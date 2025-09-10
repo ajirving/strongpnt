@@ -1,0 +1,1181 @@
+\chapter{Riemann Zeta Function}\label{riemann_zeta}
+
+\section{Zeta lower bound}
+
+\begin{definition}[Prime set] \label{def:NatPrimes} \leanok
+Let $\mathcal{P}$ be Nat.Primes
+\end{definition}
+
+\begin{lemma}[Prime decay]\label{lem:p_s_abs_1} \lean{p_s_abs_1}
+\leanok
+\uses{def:NatPrimes}
+For $p\in\mathcal{P}$ and $s\in\C$ with $\Re(s)>1$, we have $|p^{-s}|<1$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:abs_p_pow_s}
+Let $\sigma = \Re(s)$. By hypothesis, $\sigma > 1$.
+By Lemma \ref{lem:abs_p_pow_s}, we have $|p^{-s}| = p^{-\sigma}$.
+Since $p\in\mathcal{P}$, we have $p\ge 2$. As $\sigma>1$, it follows that $p^\sigma > p^1 \ge 2$.
+Therefore, $p^{-\sigma} = 1/p^\sigma < 1$.
+\end{proof}
+
+\begin{lemma}[Euler product]\label{lem:zetaEulerprod} \lean{zetaEulerprod}
+\leanok
+\uses{def:NatPrimes}
+For $s\in\C$ with $\Re(s)>1$, the function $w_s(p)=(1-p^{-s})^{-1}$ is multipliable, and we have $\zeta(s) = \prod'_{p\in\mathcal{P}}(1-p^{-s})^{-1}$.
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib: riemannZeta\_eulerProduct\_hasProd, riemannZeta\_eulerProduct\_tprod,
+\end{proof}
+
+
+\begin{lemma}[Abs product]\label{lem:abs_of_tprod} \lean{abs_of_tprod}
+\leanok
+Let $P$ be a set and $w:P\to\C$ be multipliable. Then $|\prod'_{p\in P} w(p)| = \prod'_{p \in P} |w(p)|$.
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib: abs\_tprod
+\end{proof}
+
+\begin{lemma}[Abs primes]\label{lem:abs_P_prod} \lean{abs_P_prod}
+\leanok
+\uses{def:NatPrimes}
+For $s\in\C$ with $\Re(s)>1$, we have $|\prod'_{p\in\mathcal{P}}(1-p^{-s})^{-1}| = \prod'_{p\in\mathcal{P}}|(1-p^{-s})^{-1}|$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zetaEulerprod, lem:abs_of_tprod}
+By \cref{lem:zetaEulerprod,lem:abs_of_tprod} with $P=\mathcal{P}$ and
+$w(p) = (1-p^{-s})^{-1}$, which is multipiable.
+\end{proof}
+
+\begin{lemma}[Abs zeta]\label{lem:abs_zeta_prod} \lean{abs_zeta_prod}
+\leanok
+\uses{def:NatPrimes}
+For $s\in\C$ with $\Re(s)>1$, we have $|\zeta(s)| = \prod'_{p\in\mathcal{P}}|(1-p^{-s})^{-1}|$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zetaEulerprod, lem:abs_P_prod}
+By \cref{lem:zetaEulerprod,lem:abs_P_prod}.
+\end{proof}
+
+\begin{lemma}[Abs inverse]\label{lem:abs_of_inv} \lean{abs_of_inv}
+\leanok
+For $z\in\C$, if $z\neq0$ then $|z^{-1}| = |z|^{-1}$.
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib: abs\_inv
+\end{proof}
+
+
+\begin{lemma}[Nonzero factor]\label{lem:one_minus_p_s_neq_0} \lean{one_minus_p_s_neq_0}
+\leanok
+\uses{def:NatPrimes}
+For $p\in\mathcal{P}$ and $s\in\C$ with $\Re(s)>1$, we have $1-p^{-s}\neq0$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:p_s_abs_1}
+By \cref{lem:p_s_abs_1}.
+\end{proof}
+
+\begin{lemma}[Abs product]\label{lem:abs_zeta_prod_prime} \lean{abs_zeta_prod_prime}
+\leanok
+\uses{def:NatPrimes}
+For $s\in\C$ with $\Re(s)>1$, we have $|\zeta(s)| = \prod'_{p\in\mathcal{P}}|1-p^{-s}|^{-1}$.
+\end{lemma}
+\begin{proof}
+\uses{lem:abs_zeta_prod, lem:abs_of_inv, lem:one_minus_p_s_neq_0}
+\leanok
+Apply \cref{lem:abs_zeta_prod} and \cref{lem:abs_of_inv} with $z=1-p^{-s}$. Note $z\neq0$ by \cref{lem:one_minus_p_s_neq_0}.
+\end{proof}
+
+\begin{lemma}[Real double]\label{lem:Re2s} \lean{Re2s}
+\leanok
+For $s\in\C$ we have $\Re(2s)=2\Re(s)$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+
+\begin{lemma}[Real bound]\label{lem:Re2sge1} \lean{Re2sge1}
+\leanok
+For $s\in\C$, if $\Re(s)>1$ then $\Re(2s)>1$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:Re2s}
+By \cref{lem:Re2s} and assumption $\Re(s)>1$.
+\end{proof}
+
+\begin{lemma}[Zeta ratio]\label{lem:zeta_ratio_prod} \lean{zeta_ratio_prod}
+\leanok
+\uses{def:NatPrimes}
+For $s\in\C$ with $\Re(s)>1$, we have $\frac{\zeta(2s)}{\zeta(s)} = \frac{\prod'_{p\in\mathcal{P}}(1-p^{-2s})^{-1}}{\prod'_{p\in\mathcal{P}}(1-p^{-s})^{-1}}$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zetaEulerprod, lem:Re2sge1}
+Apply Lemma \ref{lem:zetaEulerprod} twice, to both $\zeta(2s)$ and $\zeta(s)$. Use condition \cref{lem:Re2sge1}.
+\end{proof}
+
+\begin{lemma}[Ratio product]\label{lem:prod_of_ratios} \lean{prod_of_ratios}
+\leanok
+Let $P$ be a set, and $a(p):P\to\C$ and $b(p):P\to\C$ be multipliable. Then $ \frac{\prod'_{p\in P} a(p)}{\prod'_{p\in P} b(p)} = \prod'_{p\in P} \frac{a(p)}{b(p)}$.
+\end{lemma}
+\begin{proof}
+\leanok
+We proceed by cases on whether $a$ ever takes the value zero.
+
+\textbf{Case 1: There exists $p_0 \in P$ such that $a(p_0) = 0$.}
+
+In this case, the infinite product $\prod_{p \in P}' a(p)$ contains the factor $a(p_0) = 0$, and therefore:
+$$\prod_{p \in P}' a(p) = 0$$
+
+Similarly, the quotient function $p \mapsto a(p)/b(p)$ satisfies $(a/b)(p_0) = a(p_0)/b(p_0) = 0/b(p_0) = 0$, so:
+$$\prod_{p \in P}' \frac{a(p)}{b(p)} = 0$$
+
+Therefore, both sides of the desired equality equal zero:
+$$\frac{\prod_{p \in P}' a(p)}{\prod_{p \in P}' b(p)} = \frac{0}{\prod_{p \in P}' b(p)} = 0 = \prod_{p \in P}' \frac{a(p)}{b(p)}$$
+
+\textbf{Case 2: For all $p \in P$, $a(p) \neq 0$.}
+
+In this case, our hypotheses are that both $a$ and $b$ are multipliable and map to non-zero values everywhere. Our strategy is to apply Assumption \texttt{tprod\_div}, but doing so requires careful reasoning about the algebraic structures involved.
+
+\textbf{The Obstacle}
+Assumption \texttt{tprod\_div} requires the functions to map into a \textbf{Commutative Group}. The field of complex numbers, $\Cx$, is not a commutative group under multiplication because the element $0$ lacks a multiplicative inverse. Therefore, we cannot directly apply the theorem to our functions $a$ and $b$.
+
+\textbf{The Strategy: Lifting to the Group of Units}
+The solution is to work within the \textbf{group of units of $\Cx$}, denoted $\Cx^\times$, which is the set of non-zero complex numbers $\Cx \setminus \{0\}$. This set \textit{is} a commutative group under multiplication. Since we are in the case where $a(p)$ and $b(p)$ are always non-zero, we can "lift" our functions to have $\Cx^\times$ as their codomain.
+
+\textbf{Defining the Lifted Functions}
+We define two new unit-valued functions, $u$ and $v$:
+\begin{align}
+u : P &\to \Cx^\times, \quad u(p) := a(p) \\
+v : P &\to \Cx^\times, \quad v(p) := b(p)
+\end{align}
+These functions are well-defined because our case assumption ($\forall p, a(p) \neq 0$) and the given hypothesis ($\forall p, b(p) \neq 0$) guarantee their outputs are always in $\Cx^\times$.
+
+\textbf{Multipliability of the Lifted Functions}
+The multipliability of $u$ and $v$ follows directly from that of $a$ and $b$. A function's multipliability depends on the summability of $|f(p) - 1|$ over its support. Since the values of $u(p)$ and $a(p)$ are identical (and likewise for $v$ and $b$), their multipliability properties are preserved.
+\begin{itemize}
+\item $\{p : u(p) \neq 1\} = \{p : a(p) \neq 1\}$ is countable (since $a$ is multipliable).
+\item $\sum_{p} |u(p) - 1| = \sum_{p} |a(p) - 1| < \infty$ (since $a$ is multipliable).
+\item Similarly for $v$ and $b$.
+\end{itemize}
+
+\textbf{Applying the Division Theorem}
+With $u$ and $v$ established as multipliable functions into the commutative group $\Cx^\times$, we can now safely apply Assumption \texttt{tprod\_div}. This gives us an equality that holds within $\Cx^\times$:
+\begin{equation}
+\frac{\prod_{p \in P}' u(p)}{\prod_{p \in P}' v(p)} = \prod_{p \in P}' \frac{u(p)}{v(p)}
+\label{eq:units_div}
+\end{equation}
+
+\textbf{Returning to $\Cx$}
+Our final step is to show that this equality in $\Cx^\times$ implies the desired equality in $\Cx$. This is true because the natural inclusion (coercion) from $\Cx^\times$ to $\Cx$ preserves the algebraic operations of division and infinite products. Since $\text{coe}(u(p)) = a(p)$ and $\text{coe}(v(p)) = b(p)$, applying this coercion to both sides of Equation (\ref{eq:units_div}) directly yields our goal:
+\[\frac{\prod_{p \in P}' a(p)}{\prod_{p \in P}' b(p)} = \prod_{p \in P}' \frac{a(p)}{b(p)}\]
+
+In both cases, the desired equality holds.
+\end{proof}
+
+\begin{lemma}[Ratio split]\label{lem:simplify_prod_ratio} \lean{simplify_prod_ratio}
+\leanok
+\uses{def:NatPrimes}
+For $s\in\C$ with $\Re(s)>1$, we have $\frac{\prod'_{p\in\mathcal{P}}(1-p^{-2s})^{-1}}{\prod'_{p\in\mathcal{P}}(1-p^{-s})^{-1}} = \prod'_{p\in\mathcal{P}}\frac{(1-p^{-2s})^{-1}}{(1-p^{-s})^{-1}}$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:prod_of_ratios, lem:zetaEulerprod, lem:Re2sge1}
+By \cref{lem:prod_of_ratios} with $a(p)=(1-p^{-2s})^{-1}$ and $b(p)=(1-p^{-s})^{-1}$. Multipliability holds by \cref{lem:zetaEulerprod}, and use condition \cref{lem:Re2sge1}.
+\end{proof}
+
+\begin{lemma}[Ratio form]\label{lem:zeta_ratios} \lean{zeta_ratios}
+\leanok
+\uses{def:NatPrimes}
+For $s\in\C$ with $\Re(s)>1$, we have $\frac{\zeta(2s)}{\zeta(s)} = \prod'_{p\in\mathcal{P}}\frac{(1-p^{-2s})^{-1}}{(1-p^{-s})^{-1}}$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:simplify_prod_ratio, lem:zeta_ratio_prod}
+By \cref{lem:simplify_prod_ratio,lem:zeta_ratio_prod}.
+\end{proof}
+
+\begin{lemma}[Diff squares]\label{lem:diff_of_squares} \lean{diff_of_squares}
+\leanok
+For any $z\in\C$, we have $(1-z^2) = (1-z)(1+z)$.
+\end{lemma}
+\begin{proof}
+\leanok
+Basic algebra
+\end{proof}
+
+\begin{lemma}[Inverse ratio]\label{lem:ratio_invs} \lean{ratio_invs}
+\leanok
+For any $z\in\C$. If $|z|<1$ then $\frac{(1-z^2)^{-1}}{(1-z)^{-1}} = (1+z)^{-1}$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:diff_of_squares}
+By \cref{lem:diff_of_squares}, then invert terms and simplify. Note $|z|<1$ implies $z\neq\pm 1$ so we may invert $1-z$ and $1+z$ and $1-z^2$.
+\end{proof}
+
+
+\begin{theorem}[Ratio identity]\label{thm:zeta_ratio_identity} \lean{zeta_ratio_identity}
+\leanok
+\uses{def:NatPrimes}
+For $s\in\C$ with $\Re(s)>1$, we have $\frac{\zeta(2s)}{\zeta(s)} = \prod'_{p\in\mathcal{P}}(1+p^{-s})^{-1}$.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{lem:zeta_ratios, lem:ratio_invs, lem:p_s_abs_1}
+Apply Lemma \ref{lem:zeta_ratios} and Lemma \ref{lem:ratio_invs} with $z=p^{-s}$. We verify condition using \cref{lem:p_s_abs_1}.
+\end{proof}
+
+\begin{lemma}[Three halves]\label{lem:zeta_ratio_at_3_2} \lean{zeta_ratio_at_3_2}
+\leanok
+\uses{def:NatPrimes}
+We have $\frac{\zeta(3)}{\zeta(3/2)} = \prod'_{p\in\mathcal{P}}(1+p^{-3/2})^{-1}$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{thm:zeta_ratio_identity}
+Apply Theorem \ref{thm:zeta_ratio_identity} with $s=3/2$. Note $\Re(3/2)=3/2>1$.
+\end{proof}
+
+\begin{lemma}[Triangle abs]\label{lem:triangle_inequality_specific} \lean{triangle_inequality_specific}
+\leanok
+For any $z\in\C$, we have $|1-z| \le 1+|z|$.
+\end{lemma}
+\begin{proof}
+\leanok
+By the triangle inequality, $|a+b| \le |a|+|b|$. Let $a=1$ and $b=-z$. Then $|1-z| \le |1|+|-z| = 1+|z|$.
+\end{proof}
+
+\begin{lemma}[Prime power]\label{lem:abs_p_pow_s} \lean{abs_p_pow_s}
+\leanok
+\uses{def:NatPrimes}
+For $p\in\mathcal{P}$ and $s=\sigma+it \in\C$, we have $|p^{-s}| = p^{-\sigma}$.
+\end{lemma}
+\begin{proof}
+\leanok
+$|p^{-s}| = |p^{-\sigma-it}| = |p^{-\sigma}p^{-it}| = |p^{-\sigma}||e^{-it\log p}| = p^{-\sigma} \cdot 1 = p^{-\sigma}$.
+\end{proof}
+
+\begin{lemma}[Term bound]\label{lem:abs_term_bound} \lean{abs_term_bound}
+\leanok
+\uses{def:NatPrimes}
+For $p\in\mathcal{P}$ and $t\in\R$, we have $|1 - p^{-(3/2+it)}| \le 1 + p^{-3/2}$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:triangle_inequality_specific, lem:abs_p_pow_s}
+Apply Lemma \ref{lem:triangle_inequality_specific} with $z=p^{-(3/2+it)}$. This gives $|1 - p^{-(3/2+it)}| \le 1 + |p^{-(3/2+it)}|$. Apply Lemma \ref{lem:abs_p_pow_s} with $\sigma=3/2$ to get $|p^{-(3/2+it)}| = p^{-3/2}$.
+\end{proof}
+
+\begin{lemma}[Inv order]\label{lem:inv_inequality} \lean{inv_inequality}
+\leanok
+If $0 < a \le b$, then $a^{-1} \ge b^{-1}$.
+\end{lemma}
+\begin{proof}
+\leanok
+Basic property of inequalities
+\end{proof}
+
+\begin{lemma}[Nonzero term]\label{lem:condp32} \lean{condp32}
+\leanok
+\uses{def:NatPrimes}
+For $p\in\mathcal{P}$, we have $1 - p^{-(3/2+it)}\neq 0$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:p_s_abs_1}
+We have $p^{-(3/2+it)}\neq1$ by \cref{lem:p_s_abs_1} with $s=3/2+it$.
+\end{proof}
+
+\begin{lemma}[Inverse bound]\label{lem:abs_term_inv_bound} \lean{abs_term_inv_bound}
+\leanok
+\uses{def:NatPrimes}
+For $p\in\mathcal{P}$ and $t\in\R$, we have $|1 - p^{-(3/2+it)}|^{-1} \ge (1 + p^{-3/2})^{-1}$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:abs_term_bound, lem:inv_inequality, lem:condp32}
+Apply \cref{lem:abs_term_bound}, and then \cref{lem:inv_inequality,lem:condp32} with $a = |1 - p^{-(3/2+it)}|$ and $b=1 + p^{-3/2}$.
+\end{proof}
+
+\begin{lemma}[Prod order]\label{lem:prod_inequality} \lean{prod_inequality}
+\leanok
+Let $P$ be a set, and $a(p):P\to\C$ and $b(p):P\to\C$ be multipliable. If $0 < a(p) \le b(p)$ for all $p\in P$ then $\prod'_{p\in P} a(p) \le \prod'_{p\in P} b(p)$.
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib: tprod\_le\_tprod
+\end{proof}
+
+\begin{lemma}[Zeta compare]\label{lem:abs_zeta_inequality} \lean{abs_zeta_inequality}
+\leanok
+\uses{def:NatPrimes}
+For $t\in\R$, we have $\prod'_{p\in\mathcal{P}}(1 + p^{-3/2})^{-1} \le \prod'_{p\in\mathcal{P}}|1 - p^{-(3/2+it)}|^{-1}$.
+\end{lemma}
+\begin{proof}
+\uses{lem:abs_term_inv_bound, lem:prod_inequality, lem:zetaEulerprod}
+\leanok
+Apply \cref{lem:abs_term_inv_bound,lem:prod_inequality} with $P=\mathcal{P}$, $a(p) = (1 + p^{-3/2})^{-1}$, $b(p)=|1 - p^{-(3/2+it)}|^{-1}$. Multipliability holds by \cref{lem:zetaEulerprod}
+\end{proof}
+
+\begin{theorem}[Zeta lower]\label{thm:zeta_lower_bound} \lean{zeta_lower_bound}
+\leanok
+For any $t\in\R$, we have $|\zeta(3/2+it)| \ge \frac{\zeta(3)}{\zeta(3/2)}$.
+\end{theorem}
+\begin{proof} \leanok
+\uses{lem:abs_zeta_prod_prime, lem:zeta_ratio_at_3_2, lem:abs_zeta_inequality}
+From Lemma \ref{lem:abs_zeta_prod_prime} with $s=3/2+it$, the left hand side is $|\zeta(3/2+it)| = \prod'_{p\in\mathcal{P}}|1 - p^{-(3/2+it)}|^{-1}$.
+From Lemma \ref{lem:zeta_ratio_at_3_2}, the right hand side is $\frac{\zeta(3)}{\zeta(3/2)} = \prod'_{p\in\mathcal{P}}(1+p^{-3/2})^{-1}$.
+The theorem then follows directly from the inequality in Lemma \ref{lem:abs_zeta_inequality}.
+\end{proof}
+
+\begin{lemma}[Zeta positive]\label{lem:zetapos} \lean{zetapos}
+\leanok
+For $x\in \R$, if $x>1$ then $\zeta(x)\in \R$ and $\zeta(x)>0$.
+\end{lemma}
+\begin{proof}
+\leanok
+By zeta\_eq\_tsum\_one\_div\_nat\_add\_one\_cpow, since $x>1$ we have
+$\zeta(x)=\sum_{n=1}^\infty n^{-x}$. Then note $n^{-x}$ is positive real for all $n$, so the sum is also positive real.
+\end{proof}
+
+\begin{lemma}[Ratio positive]\label{lem:zeta332pos} \lean{zeta332pos}
+\leanok
+We have $\frac{\zeta(3)}{\zeta(3/2)}>0$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zetapos}
+By \cref{lem:zetapos} applied twice, to both $x=3$ and $x=3/2$.
+\end{proof}
+
+\begin{lemma}[Fixed lower]\label{lem:zeta_low_332} \lean{zeta_low_332}
+\leanok
+There exists $a>0$ such that for any $t\in\R$, we have $|\zeta(3/2+it)| \ge a$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{thm:zeta_lower_bound, lem:zeta332pos}
+By \cref{thm:zeta_lower_bound} with $a=\frac{\zeta(3)}{\zeta(3/2)}$. Note $a>0$ by \cref{lem:zeta332pos}.
+\end{proof}
+
+
+\section{Zeta bound}
+
+\begin{lemma}[Series form]\label{lem:zetaLimit}
+\lean{lem_zetaLimit}\leanok
+For $s\in\C$ with $\Re(s)>1$, we have $\zeta(s) = \sum_{n=1}^\infty n^{-s}$.
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib: zeta\_eq\_tsum\_one\_div\_nat\_add\_one\_cpow
+\end{proof}
+
+\begin{definition}[Partial sum]\label{def:zetaPartialSum}
+\lean{zetaPartialSum} \leanok
+For $s\in\C$ and $N\in\N$, define the partial sum $\zeta_N(s) = \sum_{n=1}^N n^{-s}$.
+\end{definition}
+
+
+\begin{lemma}[Abel sum]\label{lem:abelSummation}
+\lean{lem_abelSummation}\leanok
+Let $a_n \in \C$ and let $f: \R \to \C$ be a continuously differentiable function. Let $A(u) = \sum_{n=1}^{\lfloor u \rfloor} a_n$. Then for any integer $N\ge 1$,
+\[ \sum_{n=1}^N a_n f(n) = A(N)f(N) - \int_1^N A(u) f'(u) du. \]
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib: sum\_mul\_eq\_sub\_sub\_integral\_mul
+\end{proof}
+
+
+\begin{lemma}[Sum identity]\label{lem:partialSumIsZetaN}
+\lean{lem_partialSumIsZetaN}\leanok
+\uses{def:zetaPartialSum}
+For $s\in\C$, let $f(u) = u^{-s}$ and $a_n=1$ for all $n$ $N\in\N$. Then $\zeta_N(s) = \sum_{n=1}^N a_n f(n)$.
+\end{lemma}
+\begin{proof}
+\leanok
+Direct substution
+\end{proof}
+
+\begin{lemma}[Count sum]\label{lem:sumOfAn}
+\lean{lem_sumOfAn}\leanok
+Let $a_n=1$. For $u\ge 1$, let $A(u) = \sum_{n=1}^{\lfloor u \rfloor} a_n$. Then $A(u) = \lfloor u \rfloor$.
+\end{lemma}
+\begin{proof}
+\leanok
+By definition, $\sum_{n=1}^{\lfloor u \rfloor} 1 = \lfloor u \rfloor$.
+\end{proof}
+
+\begin{lemma}[Power deriv]\label{lem:fDeriv}
+\lean{lem_fDeriv}\leanok
+Let $f(u) = u^{-s}$. Then $f'(u) = -s u^{-s-1}$.
+\end{lemma}
+\begin{proof}
+\leanok
+Apply the power rule for differentiation. See Mathlib/Analysis/Calculus.
+\end{proof}
+
+\begin{lemma}[Apply Abel]\label{lem:applyAbel}
+\lean{lem_applyAbel}\leanok
+\uses{def:zetaPartialSum}
+For $s\in\C$ and integer $N\ge 1$,
+\[ \zeta_N(s) = \lfloor N \rfloor N^{-s} - \int_1^N \lfloor u \rfloor (-s u^{-s-1}) du. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:abelSummation, lem:partialSumIsZetaN, lem:sumOfAn, lem:fDeriv}
+\leanok
+Apply Lemma \ref{lem:abelSummation} with $f(u)=u^{-s}$ and $a_n=1$. Use lemma \ref{lem:partialSumIsZetaN}, and $A(u)$ from Lemma \ref{lem:sumOfAn}, and $f'(u)$ from Lemma \ref{lem:fDeriv}.
+\end{proof}
+
+\begin{lemma}[Floor int]\label{lem:floorNisN}
+\lean{lem_floorNisN}\leanok
+For an integer $N\ge 1$, $\lfloor N \rfloor = N$.
+\end{lemma}
+\begin{proof}
+\leanok
+By definition of the floor function.
+\end{proof}
+
+\begin{lemma}[First form]\label{lem:zetaNsimplified1}
+\lean{lem_zetaNsimplified1} \leanok
+\uses{def:zetaPartialSum}
+For $s\in\C$ and integer $N\ge 1$,
+\[ \zeta_N(s) = N^{1-s} + s \int_1^N \lfloor u \rfloor u^{-s-1} du. \]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:applyAbel, lem:floorNisN}
+Apply Lemma \ref{lem:applyAbel} and Lemma \ref{lem:floorNisN}.
+\end{proof}
+
+\begin{lemma}[Floor split]\label{lem:floorUdecomp}
+\lean{lem_floorUdecomp}\leanok
+For any $u\in\R$, $\lfloor u \rfloor = u - \{u\}$, where $\{u\}$ is the fractional part of $u$.
+\end{lemma}
+\begin{proof}
+\leanok
+By definition of the fractional part function.
+\end{proof}
+
+\begin{lemma}[Integral split]\label{lem:integralSplit}
+\lean{lem_integralSplit}\leanok
+For $s\in\C$ and integer $N\ge 1$,
+\[ \int_1^N \lfloor u \rfloor u^{-s-1} du = \int_1^N u^{-s} du - \int_1^N \{u\} u^{-s-1} du. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:floorUdecomp}
+\leanok
+Apply Lemma \ref{lem:floorUdecomp} and linearity of the integral.
+\end{proof}
+
+\begin{lemma}[Second form]\label{lem:zetaNsimplified2}
+\lean{lem_zetaNsimplified2}\leanok
+\uses{def:zetaPartialSum}
+For $s\in\C$ and integer $N\ge 1$,
+\[ \zeta_N(s) = N^{1-s} + s \int_1^N u^{-s} du - s \int_1^N \{u\} u^{-s-1} du. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:zetaNsimplified1, lem:integralSplit}
+\leanok
+Apply Lemmas \ref{lem:zetaNsimplified1} and \ref{lem:integralSplit}.
+\end{proof}
+
+\begin{lemma}[Main integral]\label{lem:evalMainIntegral}
+\lean{lem_evalMainIntegral}\leanok
+For $s\in\C, s\neq 1$, we have $s \int_1^N u^{-s} du = \frac{s}{1-s}(N^{1-s} - 1)$.
+\end{lemma}
+\begin{proof}
+\leanok
+The antiderivative of $u^{-s}$ is $\frac{u^{1-s}}{1-s}$. Evaluate at $u=N$ and $u=1$.
+\end{proof}
+
+\begin{lemma}[Final form]\label{lem:zetaNfinal}
+\lean{lem_zetaNfinal}\leanok
+\uses{def:zetaPartialSum}
+For $s\in\C, s\neq 1$ and integer $N\ge 1$,
+\[ \zeta_N(s) = \frac{N^{1-s}}{1-s} + 1+\frac{1}{s-1} - s \int_1^N \{u\} u^{-s-1} du. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:zetaNsimplified2, lem:evalMainIntegral}
+\leanok
+Apply Lemmas \ref{lem:zetaNsimplified2} and \ref{lem:evalMainIntegral} and combine terms:
+$N^{1-s} + \frac{s}{1-s}N^{1-s} = N^{1-s}(1+\frac{s}{1-s}) = N^{1-s}(\frac{1-s+s}{1-s}) = \frac{N^{1-s}}{1-s}$.
+The term $-\frac{s}{1-s}$ is $\frac{s}{s-1}=1+\frac{1}{s-1}$.
+\end{proof}
+
+\begin{lemma}[Limit term]\label{lem:limitTerm1}
+\lean{lem_limitTerm1}\leanok
+If $\Re(s)>1$, then $\lim_{N\to\infty} N^{1-s} = 0$.
+\end{lemma}
+\begin{proof}
+\leanok
+$|N^{1-s}| = N^{1-\Re(s)}$. Since $1-\Re(s) < 0$, this limit tends to 0.
+\end{proof}
+
+\begin{lemma}[Frac bound]\label{lem:fracPartBound}
+\lean{lem_fracPartBound}\leanok
+For any $u\in\R$, $0 \le \{u\} < 1$, and thus $|\{u\}| \le 1$.
+\end{lemma}
+\begin{proof}
+\leanok
+By definition of the fractional part.
+\end{proof}
+
+
+\begin{lemma}[Term bound]\label{lem:integrandBound}
+\lean{lem_integrandBound}\leanok
+For $u\ge 1$ and $s\in\C$, $|\{u\} u^{-s-1}| \le u^{-\Re(s)-1}$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:fracPartBound}
+Apply Lemma \ref{lem:fracPartBound}. We have $|\{u\} u^{-s-1}| = |\{u\}| |u^{-s-1}| \le 1 \cdot u^{-\Re(s)-1}$.
+\end{proof}
+
+\begin{lemma}[Eps bound]\label{lem:integrandBoundeps}
+\lean{lem_integrandBoundeps}\leanok
+Let $\eps>0$ and $u\ge 1$. If $\Re(s)\ge \eps$ then $|\{u\} u^{-s-1}| \le u^{-1-\eps}$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:integrandBound}
+Apply Lemma \ref{lem:integrandBound} and that $x\mapsto u^{-1-x}$ is monotonic.
+\end{proof}
+
+\begin{lemma}[Triangle int]\label{lem:triangleInequality}
+\lean{lem_triangleInequality_add}\leanok
+For $z_1, z_2 \in \C$, $|z_1+z_2| \le |z_1|+|z_2|$. For an integral, $|\int g(u)du| \le \int |g(u)|du$.
+\end{lemma}
+\begin{proof}
+\leanok
+Standard results from complex analysis.
+\end{proof}
+
+\begin{lemma}[Integral conv]\label{lem:integralConvergence}
+\lean{lem_integralConvergence}\leanok
+Let $\eps>0$ If $\Re(s)\ge \eps$, the integral $\int_1^\infty \{u\} u^{-s-1} du$ converges uniformly.
+\end{lemma}
+\begin{proof}
+\uses{lem:triangleInequality, lem:integrandBoundeps} \leanok
+By Lemmas \ref{lem:triangleInequality} and \ref{lem:integrandBoundeps}, we calculate
+\[\Big|\int_1^\infty \{u\} u^{-s-1} du \Big| \le \int_1^\infty |\{u\} u^{-s-1}| \le \int_1^\infty u^{-1-\eps} du = \frac{1}{\eps}. \]
+Thus the integral converges.
+\end{proof}
+
+\begin{lemma}[Zeta formula]\label{lem:zetaFormula}
+\lean{lem_zetaFormula}\leanok
+For $\Re(s)>1$,
+\[ \zeta(s) = 1+\frac{1}{s-1} - s \int_1^\infty \{u\} u^{-s-1} du. \]
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:zetaNfinal, lem:zetaLimit, lem:limitTerm1, lem:integralConvergence}
+Take the limit $N\to\infty$ in Lemma \ref{lem:zetaNfinal}. Apply Lemmas \ref{lem:zetaLimit}, \ref{lem:limitTerm1}, and \ref{lem:integralConvergence}.
+\end{proof}
+
+\begin{lemma}[Analytic off]\label{lem:zetaanalS}
+\lean{lem_zetaanalS}\leanok
+Let $S=\{s\in \C : s\neq 1\}$. Then $\zeta(s)$ is analyticOnNhd $S$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zetaanalOnnot1}
+Apply \cref{lem:zetaanalOnnot1}
+\end{proof}
+
+\begin{lemma}[S open]\label{lem:S_isOpen}
+\lean{lem_S_isOpen}\leanok
+Let $S=\{s\in \C : s\neq 1\}$. Then $S$ is open.
+\end{lemma}
+\begin{proof}
+\leanok
+$S$ is the complement of the singleton $\{1\}$, which is open.
+\end{proof}
+
+\begin{lemma}[T open]\label{lem:T_isOpen}
+\lean{lem_T_isOpen}\leanok
+Let $S=\{s\in \C : s\neq 1\}$ and $T=\{s\in S : \Re(s)>1/10\}$. Then $T$ is open.
+\end{lemma}
+\begin{proof}
+\uses{lem:S_isOpen}
+\leanok
+$T$ is the intersection of the open set $S$ with the open half-plane $\{s : \Re(s) > 1/10\}$.
+\end{proof}
+
+\begin{lemma}[T connected]\label{lem:T_isPreconnected}
+\lean{lem_T_isPreconnected}\leanok
+Let $S=\{s\in \C : s\neq 1\}$ and $T=\{s\in S : \Re(s)>1/10\}$. Then $T$ is preconnected.
+\end{lemma}
+\begin{proof}
+\leanok
+The set $T$ can be shown to be path-connected, which implies preconnected.
+\end{proof}
+
+\begin{lemma}[Integral analytic] \label{lem:integralAnalytic} \lean{lem_integralAnalytic} \leanok
+If the integral of an analytic function $f:\C\to\C$ converges uniformly for all $s$ such that $\Re(s) \ge \frac{1}{10}$, then the integral is analytic (as a function of s).
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+
+\begin{lemma}[Analytic ext]\label{lem:zetaFormulaAC}
+\lean{lem_zetaFormulaAC}\leanok
+Let $S=\{s\in \C : s\neq 1\}$ and $T=\{s\in S : \Re(s)>1/10\}$. The function $F(z) = \frac{z}{z-1} - z \int_1^\infty \{u\} u^{-z-1} du$ is analyticOnNhd $T$.
+\end{lemma}
+\begin{proof}
+\uses{lem:integralConvergence, lem:integralAnalytic}
+\leanok
+Take $s\in T$. The function $\frac{z}{z-1}$ is analyticAt $z=s$, since $s\neq 1$. The integral converges uniformly by \cref{lem:integralConvergence}, so $F(z)$ is analyticAt $z=s$.
+\end{proof}
+
+\begin{lemma}[Divide split]\label{lem:div_eq_one_plus_one_div}
+\lean{lem_div_eq_one_plus_one_div}\leanok
+For any complex number $z \neq 1$, we have $\frac{z}{z-1} = 1 + \frac{1}{z-1}$.
+\end{lemma}
+\begin{proof}
+\leanok
+Direct algebraic manipulation: $\frac{z}{z-1} = \frac{(z-1)+1}{z-1} = \frac{z-1}{z-1} + \frac{1}{z-1} = 1 + \frac{1}{z-1}$.
+\end{proof}
+
+\begin{lemma}[Zeta extend]\label{lem:zetaAnalyticContinuation}
+\lean{lem_zetaAnalyticContinuation}\leanok
+Let $S=\{s\in \C : s\neq 1\}$ and $T=\{s\in S : \Re(s)>1/10\}$. We have $\zeta(s) = 1+\frac{1}{s-1} - s \int_1^\infty \{u\} u^{-s-1} du$ on $T$.
+\end{lemma}
+\begin{proof}
+\uses{lem:zetaFormula, lem:zetaFormulaAC, lem:zetaanalS, lem:integralAnalytic, lem:div_eq_one_plus_one_div, lem:T_isOpen, lem:T_isPreconnected}
+\leanok
+By Lemma \ref{lem:zetaFormula}, the equality $\zeta(s)=F(s)$ holds for $\Re(s)>1$. By Lemma \ref{lem:zetaFormulaAC}, $F(s)$ is analyticOnNhd $T$. By Lemma \ref{lem:zetaanalS} $\zeta(s)$ is analyticOnNhd $S\supset T$.
+Hence by the identity principle, (Mathlib try AnalyticOnNhd.eqOn\_of\_preconnected\_of\_eventuallyEq)
+the equality $\zeta(s)=F(s)$ holds in $T$.
+\end{proof}
+
+
+\begin{lemma}[First bound]\label{lem:zetaBound1}
+\lean{lem_zetaBound1}\leanok
+For $\Re(s)>0, s\neq 1$,
+\[ |\zeta(s)| \le 1+\left|\frac{1}{s-1}\right| + |s| \int_1^\infty |\{u\} u^{-s-1}| du. \]
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:triangleInequality, lem:zetaAnalyticContinuation}
+Apply Lemma \ref{lem:triangleInequality} to the formula in Lemma \ref{lem:zetaAnalyticContinuation}.
+\end{proof}
+
+\begin{lemma}[Integral value]\label{lem:integralBoundValue}
+\lean{lem_integralBoundValue}\leanok
+For $\Re(s)>0$, $\int_1^\infty u^{-\Re(s)-1} du = \frac{1}{\Re(s)}$.
+\end{lemma}
+\begin{proof}
+\leanok
+The antiderivative is $\frac{u^{-\Re(s)}}{-\Re(s)}$. Evaluating from $1$ to $\infty$ gives $0 - \frac{1}{-\Re(s)} = \frac{1}{\Re(s)}$.
+\end{proof}
+
+\begin{lemma}[Second bound]\label{lem:zetaBound2}
+\lean{lem_zetaBound2}\leanok
+For $\Re(s)>0, s\neq 1$,
+\[ |\zeta(s)| \le 1+\left|\frac{1}{s-1}\right| + \frac{|s|}{\Re(s)}. \]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zetaBound1, lem:integrandBound, lem:integralBoundValue}
+Apply Lemmas \ref{lem:zetaBound1}, \ref{lem:integrandBound}, and \ref{lem:integralBoundValue}.
+\end{proof}
+
+\begin{lemma}[Inverse mod]\label{lem:sOverSminus1Bound}
+\lean{lem_sOverSminus1Bound}\leanok
+For $s\in\C, s\neq 1$, we have $\left|\frac{1}{s-1}\right| =\frac{1}{|s-1|}$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:triangleInequality}
+Algebraic identity and Lemma \ref{lem:triangleInequality}.
+\end{proof}
+
+\begin{lemma}[Third bound]\label{lem:zetaBound3}
+\lean{lem_zetaBound3}\leanok
+For $\Re(s)>0, s\neq 1$,
+\[ |\zeta(s)| \le 1 + \frac{1}{|s-1|} + \frac{|s|}{\Re(s)}. \]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zetaBound2, lem:sOverSminus1Bound}
+Apply Lemmas \ref{lem:zetaBound2} and \ref{lem:sOverSminus1Bound}.
+\end{proof}
+
+\begin{lemma}[s bound]\label{lem:sBound}
+\lean{lem_sBound}\leanok
+Let $s=\sigma+it$. If $\tfrac{1}{2} \le \sigma < 3$, then $|s| < 3+|t|$.
+\end{lemma}
+\begin{proof}
+\leanok
+$|s|^2 = \sigma^2+t^2 \le 3^2+t^2 = 9+|t|^2$. Since $0 \le 6|t|$, we have $9+|t|^2 \le 9+6|t|+|t|^2 = (3+|t|)^2$. Taking the square root gives $|s| \le 3+|t|$.
+\end{proof}
+
+\begin{lemma}[Real inv]\label{lem:invReSbound}
+\lean{lem_invReSbound}\leanok
+If $\tfrac{1}{2} \le \Re(s) < 3$, then $\dfrac{1}{\Re(s)} \le 2$.
+\end{lemma}
+\begin{proof}
+\leanok
+From $1/2 \le \Re(s)$, taking reciprocals reverses the inequality.
+\end{proof}
+
+\begin{lemma}[Shift bound]\label{lem:invSminus1bound}
+\lean{lem_invSminus1bound}\leanok
+Let $s=\sigma+it$. If $\tfrac{1}{2} \le \sigma < 3$ and $|t|\ge 1$, then $|s-1| \ge 1$.
+\end{lemma}
+\begin{proof}
+\leanok
+$|s-1|^2 = (\sigma-1)^2 + t^2$. Since $|t|\ge 1$, $t^2\ge 1$. Since $(\sigma-1)^2 \ge 0$, we have $|s-1|^2 \ge 1$.
+\end{proof}
+
+\begin{lemma}[Combine bounds]\label{lem:finalBoundCombination}
+\lean{lem_finalBoundCombination}\leanok
+If $s=\sigma+it$ with $\tfrac{1}{2} \le \sigma < 3$ and $|t|\ge 1$, then
+\[ |\zeta(s)| < 1 + 1 + (3+|t|) \cdot 2. \]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zetaBound3, lem:invSminus1bound, lem:sBound, lem:invReSbound}
+In Lemma \ref{lem:zetaBound3}, apply Lemma \ref{lem:invSminus1bound} to bound $\frac{1}{|s-1|} \le 1$. Apply Lemma \ref{lem:sBound} to bound $|s|$ and Lemma \ref{lem:invReSbound} to bound $\frac{1}{\Re(s)}$.
+\end{proof}
+
+\begin{lemma}[Algebra step]\label{lem:finalAlgebra}
+\lean{lem_finalAlgebra}\leanok
+For $|t|\ge 1$, we have $1 + 1 + (3+|t|) \cdot 2 = 8 + 2|t|$.
+\end{lemma}
+\begin{proof}
+\leanok
+By arithmetic. $2 + 6 + 2|t| = 8+2|t|$.
+\end{proof}
+
+\begin{lemma}[Upper bound]\label{lem:zetaUppBd}
+\lean{lem_zetaUppBd}\leanok
+For all $z\in\C$ with $\tfrac{1}{2} \le \Re(z) < 3$ and $|\Im(z)|\ge 1$, we have $|\zeta(z)| < 8+2|\Im(z)|$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:finalBoundCombination, lem:finalAlgebra}
+Apply Lemmas \ref{lem:finalBoundCombination} and \ref{lem:finalAlgebra}.
+\end{proof}
+
+\begin{lemma}[Shift calc]\label{lem:zfroms}
+\lean{lem_zfroms_calc}\leanok
+For $s\in \C$, $t\in\R$ let $z=s+3/2+it$. Then $\Re(z) = \Re(s)+3/2$ and $\Im(z)=\Im(s)+t$.
+\end{lemma}
+\begin{proof}
+\leanok
+Direct calculation
+\end{proof}
+
+\begin{lemma}[Shift cond] \label{lem:zfroms_conditions}
+\lean{lem_zfroms_conditions}\leanok
+For $s\in \C$, $t\in\R$ let $z=s+3/2+it$. If $|s|\le 1$ and $|t|\ge3$, then $\Re(z) \in [1/2, 3]$ and $|\Im(z)|\ge 1$
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zfroms}
+Apply \cref{lem:zfroms}, and use arithmetic. Here $\Im(s)^2 + \Re(s)^2 = |s|^2 \in [0,1]$ by assumption.
+\end{proof}
+
+\begin{lemma}[Global bound]\label{lem:zetaUppBound}
+\lean{lem_zetaUppBound}\leanok
+There exists $b>1$ such that for all $t\in\R$ we have $|\zeta(s+3/2+it)| \le 8+2|t|$ for all $|s|\le 1$ and $|t|\ge3$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zetaUppBd, lem:zfroms_conditions}
+Apply \cref{lem:zetaUppBd,lem:zfroms_conditions}.
+\end{proof}
+
+
+\section{Zeta derivatives}
+
+
+\begin{lemma}[Diff off pole]\label{lem:zetadiffAtnot1}
+\lean{zetadiffAtnot1}
+\leanok
+Let $S=\{s\in \C : s\neq 1\}$. For all $s\in S$ we have $\zeta(s)$ DifferentiableAt $s$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+
+
+\begin{lemma}[At to within]\label{lem:DiffAtWithinAt}
+\lean{DiffAtWithinAt}
+\leanok
+Let $T\subset\C$. For $g:T\to\C$ and $s\in T$, if $g$ DifferentiableAt $s$ then $g$ DifferentiableWithinAt $s$
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib: DifferentiableAt.differentiableWithinAt
+\end{proof}
+
+\begin{lemma}[Within to on]\label{lem:DiffWithinAtallOn}
+\lean{DiffWithinAtallOn}
+\leanok
+Let $T\subset\C$. For $g:T\to\C$, if $g$ DifferentiableWithinAt $s$ for all $s\in T$, then $g$ DifferentiableOn $T$
+\end{lemma}
+\begin{proof}
+\leanok
+Unfold definition of DifferentiableOn $T$ in terms of differentiableWithinAt $s$ for all $s\in T$.
+\end{proof}
+
+\begin{lemma}[At to on]\label{lem:DiffAtOn}
+\lean{DiffAtOn}
+\leanok
+Let $T\subset\C$. For $g:T\to\C$, if $g$ DifferentiableAt $s$ for all $s\in T$, then $g$ DifferentiableOn $T$
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:DiffWithinAtallOn,lem:DiffAtWithinAt}
+By \cref{lem:DiffWithinAtallOn,lem:DiffAtWithinAt}
+\end{proof}
+
+
+
+\begin{lemma}[Diff to anal]\label{lem:DiffOnanalOnNhd}
+\lean{DiffOnanalOnNhd}
+\leanok
+Let open $T\subset\C$. For $g:T\to\C$, if $g$ DifferentiableOn $T$, then $g$ analyticOnNhd $T$
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib: Complex.analyticOnNhd\_iff\_differentiableOn
+\end{proof}
+
+\begin{lemma}[At gives anal]\label{lem:DiffAtallanalOnNhd}
+\lean{DiffAtallanalOnNhd}
+\leanok
+Let open $T\subset\C$. For $g:T\to\C$, if $g$ DifferentiableAt $s$ for all $s\in T$, then $g$ analyticOnNhd $T$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:DiffAtOn,lem:DiffOnanalOnNhd}
+By \cref{lem:DiffAtOn,lem:DiffOnanalOnNhd}
+\end{proof}
+
+
+\begin{lemma}[Analytic off]\label{lem:zetaanalOnnot1}
+\lean{zetaanalOnnot1}
+\leanok
+Let $S=\{s\in \C : s\neq 1\}$. Then $\zeta(s)$ is analyticOnNhd $S$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zetadiffAtnot1,lem:DiffAtallanalOnNhd}
+Apply \cref{lem:zetadiffAtnot1,lem:DiffAtallanalOnNhd} with $T=S$ and $g(s)=\zeta(s)$.
+\end{proof}
+
+
+\begin{lemma}[Disk avoid]\label{lem:D1cinTt_pre}
+\lean{D1cinTt_pre}
+\leanok
+Let $t\in\R$  with $|t|>1$. Let $c=3/2+it$ and $S_t=\{s\in\C : s+c\neq 1\}$. Then $s\neq1$ for all $s\in\C$ with $|s-c|\le 1$.
+\end{lemma}
+\begin{proof}
+\leanok
+For sake of contradiction, suppose $s=1$. Then we calculate $$|s-c|=|1-c| = |1-3/2-it|=|1/2-it|\ge |\Im(it)| = |t|.$$
+Thus $|s-c| \ge |t|>1$, but this contradicts $|s-c|\le 1$. Hence the proof is complete.
+\end{proof}
+
+\begin{lemma}[Disk subset]\label{lem:D1cinTt}
+\lean{D1cinTt}
+\leanok
+Let $t\in\R$ with $|t|>1$. Let $c=3/2+it$. Then $\overline{\D}_1(c) \subset S$
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:D1cinTt_pre}
+By \cref{lem:D1cinTt_pre}, and unfolding the definitions of $c$, $\overline{\D}_1(c)$,  and $S$.
+\end{proof}
+
+\begin{lemma}[Disk analytic]\label{lem:zetaanalOnD1c}
+\lean{zetaanalOnD1c_general}
+\leanok
+Let $t\in\R$ with $|t|>1$, $x \in \R$, and let $c=x+it$. Then $\zeta(s)$ is analyticOnNhd $\overline{\D}_1(c)$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zetaanalOnnot1,lem:D1cinTt}
+Apply \cref{lem:zetaanalOnnot1,lem:D1cinTt}, and then Mathlib: AnalyticOnNhd.mono
+\end{proof}
+
+
+\begin{lemma}[Zero free]\label{lem:sigmageq1}
+\lean{sigmageq1}
+\leanok
+Let $s\in\C$. If $\Re(s) > 1$ then $\zeta(s) \neq0 $.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+
+\begin{lemma}[Point nonzero]\label{lem:zetacnot0}
+\lean{zetacnot0}
+\leanok
+For all $t\in\R$ we have $\zeta(3/2+it)\neq0$
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:sigmageq1}
+By \cref{lem:sigmageq1}
+\end{proof}
+
+
+\begin{lemma}[Normalize analytic] \label{lem:fc_analytic_normalized} \lean{fc_analytic_normalized} \leanok
+Let $c\in\C$ and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1(c)$ with $f(c)\neq 0$. Then the function $f_c(z) = f(z+c)/f(c)$ is AnalyticOnNhd $\overline{\D}_1$ and satisfies $f_c(0)=1$.
+\end{lemma}
+\begin{proof}
+\leanok
+Since $f$ is AnalyticOnNhd $\overline{\D}_1(c)$, and $\overline{\D}_1(c)=\{z+c:z\in \overline{\D}_1\}$, then $f_c$ is AnalyticOnNhd $\overline{\D}_1$.
+
+Next we calculate $f_c(0) = \frac{f(0+c)}{f(c)} = \frac{f(c)}{f(c)} = 1.$
+\end{proof}
+
+\begin{lemma}[Log derivative] \label{lem:fc_log_deriv} \lean{fc_log_deriv} \leanok
+Let $c\in\C$ and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1(c)$ with $f(c)\neq 0$. Let $f_c(z) = f(z+c)/f(c)$. Then for any $z$ where $f(z+c) \neq 0$, we have $\text{logDeriv}(f_c)(z) = \text{logDeriv}(f)(z+c)$.
+\end{lemma}
+\begin{proof}
+\leanok
+By the chain rule, we calculate $f_c'(z) = f'(z+c)$. Thus since $f(c),f(z+c) \neq 0$, we calculate
+\[ \text{logDeriv}(f_c)(z) = \frac{f_c'(z)}{f_c(z)} = \frac{f'(z+c)/f(c)}{f(z+c)/f(c)} = \frac{f'(z+c)}{f(z+c)}= \text{logDeriv}(f)(z+c) \]
+\end{proof}
+
+\begin{lemma}[Shift bound] \label{lem:fc_bound} \lean{fc_bound} \leanok
+Let $B>1$, $0<R<1$, $c\in\C$, and $f:\C\to\C$ with $f(c)\neq 0$. If $|f(z)|\le B$ for all $z\in \overline{\D}_R(c)$, then the function $f_c(z) = f(z+c)/f(c)$ satisfies $|f_c(z)| \le B/|f(c)|$ for all $z\overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\leanok
+If $z\overline{\D}_R$ then $z+c\in \overline{\D}_R$, so $|f(z+c)|\le B$ by assumption.
+Thus we calculate $|f_c(z)| = |f(z+c)|/f(c) \le B/|f(c)|$.
+\end{proof}
+
+\begin{lemma}[Zero shift] \label{lem:fc_zeros} \lean{fc_zeros} \leanok
+Let $r>0$, $c\in\C$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1(c)$ with $f(c)\neq 0$. Let $f_c(z) = f(z+c)/f(c)$. We have $\rho'\in\mathcal{K}_{f_c}(r)$ if and only if $\rho'=\rho-c$ where $\rho \in \mathcal{K}_f(r;c)$. In particular $\mathcal{K}_{f_c}(r) = \{\rho-c : \rho\in\mathcal{K}_f(r) \}$.
+\end{lemma}
+\begin{proof}
+\leanok
+By definition, $\rho' \in \mathcal{K}_{f_c}(r)$ means $f_c(\rho')=0$ and $|\rho'|\le r$. By definition of $f_c$ we have $f_c(\rho')=f(\rho'+c)/f(c)$. Since $f(c)\neq 0$ we conclude $f(\rho'+c)=0$. Also $|(\rho'+c)-c|=|\rho'|\le r$, and hence $\rho'+c \in \mathcal{K}_{f}(r;c)$. Therefore $\rho' \in \mathcal{K}_{f_c}(r)$ implies $\rho'+c \in \mathcal{K}_{f}(r;c)$
+
+The proof that $\rho \in \mathcal{K}_{f}(r;c)$ implies $\rho-c \in \mathcal{K}_{f_c}(r)$ is similar.
+\end{proof}
+
+\begin{lemma}[Order shift] \label{lem:fc_m_order} \lean{fc_m_order} \leanok
+Let $r>0$, $c\in\C$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1(c)$ with $f(c)\neq 0$. Let $f_c(z) = f(z+c)/f(c)$. For $\rho \in \mathcal{K}_{f_c}(r)$, the analyticOrderAt satisfies $m_{\rho,f_c} = m_{\rho+c,f}$.
+\end{lemma}
+\begin{proof}
+\leanok
+By definition of analyticOrderAt, we have $f_c(z) = (z-\rho)^{m_{\rho,f_c}} h(z)$ for some $h$ AnalyticAt $\rho$ with $h(\rho)\neq0$. As $f_c(z) = f(z+c)/f(c)$ and $f(c)\neq 0$, this implies
+$f(z+c) = (z-\rho')^{m_{\rho',f_c}} h(z)f(c)$. Thus letting $w=z+c$ and $g(w) = h(w-c)f(c)$, we have $f(w) = (w-c-\rho)^{m_{\rho,f_c}} g(w)$. Observe $h$ AnalyticAt $\rho'$ implies that $g$ is AnalyticAt $\rho'+c$. And $h(\rho'),f(c)\neq0$ imply $g(\rho+c)\neq0$. Hence by definition we conclude AnalyticAt of $f$ at $\rho+c$ equals $m_{\rho',f_c}$.
+\end{proof}
+
+
+\begin{lemma}[Disk minus K]\label{lem:DminusK} \lean{DminusK} \leanok
+Let $r_1>0$, $c\in\C$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1(c)$ with $f(c)\neq 0$. Let $f_c(z) = f(z+c)/f(c)$. We have $z\in \overline{\D}_{r_1} \setminus\mathcal K_{f_c}(R_1)$ if and only if $z+c\in \overline{\D}_{r_1}(c) \setminus\mathcal K_{f}(R_1;c)$
+\end{lemma}
+\begin{proof}
+\leanok
+First $z\in \overline{\D}_{r_1}$ if and only if $|z| \le r_1$ if and only if $|(z+c)-c|\le r_1$ iff $z+c\in \overline{\D}_{r_1}(c)$.
+Second, since $f(c)\neq0$ we have $z\in \mathcal K_{f_c}(R_1)$ if and only if $f_c(z)=0$ if and only if $f(z+c)=0$ if and only if $z+c\in \mathcal K_{f}(R_1;c)$.
+Combining these two equivalences, $z\in \overline{\D}_{r_1} \setminus\mathcal K_{f_c}(R_1)$ if and only if $z+c\in \overline{\D}_{r_1}(c) \setminus\mathcal K_{f}(R_1;c)$.
+\end{proof}
+
+
+\begin{lemma}[Final bound]\label{lem:final_ineq2} \lean{final_ineq2} \leanok
+Let $B>1$, $0<r_1<r<R_1<R<1$. Let $c\in\C$ and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1(c)$ with $f(c)\neq 0$. Let $f_c(z) = f(z+c)/f(c)$. If $|f(z)| < B$ for all $z\in \overline{\D}_R(c)$, then for all $z\in \overline{\D}_{r_1} \setminus\mathcal K_{f_c}(R_1)$ we have
+\[\left|\frac{f_c'}{f_c}(z) - \sum_{\rho'\in\mathcal K_{f_c}(R_1)}\frac{m_{\rho',f_c}}{z-\rho'}\right| \le \left(\frac{16 r^2}{(r-r_1)^3} + \frac{1}{(R^2/R_1 - R_1)\log(R/R_1)}\right)\log(B/|f(c)|).\]
+\end{lemma}
+\begin{proof}
+\uses{lem:final_ineq1, lem:fc_analytic_normalized, lem:fc_bound, lem:fc_log_deriv, lem:fc_zeros, lem:fc_m_order}
+\leanok
+Apply \cref{lem:final_ineq1} with the function $f_c$, using the conditions \cref{lem:fc_log_deriv,lem:fc_analytic_normalized,lem:fc_bound}.
+\end{proof}
+
+
+\begin{lemma}[Log expansion]\label{lem:log_Deriv_Expansion_Zeta} \lean{log_Deriv_Expansion_Zeta} \leanok
+Let $t\in\R$ with $|t|>3$. Let $c=3/2+it$, $B>1$, $0<r_1<r<R_1<R<1$.
+If $|\zeta(z)| < B$ for all $z\in \overline{\D}_R(c)$, then for all $z\in\overline{\D}_{r_1}(c)\setminus \mathcal K_\zeta(R_1;c)$ we have
+\begin{align*}
+\left|\frac{\zeta'(z)}{\zeta(z)} - \sum_{\rho\in\mathcal K_{\zeta}(R_1;c)} \frac{m_{\rho,\zeta}}{z-\rho} \right| \le \left(\frac{16 r^2}{(r-r_1)^3} + \frac{1}{(R^2/R_1 - R_1)\log(R/R_1)}\right) \log(B/|\zeta(c)|)
+\end{align*}
+\end{lemma}
+\begin{proof}
+\uses{lem:final_ineq2,lem:zetaanalOnD1c,lem:zetacnot0, lem:final_inequality, lem:DminusK}
+\leanok
+We apply \cref{lem:final_ineq2} using $f(z) = \zeta(z)$.
+The conditions $\zeta$ AnalyticOnNhd $\overline{\D}_1(c)$ with $\zeta(c)\neq 0$ hold by \cref{lem:zetaanalOnD1c,lem:zetacnot0}.
+\end{proof}
+
+\begin{lemma}[Lower shift]\label{lem:zeta32lower}
+\lean{zeta32lower}
+\leanok
+There exists $a>0$ such that for all $t\in\R$ we have $|\zeta(3/2+it)| \ge a$
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zeta_low_332}
+Euler product for zeta, triangle inequality, properties of $\zeta(\sigma)$ for $\sigma>1$
+Let $s = \sigma + it$. We are interested in the case where $\sigma = 3/2$.
+
+\textbf{Step 1: Use the Euler Product Formula}
+
+For any complex number $s$ with $\Re(s) = \sigma > 1$, the Riemann zeta function can be represented by the absolutely convergent Euler product over all prime numbers $p$:
+$$ \zeta(s) = \prod_{p} \frac{1}{1-p^{-s}} $$
+This implies that its reciprocal is
+$$ \frac{1}{\zeta(s)} = \prod_{p} (1-p^{-s}) $$
+We take the modulus of both sides:
+$$ \left|\frac{1}{\zeta(s)}\right| = \left|\prod_{p} (1-p^{-s})\right| = \prod_{p} |1-p^{-s}| $$
+
+\textbf{Step 2: Bound the term $|1-p^{-s}|$}
+
+Using the triangle inequality ($|z_1+z_2| \le |z_1|+|z_2|$), we can bound each term in the product:
+$$ |1 - p^{-s}| \le |1| + |-p^{-s}| = 1 + |p^{-s}| $$
+The modulus of $p^{-s}$ is:
+$$ |p^{-s}| = |p^{-(\sigma+it)}| = |p^{-\sigma} p^{-it}| = |p^{-\sigma}| |e^{-it\log p}| = p^{-\sigma} \cdot 1 = p^{-\sigma} $$
+So, we have $|1-p^{-s}| \le 1+p^{-\sigma}$.
+
+\textbf{Step 3: Bound the entire product}
+
+Substituting this back into the product for the reciprocal's modulus:
+$$ \left|\frac{1}{\zeta(s)}\right| \le \prod_{p} (1+p^{-\sigma}) $$
+The product $\prod_{p} (1+p^{-\sigma})$ can be expanded:
+$$ (1+2^{-\sigma})(1+3^{-\sigma})(1+5^{-\sigma})\dots = 1 + 2^{-\sigma} + 3^{-\sigma} + 5^{-\sigma} + 6^{-\sigma} + \dots $$
+This expanded sum contains terms $n^{-\sigma}$ for all square-free integers $n$. This sum is strictly less than the sum over all integers $n \ge 1$:
+$$ \prod_{p} (1+p^{-\sigma}) < \sum_{n=1}^\infty \frac{1}{n^\sigma} $$
+The sum on the right is, by definition, the Riemann zeta function evaluated at the real number $\sigma$, i.e., $\zeta(\sigma)$.
+Thus, we have established that for $\sigma > 1$:
+$$ \left|\frac{1}{\zeta(\sigma+it)}\right| < \zeta(\sigma) $$
+
+\textbf{Step 4: Conclude the proof}
+
+Taking the reciprocal of the inequality (and flipping the inequality sign) gives:
+$$ |\zeta(\sigma+it)| > \frac{1}{\zeta(\sigma)} $$
+We are interested in the specific case $\sigma = 3/2$. For this value, we have:
+$$ |\zeta(3/2+it)| > \frac{1}{\zeta(3/2)} $$
+The value $\zeta(3/2) = \sum_{n=1}^\infty n^{-3/2}$ is a convergent sum of positive terms, so it is a finite positive constant (approximately 2.612).
+We can therefore define our constant $a$ to be $a = 1/\zeta(3/2)$. Since $\zeta(3/2)>0$, we have $a>0$. The inequality $|\zeta(3/2+it)| \ge a$ holds for all $t \in \R$.
+\end{proof}
+
+
+\begin{lemma}[Log lower]\label{lem:zeta32lower_log}
+\lean{zeta32lower_log}
+\leanok
+There exists $A>1$ such that for all $t\in\R$,
+$$ \log \left(\frac{1}{|\zeta(3/2+it)|}\right) \leq A $$
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zeta32lower}
+Let $a>0$ be as in \cref{lem:zeta32lower}, so $|\zeta(3/2+it)| \ge a$ for all $t\in\R$.
+Set $A = \max\{2, \log(1/a)\}$. Clearly $A > 1$ since $a > 0$ and $\log(1/a) > 0$.
+For any $t\in\R$, set $x = |\zeta(3/2+it)|$. Then $a \leq x$, so $1/x \leq 1/a$ and $\log(1/x) \leq \log(1/a) \leq A$. Also, $\log(1/x) < 2 \leq A$ for $x > 1/2$.
+Thus $\log(1/x) \leq A$ for all $t$.
+\end{proof}
+
+
+\begin{lemma}[Upper pre]\label{lem:zeta32upper_pre}
+\lean{zeta32upper_pre}
+\leanok
+There exists $b>1$ such that for all $t\in\R$ we have $|\zeta(s+3/2+it)| \le b|t|$ for all $|s|\le 1$ and $|t|\ge3$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zetaUppBound}
+Apply \cref{lem:zetaUppBound}
+\end{proof}
+
+\begin{lemma}[Upper disk]\label{lem:zeta32upper}
+\lean{zeta32upper} \leanok
+There exists $b>1$ such that for all $t\in\R$ with $|t|>3$, letting $c=3/2+it$, we have $|\zeta(s)| \le b|t|$ for all $s\in\overline{\D}_1(c)$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zeta32upper_pre}
+The proof of this lemma is a direct application of \cref{lem:zeta32upper_pre} by a change of variables.
+
+\textbf{Step 1: Recall the prerequisite lemma}
+
+\Cref{lem:zeta32upper_pre} states that there exists a constant $b>1$ such that for all $t\in\R$ with $|t|\ge3$ and for all complex numbers $s_{pre}\in\C$ with $|s_{pre}|\le 1$, the following inequality holds:
+$$ |\zeta(s_{pre}+3/2+it)| \le b|t| $$
+We will show that the conditions and conclusion of the current lemma perfectly align with this statement.
+
+\textbf{Step 2: Unpack the conditions of the current lemma}
+
+We are given the following conditions:
+\begin{enumerate}
+    \item A real number $t$ with $|t| > 3$.
+    \item A complex number $c = 3/2 + it$.
+    \item A complex number $s$ which belongs to the closed disk of radius 1 centered at $c$, denoted $\overline{\D}_1(c)$.
+\end{enumerate}
+The condition $s \in \overline{\D}_1(c)$ means, by definition, that the distance between $s$ and $c$ is at most 1:
+$$ |s - c| \le 1 $$
+
+\textbf{Step 3: Define a new variable to match the prerequisite}
+
+Our goal is to bound $|\zeta(s)|$. Let's define a new variable, which we will call $s_{pre}$, in a way that relates our $s$ to the argument of the zeta function in \cref{lem:zeta32upper_pre}.
+Let's set the argument of $\zeta$ in our lemma, which is $s$, equal to the argument of $\zeta$ in the prerequisite lemma, which is $s_{pre}+3/2+it$:
+$$ s = s_{pre} + 3/2 + it $$
+Now, let's solve for $s_{pre}$:
+$$ s_{pre} = s - (3/2 + it) $$
+Recognizing the definition $c=3/2+it$, this simplifies to:
+$$ s_{pre} = s - c $$
+
+\textbf{Step 4: Verify the conditions on the new variable}
+
+\Cref{lem:zeta32upper_pre} requires that the variable $s_{pre}$ satisfies $|s_{pre}| \le 1$. Let's check if our definition of $s_{pre}$ meets this condition.
+From Step 2, we know that for any $s \in \overline{\D}_1(c)$, we have $|s - c| \le 1$.
+Substituting our definition from Step 3, this is exactly the condition:
+$$ |s_{pre}| \le 1 $$
+Therefore, for any $s$ that satisfies the conditions of our lemma, we can define $s_{pre} = s-c$, and this $s_{pre}$ will satisfy the conditions of \cref{lem:zeta32upper_pre}.
+
+\textbf{Step 5: Apply the prerequisite lemma and conclude}
+
+We have established the following:
+\begin{itemize}
+    \item We are given $t$ with $|t|>3$. This matches the condition on $t$ in \cref{lem:zeta32upper_pre}.
+    \item For any $s \in \overline{\D}_1(c)$, we can write $s = s_{pre} + c = s_{pre} + 3/2 + it$, where $s_{pre} = s-c$ satisfies $|s_{pre}| \le 1$.
+\end{itemize}
+We can now apply the inequality from \cref{lem:zeta32upper_pre} to the number $\zeta(s_{pre} + 3/2 + it)$. The lemma guarantees the existence of a constant $b>1$ such that:
+$$ |\zeta(s_{pre} + 3/2 + it)| \le b|t| $$
+Since $s = s_{pre} + 3/2 + it$, this inequality is identical to:
+$$ |\zeta(s)| \le b|t| $$
+This holds for any $s \in \overline{\D}_1(c)$ and any $t \in \R$ with $|t|>3$. This is precisely the statement we needed to prove.
+\end{proof}
+
+\begin{lemma}[Expand bound]\label{lem:Zeta1_Zeta_Expand} \lean{Zeta1_Zeta_Expand}
+\leanok
+There exists a constant $A>1$ such that for all $t\in\R$ with $|t|>3$, $c=3/2+it$, $B>1$, $0<r_1<r<R_1<R<1$, $z\in\overline{\D}_{r_1}(c)\setminus \mathcal K_\zeta(R_1;c)$ we have
+\begin{align*}
+\left|\frac{\zeta'(z)}{\zeta(z)} - \sum_{\rho\in\mathcal K_{\zeta}(R_1;c)} \frac{m_{\rho,\zeta}}{z-\rho} \right| \le \left(\frac{16 r^2}{(r-r_1)^3} + \frac{1}{(R^2/R_1 - R_1)\log(R/R_1)}\right)\Big(\log|t| + \log(b) + A\Big)
+\end{align*}
+\end{lemma}
+\begin{proof}
+\uses{lem:log_Deriv_Expansion_Zeta,lem:zeta32upper,lem:zeta32lower_log}
+\leanok
+We apply \cref{lem:log_Deriv_Expansion_Zeta,lem:zeta32upper,lem:zeta32lower_log} with $B=bt$, and $C_1=C/R$.
+\end{proof}
+
+\begin{lemma}[Final expansion]\label{lem:Zeta1_Zeta_Expansion}
+\lean{Zeta1_Zeta_Expansion}
+\leanok
+Let $0< r_1 < r < 5/6$.
+There exists constants $C>1$ such that for all $t\in\R$ with $|t|>3$, $c=3/2+it$, and $z\in\overline{\D}_{r_1}(c)\setminus \mathcal K_\zeta(5/6;c)$ we have
+\begin{align*}
+\left|\frac{\zeta'(z)}{\zeta(z)} - \sum_{\rho\in\mathcal K_{\zeta}(5/6;c)} \frac{m_{\rho,\zeta}}{z-\rho} \right| \le C\left(\frac{1}{(r-r_1)^3} + 1\right)\log|t|
+\end{align*}
+\end{lemma}
+\begin{proof}
+\uses{lem:Zeta1_Zeta_Expand}
+\leanok
+We apply \cref{lem:Zeta1_Zeta_Expand} and choose $R_1 = 5/6$, $R=8/9$.
+Set $C=\left(16 + \frac{1}{(R^2/R_1 - R_1)\log(R/R_1)}\right)(1 + \log(b) + A)$.
+\end{proof}

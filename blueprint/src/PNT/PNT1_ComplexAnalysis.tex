@@ -1,0 +1,2394 @@
+\chapter{Complex Analysis}\label{complex_analysis}
+
+
+\begin{lemma}[Log growth]\label{lem:2logOlog} \lean{lem_2logOlog} \leanok
+For $t> 1$ we have $2\log t \le O(\log t)$
+\end{lemma}
+\begin{proof} \leanok
+Uses definition of big $O(.)$
+\end{proof}
+%%%
+
+\begin{lemma}[Square log]\label{lem:logt22logt} \lean{lem_logt22logt} \leanok
+For $t\ge 2$ we have $\log(t^2) = 2\log t$
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Double log]\label{lem:log2tlogt2} \lean{lem_log2tlogt2} \leanok
+For $t\ge 2$ we have $\log(2t) \le \log(t^2)$
+\end{lemma}
+\begin{proof} \leanok
+Uses $2t \le t^2$, and $\log(t)$ monotonically increasing.
+\end{proof}
+%%%
+
+\begin{lemma}[Log compare]\label{lem:log22log} \lean{lem_log22log} \leanok
+For $t\ge 2$ we have $\log(2t) \le 2\log t$
+\end{lemma}
+\begin{proof} \leanok \uses{lem:logt22logt, lem:log2tlogt2}
+Apply Lemmas \ref{lem:logt22logt} and \ref{lem:log2tlogt2}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Exp rule]\label{lem:exprule} \lean{lem_exprule} \leanok
+For any $n\ge1$ and $\alpha,\beta\in\C$ we have $n^{\alpha+\beta} = n^\alpha\cdot n^{\beta}$
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+
+\begin{lemma}[Real scale]\label{lem:realbw} \lean{lem_realbw} \leanok
+For $b\in\R$ and $w\in\C$ we have $\Re(bw) = b\Re(w)$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Real series]\label{lem:sumReal} \lean{lem_sumReal} \leanok
+For a convergent series $v=\sum_{n=1}^\infty v_n$ with $v_n\in\C$, we have $\Re(v) = \sum_{n=1}^\infty \Re(v_n)$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+
+
+\begin{lemma}[Euler's formula] \label{lem:Euler} \lean{lem_Euler} \leanok
+For $a\in\R$ we have $e^{ia} = \cos(a) + i\sin(a)$
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Real cosine]\label{lem:Reecos} \lean{lem_Reecos} \leanok
+For $a\in\R$ we have $\Re(e^{ia}) = \cos(a)$
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Euler}
+Apply Lemma \ref{lem:Euler}.
+\end{proof}
+%%%
+
+\begin{lemma}[Log inverse]\label{lem:explog} \lean{lem_explog} \leanok
+For $n\ge1$ we have $n = e^{\log n}$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Cos even]\label{lem:coseven} \lean{lem_coseven} \leanok
+For $a\in\R$ we have $\cos(-a) = \cos(a)$
+\end{lemma}
+\begin{proof}
+    \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Cos even]\label{lem:coseveny} \lean{lem_coseveny} \leanok
+For $n\ge1$, $y\in\R$ we have $\cos(-y\log n) = \cos(y\log n)$
+\end{lemma}
+\begin{proof} \leanok \uses{lem:coseven}
+Let $a=y\log n$. Since $n\ge1$ we have $\log n\ge0$, so $a\in \R$.
+Apply Lemma \ref{lem:coseven} with $a=y\log n$.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Exp form]\label{lem:niyelog} \lean{lem_niyelog} \leanok
+For $n\ge1$ and $y\in\R$ we have $n^{-iy} = e^{-iy\log n}$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:explog}
+By Lemma \ref{lem:explog} $n^{-iy} = (e^{\log n})^{-iy}$. Then $(e^{\log n})^{-iy} = e^{-iy\log n}$ so $n^{-iy} = e^{-iy\log n}$.
+\end{proof}
+%%%
+
+\begin{lemma}[Real cosine]\label{lem:eacosalog} \lean{lem_eacosalog} \leanok
+For $n\ge1$ and $y\in\R$ we have $\Re(e^{-iy\log n}) = \cos(-y\log n)$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Reecos}
+Let $a=-y\log n$ so $e^a = e^{-iy\log n}$. Apply Lemma \ref{lem:Reecos} with $a=-y\log n$.
+\end{proof}
+%%%
+
+\begin{lemma}[Real cosine]\label{lem:eacosalog2} \lean{lem_eacosalog2} \leanok
+For $n\ge1$ and $y\in\R$ we have $\Re(n^{-iy}) = \cos(-y\log n)$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:niyelog, lem:eacosalog}
+Apply Lemmas \ref{lem:niyelog} and \ref{lem:eacosalog}.
+\end{proof}
+%%%
+
+\begin{lemma}[Real cosine]\label{lem:eacosalog3} \lean{lem_eacosalog3} \leanok
+For $n\ge1$ and $y\in\R$ we have $\Re(n^{-iy}) = \cos(y\log n)$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:coseveny, lem:eacosalog2}
+Apply Lemmas \ref{lem:coseveny} and \ref{lem:eacosalog2}.
+\end{proof}
+%%%
+
+
+
+\begin{lemma}[Double angle]\label{lem:cos2t} \lean{lem_cos2t} \leanok
+For any $\theta\in\R$ we have $\cos(2\theta) = 2\cos(\theta)^2 - 1$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Cos square]\label{lem:cos2t2} \lean{lem_cos2t2} \leanok
+For any $\theta\in\R$ we have $2\cos(\theta)^2 = 1+\cos(2\theta)$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:cos2t}
+Apply Lemma \ref{lem:cos2t}
+\end{proof}
+%%%
+
+\begin{lemma}[Square expand]\label{lem:cosSquare} \lean{lem_cosSquare} \leanok
+For any $\theta\in\R$ we have $2(1+\cos(\theta))^2 = 2 + 4\cos(\theta) + 2\cos(\theta)^2$.
+\end{lemma}
+\begin{proof} \leanok
+We calculate $2(1+\cos(\theta))^2 = 2(1 + 2\cos(\theta) + \cos(\theta)^2) = 2 + 4\cos(\theta) + 2\cos(\theta)^2.$
+\end{proof}
+%%%
+
+\begin{lemma}[Trig identity]\label{lem:cos2cos341} \lean{lem_cos2cos341} \leanok
+For any $\theta\in\R$ we have $2(1+\cos(\theta))^2 = 3+4\cos(\theta)+\cos(2\theta)$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:cos2t2, lem:cosSquare}
+Apply Lemmas \ref{lem:cos2t2} and \ref{lem:cosSquare}.
+\end{proof}
+%%%
+
+\begin{lemma}[Square nonneg]\label{lem:SquarePos} \lean{lem_SquarePos} \leanok
+For $y\in\R$ we have $0\le y^2$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Double square]\label{lem:SquarePos2} \lean{lem_SquarePos2} \leanok
+For $y\in\R$ we have $0\le 2y^2$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:SquarePos}
+Apply Lemma \ref{lem:SquarePos}.
+\end{proof}
+%%%
+
+\begin{lemma}[Cos square]\label{lem:SquarePoscos} \lean{lem_SquarePoscos} \leanok
+For any $\theta\in\R$ we have $0\le 2(1+\cos(\theta))^2$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:SquarePos2}
+Apply Lemma \ref{lem:SquarePos2} with $y=1+\cos(\theta)$.
+\end{proof}
+%%%
+
+\begin{lemma}[Trig positive]\label{lem:postrig} \lean{lem_postrig} \leanok
+For any $\theta\in\R$ we have $0\le 3+4\cos(\theta)+\cos(2\theta)$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:cos2cos341, lem:SquarePoscos}
+Apply Lemmas \ref{lem:cos2cos341} and \ref{lem:SquarePoscos}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Trig positive]\label{lem:postriglogn} \lean{lem_postriglogn} \leanok
+For $n\ge1$ and $t\in\R$ we have $0\le 3+4\cos(t\log n)+\cos(2t\log n)$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:postrig}
+Apply Lemma \ref{lem:postrig} with $\theta=t\log n$.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Series positive]\label{lem:seriesPos} \lean{lem_seriesPos} \leanok
+For a convergent series $r=\sum_{n=1}^\infty r_n$, if $r_n\ge0$ for all $n\ge1$, then $r\ge0$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+
+\begin{lemma}[Real part diff]\label{lem:real_part_of_diff} \lean{real_part_of_diff} \leanok
+For any $w \in \C$, $\Re(2M-w) = 2M - \Re(w)$.
+\end{lemma}
+\begin{proof}  \leanok
+\end{proof}
+
+\begin{lemma}[Real part 2M]\label{lem:real_part_of_diffz} \lean{real_part_of_diffz} \leanok
+We have $\Re(2M-f(z)) = 2M - \Re(f(z))$.
+\end{lemma}
+\begin{proof} \uses{lem:real_part_of_diff} \leanok
+Apply Lemma \ref{lem:real_part_of_diff} with $w=f(z)$.
+\end{proof}
+
+\begin{lemma}[Inequality reversal]\label{lem:inequality_reversal} \lean{inequality_reversal} \leanok
+For $x, M\in\R$, if $x \le M$ then $2M-x \ge M$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Real part lower bound]\label{lem:real_part_lower_bound} \lean{real_part_lower_bound} \leanok
+For $w\in\C$ and $M>0$, if $\Re(w) \le M$ then $2M-\Re(w) \ge M$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:inequality_reversal}
+Apply Lemma \ref{lem:inequality_reversal} with $x=\Re(w)$.
+\end{proof}
+
+\begin{lemma}[Real part bound]\label{lem:real_part_lower_bound2} \lean{real_part_lower_bound2} \leanok
+For $w\in\C$ and $M>0$, if $\Re(w) \le M$ then $\Re(2M - w) \ge M$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:real_part_of_diffz, lem:real_part_lower_bound}
+Apply Lemmas \ref{lem:real_part_of_diffz} and \ref{lem:real_part_lower_bound}.
+\end{proof}
+
+\begin{lemma}[Real part >0]\label{lem:real_part_lower_bound3} \lean{real_part_lower_bound3} \leanok
+For $w\in\C$ and $M>0$, if $\Re(w) \le M$ then $\Re(2M - w) > 0$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:real_part_of_diffz, lem:real_part_lower_bound}
+Apply Lemmas \ref{lem:real_part_of_diffz} and \ref{lem:real_part_lower_bound} with $w=f(z)$.
+\end{proof}
+
+\begin{lemma}[Pos real nonzero]\label{lem:nonzero_if_real_part_positive} \lean{nonzero_if_real_part_positive} \leanok
+If $w \in \C$ has $\Re(w) > 0$, then $w \neq 0$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[2M minus nonzero]\label{lem:real_part_lower_bound4} \lean{lem_real_part_lower_bound4} \leanok
+For $w\in\C$ and $M>0$, if $\Re(w) \le M$ then $2M - w\neq 0$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:real_part_lower_bound3, lem:nonzero_if_real_part_positive}
+Apply Lemmas \ref{lem:real_part_lower_bound3} and \ref{lem:nonzero_if_real_part_positive}.
+\end{proof}
+
+\begin{lemma}[Absolute value positive]\label{lem:abspos} \lean{lem_abspos} \leanok
+Let $z\in\C$. If $z\neq0$ then $|z|>0$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[2M minus mod]\label{lem:real_part_lower_bound5} \lean{lem_real_part_lower_bound5} \leanok
+For $w\in\C$ and $M>0$, if $\Re(w) \le M$ then $|2M - w|>0$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:real_part_lower_bound4, lem:abspos}
+Apply Lemmas \ref{lem:real_part_lower_bound4} and \ref{lem:abspos} with $z=2M-w$.
+\end{proof}
+
+
+\begin{lemma}[Real imaginary]\label{lem:wReIm} \lean{lem_wReIm} \leanok
+For any $w \in \C$, we have $w=\Re(w) + i\Im w$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+
+\begin{lemma}[Mod square]\label{lem:modaib} \lean{lem_modaib} \leanok
+For any $a,b \in \R$, we have $|a + ib|^2 = a^2 + b^2$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Shifted mod]\label{lem:modcaib} \lean{lem_modcaib} \leanok
+For any $a,b,c \in \R$, we have $|c-a - ib|^2 = (c-a)^2 + b^2$.
+\end{lemma}
+\begin{proof}  \leanok
+\end{proof}
+
+\begin{lemma}[Mod diff] \label{lem:diffmods} \lean{lem_diffmods} \leanok
+For any $a,b,c \in \R$, we have $|c-a - ib|^2 - |a + ib|^2 = (c-a)^2 - a^2$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:modcaib, lem:modaib}
+Apply Lemmas \ref{lem:modcaib} and \ref{lem:modaib}.
+\end{proof}
+
+\begin{lemma}[Square expand]\label{lem:casq} \lean{lem_casq} \leanok
+For any $a,c \in \R$, we have $(c-a)^2 = a^2-2ac+c^2$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Square diff]\label{lem:casq2} \lean{lem_casq2} \leanok
+For any $a,c \in \R$, we have $(c-a)^2 - a^2 = 2c(c-a)$.
+\end{lemma}
+\begin{proof} \uses{lem:casq} \leanok
+Apply Lemma \ref{lem:casq}
+\end{proof}
+
+\begin{lemma}[Mod diff]\label{lem:diffmods2} \lean{lem_diffmods2} \leanok
+For any $a,b,c \in \R$, we have $|c-a - ib|^2 - |a + ib|^2 = 2c(c-a)$.
+\end{lemma}
+\begin{proof} \uses{lem:diffmods, lem:casq2} \leanok
+Apply Lemmas \ref{lem:diffmods} and \ref{lem:casq2}.
+\end{proof}
+
+\begin{lemma}[Modulus diff]\label{lem:modulus_sq_ReImw} \lean{lem_modulus_sq_ReImw} \leanok
+For any $w \in \C$, $|2M-\Re(w) - i\Im w|^2 - |\Re(w) + i\Im w|^2 = 4M(M - \Re(w))$.
+\end{lemma}
+\begin{proof} \uses{lem:diffmods2} \leanok
+Apply Lemma \ref{lem:diffmods2} with $a=\Re(w)$ and $b=\Im w$ and $c=2M$.
+\end{proof}
+
+\begin{lemma}[Modulus identity]\label{lem:modulus_sq_identity} \lean{lem_modulus_sq_identity} \leanok
+For any $w \in \C$, $|2M-w|^2 - |w|^2 = 4M(M - \Re(w))$.
+\end{lemma}
+\begin{proof} \uses{lem:modulus_sq_ReImw, lem:wReIm} \leanok
+Apply Lemmas \ref{lem:modulus_sq_ReImw} and \ref{lem:wReIm}
+\end{proof}
+
+\begin{lemma}[Nonneg product]\label{lem:nonnegative_product} \lean{lem_nonnegative_product} \leanok
+If $M>0$ and $x \le M$, then $4M(M-x) \ge 0$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Nonneg product]\label{lem:nonnegative_product2} \lean{lem_nonnegative_product2} \leanok
+Let $M>0$ and $w\in\C$. If $\Re(w) \le M$ then $4M(M-\Re(w)) \ge 0$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:nonnegative_product}
+Apply Lemma \ref{lem:nonnegative_product} with $x=\Re(w)$.
+\end{proof}
+
+
+\begin{lemma}[Modulus compare]\label{lem:nonnegative_product3} \lean{lem_nonnegative_product3} \leanok
+Let $M>0$ and $w \in \C$. If $\Re(w) \le M$ then $|2M-w|^2 - |w|^2 \ge 0$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:modulus_sq_identity, lem:nonnegative_product2}
+Apply Lemmas \ref{lem:modulus_sq_identity} and \ref{lem:nonnegative_product2}
+\end{proof}
+
+\begin{lemma}[Modulus bound]\label{lem:nonnegative_product4} \lean{lem_nonnegative_product4} \leanok
+Let $M>0$ and $w \in \C$. If $\Re(w) \le M$ then $|2M-w|^2 \ge |w|^2$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:nonnegative_product3}
+Apply Lemma \ref{lem:nonnegative_product3}.
+\end{proof}
+
+\begin{lemma}[Modulus bound]\label{lem:nonnegative_product5} \lean{lem_nonnegative_product5} \leanok
+Let $M>0$ and $w \in \C$. If $\Re(w) \le M$ then $|2M-w| \ge |w|$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:nonnegative_product4}
+Apply Lemma \ref{lem:nonnegative_product4} and take non-negative square-root.
+\end{proof}
+
+\begin{lemma}[Modulus order]\label{lem:nonnegative_product6} \lean{lem_nonnegative_product6} \leanok
+Let $M>0$ and $w \in \C$. If $\Re(w) \le M$ then $|w|\le |2M-w|$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:nonnegative_product5}
+Apply Lemma \ref{lem:nonnegative_product5}.
+\end{proof}
+
+\begin{lemma}[Divide inequality]\label{lem:ineqmultr} \lean{lem_ineqmultr} \leanok
+If $c>0$ and $0\le a\le b$, then $a/c\le b/c$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+
+\begin{lemma}[Ratio bound]\label{lem:ineqmultrbb} \lean{lem_ineqmultrbb} \leanok
+If $b>0$ and $0\le a\le b$, then $a/b\le 1$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:ineqmultr}
+Apply Lemma \ref{lem:ineqmultr} with $c=b>0$.
+\end{proof}
+
+\begin{lemma}[Ratio bound]\label{lem:nonnegative_product7} \lean{lem_nonnegative_product7} \leanok
+Let $M>0$ and $w \in \C$. If $|2M-w|>0$ and $|w|\le |2M-w|$ then $\frac{|w|}{|2M-w|} \le 1$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:real_part_lower_bound5, lem:nonnegative_product6, lem:ineqmultrbb}
+Apply Lemmas \ref{lem:real_part_lower_bound5} and \ref{lem:nonnegative_product6} and \ref{lem:ineqmultrbb} with $a=|w|$ and $b=|2M-w|$.
+\end{proof}
+
+\begin{lemma}[Ratio bound]\label{lem:nonnegative_product8} \lean{lem_nonnegative_product8} \leanok
+Let $M>0$ and $w \in \C$. If $\Re(w) \le M$ and $|w|\le |2M-w|$ then $\frac{|w|}{|2M-w|} \le 1$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:real_part_lower_bound5, lem:nonnegative_product7}
+Apply Lemmas \ref{lem:real_part_lower_bound5} and \ref{lem:nonnegative_product7}.
+\end{proof}
+
+\begin{lemma}[Ratio bound]\label{lem:nonnegative_product9} \lean{lem_nonnegative_product9} \leanok
+Let $M>0$ and $w \in \C$. If $\Re(w) \le M$ then $\frac{|w|}{|2M-w|} \le 1$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:nonnegative_product6, lem:nonnegative_product8}
+Apply Lemmas \ref{lem:nonnegative_product6} and \ref{lem:nonnegative_product8}.
+\end{proof}
+
+
+\begin{lemma}[Triangle inequality] \label{lem:triangleineq} \lean{lem_triangle_ineq} \leanok
+Let $N,G\in\C$. We have $|N + G| \le |N| + |G|$
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Triangle minus] \label{lem:triangleineqminus} \lean{lem_triangleineqminus} \leanok
+Let $N,F\in\C$. We have $|N - F| \le |N| + |F|$
+\end{lemma}
+\begin{proof} \leanok \uses{lem:triangleineq}
+Apply Lemma \ref{lem:triangleineq} with $G=-F$.
+\end{proof}
+
+
+\begin{lemma}[Scaled triangle]\label{lem:rtriangle} \lean{lem_rtriangle} \leanok
+Let $r>0$ and $N,F\in\C$. We have $r|N - F| \le r(|N| + |F|)$
+\end{lemma}
+\begin{proof} \leanok \uses{lem:triangleineq, lem:ineqmultr}
+Apply Lemmas \ref{lem:triangleineq} and \ref{lem:ineqmultr} with $a=|N-F|$ and $b=(|N| + |F|)$.
+\end{proof}
+
+\begin{lemma}[Scaled triangle]\label{lem:rtriangle2} \lean{rtriangle2} \leanok
+Let $r>0$ and $N,F\in\C$. We have $r|N - F| \le r|N| + r|F|$
+\end{lemma}
+\begin{proof} \leanok \uses{lem:rtriangle}
+Apply Lemma \ref{lem:rtriangle}
+\end{proof}
+
+\begin{lemma}[Ineq step]\label{lem:rtriangle3} \lean{lem_rtriangle3} \leanok
+Let $0<r<R$ and $N,F\in\C$. If $R|F| \le r|N-F|$ then $R|F| \le r|N| + r|F|$
+\end{lemma}
+\begin{proof} \leanok \uses{lem:rtriangle2}
+Apply assumption $R|F| \le r|N-F|$ and Lemma \ref{lem:rtriangle2}
+\end{proof}
+
+\begin{lemma}[Rearranged bound] \label{lem:rtriangle4} \lean{lem_rtriangle4} \leanok
+Let $0<r<R$ and $N,F\in\C$. If $R|F| \le r|N-F|$ then $(R-r)|F| \le r|N|$
+\end{lemma}
+\begin{proof} \leanok \uses{lem:rtriangle3}
+Apply Lemma \ref{lem:rtriangle3}
+\end{proof}
+
+\begin{lemma}[Abs positive]\label{lem:absposeq} \lean{lem_absposeq} \leanok
+For $a\in\R$, if $a>0$ then $|a|=a$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Double positive]\label{lem:a2a} \lean{lem_a2a} \leanok
+For $a\in\R$, if $a>0$ then $2a>0$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Scaled abs]\label{lem:absposeq2} \lean{lem_absposeq2} \leanok
+For $a\in\R$, if $a>0$ then $|2a|=2a$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:absposeq, lem:a2a}
+Apply Lemmas \ref{lem:absposeq} and \ref{lem:a2a}
+\end{proof}
+
+\begin{lemma}[Key bound] \label{lem:rtriangle5} \lean{lem_rtriangle5} \leanok
+Let $0<r<R$, $M>0$, and $F\in\C$. If $RF \le r|2M-F|$ then $(R-r)|F| \le 2Mr$
+\end{lemma}
+\begin{proof} \uses{lem:rtriangle4, lem:absposeq2} \leanok
+Apply Lemma \ref{lem:rtriangle4} with $N=2M$, and Lemma \ref{lem:absposeq2} with $a=M$.
+\end{proof}
+
+\begin{lemma}[Nonneg factor]\label{lemRrFpos} \lean{lem_RrFpos} \leanok
+Let $0<r<R$ and $F\in\C$. Then we have $(R-r)|F| \ge0$
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Divide bound] \label{lem:rtriangle6} \lean{lem_rtriangle6} \leanok
+Let $0<r<R$, $M>0$, and $F\in\C$. If $(R-r)|F| \le 2Mr$ then $|F| \le \frac{2Mr}{R-r}$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:ineqmultr, lemRrFpos}
+Apply Lemma \ref{lem:ineqmultr} with $c=(R-r)>0$ and $a=(R-r)|F|$ and $b=2Mr$. Lemma \ref{lemRrFpos} gives $a\ge0$.
+\end{proof}
+
+\begin{lemma}[Final bound] \label{lem:rtriangle7} \lean{lem_rtriangle7} \leanok
+Let $0<r<R$, $M>0$, and $F\in\C$. If $R|F| \le r|2M-F|$ then $|F| \le \frac{2Mr}{R-r}$
+\end{lemma}
+\begin{proof} \leanok \uses{lem:rtriangle5, lem:rtriangle6}
+Apply Lemmas \ref{lem:rtriangle5} and \ref{lem:rtriangle6}.
+\end{proof}
+
+
+\begin{lemma}[Order nonzero] \label{lem:orderne0} \lean{lem_orderne0}
+\leanok
+Let $f:\C\to\C$ be analytic, and let $n_0$ be the analyticOrderAt for $f$ at $0$.
+If $f(0)=0$ then $n_0 \neq 0$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Order natural] \label{lem:ordernetop} \lean{lem_ordernetop}
+\leanok
+Let $f:\C\to\C$ be analytic, and let $n_0$ be the analyticOrderAt for $f$ at $0$.
+If $f\neq 0$ then $n_0 \in \N$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+%%%
+
+
+\begin{lemma}[Factor power] \label{lem:ordernatcast} \lean{lem_ordernatcast}
+\leanok
+Let $f:\C\to\C$ be analytic at $0$, and let $n_0$ be the analyticOrderAt for $f$ at $0$. If $n_0\in\N$ then there exists a nhd $N$ of $0$ and $g:\C\to\C$ such that $g$ is analytic at $0$, and $f(z) = z^{n_0} g(z)$ on $N$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+%%%
+
+
+
+\begin{lemma}[Factor linear] \label{lem:ordernatcast1} \lean{lem_ordernatcast1}
+\leanok
+Let $f:\C\to\C$ be analytic at $0$, and let $n_0$ be the analyticOrderAt for $f$ at $0$. If $n_0\in\N$ and $n_0\neq 0$, then there exists a nhd $N$ of $0$ and $h:\C\to\C$ such that $h$ is analytic at $0$, and $f(z) = zh(z)$ on $N$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:ordernatcast}
+Apply Lemma \ref{lem:ordernatcast} and let $h(z)=z^{n_0-1} g(z)$.
+\end{proof}
+%%%
+
+
+
+\begin{lemma}[Divide zero] \label{lem:ordernatcast2} \lean{lem_ordernatcast2}
+\leanok
+Let $f:\C\to\C$ be analytic at $0$, and let $n_0$ be the analyticOrderAt for $f$ at $0$. If $f\neq0$ and $f(0)=0$, then $h(z)=f(z)/z$ is analytic at $0$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:ordernetop, lem:ordernatcast1, lem:orderne0}
+Apply Lemmas \ref{lem:ordernetop} and \ref{lem:ordernatcast1} and \ref{lem:orderne0}
+\end{proof}
+%%%
+
+
+
+
+\begin{lemma}[Inverse analytic] \label{lem:1zanal}
+\leanok
+The function $f_1(z) = \frac{1}{z}$ is analytic on $\{z\in\C: z \neq0\}$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Analytic mono] \label{lem:analmono} \lean{lem_analmono}
+\leanok
+Let $T\subset S\subset\C$ and $f:S\to\C$.
+If $f$ is analytic on $S$ then $f$ is analytic on $T$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Nonzero subset] \label{lem:not0mono} \lean{lem_not0mono}
+\leanok
+Let $0<R<1$ and $V=\{z\in \overline{\D}_R: z \neq0\}$ and $U=\{z\in\C: z \neq0\}$. Then $V\subset U$.
+\end{lemma}
+\begin{proof}
+\leanok
+unfold definitions, using $\overline{\D}_R\subset \C$.
+\end{proof}
+%%%
+
+\begin{lemma}[Inverse analytic] \label{lem:1zanalDR} \lean{lem_1zanalDR}
+\leanok
+The function $f_1(z) = \frac{1}{z}$ is analytic on $T=\{z\in \overline{\D}_R: z \neq0\}$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:not0mono, lem:1zanal, lem:analmono}
+Apply Lemmas \ref{lem:not0mono} and \ref{lem:1zanal} and \ref{lem:analmono} with $S=\{z\in\C: z \neq0\}$ and $T=\{z\in \overline{\D}_R: z \neq0\}$.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Product analytic] \label{lem:analprod} \lean{lem_analprod}
+\leanok
+Let $T\subset S\subset\C$, and let $f_1:S\to \C$ and $f_2:S\to \C$.
+If $f_1$ is analytic on $T$ and $f_2$ is analytic on $T$, then $f_1\cdot f_2$ is analytic on $T$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Product analytic] \label{lem:analprodST} \lean{lem_analprodST}
+\leanok
+Let $T\subset S\subset\C$, and let $f_1:S\to \C$ and $f_2:S\to \C$.
+If $f_1$ is analytic on $T$ and $f_2$ is analytic on $S$, then $f_1\cdot f_2$ is analytic on $T$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:analprod, lem:analmono}
+Apply Lemmas \ref{lem:analprod} and \ref{lem:analmono} with $f=f_2$
+\end{proof}
+%%%
+
+
+\begin{lemma}[Product analytic] \label{lem:analprodTDR} \lean{lem_analprodTDR}
+\leanok
+Let $T=\{z\in\ \overline{\D}_R : z\neq0\}$ and $f_1:\C\to \C$ and $f_2:\C\to \C$.
+If $f_1$ is analytic on $T$ and $f_2$ is analytic on $\overline{\D}_R$, then $f_1\cdot f_2$ is analytic on $T$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:analprodST}
+Apply Lemmas \ref{lem:analprodST} with $S=\overline{\D}_R$ and $T=\{z\in\ \overline{\D}_R : z\neq0\}$.
+\end{proof}
+%%%
+
+\begin{lemma}[Quotient analytic] \label{lem:fzzTanal} \lean{lem_fzzTanal}
+\leanok
+Let $T=\{z\in\ \overline{\D}_R : z\neq0\}$ and $f:\C\to \C$.
+If $f(z)$ is analytic on $\overline{\D}_R$, then $f(z)/z$ is analytic on $T$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:1zanalDR, lem:analprodTDR}
+Apply Lemmas \ref{lem:1zanalDR} and \ref{lem:analprodTDR} with $f_1(z) = 1/z$ and $f_2(z)=f(z)$.
+\end{proof}
+%%%
+
+
+\begin{lemma}[On implies within] \label{lem:AnalOntoWithin} \lean{lem_AnalOntoWithin}
+\leanok
+Let $V\subset \C$ and $h:\C\to\C$. If $h$ is AnalyticOn $V$,
+then $h$ is AnalyticWithinAt $z$ for all $z\in V$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Within implies on] \label{lem:AnalWithintoOn} \lean{lem_AnalWithintoOn}
+\leanok
+Let $h:\C\to\C$. If $h$ is AnalyticWithinAt $z$ for all $z\in \overline{\D}_R$, then $h$ is AnalyticOn $\overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+%%%
+
+
+
+\begin{lemma}[Disk split] \label{lem:DR0T} \lean{lem_DR0T}
+\leanok
+Let $T=\{z\in\ \overline{\D}_R : z\neq0\}$. Then $\overline{\D}_R = \{0\}\cup T$.
+\end{lemma}
+\begin{proof}
+\leanok
+Unfold definition of $T$.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Within union] \label{lem:analWWWithin} \lean{lem_analWWWithin}
+\leanok
+Let $T=\{z\in\ \overline{\D}_R : z\neq0\}$ and $h: \C\to\C$. If $h$ is AnalyticWithinAt $0$ and $h$ is AnalyticWithinAt $z$ for all $z\in T$, then $h$ is AnalyticWithinAt $z$ for all $z\in \overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:DR0T}
+Apply Lemma \ref{lem:DR0T}.
+\end{proof}
+%%%
+
+\begin{lemma}[Within gives on] \label{lem:analWWithinAtOn} \lean{lem_analWWithinAtOn}
+\leanok
+Let $T=\{z\in\ \overline{\D}_R : z\neq0\}$ and $h: \C\to\C$. If $h$ is AnalyticWithinAt $0$ and $h$ is AnalyticWithinAt $z$ for all $z\in T$, then $h$ is AnalyticOn $\overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:AnalWithintoOn, lem:analWWWithin}
+Apply Lemmas \ref{lem:AnalWithintoOn} and \ref{lem:analWWWithin}
+\end{proof}
+%%%
+
+
+
+\begin{lemma}[At to within] \label{lem:AnalAttoWithin} \lean{lem_AnalAttoWithin}
+\leanok
+Let $h:\C\to\C$. If $h$ is AnalyticAt $0$,
+then $h$ is AnalyticWithinAt $0$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Local to global] \label{lem:analAtOnOn} \lean{lem_analAtOnOn}
+\leanok
+Let $T=\{z\in\ \overline{\D}_R : z\neq0\}$ and $h: \C\to\C$. If $h$ is AnalyticAt $0$ and $h$ is AnalyticOn $T$, then $h$ is AnalyticOn $\overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:AnalAttoWithin, lem:analWWithinAtOn, lem:AnalOntoWithin}
+Apply Lemmas \ref{lem:AnalAttoWithin} and \ref{lem:analWWithinAtOn}.
+\end{proof}
+%%%
+
+
+\section{Borel-Carathéodory I}
+
+\begin{definition}[Open disk] \label{def:ballDR} \lean{ballDR} \leanok
+For $R>0$, define the open ball $\D_R := \{ z\in\C : |z| < R\}$.
+\end{definition}
+%%%
+
+\begin{lemma}[Disk closure] \label{lem:ballDR} \lean{lem_ballDR} \leanok
+For $R>0$, the closure of $\D_R$ equals $\overline{\D}_R := \{ z\in\C : |z|\le R\}$
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[In disk bound]\label{lem:inDR} \lean{lem_inDR} \leanok
+For $R>0$, if $w\in \overline{\D}_R$ then $|w|\le R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:ballDR}
+Apply Lemma \ref{lem:ballDR}.
+\end{proof}
+%%%
+
+\begin{lemma}[Outside disk bound]\label{lem:notinDR} \lean{lem_notinDR} \leanok
+For $R>0$, if $w\notin \D_R$ then $|w| \ge R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{def:ballDR}
+Apply definition \ref{def:ballDR}.
+\end{proof}
+%%%
+
+\begin{lemma}[Modulus equal]\label{lem:legeR} \lean{lem_legeR} \leanok
+For $R>0$, if $|w|\le R$ and $|w|\ge R$ then $|w|=R$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+
+\begin{lemma}[Boundary modulus] \label{lem:circleDR} \lean{lem_circleDR} \leanok
+For $R>0$, if $w\in \overline{\D}_R$ and $w\notin \D_R$, then $|w|=R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:inDR, lem:notinDR, lem:legeR}
+Apply Lemmas \ref{lem:inDR} and \ref{lem:notinDR} and \ref{lem:legeR}.
+\end{proof}
+%%%
+
+\begin{lemma}[Positive modulus] \label{lem:Rself} \lean{lem_Rself} \leanok
+For $R>0$ we have $|R|=R$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Modulus bound]\label{lem:Rself2} \lean{lem_Rself2} \leanok
+For $R>0$ we have $|R|\le R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:Rself}
+Apply Lemma \ref{lem:Rself} and $R\le R$.
+\end{proof}
+%%%
+
+\begin{lemma}[Positive radius belongs to its closed disk]\label{lem:Rself3} \lean{lem_Rself3} \leanok
+For $R>0$ we have $R\in \overline{\D}_R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:Rself2, def:ballDR}
+Apply Lemma \ref{lem:Rself2} and definition \ref{def:ballDR}
+\end{proof}
+%%%
+
+\begin{lemma}[Compactness] \label{lem:DRcompact} \lean{lem_DRcompact} \leanok
+For $R>0$ the ball $\overline{\D}_R$ is a compact subset of $\C$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[ExtrValThm] \label{lem:ExtrValThm} \lean{lem_ExtrValThm} \leanok
+If $K\subset\C$ is compact and $g:K \to \C$ is continuous, then there exists $v\in K$ such that $|g(v)| \ge |g(z)|$ for all $z\in K$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Disk Boundary] \label{lem:ExtrValThmDR} \lean{lem_ExtrValThmDR} \leanok
+If $g:\overline{\D}_R \to \C$ is continuous, then there exists $v\in \overline{\D}_R$ such that $|g(v)| \ge |g(z)|$ for all $z\in \overline{\D}_R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:DRcompact, lem:ExtrValThm}
+Apply Lemmas \ref{lem:DRcompact} and \ref{lem:ExtrValThm} with $K=\overline{\D}_R$.
+\end{proof}
+%%%
+
+\begin{lemma}[Analytic Continuation] \label{lem:AnalCont} \lean{lem_AnalCont} \leanok
+If $h:\overline{\D}_R \to \C$ is analytic, then $h$ is continuous.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Max modulus] \label{lem:ExtrValThmh} \lean{lem_ExtrValThmh} \leanok
+If $h:\overline{\D}_R \to \C$ is analytic, then there exists $u\in \overline{\D}_R$ such that $|h(u)| \ge |h(z)|$ for all $z\in \overline{\D}_R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:ExtrValThmDR, lem:AnalCont}
+Apply Lemmas \ref{lem:ExtrValThmDR} and \ref{lem:AnalCont} with $g(z)=h(z)$ and $u=v$.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Interior max] \label{lem:MaxModP} \lean{lem_MaxModP} \leanok
+Let $R>0$. Let $h:\overline{\D}_R \to \C$ be analytic. Suppose there exists $w\in \D_R$ such that $|h(w)| \ge |h(z)|$ for all $z\in \D_R$. Then $|h(z)|=|h(w)|$ for all $z\in \overline{\D}_R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:ballDR}
+Apply Lemma \ref{lem:ballDR}
+\end{proof}
+%%%
+
+\begin{lemma}[Boundary value] \label{lem:MaxModR} \lean{lem_MaxModR} \leanok
+Let $R>0$. Let $h:\overline{\D}_R \to \C$ be analytic. Suppose there exists $w\in \D_R$ such that $|h(w)| \ge |h(z)|$ for all $z\in \D_R$. Then $|h(R)|=|h(w)|$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:MaxModP, lem:Rself3}
+Apply Lemmas \ref{lem:MaxModP} and \ref{lem:Rself3} with $z=R$.
+\end{proof}
+%%%
+
+\begin{lemma}[Boundary bound] \label{lem:MaxModRR} \lean{lem_MaxModRR} \leanok
+Let $R>0$. Let $h:\overline{\D}_R \to \C$ be analytic. Suppose there exists $w\in \D_R$ such that $|h(w)| \ge |h(z)|$ for all $z\in \D_R$. Then $|h(R)|\ge |h(z)|$ for all $z\in \overline{\D}_R$
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:MaxModP, lem:MaxModR}
+Apply Lemmas \ref{lem:MaxModP} and \ref{lem:MaxModR}
+\end{proof}
+%%%
+
+
+\begin{lemma}[Boundary point] \label{lem:MaxModv2} \lean{lem_MaxModv2} \leanok
+Let $R>0$. Let $h:\overline{\D}_R \to \C$ be analytic. There exists $v\in \overline{\D}_R$ with $|v|=R$ such that $|h(v)|\ge |h(z)|$ for all $z\in \overline{\D}_R$
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:ExtrValThmh, lem:MaxModRR, lem:circleDR}
+Apply Lemma \ref{lem:ExtrValThmh} to get $u\in \overline{\D}_R$ such that $|h(u)|\ge |h(z)|$ for all $z\in \overline{\D}_R$.
+If $u\in \D_R$ then set $v=R$. Now by Lemma \ref{lem:MaxModRR} we have $|v|=|R|=R$.
+Else $u\notin \D_R$, then set $v=u$. Now by Lemma \ref{lem:circleDR} with $w=u$ we have $|v|=|u|=R$.
+\end{proof}
+%%%
+
+\begin{lemma}[Boundary point] \label{lem:MaxModv3} \lean{lem_MaxModv3} \leanok
+Let $R>0$. Let $h(z)$ be analytic on $|z|\le R$. There exists $v\in \C$ with $|v|=R$ such that $|h(v)|\ge |h(z)|$ for all $z\in \C$ with $|z|\le R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:MaxModv2, lem:inDR}
+Apply Lemma \ref{lem:MaxModv2}, and apply Lemma \ref{lem:inDR} for $w=v$ and then again for $w=z$.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Boundary max]\label{lem:MaxModv4} \lean{lem_MaxModv4} \leanok
+Let $R>0$ and $B\ge0$. Let $h(z)$ be a function analytic on $|z| \le R$. Suppose that $|h(z)| \le B$ for all $z\in \C$ with $|z|= R$. Then there exists $v\in \C$ with $|v|=R$ such that $|h(v)|\ge |h(w)|$ for all $w\in \C$ with $|w|\le R$, and $|h(v)| \le B$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:MaxModv3}
+Apply Lemma \ref{lem:MaxModv3}, and the assumption $|h(z)| \le B$ with $z=v$, since $|v|=R$.
+\end{proof}
+%%%
+
+\begin{lemma}[Max principle] \label{lem:HardMMP} \lean{lem_HardMMP} \leanok
+Let $R>0$ and $B\ge0$. Let $h(z)$ be a function analytic on $|z| \le R$. Suppose that $|h(z)| \le B$ for all $z\in \C$ with $|z|= R$. Then $|h(w)| \le B$ for all $w\in \C$ with $|w|\le R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:MaxModv4}
+Apply Lemma \ref{lem:MaxModv4}. By assumption we calculate $|h(w)|\le |h(v)| \le B$ for all $w\in \C$ with $|w|\le R$.
+\end{proof}
+%%%
+
+\begin{lemma}[Easy maximum principle] \label{lem:EasyMMP} \lean{lem_EasyMMP} \leanok
+Let $R>0$ and $B\ge0$. Let $h(z)$ be a function analytic on $|z| \le R$. Suppose that $|h(w)| \le B$ for all $w\in \C$ with $|w|\le R$. Then $|h(z)| \le B$ for all $z\in \C$ with $|z|= R$.
+\end{lemma}
+\begin{proof} \leanok
+Take $z\in\C$ with $|z|= R$. Then $|z|\le R$, so by assumption with $w=z$ we have $|h(z)| \le B$.
+\end{proof}
+%%%
+
+\begin{lemma}[Maximum modulus principle] \label{lem:MMP} \lean{lem_MMP} \leanok
+Let $T>0$ and $B\ge0$. Let $h(z)$ be a function analytic on $|z| \le T$. We have $|h(z)| \le B$ for all $z\in \C$ with $|z|\le T$ if and only if $|h(z)| \le B$ for all $z\in \C$ with $|z|= T$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:HardMMP, lem:EasyMMP}
+Apply Lemmas \ref{lem:HardMMP} and \ref{lem:EasyMMP} with $R=T$.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Denom nonzero]\label{lem:denominator_nonzero} \lean{lem_denominator_nonzero} \leanok
+Let $R,M>0$. Suppose $f(z)$ is an analytic function on $|z|\le R$ satisfying $\Re(f(z)) \le M$. Then $2M - f(z) \neq 0$ for all $|z|\le R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:real_part_lower_bound4}
+For each $z$ with $|z|\le R$, apply Lemma \ref{lem:real_part_lower_bound4} with $w=f(z)$.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Ratio bound]\label{lem:f_vs_2M_minus_f} \lean{lem_f_vs_2M_minus_f} \leanok
+Let $R,M>0$. Suppose $f(z)$ is an analytic function on $|z|\le R$ satisfying $\Re(f(z)) \le M$. For any $z$ with $|z| \le R$, we have $ \frac{|f(z)|}{|2M - f(z)|}\le1$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:nonnegative_product9}
+For each $z$ with $|z|\le R$, apply Lemma \ref{lem:nonnegative_product9} with $w=f(z)$.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Removable zero]\label{lem:removable_singularity} \lean{lem_removable_singularity} \leanok
+Let $R>0$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$. Then the function $h(z) = f(z)/z$ is analytic on $|z| \le R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:ordernatcast2,lem:analAtOnOn,lem:fzzTanal}
+Apply \cref{lem:ordernatcast2,lem:analAtOnOn,lem:fzzTanal}.
+\end{proof}
+%%%
+
+\begin{lemma}[Quotient analytic]\label{lem:quotient_analytic} \lean{lem_quotient_analytic} \leanok
+Let $R>0$. If $h_1(z)$ and $h_2(z)$ are analytic for $|z|\le R$ and $h_2(z)\neq0$ for all $|z|\le R$, then $h_1(z)/h_2(z)$ is analytic for $|z|\le R$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{definition}[Modified function] \label{def:g} \lean{f_M} \leanok
+Let $R,M>0$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$. Define the function $f_M(z)$ for $|z| \le R$ as
+\[ f_M(z) = \frac{f(z)/z}{2M - f(z)}. \]
+\end{definition}
+%%%
+
+\begin{lemma}[g analytic]\label{lem:g_analytic} \lean{lem_g_analytic} \leanok
+The function $f_M(z)$ from Definition \ref{def:g} is analytic on $|z| \le R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{def:g, lem:quotient_analytic, lem:removable_singularity, lem:denominator_nonzero}
+Write $f_M(z) = h_1(z)/h_2(z)$ where $h_1(z)=f(z)/z$ and $h_2(z)=2M-f(z)$.
+Then apply Lemma \ref{lem:quotient_analytic} with $h_1(z)$ and $h_2(z)$, using Lemma \ref{lem:removable_singularity} and Lemma \ref{lem:denominator_nonzero}.
+\end{proof}
+%%%
+
+\begin{lemma}[Quotient modulus]\label{lem:absab} \lean{lem_absab} \leanok
+Let $a,b\in\C$. If $b\neq0$ then $|a/b| = |a|/|b|$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[g modulus]\label{lem:g_on_boundaryz} \lean{lem_g_on_boundaryz} \leanok
+Let $R,M>0$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$. We have $|f_M(z)| = \frac{|f(z)/z|}{|2M - f(z)|}$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{def:g, lem:absab, lem:denominator_nonzero}
+For each $|z|\le R$, apply Definition \ref{def:g}, and Lemma \ref{lem:absab} with $a=f(z)/z$ and $b=2M-f(z)$. Note $b\neq0$ by Lemma \ref{lem:denominator_nonzero}.
+\end{proof}
+%%%
+
+\begin{lemma}[Quotient radius] \label{lem:fzzR} \lean{lem_fzzR} \leanok
+Let $T>0$ and $z,w\in\C$. If $|z|=T$ then $|w/z| = |w|/T$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+
+\begin{lemma}[Boundary g]\label{lem:g_on_boundary} \lean{lem_g_on_boundary} \leanok
+Let $R,M>0$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$.  For any $z\in\C$ with $|z|=R$, we have $|f_M(z)| = \frac{|f(z)|/R}{|2M - f(z)|}$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:g_on_boundaryz, lem:fzzR}
+Apply Lemmas \ref{lem:g_on_boundaryz} and \ref{lem:fzzR} with $w=f(z)$ and $T=R>0$.
+\end{proof}
+%%%
+
+\begin{lemma}[Scaled ratio]\label{lem:f_vs_2M_minus_fR} \lean{lem_f_vs_2M_minus_fR} \leanok
+Let $R,M>0$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$. For any $z$ with $|z| \le R$, we have $ \frac{|f(z)|/R}{|2M - f(z)|}\le 1/R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:f_vs_2M_minus_f}
+Apply Lemma \ref{lem:f_vs_2M_minus_f}.
+\end{proof}
+%%%
+
+\begin{lemma}[Boundary bound]\label{lem:g_boundary_bound0} \lean{lem_g_boundary_bound0} \leanok
+Let $R,M>0$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$. For any $z\in\C$ with $|z|=R$, we have $|f_M(z)| \le 1/R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:g_on_boundary, lem:f_vs_2M_minus_fR}
+Apply Lemmas \ref{lem:g_on_boundary} and \ref{lem:f_vs_2M_minus_fR}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Interior bound]\label{lem:g_interior_bound} \lean{lem_g_interior_bound} \leanok
+Let $R,M>0$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$. For any $z\in\C$ with $|z| \le R$, we have $|f_M(z)| \le 1/R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:g_boundary_bound0, lem:MMP, lem:g_analytic}
+Apply Lemmas \ref{lem:g_boundary_bound0} and \ref{lem:MMP} with $B=1/R$ and $T=R$ and $h(z)=f_M(z)$.
+\end{proof}
+%%%
+
+\begin{lemma}[g at r]\label{lem:g_at_r} \lean{lem_g_at_r} \leanok
+Let $R,M>0$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$. For any $0<r<R$ and any $z\in\C$ with $|z|=r$, we have $|f_M(z)| = \frac{|f(z)|/r}{|2M - f(z)|}$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:g_on_boundaryz, lem:fzzR}
+Apply Lemmas \ref{lem:g_on_boundaryz} and \ref{lem:fzzR} with $w=f(z)$ and $T=r>0$.
+\end{proof}
+%%%
+
+\begin{lemma}[g bound r]\label{lem:g_at_rR} \lean{lem_g_at_rR} \leanok
+Let $R,M>0$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$. For any $0<r<R$ and any $z\in\C$ with $|z|=r$, we have $\frac{|f(z)|/r}{|2M - f(z)|} \le 1/R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:g_interior_bound, lem:g_at_r}
+Apply Lemmas \ref{lem:g_interior_bound} and \ref{lem:g_at_r} with $|z|=r<R$.
+\end{proof}
+%%%
+
+\begin{lemma}[Fraction swap]\label{lem:fracs} \lean{lem_fracs} \leanok
+Let $a,b,r,R>0$. If $\frac{a/r}{b} \le 1/R$ then $Ra \le rb$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Rearranged bound]\label{lem:f_bound_rearranged} \lean{lem_f_bound_rearranged} \leanok
+Let $R,M>0$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$. For any $0<r < R$ and any $z\in\C$ with $|z|=r$, we have $R|f(z)| \le r|2M - f(z)|$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:g_at_rR, lem:fracs}
+Apply Lemmas \ref{lem:g_at_rR} and \ref{lem:fracs} with $a=|f(z)|>0$ and $b=|2M - f(z)|>0$.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Circle bound]\label{lem:final_bound_on_circle0} \lean{lem_final_bound_on_circle0} \leanok
+Let $R,M>0$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$. For any $0<r < R$ and any $z\in\C$ with $|z|=r$, we have
+\[ |f(z)| \le \frac{2r}{R-r}M. \]
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:f_bound_rearranged, lem:rtriangle7}
+For each $|z| \le R$, apply Lemmas \ref{lem:f_bound_rearranged} and \ref{lem:rtriangle7} with $F=f(z)$.
+\end{proof}
+%%%
+
+\begin{lemma}[Circle bound]\label{lem:final_bound_on_circle} \lean{lem_final_bound_on_circle} \leanok
+Let $R,M>0$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$.  For any $0<r < R$, and any $z\in\C$ with $|z|=r$ we have
+\[ |f(z)| \le \frac{2r}{R-r}M. \]
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:final_bound_on_circle0}
+Apply Lemma \ref{lem:final_bound_on_circle0}.
+\end{proof}
+%%%
+
+\begin{lemma}[BC bound]\label{lem:BCI} \lean{lem_BCI} \leanok
+Let $R,M>0$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$.  For any $0<r < R$, and any $z\in\C$ with $|z|\le r$ we have
+\[ |f(z)| \le \frac{2r}{R-r}M. \]
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:final_bound_on_circle, lem:MMP}
+Apply Lemmas \ref{lem:final_bound_on_circle} and \ref{lem:MMP} with $B=\frac{2r}{R-r}M$ and $T=r$ and $h(z)=f(z)$.
+\end{proof}
+%%%
+
+
+
+\begin{theorem}[Borel-Carathéodory I]\label{thm:BorelCaratheodoryI} \lean{thm_BorelCaratheodoryI}
+Let $R,M>0$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$. For any $0<r < R,$
+\[ \sup_{|z| \le r} |f(z)| \le \frac{2r}{R-r}M. \] \leanok
+\end{theorem}
+\begin{proof} \leanok
+\uses{lem:BCI}
+Apply Lemma \ref{lem:BCI} and definition of supremum $\sup_{|z| \le r}$.
+\end{proof}
+%%%
+
+
+\section{Borel-Carathéodory II}
+
+\begin{lemma}[Cauchy's Integral Formula for $f'$] \label{lem:cauchy_formula_deriv} \lean{cauchy_formula_deriv}\leanok
+Let $f$ be analytic on $|z| \le R$. For any $z$ with $|z| \le r$ and any $r'$ with $0 < r < r' < R$,
+\[ f'(z) = \frac{1}{2\pi i} \oint_{|w|=r'} \frac{f(w)}{(w-z)^2}dw. \]
+\end{lemma}
+\begin{proof}\leanok
+\end{proof}
+
+%%%
+
+
+\begin{lemma}[Differential of $w(t)$] \label{lem:dw_dt} \lean{lem_dw_dt}\leanok
+For $w(t) = r'e^{it}$, we have $dw = ir'e^{it}dt$.
+\end{lemma}
+\begin{proof}\leanok
+Differentiate $w(t)$ with respect to $t$.
+\end{proof}
+
+%%%
+
+\begin{lemma}[CIF for $f'$, Parameterized] \label{lem:CIF_deriv_param} \lean{lem_CIF_deriv_param}\leanok
+Let $f$ be analytic on $|z| \le R$. For any $z$ with $|z| \le r$ and any $r'$ with $0 < r < r' < R$,
+\[ f'(z) = \frac{1}{2\pi i} \int_{0}^{2\pi} \frac{f(r'e^{it})}{(r'e^{it}-z)^2} (ir'e^{it})\,dt. \]
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:cauchy_formula_deriv, lem:dw_dt}
+Apply Lemmas \ref{lem:cauchy_formula_deriv} and \ref{lem:dw_dt}, and unfold definition of the circle integral $\oint$ over $w\in C(0,r')$. \leanok
+\end{proof}
+
+%%%
+
+\begin{lemma}[CIF for $f'$, Simplified] \label{lem:CIF_deriv_simplified} \lean{lem_CIF_deriv_simplified}\leanok
+Let $f$ be analytic on $|z| \le R$. For any $z$ with $|z| \le r$ and any $r'$ with $0 < r < r' < R$,
+\[ f'(z) = \frac{1}{2\pi} \int_{0}^{2\pi} \frac{f(r'e^{it}) r'e^{it}}{(r'e^{it}-z)^2}\, dt. \]
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:CIF_deriv_param}
+Apply Lemma \ref{lem:CIF_deriv_param} and cancel $i$ from the numerator and denominator.
+\end{proof}
+
+%%%
+
+
+
+\begin{lemma}[Derivative modulus]\label{lem:modulus_of_f_prime0} \lean{lem_modulus_of_f_prime0}\leanok
+Let $0 < r < r' < R$. Let $f$ be analytic on $|z| \le R$. For any $z$ with $|z| \le r$, we have
+$|f'(z)| = \left|\frac{1}{2\pi} \int_{0}^{2\pi} \frac{f(r'e^{it}) r'e^{it}}{(r'e^{it}-z)^2}\, dt \right|$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:CIF_deriv_simplified}
+Apply modulus to both sides of the equality in Lemma \ref{lem:CIF_deriv_simplified}.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Integral bound] \label{lem:integral_modulus_inequality}
+\leanok
+\lean{lem_integral_modulus_inequality}
+For an integrable function $g(t)$, we have $|\int_a^b g(t) dt| \le \int_a^b |g(t)| dt$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+
+%%%
+
+\begin{lemma}[Modulus of $f'$]\label{lem:modulus_of_f_prime} \lean{lem_modulus_of_f_prime}\leanok
+Let $0 < r < r' < R$.  Let $f$ be analytic on $|z| \le R$. For any $z$ with $|z| \le r$, we have
+$|f'(z)| \le \frac{1}{2\pi} \int_{0}^{2\pi} \left|\frac{f(r'e^{it}) r'e^{it}}{(r'e^{it}-z)^2} \right| \, dt$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:modulus_of_f_prime0, lem:integral_modulus_inequality}
+Apply Lemmas \ref{lem:modulus_of_f_prime0} and \ref{lem:integral_modulus_inequality}.
+\end{proof}
+
+%%%
+
+
+\begin{lemma}[Integrand modulus]\label{lem:modulus_of_integrand_product2} \lean{lem_modulus_of_integrand_product2}\leanok
+Let $0 < r < r' < R$. Let $f$ be analytic on $|z| \le R$. For any $z$ with $|z| \le r$, we have
+$|f(r'e^{it}) r'e^{it}| = |f(r'e^{it})| \cdot |r'e^{it}|$.
+\end{lemma}
+\begin{proof}\leanok
+Apply modulus property $|ab|=|a||b|$.
+\end{proof}
+
+%%%
+
+
+
+\begin{lemma}[Modulus one]\label{lem:modeit} \lean{lem_modeit}\leanok
+For $t\in\R$ we have $|e^{it}| = e^{\Re(it)}$
+\end{lemma}
+\begin{proof}\leanok
+\end{proof}
+
+%%%
+
+
+\begin{lemma}[Cosine part] \label{lem:Reit0} \lean{lem_Reit0}\leanok
+For $t\in\R$ we have $\Re(it) = 0$
+\end{lemma}
+\begin{proof}\leanok
+\end{proof}
+
+%%%
+
+
+\begin{lemma}[Euler part]\label{lem:eReite0} \lean{lem_eReite0}\leanok
+For $t\in\R$ we have $e^{\Re(it)} =e^0$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:Reit0}
+Apply Lemma \ref{lem:Reit0}.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Exp zero one] \label{lem:e01} \lean{lem_e01}\leanok
+We have $e^0 = 1$.
+\end{lemma}
+\begin{proof}\leanok
+\end{proof}
+
+%%%
+
+\begin{lemma}[Cosine relation] \label{lem:eReit1} \lean{lem_eReit1}\leanok
+For $t\in\R$ we have  $e^{\Re(it)} = 1$
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:eReite0, lem:e01}
+Apply Lemmas \ref{lem:eReite0} and \ref{lem:e01}
+\end{proof}
+
+%%%
+
+\begin{lemma}[Unit modulus]\label{lem:modulus_of_e_it_is_one} \lean{lem_modulus_of_e_it_is_one}\leanok
+For $t\in\R$ we have $|e^{it}| = 1$
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:modeit, lem:eReit1}
+Apply Lemmas \ref{lem:modeit} and \ref{lem:eReit1}
+\end{proof}
+
+%%%
+
+\begin{lemma}[Scaled modulus]\label{lem:modulus_of_ae_it} \lean{lem_modulus_of_ae_it}\leanok
+For $a>0$ and $t\in\R$ we have $|ae^{it}| = a$
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:modulus_of_e_it_is_one}
+Apply Lemma \ref{lem:modulus_of_e_it_is_one} and calculate $|ae^{it}| = |a|\cdot|e^{it}| = a\cdot 1 = a$.
+\end{proof}
+
+%%%
+
+
+\begin{lemma}[Integrand modulus]\label{lem:modulus_of_integrand_product3} \lean{lem_modulus_of_integrand_product3}\leanok
+Let $0 < r < r' < R$. Let $f$ be analytic on $|z| \le R$. For any $z$ with $|z| \le r$, we have
+$|f(r'e^{it}) r'e^{it}| = r' |f(r'e^{it})|$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:modulus_of_integrand_product2, lem:modulus_of_ae_it}
+Apply Lemmas \ref{lem:modulus_of_integrand_product2} and  \ref{lem:modulus_of_ae_it} with $a=r'$.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Square modulus]\label{lem:modulus_of_square} \lean{lem_modulus_of_square}\leanok
+For any $c \in \C$, $|c^2| = |c|^2$.
+\end{lemma}
+\begin{proof}\leanok
+\end{proof}
+
+%%%
+
+\begin{lemma}[Shifted modulus]\label{lem:modulus_wz} \lean{lem_modulus_wz}\leanok
+For any $w,z \in \C$, $|(w-z)^2| = |w-z|^2$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:modulus_of_square}
+Apply Lemma \ref{lem:modulus_of_square} with $c=w-z$.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Reverse triangle] \label{lem:reverse_triangle} \lean{lem_reverse_triangle}\leanok
+For any $w, z\in \C$, we have $|w|-|z| \le |w-z|$.
+\end{lemma}
+\begin{proof}\leanok
+\end{proof}
+
+%%%
+
+\begin{lemma}[Reverse triangle] \label{lem:reverse_triangle2} \lean{lem_reverse_triangle2}\leanok
+Let $t\in\R$ and $0 < r < r' < R$ and $z\in\C$, we have $|r'e^{it}|-|z| \le |r'e^{it}-z|$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:reverse_triangle}
+Apply Lemma \ref{lem:reverse_triangle} with $w=r'e^{it}$.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Reverse triangle] \label{lem:reverse_triangle3} \lean{lem_reverse_triangle3}\leanok
+Let $t\in\R$ and $0 < r < r' < R$ and $z\in\C$, we have $r' -|z| \le |r'e^{it}-z|$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:reverse_triangle2, lem:modulus_of_ae_it}
+Apply Lemmas \ref{lem:reverse_triangle2} and \ref{lem:modulus_of_ae_it} with $a=r'$
+\end{proof}
+
+%%%
+
+\begin{lemma}[Radius relation] \label{lem:zrr1} \lean{lem_zrr1}\leanok
+Let $0 < r < r' < R$ and $z\in\C$ with $|z|\le r$. Then $0<r' - |z|$.
+\end{lemma}
+\begin{proof}\leanok
+We calculate $|z| \le r < r'$ by assumption, so $0 < r' - |z|$.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Radius relation] \label{lem:zrr2} \lean{lem_zrr2}\leanok
+Let $t\in\R$ and $0 < r < r' < R$ and $z\in\C$ and $z\in\C$ with $|z|\le r$. Then $r' - r \le |r'e^{it}-z|$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:reverse_triangle3}
+Apply Lemma \ref{lem:reverse_triangle3} and $|z|\le r$.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Radius relation] \label{lem:rr11} \lean{lem_rr11}\leanok
+If $0<r<r'$ then $r'-r>0$
+\end{lemma}
+\begin{proof}\leanok
+Calculation
+\end{proof}
+
+%%%
+
+\begin{lemma}[Radius relation] \label{lem:rr12} \lean{lem_rr12}\leanok
+If $0<r<r'$ then $(r'-r)^2>0$
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:rr11}
+Apply Lemma \ref{lem:rr11}
+\end{proof}
+
+%%%
+
+\begin{lemma}[Radius relation] \label{lem:zrr3} \lean{lem_zrr3}\leanok
+Let $t\in\R$ and $0 < r < r' < R$ and $z\in\C$and $z\in\C$ with $|z|\le r$. Then $(r' - r)^2 \le |r'e^{it}-z|^2$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:zrr2, lem:rr12}
+Apply Lemmas \ref{lem:zrr2} and \ref{lem:rr12}.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Radius relation] \label{lem:zrr4} \lean{lem_zrr4}\leanok
+Let $t\in\R$ and $0 < r < r' < R$ and $z\in\C$and $z\in\C$ with $|z|\le r$. Then $|(r'e^{it}-z)^2| = |r'e^{it}-z|^2$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:modulus_of_square}
+Apply Lemmas \ref{lem:zrr2} and \ref{lem:rr12}.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Reverse triangle] \label{lem:reverse_triangle4} \lean{lem_reverse_triangle4}\leanok
+Let $t\in\R$ and $0 < r < r' < R$ and $z\in\C$ with $|z|\le r$, we have $0 < |r'e^{it}-z|$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:reverse_triangle3, lem:zrr1}
+Apply Lemmas \ref{lem:reverse_triangle3} and \ref{lem:zrr1}.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Positive nonzero] \label{lem:wposneq0} \lean{lem_wposneq0}\leanok
+For $w\in\C$, if $|w|>0$ then $w\neq0$.
+\end{lemma}
+\begin{proof}\leanok
+\end{proof}
+
+%%%
+
+\begin{lemma}[Reverse triangle] \label{lem:reverse_triangle5} \lean{lem_reverse_triangle5}\leanok
+Let $t\in\R$ and $0 < r < r' < R$ and $z\in\C$ with $|z|\le r$, we have $r'e^{it}-z \neq 0$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:reverse_triangle4, lem:wposneq0}
+Apply Lemmas \ref{lem:reverse_triangle4} and \ref{lem:wposneq0} with $w=r'e^{it}-z$.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Reverse triangle] \label{lem:reverse_triangle6} \lean{lem_reverse_triangle6}\leanok
+Let $t\in\R$ and $0 < r < r' < R$ and $z\in\C$ with $|z|\le r$, we have $(r'e^{it}-z)^2 \neq 0$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:reverse_triangle5}
+Apply Lemma \ref{lem:reverse_triangle5}, and Mathlib mul\_self\_ne\_zero
+\end{proof}
+
+%%%
+
+\begin{lemma}[Division bound]\label{lem:absdiv} \lean{lem_absdiv}\leanok
+If $a,b\in\C$ and $b\neq0$ then $|a/b|=|a|/|b|$.
+\end{lemma}
+\begin{proof}\leanok
+\end{proof}
+
+%%%
+
+\begin{lemma}[Integrand modulus]\label{lem:modulus_of_integrand_product} \lean{lem_modulus_of_integrand_product}\leanok
+Let $0 < r < r' < R$. Let $f$ be analytic on $|z| \le R$. For any $z$ with $|z| \le r$, we have
+$\left|\frac{f(r'e^{it}) r'e^{it}}{(r'e^{it}-z)^2}\right| = \frac{|f(r'e^{it}) r'e^{it}|}{|(r'e^{it}-z)^2|}$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:absdiv, lem:reverse_triangle6, lem:modulus_wz}
+Apply Lemma \ref{lem:absdiv} with $a=f(r'e^{it}) r'e^{it}$ and $b=(r'e^{it}-z)^2$. Here $b\neq0$ by Lemma \ref{lem:reverse_triangle6}.
+\end{proof}
+
+%%%
+
+
+\begin{lemma}[Product modulus]\label{lem:modulus_of_product} \lean{lem_modulus_of_product}\leanok
+Let $0 < r < r' < R$. Let $f$ be analytic on $|z| \le R$. For any $z$ with $|z| \le r$, we have
+$\left|\frac{f(r'e^{it}) r'e^{it}}{(r'e^{it}-z)^2}\right| = \frac{r'|f(r'e^{it})|}{|(r'e^{it}-z)^2|}$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:modulus_of_integrand_product, lem:modulus_of_integrand_product3}
+Apply Lemmas \ref{lem:modulus_of_integrand_product} and \ref{lem:modulus_of_integrand_product3}.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Product modulus]\label{lem:modulus_of_product2} \lean{lem_modulus_of_product2}\leanok
+Let $0 < r < r' < R$. Let $f$ be analytic on $|z| \le R$. For any $z$ with $|z| \le r$, we have
+$\left|\frac{f(r'e^{it}) r'e^{it}}{(r'e^{it}-z)^2}\right| = \frac{r'|f(r'e^{it})|}{|r'e^{it}-z|^2}$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:modulus_of_product, lem:zrr4}
+Apply Lemmas \ref{lem:modulus_of_product} and \ref{lem:zrr4}.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Product modulus]\label{lem:modulus_of_product3} \lean{lem_modulus_of_product3}\leanok
+Let $0 < r < r' < R$. Let $f$ be analytic on $|z| \le R$. For any $z$ with $|z| \le r$, we have
+$\frac{r'|f(r'e^{it})|}{|r'e^{it}-z|^2} \le \frac{r'|f(r'e^{it})|}{(r'-r)^2}$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:zrr3}
+Apply Lemmas \ref{lem:modulus_of_product2} and \ref{lem:zrr3}.
+\end{proof}
+
+%%%
+
+
+\begin{lemma}[Product modulus]\label{lem:modulus_of_product4} \lean{lem_modulus_of_product4}\leanok
+Let $0 < r < r' < R$. Let $f$ be analytic on $|z| \le R$. For any $z$ with $|z| \le r$, we have
+$\left|\frac{f(r'e^{it}) r'e^{it}}{(r'e^{it}-z)^2}\right| \le \frac{r'|f(r'e^{it})|}{(r'-r)^2}$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:modulus_of_product2, lem:modulus_of_product3}
+Apply Lemmas \ref{lem:modulus_of_product2} and \ref{lem:modulus_of_product3}.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Point bound]\label{lem:bound_on_f_at_r_prime} \lean{lem_bound_on_f_at_r_prime}\leanok
+Let $M,R>0$ and $0<r'<R$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$. For any $t \in \R$ we have $|f(r'e^{it})| \le \frac{2r' M}{R-r'}$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:modulus_of_ae_it, lem:BCI}
+Note $w=r'e^{it}$ satisfies $|w|=r'<R$ by Lemma \ref{lem:modulus_of_ae_it} with $a=r'$. Then apply Lemma \ref{lem:BCI}.
+\end{proof}
+
+%%%
+
+
+\begin{lemma}[Integrand bound]\label{lem:bound_on_integrand_modulus} \lean{lem_bound_on_integrand_modulus}\leanok
+Let $M,R>0$ and $0<r<r'<R$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$. For any $t \in \R$ we have $\left|\frac{f(r'e^{it}) r'e^{it}}{(r'e^{it}-z)^2}\right| \le \frac{2(r')^2M}{(R-r')(r'-r)^2}$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:modulus_of_product4, lem:bound_on_f_at_r_prime}
+Apply Lemmas \ref{lem:modulus_of_product4} and \ref{lem:bound_on_f_at_r_prime}.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Integral inequality]\label{lem:inequality_under_integral} \lean{lem_integral_inequality}\leanok
+If $g(t) \le C$ for all $t \in [a,b]$, then $\int_a^b g(t) dt \le \int_a^b C dt$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+
+%%%
+
+\begin{lemma}[Derivative bound]\label{lem:f_prime_bound_by_integral_of_constant} \lean{lem_f_prime_bound_by_integral_of_constant}\leanok
+Let $M,R>0$ and $0<r<r'<R$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$. For any $t \in \R$ we have
+$|f'(z)| \le \frac{1}{2\pi} \int_{0}^{2\pi} \frac{2(r')^2M}{(R-r')(r'-r)^2} dt$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:modulus_of_f_prime, lem:bound_on_integrand_modulus, lem:inequality_under_integral}
+Apply Lemmas \ref{lem:modulus_of_f_prime}, \ref{lem:bound_on_integrand_modulus} and \ref{lem:inequality_under_integral} with $g(t)=\left|\frac{f(r'e^{it}) r'e^{it}}{(r'e^{it}-z)^2}\right|$ and $C=\frac{2(r')^2M}{(R-r')(r'-r)^2}$
+\end{proof}
+
+%%%
+
+\begin{lemma}[Integrate one]\label{lem:integral_of_1} \lean{lem_integral_of_1}\leanok
+We have $\int_0^{2\pi} dt = 2\pi$.
+\end{lemma}
+\begin{proof}\leanok
+\end{proof}
+
+%%%
+
+\begin{lemma}[Exponential integral]\label{lem:integral_2} \lean{lem_integral_2}\leanok
+We have $\frac{1}{2\pi}\int_0^{2\pi} dt = 1$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:integral_of_1}
+Apply Lemma \ref{lem:integral_of_1} and simplify.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Derivative bound]\label{lem:f_prime_bound} \lean{lem_f_prime_bound}\leanok
+Let $M,R>0$ and $0<r<r'<R$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$. Then we have
+$|f'(z)| \le \frac{2(r')^2M}{(R-r')(r'-r)^2}$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:f_prime_bound_by_integral_of_constant, lem:integral_2}
+Apply Lemmas \ref{lem:f_prime_bound_by_integral_of_constant} and \ref{lem:integral_2}.
+\end{proof}
+
+%%%
+
+
+\begin{lemma}[Radius compare]\label{lem:r_prime_gt_r} \lean{lem_r_prime_gt_r}\leanok
+Given $0 < r < R$ with $r'=\frac{r+R}{2}$, we have $r < r'$.
+\end{lemma}
+\begin{proof}\leanok
+Since $r<R$, we have $2r < r+R$. Dividing by 2 gives $r < (r+R)/2$.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Radius compare]\label{lem:r_prime_lt_R} \lean{lem_r_prime_lt_R}\leanok
+Given $0 < r < R$ with $r'=\frac{r+R}{2}$, we have $r' < R$.
+\end{lemma}
+\begin{proof}\leanok
+Since $r<R$, we have $r+R < 2R$. Dividing by 2 gives $(r+R)/2 < R$.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Intermediate radius]\label{lem:r_prime_is_intermediate} \lean{lem_r_prime_is_intermediate}\leanok
+Given $0 < r < R$ with $r'=\frac{r+R}{2}$, we have $r < r' < R$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:r_prime_gt_r, lem:r_prime_lt_R}
+Apply Lemmas \ref{lem:r_prime_gt_r} and \ref{lem:r_prime_lt_R}.
+\end{proof}
+
+%%%
+
+
+\begin{lemma}[Radius formula]\label{lem:calc_R_minus_r_prime} \lean{lem_calc_R_minus_r_prime}\leanok
+Given $0 < r < R$ with $r'=\frac{r+R}{2}$, we have $R-r' = \frac{R-r}{2}$.
+\end{lemma}
+\begin{proof}\leanok
+We calculate $R - \frac{r+R}{2} = \frac{2R - (r+R)}{2} = \frac{R-r}{2}$.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Radius formula]\label{lem:calc_r_prime_minus_r} \lean{lem_calc_r_prime_minus_r}\leanok
+Given $0 < r < R$ with $r'=\frac{r+R}{2}$, we have $r'-r = \frac{R-r}{2}$.
+\end{lemma}
+\begin{proof}\leanok
+We calculate $\frac{r+R}{2} - r = \frac{r+R - 2r}{2} = \frac{R-r}{2}$.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Denominator form]\label{lem:calc_denominator_specific} \lean{lem_calc_denominator_specific}\leanok
+Given $0 < r < R$ with $r'=\frac{r+R}{2}$, we have $(R-r')(r'-r)^2 = \frac{(R-r)^3}{8}$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:calc_R_minus_r_prime, lem:calc_r_prime_minus_r}
+Apply Lemmas \ref{lem:calc_R_minus_r_prime} and \ref{lem:calc_r_prime_minus_r} and calculate $\left(\frac{R-r}{2}\right) \cdot \left(\frac{R-r}{2}\right)^2 = \frac{(R-r)}{2}\frac{(R-r)^2}{4} = \frac{(R-r)^3}{8}$.
+\end{proof}
+
+%%%
+
+
+\begin{lemma}[Numerator form]\label{lem:calc_numerator_specific} \lean{lem_calc_numerator_specific}\leanok
+Given $M>0$ and $0 < r < R$ with $r'=\frac{r+R}{2}$, we have $2(r')^2M = \frac{(R+r)^2 M}{2}$.
+\end{lemma}
+\begin{proof}\leanok
+We calculate $2(r')^2M = 2\left(\frac{R+r}{2}\right)^2M = 2\frac{(R+r)^2}{4}M =\frac{(R+r)^2 M}{2}$
+\end{proof}
+
+%%%
+
+\begin{lemma}[Fraction simplify] \label{lem:frac_simplify} \lean{lem_frac_simplify}\leanok
+Given $M>0$ and $0 < r < R$ with $r'=\frac{r+R}{2}$, we have $\frac{2(r')^2M}{(R-r')(r'-r)^2} = \frac{(R+r)^2 M/2}{(R-r)^3/8}$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:calc_numerator_specific, lem:calc_denominator_specific}
+Apply Lemmas \ref{lem:calc_numerator_specific} and \ref{lem:calc_denominator_specific}.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Fraction simplify] \label{lem:frac_simplify2} \lean{lem_frac_simplify2}\leanok
+Given $M>0$ and $0 < r < R$, we have $\frac{(R+r)^2 M/2}{(R-r)^3/8} = \frac{4(R+r)^2 M}{(R-r)^3}$.
+\end{lemma}
+\begin{proof}\leanok
+Simplify fraction
+\end{proof}
+
+%%%
+
+\begin{lemma}[Fraction simplify] \label{lem:frac_simplify3} \lean{lem_frac_simplify3}\leanok
+Given $M>0$ and $0 < r < R$ with $r'=\frac{r+R}{2}$, we have $\frac{2(r')^2M}{(R-r')(r'-r)^2} = \frac{4(R+r)^2 M}{(R-r)^3}$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:frac_simplify, lem:frac_simplify2}
+Apply Lemmas \ref{lem:frac_simplify} and \ref{lem:frac_simplify2}.
+\end{proof}
+
+%%%
+
+
+\begin{lemma}[Inequality fact]\label{lem:ineq_R_plus_r_lt_2R} \lean{lem_ineq_R_plus_r_lt_2R}\leanok
+Given $r < R$, we have $R+r < 2R$.
+\end{lemma}
+\begin{proof}\leanok
+calculation
+\end{proof}
+
+%%%
+
+
+\begin{lemma}[Sum positive]\label{lem:R_plus_r_is_positive} \lean{lem_R_plus_r_is_positive}\leanok
+Given $0 < r < R$, we have $0 < R+r$.
+\end{lemma}
+\begin{proof}\leanok
+\end{proof}
+
+%%%
+
+\begin{lemma}[Double positive]\label{lem:2R_is_positive} \lean{lem_2R_is_positive}\leanok
+Given $0 < R$, we have $2R > 0$.
+\end{lemma}
+\begin{proof}\leanok
+\end{proof}
+
+%%%
+
+\begin{lemma}[Square fact]\label{lem:square_inequality_strict} \lean{lem_square_inequality_strict}\leanok
+If $0 < a < b$, then $a^2 < b^2$.
+\end{lemma}
+\begin{proof}\leanok
+\end{proof}
+
+%%%
+
+\begin{lemma}[Square bound]\label{lem:ineq_R_plus_r_sq_lt_2R_sq} \lean{lem_ineq_R_plus_r_sq_lt_2R_sq}\leanok
+Given e, we have $(R+r)^2 < (2R)^2$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:R_plus_r_is_positive, lem:2R_is_positive, lem:ineq_R_plus_r_lt_2R, lem:square_inequality_strict}
+Let $a = R+r$ and $b = 2R$. From Lemma \ref{lem:R_plus_r_is_positive}, $a>0$. From Lemma \ref{lem:2R_is_positive}, $b>0$. From Lemma \ref{lem:ineq_R_plus_r_lt_2R}, $a<b$. Apply Lemma \ref{lem:square_inequality_strict}.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Square identity]\label{lem:2R_sq_is_4R_sq} \lean{lem_2R_sq_is_4R_sq}\leanok
+For any $R>0$, we have $(2R)^2 = 4R^2$.
+\end{lemma}
+\begin{proof}\leanok
+We calculate $(2R)^2 = 2^2 R^2 = 4R^2$.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Square bound]\label{lem:ineq_R_plus_r_sq} \lean{lem_ineq_R_plus_r_sq}\leanok
+Given $0 < r < R$, we have $(R+r)^2 < 4R^2$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:ineq_R_plus_r_sq_lt_2R_sq, lem:2R_sq_is_4R_sq}
+Apply Lemmas \ref{lem:ineq_R_plus_r_sq_lt_2R_sq} and \ref{lem:2R_sq_is_4R_sq}.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Square bound]\label{lem:ineq_R_plus_r_sqM} \lean{lem_ineq_R_plus_r_sqM}\leanok
+Given $M>0$ and $0 < r < R$, we have $4(R+r)^2M < 16R^2M$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:ineq_R_plus_r_sq}
+Apply Lemma \ref{lem:ineq_R_plus_r_sq} and multiply by $4M>0$.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Bound simplify]\label{lem:simplify_final_bound} \lean{lem_simplify_final_bound}\leanok
+Given $M>0$ and $0 < r < R$, we have $\frac{4(R+r)^2 M}{(R-r)^3} < \frac{16R^2 M}{(R-r)^3}$.
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:ineq_R_plus_r_sqM}
+Apply Lemma \ref{lem:ineq_R_plus_r_sqM} to the numerator of the fraction.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Fraction simplify] \label{lem:frac_simplify4} \lean{lem_bound_after_substitution}\leanok
+Given $M>0$ and $0 < r < R$ with $r'=\frac{r+R}{2}$, we have $\frac{2(r')^2M}{(R-r')(r'-r)^2} \leq \frac{16R^2 M}{(R-r)^3}$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:frac_simplify3, lem:simplify_final_bound}
+Apply Lemmas \ref{lem:frac_simplify3} and \ref{lem:simplify_final_bound}.
+\end{proof}
+
+%%%
+
+\begin{theorem}[Borel-Carathéodory II] \label{thm:BCII} \lean{borel_caratheodory_II}\leanok
+Let $R,M>0$. Let $f$ be analytic on $|z| \le R$ such that $f(0)=0$ and suppose $\Re f(z) \le M$ for all $|z| \le R$. For any $0<r < R$ and any $|z|\le r$,
+\[ |f'(z)| \le \frac{16M R^2}{(R-r)^3}. \]
+\end{theorem}
+\begin{proof}\leanok
+\uses{lem:f_prime_bound, lem:frac_simplify4, lem:r_prime_is_intermediate}
+Apply Lemmas \ref{lem:frac_simplify4} and \ref{lem:f_prime_bound} with $r'=\frac{r+R}{2}$.
+\end{proof}
+
+%%%
+
+\section{Integral Antiderivative}
+
+\begin{lemma}[Cauchy rectangles] \label{lem:cauchy_for_rectangles}
+\lean{cauchy_for_rectangles}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Then for any $z, w \in \overline{\D}_{R}$,
+\begin{align*}
+\left(\int_{z.\re}^{w.\re} f(x + i\,z.\im) \,dx\right) &- \left(\int_{z.\re}^{w.\re} f(x + i\,w.\im) \,dx\right) \\
+&+ i \left(\int_{z.\im}^{w.\im} f(w.\re + i y) \,dy\right) - i \left(\int_{z.\im}^{w.\im} f(z.\re + i y) \,dy\right) = 0.
+\end{align*}
+\end{lemma}
+\begin{proof}
+\leanok
+Let the four corners of a rectangle be $A = z.\re + i\,z.\im$, $B = w.\re + i\,z.\im$, $C = w.\re + i\,w.\im$, and $D = z.\re + i\,w.\im$. Since $z, w \in \overline{\D}_{R}$, all four corners lie within the closed disk $\overline{\D}_{R_0}$.
+The assumption is that $f$ is analytic on a neighborhood of $\overline{\D}_{R_0}$. This means there exists an open set $U$ containing $\overline{\D}_{R_0}$ on which $f$ is analytic. The rectangle with corners $A, B, C, D$ is contained in $\overline{\D}_{R_0}$, and therefore also in $U$.
+
+By Cauchy's Integral Theorem for a rectangle (Mathlib: integral\_boundary\_rect\_eq\_zero\_of\_differentiableOn), the integral of an analytic function over the boundary of the rectangle is zero. We can express this boundary integral as the sum of four path integrals:
+\[ \oint_{\partial\text{Rect}} f(\zeta)\,d\zeta = \int_A^B f(\zeta)\,d\zeta + \int_B^C f(\zeta)\,d\zeta + \int_C^D f(\zeta)\,d\zeta + \int_D^A f(\zeta)\,d\zeta = 0. \]
+We evaluate each integral:
+\begin{enumerate}
+    \item Path from $A$ to $B$: $\zeta(x) = x + i\,z.\im$ for $x$ from $z.\re$ to $w.\re$. So $d\zeta = dx$.
+    \[ \int_A^B f(\zeta)\,d\zeta = \int_{z.\re}^{w.\re} f(x + i\,z.\im) \,dx. \]
+    \item Path from $B$ to $C$: $\zeta(y) = w.\re + i\,y$ for $y$ from $z.\im$ to $w.\im$. So $d\zeta = i\,dy$.
+    \[ \int_B^C f(\zeta)\,d\zeta = i \int_{z.\im}^{w.\im} f(w.\re + i y) \,dy. \]
+    \item Path from $C$ to $D$: $\zeta(x) = x + i\,w.\im$ for $x$ from $w.\re$ to $z.\re$. So $d\zeta = dx$.
+    \[ \int_C^D f(\zeta)\,d\zeta = \int_{w.\re}^{z.\re} f(x + i\,w.\im) \,dx = - \int_{z.\re}^{w.\re} f(x + i\,w.\im) \,dx. \]
+    \item Path from $D$ to $A$: $\zeta(y) = z.\re + i\,y$ for $y$ from $w.\im$ to $z.\im$. So $d\zeta = i\,dy$.
+    \[ \int_D^A f(\zeta)\,d\zeta = i \int_{w.\im}^{z.\im} f(z.\re + i y) \,dy = - i \int_{z.\im}^{w.\im} f(z.\re + i y) \,dy. \]
+\end{enumerate}
+Summing these four integrals gives the equation:
+\[ \left(\int_{z.\re}^{w.\re} f(x + i\,z.\im) \,dx\right) + i \left(\int_{z.\im}^{w.\im} f(w.\re + i y) \,dy\right) - \left(\int_{z.\re}^{w.\re} f(x + i\,w.\im) \,dx\right) - i \left(\int_{z.\im}^{w.\im} f(z.\re + i y) \,dy\right) = 0. \]
+Rearranging the terms to match the statement of the lemma concludes the proof.
+\end{proof}
+
+
+\begin{definition}[Integral along the taxicab path] \label{def:If_taxicab}
+\lean{If_taxicab}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Define the function $I_f:\overline{\D}_R\to\mathbb{C}$ by
+\[ I_f(z) := \int_0^{z.\re} f(t)\,dt + i \int_0^{z.\im} f(z.\re + i\tau)\,d\tau. \]
+\end{definition}
+
+
+
+\begin{lemma}[Integral form] \label{lem:def_If_z_plus_h}
+\lean{def_If_z_plus_h}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_R$ and $h\in\C$ satisfy $z+h \in \overline{\D}_R$. Then
+\[ I_f(z+h) = \int_0^{(z+h).\re} f(t)\,dt + i \int_0^{(z+h).\im} f((z+h).\re + i\tau)\,d\tau. \]
+\end{lemma}
+\begin{proof} \leanok
+\uses{def:If_taxicab}
+Apply \cref{def:If_taxicab} with $z+h$.
+\end{proof}
+
+\begin{lemma}[Integral form] \label{lem:def_If_z}
+\lean{def_If_z}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_R$. Then
+\[ I_f(z) = \int_0^{z.\re} f(t)\,dt + i \int_0^{z.\im} f(z.\re + i\tau)\,d\tau. \]
+\end{lemma}
+\begin{proof}
+\uses{def:If_taxicab} \leanok
+Apply \cref{def:If_taxicab} with $z$
+\end{proof}
+
+\begin{lemma}[Integral form] \label{lem:def_If_w}
+\lean{def_If_w}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_R$, $h\in\C$ satisfy $z+h \in \overline{\D}_R$, and let $w = (z+h).\re + i\,z.\im$. Then
+\[ I_f(w) = \int_0^{(z+h).\re} f(t)\,dt + i \int_0^{z.\im} f((z+h).\re + i\tau)\,d\tau. \]
+\end{lemma}
+\begin{proof}
+\uses{def:If_taxicab}
+\leanok
+Apply \cref{def:If_taxicab} with $w$, noting that $w.\re = (z+h).\re$ and $w.\im = z.\im$.
+\end{proof}
+
+\begin{lemma}[Difference form] \label{lem:diff_If_zh_w}
+\lean{diff_If_zh_w}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_R$, $h\in\C$ satisfy $z+h \in \overline{\D}_R$, and let $w = (z+h).\re + i\,z.\im$. Then
+\[ I_f(z+h) - I_f(w) = i \int_{z.\im}^{(z+h).\im} f((z+h).\re + i\tau)\,d\tau. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:def_If_z_plus_h, lem:def_If_w}
+\leanok
+Take the difference of \cref{lem:def_If_z_plus_h} and \cref{lem:def_If_w}, noting the terms involving $\int f(t)\,dt$ cancel. The remaining terms are combined using properties of integrals.
+\end{proof}
+
+
+\begin{lemma}[Initial form] \label{lem:diff_If_w_z_initial_form}
+\lean{diff_If_w_z_initial_form}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_R$, $h\in\C$ satisfy $z+h \in \overline{\D}_R$, and let $w = (z+h).\re + i\,z.\im$. Then
+\[ I_f(w) - I_f(z) = \int_{z.\re}^{w.\re} f(t)\,dt + i \int_0^{z.\im} [f(w.\re + i\tau) - f(z.\re + i\tau)]\,d\tau. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:def_If_w, lem:def_If_z}
+\leanok
+Apply \cref{lem:def_If_w} and \cref{lem:def_If_z}, note that $w.\im = z.\im$, and combine integrals.
+\end{proof}
+
+\begin{lemma}[Horizontal strip] \label{lem:cauchy_for_horizontal_strip}
+\lean{cauchy_for_horizontal_strip}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_R$, $h\in\C$ satisfy $z+h \in \overline{\D}_R$, and let $w = (z+h).\re + i\,z.\im$. Then
+\[ \int_{z.\re}^{w.\re} f(t) dt - \int_{z.\re}^{w.\re} f(t + i\,z.\im) dt + i \int_{0}^{z.\im} f(w.\re + i\tau) d\tau - i \int_{0}^{z.\im} f(z.\re + i\tau) d\tau = 0. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:cauchy_for_rectangles}
+\leanok
+Apply \cref{lem:cauchy_for_rectangles} with the points $z' := z.\re$ and $w' := (z+h).\re + i\,z.\im$. The four corners of the rectangle are $z.\re$, $(z+h).\re$, $(z+h).\re + i\,z.\im$, and $z.\re + i\,z.\im$. Substituting $z'$ and $w'$ into the formula from \cref{lem:cauchy_for_rectangles} yields the desired identity.
+\end{proof}
+
+\begin{lemma}[Rearrangement step]\label{lem:cauchy_rearrangement_step1}
+\lean{cauchy_rearrangement_step1}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_R$, $h\in\C$ satisfy $z+h \in \overline{\D}_R$, and let $w = (z+h).\re + i\,z.\im$. Then
+\[ i \int_0^{z.\im} [f(w.\re + i\tau) - f(z.\re + i\tau)]\,d\tau = \int_{z.\re}^{w.\re} f(t + i\,z.\im)\,dt - \int_{z.\re}^{w.\re} f(t)\,dt. \]
+\end{lemma}
+\begin{proof}\leanok
+\uses{lem:cauchy_for_horizontal_strip}
+We start with the identity from \cref{lem:cauchy_for_horizontal_strip}. The assumptions are: $0<R<R_0<1$, $f:\overline{\D}_{R_0}\to\mathbb{C}$ is analytic on a neighborhood of $\overline{\D}_{R_0}$, $z \in \overline{\D}_R$, $h\in\C$ with $z+h \in \overline{\D}_R$, and $w = (z+h).\re + i\,z.\im$. The identity is:
+\[ \int_{z.\re}^{w.\re} f(t) dt - \int_{z.\re}^{w.\re} f(t + i\,z.\im) dt + i \int_{0}^{z.\im} f(w.\re + i\tau) d\tau - i \int_{0}^{z.\im} f(z.\re + i\tau) d\tau = 0. \]
+By the linearity of integration, we can combine the last two terms:
+\[ i \int_{0}^{z.\im} f(w.\re + i\tau) d\tau - i \int_{0}^{z.\im} f(z.\re + i\tau) d\tau = i \left( \int_{0}^{z.\im} f(w.\re + i\tau) d\tau - \int_{0}^{z.\im} f(z.\re + i\tau) d\tau \right) = i \int_0^{z.\im} [f(w.\re + i\tau) - f(z.\re + i\tau)]\,d\tau. \]
+Substituting this back into the identity gives:
+\[ \int_{z.\re}^{w.\re} f(t) dt - \int_{z.\re}^{w.\re} f(t + i\,z.\im) dt + i \int_0^{z.\im} [f(w.\re + i\tau) - f(z.\re + i\tau)]\,d\tau = 0. \]
+To obtain the desired result, we isolate the term involving the integral over $\tau$ by moving the other two integral terms to the right-hand side of the equation:
+\[ i \int_0^{z.\im} [f(w.\re + i\tau) - f(z.\re + i\tau)]\,d\tau = \int_{z.\re}^{w.\re} f(t + i\,z.\im)\,dt - \int_{z.\re}^{w.\re} f(t)\,dt. \]
+This completes the proof.
+\end{proof}
+
+\begin{lemma}[Shift integral]\label{lem:diff_If_w_z}
+\lean{diff_If_w_z}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_R$, $h\in\C$ satisfy $z+h \in \overline{\D}_R$, and let $w = (z+h).\re + i\,z.\im$. Then
+\[ I_f(w) - I_f(z) = \int_{z.\re}^{(z+h).\re} f(t + i\,z.\im)\,dt. \]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:cauchy_rearrangement_step1, lem:diff_If_w_z_initial_form}
+The assumptions are: $0<R<R_0<1$, $f:\overline{\D}_{R_0}\to\mathbb{C}$ is analytic on a neighborhood of $\overline{\D}_{R_0}$, $z \in \overline{\D}_R$, $h\in\C$ with $z+h \in \overline{\D}_R$, and $w = (z+h).\re + i\,z.\im$.
+From \cref{lem:diff_If_w_z_initial_form}, we have the expression:
+\[ I_f(w) - I_f(z) = \int_{z.\re}^{w.\re} f(t)\,dt + i \int_0^{z.\im} [f(w.\re + i\tau) - f(z.\re + i\tau)]\,d\tau. \]
+From \cref{lem:cauchy_rearrangement_step1}, we have an identity for the second term in the expression above:
+\[ i \int_0^{z.\im} [f(w.\re + i\tau) - f(z.\re + i\tau)]\,d\tau = \int_{z.\re}^{w.\re} f(t + i\,z.\im)\,dt - \int_{z.\re}^{w.\re} f(t)\,dt. \]
+We substitute this identity into the expression for $I_f(w) - I_f(z)$:
+\[ I_f(w) - I_f(z) = \int_{z.\re}^{w.\re} f(t)\,dt + \left( \int_{z.\re}^{w.\re} f(t + i\,z.\im)\,dt - \int_{z.\re}^{w.\re} f(t)\,dt \right). \]
+The terms $\int_{z.\re}^{w.\re} f(t)\,dt$ and $-\int_{z.\re}^{w.\re} f(t)\,dt$ cancel each other out.
+\[ I_f(w) - I_f(z) = \int_{z.\re}^{w.\re} f(t + i\,z.\im)\,dt. \]
+Finally, we use the definition of $w$, which states $w.\re = (z+h).\re$. Substituting this into the upper limit of the integral gives the final result:
+\[ I_f(w) - I_f(z) = \int_{z.\re}^{(z+h).\re} f(t + i\,z.\im)\,dt. \]
+\end{proof}
+
+\begin{lemma}[L path]\label{lem:If_difference_is_L_path_integral}
+\lean{If_difference_is_L_path_integral}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_R$ and $h\in\C$ satisfy $z+h \in \overline{\D}_R$. Then
+\[ I_f(z+h)-I_f(z) = \int_{z.\re}^{(z+h).\re} f(t + i\,z.\im)\,dt + i \int_{z.\im}^{(z+h).\im} f((z+h).\re + i\tau)\,d\tau. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:diff_If_w_z, lem:diff_If_zh_w}
+\leanok
+The result follows by summing the identities from \cref{lem:diff_If_w_z} and \cref{lem:diff_If_zh_w}, using the identity $I_f(z+h)-I_f(z) = (I_f(w) - I_f(z)) + (I_f(z+h) - I_f(w))$.
+\end{proof}
+
+\begin{lemma}[Add-sub step]\label{lem:If_diff_add_sub_identity}
+\lean{If_diff_add_sub_identity}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_R$ and $h\in\C$ satisfy $z+h \in \overline{\D}_R$. Then
+\[ I_f(z+h)-I_f(z) = \int_{z.\re}^{(z+h).\re} (f(t + i\,z.\im) - f(z) + f(z))\,dt + i \int_{z.\im}^{(z+h).\im} (f((z+h).\re + i\tau) - f(z) + f(z))\,d\tau. \]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:If_difference_is_L_path_integral}
+The identity follows by starting with the expression for $I_f(z+h)-I_f(z)$ from \cref{lem:If_difference_is_L_path_integral} and adding and subtracting the term $f(z)$ within each integrand, which is an algebraic identity.
+\end{proof}
+
+\begin{lemma}[Linearity split]\label{lem:If_diff_linearity}
+\lean{If_diff_linearity}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_R$ and $h\in\C$ satisfy $z+h \in \overline{\D}_R$. Then
+\begin{align*}
+I_f(z+h)-I_f(z) = &\left( \int_{z.\re}^{(z+h).\re} (f(t + i\,z.\im) - f(z))\,dt + \int_{z.\re}^{(z+h).\re} f(z)\,dt \right) \\
+&+ i \left( \int_{z.\im}^{(z+h).\im} (f((z+h).\re + i\tau) - f(z))\,d\tau + \int_{z.\im}^{(z+h).\im} f(z)\,d\tau \right).
+\end{align*}
+\end{lemma}
+\begin{proof}
+\uses{lem:If_diff_add_sub_identity}
+\leanok
+We begin with the identity from \cref{lem:If_diff_add_sub_identity}, which holds under the assumptions that $0<R<R_0<1$, $f$ is analytic on a neighborhood of $\overline{\D}_{R_0}$, $z \in \overline{\D}_R$, and $h\in\C$ with $z+h \in \overline{\D}_R$:
+\[ I_f(z+h)-I_f(z) = \int_{z.\re}^{(z+h).\re} (f(t + i\,z.\im) - f(z) + f(z))\,dt + i \int_{z.\im}^{(z+h).\im} (f((z+h).\re + i\tau) - f(z) + f(z))\,d\tau. \]
+We apply the linearity property of the integral, $\int(g+k) = \int g + \int k$, to each of the two integrals on the right-hand side.
+For the first integral, we group the integrand as $(f(t + i\,z.\im) - f(z)) + f(z)$. Applying linearity yields:
+\[ \int_{z.\re}^{(z+h).\re} (f(t + i\,z.\im) - f(z) + f(z))\,dt = \int_{z.\re}^{(z+h).\re} (f(t + i\,z.\im) - f(z))\,dt + \int_{z.\re}^{(z+h).\re} f(z)\,dt. \]
+For the second integral, we group the integrand as $(f((z+h).\re + i\tau) - f(z)) + f(z)$. Applying linearity yields:
+\[ \int_{z.\im}^{(z+h).\im} (f((z+h).\re + i\tau) - f(z) + f(z))\,d\tau = \int_{z.\im}^{(z+h).\im} (f((z+h).\re + i\tau) - f(z))\,d\tau + \int_{z.\im}^{(z+h).\im} f(z)\,d\tau. \]
+Substituting these expanded forms back into the original equation for $I_f(z+h)-I_f(z)$, and distributing the factor of $i$ for the second part, we obtain the desired result:
+\begin{align*}
+I_f(z+h)-I_f(z) = &\left( \int_{z.\re}^{(z+h).\re} (f(t + i\,z.\im) - f(z))\,dt + \int_{z.\re}^{(z+h).\re} f(z)\,dt \right) \\
+&+ i \left( \int_{z.\im}^{(z+h).\im} (f((z+h).\re + i\tau) - f(z))\,d\tau + \int_{z.\im}^{(z+h).\im} f(z)\,d\tau \right).
+\end{align*}
+\end{proof}
+
+\begin{lemma}[Integral of constant over L-path]\label{lem:integral_of_constant_over_L_path}
+\lean{integral_of_constant_over_L_path}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_R$ and $h\in\C$ satisfy $z+h \in \overline{\D}_R$. Then
+\[ \int_{z.\re}^{(z+h).\re} f(z)\,dt + i \int_{z.\im}^{(z+h).\im} f(z)\,d\tau = f(z) \cdot h. \]
+\end{lemma}
+\begin{proof}
+\leanok
+The left side is the integral of the constant function $w \mapsto f(z)$ over the L-shaped path. Thus we calculate
+\begin{align*}
+\int_{z.\re}^{(z+h).\re} f(z)\,dt + i \int_{z.\im}^{(z+h).\im} f(z)\,d\tau &= f(z) \cdot ((z+h).\re - z.\re) + i \cdot f(z) \cdot ((z+h).\im - z.\im) \\
+& = f(z) \cdot (h.\re + i \cdot h.\im) = f(z) \cdot h.
+\end{align*}
+\end{proof}
+
+\begin{lemma}[Difference decomposition]\label{lem:If_diff_decomposition_final}
+\lean{If_diff_decomposition_final}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_R$ and $h\in\C$ satisfy $z+h \in \overline{\D}_R$. Then
+\[ I_f(z+h)-I_f(z) = h \cdot f(z) + \mathrm{Err}(z,h), \]
+where $\mathrm{Err}(z,h)$ is defined as
+\[ \mathrm{Err}(z,h) := \int_{z.\re}^{(z+h).\re} (f(t + i\,z.\im) - f(z))\,dt + i \int_{z.\im}^{(z+h).\im} (f((z+h).\re + i\tau) - f(z))\,d\tau. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:If_diff_linearity, lem:integral_of_constant_over_L_path}
+\leanok
+We start with the expression for $I_f(z+h)-I_f(z)$ from \cref{lem:If_diff_linearity}. The assumptions are that $f$ is analytic on a neighborhood of $\overline{\D}_{R_0}$, $z \in \overline{\D}_R$, and $h \in \C$ such that $z+h \in \overline{\D}_R$.
+\[
+I_f(z+h)-I_f(z) = \left( \int_{z.\re}^{(z+h).\re} (f(t + i\,z.\im) - f(z))\,dt + \int_{z.\re}^{(z+h).\re} f(z)\,dt \right) + i \left( \int_{z.\im}^{(z+h).\im} (f((z+h).\re + i\tau) - f(z))\,d\tau + \int_{z.\im}^{(z+h).\im} f(z)\,d\tau \right).
+\]
+We can rearrange the terms by grouping them differently:
+\begin{align*}
+I_f(z+h)-I_f(z) = &\left( \int_{z.\re}^{(z+h).\re} (f(t + i\,z.\im) - f(z))\,dt + i \int_{z.\im}^{(z+h).\im} (f((z+h).\re + i\tau) - f(z))\,d\tau \right)\\
+&+ \left( \int_{z.\re}^{(z+h).\re} f(z)\,dt + i \int_{z.\im}^{(z+h).\im} f(z)\,d\tau \right).
+\end{align*}
+The first large grouped term is precisely the definition of $\mathrm{Err}(z,h)$ given in the lemma statement.
+The second large grouped term is an expression that is evaluated in \cref{lem:integral_of_constant_over_L_path}. According to that lemma,
+\[ \int_{z.\re}^{(z+h).\re} f(z)\,dt + i \int_{z.\im}^{(z+h).\im} f(z)\,d\tau = f(z) \cdot h. \]
+Substituting these two results back into our rearranged equation, we get:
+\[ I_f(z+h)-I_f(z) = \mathrm{Err}(z,h) + f(z) \cdot h. \]
+Swapping the terms on the right-hand side gives the final statement.
+\end{proof}
+
+
+\begin{lemma}[Bound on error term]\label{lem:bound_on_Err}
+\lean{bound_on_Err}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_R$ and $h\in\C$ satisfy $z+h \in \overline{\D}_R$ and $z-h \in \overline{\D}_R$. Let
+\[ S_{horiz}(z,h) := \sup_{z.\re - |h.\re| \le t \le z.\re + |h.\re|} |f(t + i\,z.\im) - f(z)| \]
+\[ S_{vert}(z,h) := \sup_{z.\im - |h.\im|  \le \tau \le z.\im + |h.\im|} |f((z+h).\re + i\tau) - f(z)|.\]
+\[ S(z,h) := \max(S_{horiz}(z,h),S_{vert}(z,h))\]
+Then the error term $\mathrm{Err}(z,h)$ is bounded by:
+\[ |\mathrm{Err}(z,h)| \le |h.\re| S(z,h) + |h.\im|S(z,h). \]
+\end{lemma}
+\begin{proof}
+\uses{lem:If_diff_decomposition_final}
+\leanok
+We begin with the definition of $\mathrm{Err}(z,h)$ from \cref{lem:If_diff_decomposition_final}.
+\[ \mathrm{Err}(z,h) = \int_{z.\re}^{(z+h).\re} (f(t + i\,z.\im) - f(z))\,dt + i \int_{z.\im}^{(z+h).\im} (f((z+h).\re + i\tau) - f(z))\,d\tau. \]
+We take the modulus and apply the triangle inequality, $|A+B| \le |A| + |B|$:
+\[ |\mathrm{Err}(z,h)| \le \left| \int_{z.\re}^{(z+h).\re} (f(t + i\,z.\im) - f(z))\,dt \right| + \left| i \int_{z.\im}^{(z+h).\im} (f((z+h).\re + i\tau) - f(z))\,d\tau \right|. \]
+Since $|i|=1$, the second term simplifies to $\left| \int_{z.\im}^{(z+h).\im} (f((z+h).\re + i\tau) - f(z))\,d\tau \right|$.
+Now we apply the ML-inequality ($|\int_\gamma g(\zeta)d\zeta| \le \text{length}(\gamma) \cdot \sup_{\zeta \in \gamma} |g(\zeta)|$) to each integral.
+
+For the first integral, the path of integration is the line segment from $z.\re$ to $(z+h).\re$. The length of this path is $|(z+h).\re - z.\re| = |h.\re|$. The supremum of the integrand's modulus is taken over this path. The integration variable $t$ is in the interval between $z.\re$ and $z.\re+h.\re$. This interval is contained within $[z.\re - |h.\re|, z.\re + |h.\re|]$. Therefore, the supremum over the integration path is less than or equal to the supremum over this larger interval, which is $S_{horiz}(z,h)$.
+\[ \left| \int_{z.\re}^{(z+h).\re} (f(t + i\,z.\im) - f(z))\,dt \right| \le |h.\re| \cdot \sup_{t \text{ between } z.\re, (z+h).\re} |f(t + i\,z.\im) - f(z)| \le |h.\re| \cdot S_{horiz}(z,h). \]
+For the second integral, the path is from $z.\im$ to $(z+h).\im$, with length $|(z+h).\im - z.\im| = |h.\im|$. Similarly, the supremum of its integrand's modulus is bounded by $S_{vert}(z,h)$.
+\[ \left| \int_{z.\im}^{(z+h).\im} (f((z+h).\re + i\tau) - f(z))\,d\tau \right| \le |h.\im| \cdot S_{vert}(z,h). \]
+Combining these inequalities, we get:
+\[ |\mathrm{Err}(z,h)| \le |h.\re| S_{horiz}(z,h) + |h.\im| S_{vert}(z,h). \]
+By definition, $S(z,h) = \max(S_{horiz}(z,h), S_{vert}(z,h))$. Thus, $S_{horiz}(z,h) \le S(z,h)$ and $S_{vert}(z,h) \le S(z,h)$. Substituting these into the inequality gives:
+\[ |\mathrm{Err}(z,h)| \le |h.\re| S(z,h) + |h.\im| S(z,h). \]
+This is the desired result.
+\end{proof}
+
+\begin{lemma}[Bound on error term ratio]\label{lem:bound_on_Err_ratio}
+\lean{bound_on_Err_ratio}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_R$ and $h\in\C$ satisfy $z+h \in \overline{\D}_R$ and $z-h \in \overline{\D}_R$. Let $S(z,h)$ be defined as in \cref{lem:bound_on_Err}. If $h \neq 0$ then
+\[ \left|\frac{\mathrm{Err}(z,h)}{h}\right| \le 2S(z,h). \]
+\end{lemma}
+\begin{proof}
+\uses{lem:bound_on_Err}
+\leanok
+We start with the inequality from \cref{lem:bound_on_Err}, which holds under the given assumptions.
+\[ |\mathrm{Err}(z,h)| \le |h.\re| S(z,h) + |h.\im|S(z,h) = (|h.\re| + |h.\im|) S(z,h). \]
+The lemma includes the explicit assumption that $h \neq 0$, which implies $|h| > 0$. We can therefore divide the inequality by $|h|$ without changing the direction of the inequality.
+\[ \frac{|\mathrm{Err}(z,h)|}{|h|} \le \frac{|h.\re| + |h.\im|}{|h|} S(z,h). \]
+Using the property that $|\frac{A}{B}| = \frac{|A|}{|B|}$ for complex numbers, the left side is equal to $\left|\frac{\mathrm{Err}(z,h)}{h}\right|$.
+For any complex number $h = h.\re + i h.\im$, we know that $|h.\re| \le \sqrt{(h.\re)^2 + (h.\im)^2} = |h|$ and $|h.\im| \le \sqrt{(h.\re)^2 + (h.\im)^2} = |h|$.
+Therefore, the sum is bounded: $|h.\re| + |h.\im| \le |h| + |h| = 2|h|$.
+This gives us a bound for the fraction:
+\[ \frac{|h.\re| + |h.\im|}{|h|} \le \frac{2|h|}{|h|} = 2. \]
+Substituting this bound back into our main inequality, we get:
+\[ \left|\frac{\mathrm{Err}(z,h)}{h}\right| \le 2 S(z,h). \]
+This completes the proof.
+\end{proof}
+
+
+\begin{lemma}[Limit of $S(z,h)$ is zero]\label{lem:limit_of_S_is_zero}
+\lean{limit_of_S_is_zero}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_{R}$. Then with $S(z,h)$ defined as in \cref{lem:bound_on_Err}, we have
+\[ \lim_{h\to 0} S(z,h) = 0. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:bound_on_Err}
+\leanok
+The assumption that $f$ is analytic on a neighborhood of $\overline{\D}_{R_0}$ implies that $f$ is continuous at every point in $\overline{\D}_{R_0}$. In particular, $f$ is continuous at $z \in \overline{\D}_{R}$.
+By the definition of continuity at $z$, for any $\epsilon > 0$, there exists a $\delta > 0$ such that for any point $w$ satisfying $|w-z| < \delta$, we have $|f(w) - f(z)| < \epsilon$.
+
+We want to show that $\lim_{h\to 0} S(z,h) = 0$. By definition, $S(z,h) = \max(S_{horiz}(z,h), S_{vert}(z,h))$. The limit will be zero if we can show that both $S_{horiz}(z,h)$ and $S_{vert}(z,h)$ tend to zero.
+
+1.  \textbf{Analysis of $S_{horiz}(z,h)$}:
+    $S_{horiz}(z,h) = \sup_{t \in [z.\re - |h.\re|, z.\re + |h.\re|]} |f(t + i\,z.\im) - f(z)|$.
+    Let $w_t = t + i\,z.\im$ be a point on the horizontal segment. We need to bound $|w_t - z|$.
+    $|w_t - z| = |(t + i\,z.\im) - (z.\re + i\,z.\im)| = |t - z.\re|$.
+    The supremum is over $t$ such that $|t - z.\re| \le |h.\re|$. Since $|h.\re| \le |h|$, we have $|w_t - z| \le |h|$.
+    If we choose $|h| < \delta$, then for all $t$ in the interval, $|w_t - z| < \delta$. By the continuity of $f$, this implies $|f(w_t) - f(z)| < \epsilon$. Since this is true for all values in the set, their supremum must be less than or equal to $\epsilon$. Thus, for $|h|<\delta$, $S_{horiz}(z,h) \le \epsilon$.
+
+2.  \textbf{Analysis of $S_{vert}(z,h)$}:
+    $S_{vert}(z,h) = \sup_{\tau \in [z.\im - |h.\im|, z.\im + |h.\im|]} |f((z+h).\re + i\tau) - f(z)|$.
+    Let $w_\tau = (z+h).\re + i\tau = (z.\re + h.\re) + i\tau$ be a point on the vertical segment. We bound $|w_\tau - z|$.
+    $|w_\tau - z| = |(z.\re + h.\re + i\tau) - (z.\re + i z.\im)| = |h.\re + i(\tau - z.\im)|$.
+    Using the triangle inequality, $|w_\tau - z| \le |h.\re| + |i(\tau - z.\im)| = |h.\re| + |\tau - z.\im|$.
+    The supremum is over $\tau$ such that $|\tau - z.\im| \le |h.\im|$.
+    So, $|w_\tau - z| \le |h.\re| + |h.\im|$. We know $|h.\re| + |h.\im| \le 2|h|$.
+    If we choose $|h| < \delta/2$, then $|w_\tau - z| \le 2|h| < \delta$. By continuity, $|f(w_\tau) - f(z)| < \epsilon$.
+    Thus, for $|h|<\delta/2$, $S_{vert}(z,h) \le \epsilon$.
+
+Given $\epsilon > 0$, we can choose $\delta' = \delta/2$. Then for any $h$ with $|h| < \delta'$, both $S_{horiz}(z,h) \le \epsilon$ and $S_{vert}(z,h) \le \epsilon$.
+Therefore, $S(z,h) = \max(S_{horiz}(z,h), S_{vert}(z,h)) \le \epsilon$ for all $|h| < \delta'$.
+This satisfies the definition of the limit, so $\lim_{h\to 0} S(z,h) = 0$.
+\end{proof}
+
+\begin{lemma}[Limit of error term ratio is zero]\label{lem:limit_of_Err_ratio_is_zero}
+\lean{limit_of_Err_ratio_is_zero}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. Let $z \in \overline{\D}_{R}$. Then
+\[ \lim_{h\to 0} \frac{\mathrm{Err}(z,h)}{h} = 0. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:bound_on_Err_ratio, lem:limit_of_S_is_zero}
+\leanok
+To prove the limit, we will use the Squeeze Theorem. The limit is taken as $h \to 0$, so we consider $h \neq 0$.
+From \cref{lem:bound_on_Err_ratio}, we have the inequality for the modulus of the error term ratio:
+\[ \left|\frac{\mathrm{Err}(z,h)}{h}\right| \le 2S(z,h). \]
+The modulus of any complex number is non-negative, so we can write:
+\[ 0 \le \left|\frac{\mathrm{Err}(z,h)}{h}\right| \le 2S(z,h). \]
+Now, we take the limit of all parts of the inequality as $h \to 0$.
+The lower bound is constant, so $\lim_{h\to 0} 0 = 0$.
+For the upper bound, we use \cref{lem:limit_of_S_is_zero}, which states that $\lim_{h\to 0} S(z,h) = 0$.
+Therefore, $\lim_{h\to 0} 2S(z,h) = 2 \cdot \left(\lim_{h\to 0} S(z,h)\right) = 2 \cdot 0 = 0$.
+Since $\left|\frac{\mathrm{Err}(z,h)}{h}\right|$ is squeezed between two functions that both tend to 0 as $h \to 0$, the Squeeze Theorem (Mathlib: Filter.Tendsto.squeeze') implies that the limit of the modulus is also 0:
+\[ \lim_{h\to 0} \left|\frac{\mathrm{Err}(z,h)}{h}\right| = 0. \]
+A sequence of complex numbers converges to 0 if and only if the sequence of their moduli converges to 0. Therefore, we can conclude that:
+\[ \lim_{h\to 0} \frac{\mathrm{Err}(z,h)}{h} = 0. \]
+\end{proof}
+
+\begin{lemma}[Differentiability of $I_f(z)$]\label{lem:If_is_differentiable}
+\lean{If_is_differentiable_on}
+\leanok
+Let $0<R<R_0<1$, and assume $f:\overline{\D}_{R_0}\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R_0}$. The function $I_f(z)$ is analyticOnNhd $\overline{\D}_{R}$, and $I'_f(z)=f(z)$ on $\overline{\D}_{R}$.
+\end{lemma}
+\begin{proof}
+\uses{lem:If_diff_decomposition_final, lem:limit_of_Err_ratio_is_zero}
+\leanok
+To show that $I_f(z)$ is differentiable at a point $z \in \overline{\D}_R$ and that its derivative is $f(z)$, we must show that the following limit exists and equals $f(z)$:
+\[ I'_f(z) = \lim_{h\to 0} \frac{I_f(z+h)-I_f(z)}{h}. \]
+We use the decomposition from \cref{lem:If_diff_decomposition_final}, which states:
+\[ I_f(z+h)-I_f(z) = h \cdot f(z) + \mathrm{Err}(z,h). \]
+For $h \neq 0$, we can form the difference quotient by dividing by $h$:
+\[ \frac{I_f(z+h)-I_f(z)}{h} = \frac{h \cdot f(z) + \mathrm{Err}(z,h)}{h} = f(z) + \frac{\mathrm{Err}(z,h)}{h}. \]
+Now, we take the limit as $h \to 0$:
+\[ I'_f(z) = \lim_{h\to 0} \left( f(z) + \frac{\mathrm{Err}(z,h)}{h} \right). \]
+Using the property that the limit of a sum is the sum of the limits:
+\[ I'_f(z) = \lim_{h\to 0} f(z) + \lim_{h\to 0} \frac{\mathrm{Err}(z,h)}{h}. \]
+The term $f(z)$ is constant with respect to $h$, so its limit is $f(z)$.
+From \cref{lem:limit_of_Err_ratio_is_zero}, we know that $\lim_{h\to 0} \frac{\mathrm{Err}(z,h)}{h} = 0$.
+Substituting these results back, we find:
+\[ I'_f(z) = f(z) + 0 = f(z). \]
+This shows that for any $z \in \overline{\D}_R$, the derivative $I'_f(z)$ exists and is equal to $f(z)$.
+Since $f$ is analytic on a neighborhood of $\overline{\D}_{R_0}$, it is continuous on that neighborhood. This means $I'_f(z) = f(z)$ is continuous on $\overline{\D}_R$. A function with a continuous derivative is analytic.
+To show it is `analyticOnNhd` $\overline{\D}_{R}$, we note that since $R < R_0$, we can choose an $R'$ such that $R < R' < R_0$. The entire construction and proof holds for any $z \in \overline{\D}_{R'}$. This shows that $I_f$ is differentiable in the open disk $\D_{R'}$, which is an open neighborhood of $\overline{\D}_{R}$. Therefore, $I_f$ is analytic on a neighborhood of $\overline{\D}_{R}$.
+\end{proof}
+
+\section{Complex logarithm}
+
+\begin{lemma}[Logarithmic derivative is analytic]\label{lem:log_deriv_is_analytic}
+\lean{log_deriv_is_analytic}
+\leanok
+Let $0<R<R_0<1$, and assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ and $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. Then the function $B'(z)/B(z)$ is analyticOnNhd $\overline{\D}_{R_0}$.
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib: AnalyticOnNhd.div
+\end{proof}
+
+\begin{lemma}[Antiderivative of logarithmic derivative]\label{lem:I_is_antiderivative}
+\leanok
+\lean{I_is_antiderivative}
+Let $0<R<R_0<1$, and assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ and $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. Then there exists $J: \overline{\D}_R\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R}$, such that $J(0)=0$ and $J'(z) = B'(z)/B(z)$ for all $z \in \overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\uses{lem:If_is_differentiable, lem:log_deriv_is_analytic}
+\leanok
+Take $J=I_{B'/B}$ from \cref{lem:If_is_differentiable}. Here $B/B'$ is analyticOnNhd $\overline{\D}_{R_0}$ by \cref{lem:log_deriv_is_analytic}.
+\end{proof}
+
+
+\begin{definition}[Auxiliary function]\label{def:H_auxiliary} \leanok
+\lean{H_auxiliary}
+Let $0<R<R_0<1$, and assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ and $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. Define $J(z) := I_{B'/B}(z)$ from \cref{lem:I_is_antiderivative}.
+Define $H(z) := \exp(J(z))/B(z)$.
+\end{definition}
+
+\begin{lemma}[Exponential of $I_f$ at zero]\label{lem:exp_I_at_zero}
+\leanok
+\lean{exp_I_at_zero}
+Let $0<R<R_0<1$, and assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ and $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. Let $J$ be from \cref{lem:I_is_antiderivative}. Then $\exp(J(0)) = 1$.
+\end{lemma}
+\begin{proof}
+\uses{lem:I_is_antiderivative}
+\leanok
+By \cref{lem:I_is_antiderivative}, we have $J(0)=0$. Then $e^0=1$ by Mathlib: Complex.exp\_zero.
+\end{proof}
+
+\begin{lemma}[Value of $H$ at zero]\label{lem:H_at_zero}
+\leanok
+\lean{H_at_zero}
+Let $0<R<R_0<1$, assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ and $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. Let $H$ be the function from \cref{def:H_auxiliary}. Then $H(0)=1/B(0)$.
+\end{lemma}
+\begin{proof}
+\uses{def:H_auxiliary, lem:exp_I_at_zero}
+\leanok
+By \cref{def:H_auxiliary} at $z=0$, $H(0) = \exp(J(0))/B(0)$. Then apply \cref{lem:exp_I_at_zero}.
+\end{proof}
+
+\begin{lemma}[Logarithmic derivative identity]\label{lem:log_deriv_id}
+\leanok
+\lean{log_deriv_id}
+Let $0<R<R_0<1$, and assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ and $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. For $J$ from \cref{lem:I_is_antiderivative}, then $J'(z)B(z) = B'(z)$ for all $z \in \overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:I_is_antiderivative}
+Apply \cref{lem:I_is_antiderivative}. Since $B(z) \ne 0$, multiply by $B(z)$.
+\end{proof}
+
+
+\begin{lemma}[Logarithmic derivative identity]\label{lem:log_deriv_identity}
+\leanok
+\lean{log_deriv_identity}
+Let $0<R<R_0<1$, and assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ and $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. For $J$ from \cref{lem:I_is_antiderivative}, then $J'(z)B(z) - B'(z) = 0$ for all $z \in \overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\uses{lem:log_deriv_id}
+\leanok
+By \cref{lem:log_deriv_id}.
+\end{proof}
+
+
+\begin{lemma}[Derivative of $H(z)$]\label{lem:H_derivative_quotient_rule}
+\lean{H_derivative_quotient_rule}
+\leanok
+Let $0<R<R_0<1$, assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ and $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. Let $J$ and $H$ be the functions from \cref{def:H_auxiliary}. The derivative of $H(z)$ is given by
+\[ H'(z) = \frac{(\exp(J(z)))' \cdot B(z) - B'(z) \cdot \exp(J(z))}{B(z)^2}. \]
+\end{lemma}
+\begin{proof}
+\uses{def:H_auxiliary}
+\leanok
+Apply Mathlib: deriv\_div to $H(z) = \exp(J(z))/B(z)$. $B(z) \ne 0$ by assumption.
+\end{proof}
+
+\begin{lemma}[Derivative of $\exp(J(z))$]\label{lem:exp_I_derivative_chain_rule}
+\leanok
+\lean{exp_I_derivative_chain_rule}
+Let $0<R<R_0<1$, and assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ and $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. For $J$ from \cref{lem:I_is_antiderivative}, then
+\[ (\exp(J(z)))' = J'(z) \cdot \exp(J(z)). \]
+\end{lemma}
+\begin{proof}
+\uses{lem:I_is_antiderivative}
+\leanok
+Apply Mathlib: deriv.scomp\_of\_eq and AnalyticAt.differentiableAt to the composition $\exp\circ I$. Here $J$ analyticOnNhd $\overline{\D}_{R}$ by \cref{lem:I_is_antiderivative}.
+\end{proof}
+
+\begin{lemma}[Derivative of $H(z)$]\label{lem:H_derivative_calc}
+\leanok
+\lean{H_derivative_calc}
+Let $0<R<R_0<1$, assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ and $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. Let $J$ and $H$ be the functions from \cref{def:H_auxiliary}. The derivative of $H(z)$ is given by
+\[ H'(z) = \frac{\big(J'(z) B(z) - B'(z)\big)\exp(J(z))}{B(z)^2}. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:exp_I_derivative_chain_rule, lem:H_derivative_quotient_rule}
+\leanok
+By \cref{lem:exp_I_derivative_chain_rule,lem:H_derivative_quotient_rule}.
+\end{proof}
+
+
+
+\begin{lemma}[Derivative of $H(z)$ is 0]\label{lem:H_derivative_is_zero}
+\leanok
+\lean{H_derivative_is_zero}
+Let $0<R<R_0<1$, assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ and $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. Let $J$ and $H$ be the functions from \cref{def:H_auxiliary}. Then $H'(z) = 0$ for all $z \in \overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\uses{lem:H_derivative_calc, lem:log_deriv_identity}
+\leanok
+Apply \cref{lem:H_derivative_calc,lem:log_deriv_identity}.
+\end{proof}
+
+\begin{lemma}[$H(z)$ is constant]\label{lem:H_is_constant}
+\leanok
+\lean{H_is_constant}
+Let $0<R<R_0<1$, assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ and $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. Let $H$ be from \cref{def:H_auxiliary}. Then $H(z)=H(0)$ for all $z\in\overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\uses{lem:H_derivative_is_zero}
+\leanok
+Apply Mathlib: is\_const\_of\_fderiv\_eq\_zero
+to \cref{lem:H_derivative_is_zero} with $H(z)$ on the connected set $\overline{\D}_R$.
+\end{proof}
+
+
+\begin{lemma}[$H=1$]\label{lem:H_is_one}
+\leanok
+\lean{H_is_one}
+Let $0<R<R_0<1$, assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$, $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. Let $H$ be the function from \cref{def:H_auxiliary}. Then $H(z)=1/B(0)$ for all $z \in \overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\uses{lem:H_at_zero, lem:H_is_constant}
+\leanok
+Apply \cref{lem:H_at_zero,lem:H_is_constant}.
+\end{proof}
+
+\begin{lemma}[Existence of analytic logarithm]\label{lem:analytic_log_exists}
+\leanok
+\lean{analytic_log_exists}
+Let $0<R<R_0<1$, and assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ with $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. For $J$ from \cref{lem:I_is_antiderivative}, then $B(z) = B(0)\exp(J(z))$ for all $z \in \overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\uses{def:H_auxiliary, lem:H_is_one}
+\leanok
+By \cref{def:H_auxiliary,lem:H_is_one}.
+\end{proof}
+
+
+\begin{lemma}[Modulus of $\exp(J(z))$]\label{lem:modulus_of_exp_I}
+\leanok
+\lean{modulus_of_exp_I}
+Let $0<R<R_0<1$, and assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ and $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. Let $J$ be the function from \cref{lem:I_is_antiderivative}. Then for any $z \in \overline{\D}_R$,
+\[ |\exp(J(z))| = \exp(\Re(J(z))). \]
+\end{lemma}
+\begin{proof}
+\leanok
+Apply Mathlib: Complex.abs\_exp with $w = J(z)$.
+\end{proof}
+
+
+\begin{lemma}[Modulus of $B(z)$ in product form]\label{lem:modulus_of_B_product_form}
+\leanok
+\lean{modulus_of_B_product_form}
+Let $0<R<R_0<1$, assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ with $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. Let $J$ be the function from \cref{lem:I_is_antiderivative}. Then $|B(z)| = |B(0)| \cdot |e^{J(z)}|$.
+\end{lemma}
+\begin{proof}
+\uses{lem:analytic_log_exists}
+\leanok
+By \cref{lem:analytic_log_exists}, then apply modulus and Mathlib: abs\_mul.
+\end{proof}
+
+\begin{lemma}[Modulus of $\exp(J(z))$]\label{lem:modulus_of_exp_log}
+\leanok
+\lean{modulus_of_exp_log}
+Let $0<R<R_0<1$, assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ with $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. Let $J$ be the function from \cref{lem:I_is_antiderivative}. Then $|B(z)| = |B(0)| \cdot e^{\Re(J(z))}$.
+\end{lemma}
+\begin{proof}
+\uses{lem:modulus_of_B_product_form, lem:modulus_of_exp_I}
+\leanok
+By \cref{lem:modulus_of_B_product_form,lem:modulus_of_exp_I}.
+\end{proof}
+
+
+\begin{lemma}[Logarithm of modulus as sum]\label{lem:log_modulus_as_sum}
+\leanok
+\lean{log_modulus_as_sum}
+Let $0<R<R_0<1$, assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ with $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. Let $J$ be the function from \cref{lem:I_is_antiderivative}. Then $\log|B(z)| = \log|B(0)| + \log(e^{\Re(J(z))})$.
+\end{lemma}
+\begin{proof}
+\uses{lem:modulus_of_exp_log}
+\leanok
+Apply \cref{lem:modulus_of_exp_log} then Mathlib: Real.log\_mul.
+\end{proof}
+
+\begin{lemma}[Real logarithm of modulus difference]\label{lem:real_log_of_modulus_difference}
+\leanok
+\lean{real_log_of_modulus_difference}
+Let $0<R<R_0<1$, assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ with $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. Let $J$ be the function from \cref{lem:I_is_antiderivative}. Then $\log|B(z)| - \log|B(0)| = \Re(J(z))$.
+\end{lemma}
+\begin{proof}
+\uses{lem:log_modulus_as_sum}
+\leanok
+Apply \cref{lem:log_modulus_as_sum} and Mathlib: Real.log\_exp to $x=\Re(J(z))$.
+\end{proof}
+
+\begin{lemma}[Logarithm of an analytic function]\label{lem:log_of_analytic}
+\leanok
+\lean{log_of_analytic}
+Let $0<R<R_0<1$, assume $B:\overline{\D}_{R_0}\to\mathbb{C}$ is analyticOnNhd $\overline{\D}_{R_0}$ with $B(z) \ne 0$ for all $z \in \overline{\D}_{R_0}$. Then there exists $J_B: \overline{\D}_R\to\mathbb{C}$ analyticOnNhd $\overline{\D}_{R}$, such that $J_B(0)=0$, and $J_B'(z) = B'(z)/B(z)$ and $\log|B(z)| - \log|B(0)| = \Re(J_B(z))$ for all $z \in \overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\uses{lem:I_is_antiderivative, lem:real_log_of_modulus_difference}
+\leanok
+Apply \cref{lem:I_is_antiderivative,lem:real_log_of_modulus_difference}.
+\end{proof}

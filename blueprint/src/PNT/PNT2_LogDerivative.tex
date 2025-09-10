@@ -1,0 +1,1609 @@
+\chapter{Log Derivative}\label{log_derivative}
+
+
+\begin{lemma}[Disk inclusion] \label{lem:DRinD1} \lean{DRinD1}
+\leanok
+Let $0<R<1$. Then we have $\overline{\D}_R \subset \D_1$.
+\end{lemma}
+\begin{proof}
+\leanok
+Unfold definitions of $\overline{\D}_R$ and $\D_1$. Calculate $|z|\le R<1$.
+\end{proof}
+%%%
+
+\begin{definition}[Zero set] \label{def:zerosetKfR} \lean{zerosetKfR}
+\leanok
+Let $R>0$ and $f:\overline{\D}_R\to \C$. Define the set of zeros $\mathcal{K}_f(R) = \{\rho \in \C : |\rho| \le R \text{ and } f(\rho)=0\}$.
+\end{definition}
+%%%
+
+\begin{lemma}[Zero containment] \label{lem:KinDR} \lean{lemKinDR}
+\leanok
+Let $R>0$ and $f:\overline{\D}_R\to\C$. Then we have $\mathcal{K}_f(R) \subset \overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{def:zerosetKfR}
+Unfold definition of $\mathcal{K}_f(R)$.
+\end{proof}
+%%%
+
+\begin{lemma}[Zero in disk] \label{lem:KRinK1} \lean{lemKRinK1}
+\leanok
+Let $0<R<1$ and $f:\D_1\to\C$. Then we have $\mathcal{K}_f(R) \subset \{\rho\in \D_1 : f(\rho)=0 \}$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{def:zerosetKfR}
+Unfold definition of $\mathcal{K}_f(R)$.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Accumulation point] \label{lem:bolzano_weierstrass} \lean{lem_bolzano_weierstrass}
+\leanok
+Let $D\subset \C$ be a compact set. If $Z\subset D$ is an infinite subset, then $Z$ has an accumulation point $\rho_0\in D$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+%%%
+
+
+\begin{lemma}[Zeros accumulate]\label{lem:zeros_have_limit_point} \lean{lem_zeros_have_limit_point}
+\leanok
+Let $R>0$ and $f:\overline{\D}_R\to \C$. If $\mathcal{K}_f(R) \subset \overline{\D}_R$ is infinite, then $\mathcal{K}_f(R)$ has an accumulation point $\rho_0 \in \overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:DRcompact, lem:KinDR, lem:bolzano_weierstrass}
+Apply Lemmas \ref{lem:DRcompact}, \ref{lem:KinDR}, \ref{lem:bolzano_weierstrass} with $D=\overline{\D}_R$ and $Z = \mathcal{K}_f(R)$.
+\end{proof}
+%%%
+
+
+
+\begin{lemma}[Identity theorem]\label{lem:identity_theorem} \lean{lem_identity_theorem}
+\leanok
+Let $f:\overline{\D}_1\to \C$ be analytic. Suppose there exists $\rho_0\in \D_1$ an accumulation point of $\{\rho\in \D_1 : f(\rho)=0\}$. Then $f(z)=0$ for all $z\in \D_1$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Identity theorem R]\label{lem:identity_theoremR} \lean{lem_identity_theoremR}
+\leanok
+Let $0<R<1$ and $f:\overline{\D}_1\to \C$ be analytic. Suppose there exists $\rho_0\in \overline{\D}_R$ an accumulation point of $\{\rho\in \D_1 : f(\rho)=0\}$. Then $f(z)=0$ for all $z\in \D_1$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:identity_theorem, lem:DRinD1}
+Apply Lemmas \ref{lem:identity_theorem} and \ref{lem:DRinD1}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Identity on K]\label{lem:identity_theoremKR} \lean{lem_identity_theoremKR}
+\leanok
+Let $0<R<1$ and $f:\overline{\D}_1\to \C$ be analytic. Suppose there exists $\rho_0\in \overline{\D}_R$ an accumulation point of $\mathcal{K}_f(R)$. Then $f(z)=0$ for all $z\in \D_1$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:identity_theoremR, lem:KRinK1}
+Apply Lemmas \ref{lem:identity_theoremR} and \ref{lem:KRinK1}.
+\end{proof}
+%%%
+
+\begin{lemma}[Infinite zeros imply]\label{lem:identity_infiniteKR} \lean{lem_identity_infiniteKR}
+\leanok
+Let $0<R<1$ and $f:\overline{\D}_1\to \C$ be analytic. If $\mathcal{K}_f(R)$ is infinite, then $f(z)=0$ for all $z\in \D_1$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:identity_theoremKR, lem:zeros_have_limit_point}
+Apply Lemmas \ref{lem:identity_theoremKR} and \ref{lem:zeros_have_limit_point}.
+\end{proof}
+%%%
+
+\begin{lemma}[Finite zeros]\label{lem:Contra_finiteKR} \lean{lem_Contra_finiteKR}
+\leanok
+Let $0<R<1$ and $f:\overline{\D}_1\to \C$ be analytic. If there exists $z\in\D_1$ such that $f(z)\neq0$, then $\mathcal{K}_f(R)$ is finite.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:identity_infiniteKR}
+Contrapositive of Lemma \ref{lem:identity_infiniteKR}.
+\end{proof}
+%%%
+
+
+\section{$B_f$ analytic and never zero}
+
+
+\begin{definition}[Zero order] \label{def:m_rho_order} \leanok
+Let $0<R_1<1$ and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$. For any zero $\rho\in \mathcal K_f(R_1)$ of the function $f$, we define $m_{\rho,f}$ as the analytic order of $f$ at $\rho$, denoted by analyticOrderAt $f$ $\rho$.
+\end{definition}
+
+\begin{lemma}[Order is integer] \label{lem:m_rho_is_nat} \lean{lem_m_rho_is_nat} \leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$. If $f(0)\neq0$ then $m_{\rho,f}\in\N$ for all $\rho\in \mathcal K_f(R_1)$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{def:zerosetKfR, lem:f_is_nonzero}
+Let $\rho$ be an arbitrary element of $\mathcal{K}_f(R_1)$.
+By the definition of $\mathcal{K}_f(R_1)$ (see \cref{def:zerosetKfR}), any element $\rho \in \mathcal{K}_f(R_1)$ is a zero of $f$, which means $f(\rho)=0$.
+The function $f$ is assumed to be `AnalyticOnNhd` on $\overline{\D}_1$. This implies that for any point $w \in \overline{\D}_1$, there exists an open neighborhood of $w$ where $f$ is analytic. Since $\rho \in \mathcal{K}_f(R_1) \subset \overline{\D}_{R_1} \subset \overline{\D}_1$, $f$ is analytic in a neighborhood of $\rho$.
+We are given that $f(0) \neq 0$. This implies that the function $f$ is not identically zero on any open connected set containing the origin. Since $f$ is analytic on a connected open neighborhood of $\overline{\D}_1$, if $f$ were identically zero on any open subset of its domain, it would have to be identically zero on the entire connected component, which would contradict $f(0) \neq 0$. Therefore, $f$ is not identically zero in any neighborhood of $\rho$ (this is the consequence of \cref{lem:f_is_nonzero}).
+The quantity $m_{\rho,f}$ is defined as the analytic order of $f$ at $\rho$. For a function that is analytic at a point $\rho$ but not identically zero in a neighborhood of $\rho$, the order of a zero at $\rho$ is a well-defined non-negative integer.
+Specifically, the order is the smallest integer $n \ge 0$ such that the $n$-th derivative $f^{(n)}(\rho)$ is non-zero. Since $f$ is not identically zero around $\rho$, not all derivatives can be zero.
+Thus, $m_{\rho,f}$ must be a non-negative integer, i.e., $m_{\rho,f} \in \N = \{0, 1, 2, \dots\}$.
+\end{proof}
+
+
+\begin{lemma}[Order at least one]\label{lem:m_rho_ge_1}\lean{lem_m_rho_ge_1} \leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$. If $f(0)\neq0$ then $m_{\rho,f}\ge1$ for all $\rho\in \mathcal K_f(R_1)$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:m_rho_is_nat, lem:frho_zero}
+Let $\rho$ be an arbitrary element of $\mathcal{K}_f(R_1)$.
+From \cref{lem:m_rho_is_nat}, we have established that $m_{\rho,f}$ is a non-negative integer.
+The analytic order of a function $f$ at a point $\rho$, $m_{\rho,f}$, is equal to 0 if and only if $f(\rho) \neq 0$.
+By the definition of the set of zeros $\mathcal{K}_f(R_1)$ (see \cref{lem:frho_zero}), for any $\rho \in \mathcal{K}_f(R_1)$, we have $f(\rho) = 0$.
+Since $f(\rho) = 0$, the order $m_{\rho,f}$ cannot be 0.
+Given that $m_{\rho,f}$ is a non-negative integer, it must be strictly greater than 0.
+Therefore, $m_{\rho,f} \ge 1$ for all $\rho \in \mathcal{K}_f(R_1)$.
+\end{proof}
+
+
+\begin{lemma}[Analytic division] \label{lem:analDiv} \lean{lem_analDiv}\leanok
+Let $D \subset \C$ be an open set, and let $w\in D$. Let $h:D\to\C$ and $g:D\to\C$ be functions that are analyticAt $w$. If $g(w)\neq0$, then the function $z \mapsto h(z)/g(z)$ is analyticAt $w$.
+\end{lemma}
+\begin{proof}
+\leanok
+We are given that the functions $h$ and $g$ are analytic at $w$. This means they are complex differentiable in a neighborhood of $w$.
+We are also given the crucial assumption that $g(w) \neq 0$.
+Since $g$ is analytic at $w$, it is also continuous at $w$. By the definition of continuity, for any $\epsilon > 0$, there exists a $\delta > 0$ such that if $|z-w| < \delta$, then $|g(z)-g(w)| < \epsilon$. Let's choose $\epsilon = |g(w)|/2$. Since $g(w) \neq 0$, $\epsilon > 0$. Then there exists a neighborhood of $w$, say $U = D(w, \delta)$, such that for all $z \in U$, $|g(z)-g(w)| < |g(w)|/2$. This implies $g(z) \neq 0$ for all $z \in U$.
+Now consider the function $q(z) = 1/g(z)$ defined on the neighborhood $U$. The function $z \mapsto 1/z$ is analytic on $\C \setminus \{0\}$. Since $g$ is analytic at $w$ and its image $g(z)$ for $z \in U$ is contained in $\C \setminus \{0\}$, the composition $1/g$ is analytic at $w$.
+The function we are interested in is $h(z)/g(z)$, which can be written as the product of two functions: $h(z)$ and $q(z) = 1/g(z)$.
+The product of two functions that are analytic at a point $w$ is also analytic at $w$.
+Since both $h(z)$ and $1/g(z)$ are analytic at $w$, their product $h(z)/g(z)$ is also analytic at $w$.
+\end{proof}
+
+
+\begin{lemma}[Denominator analytic]\label{lem:denomAnalAt} \leanok \lean{lem_denomAnalAt}
+Let $S \subset \C$ be a finite set, and for each $s \in S$, let $n_s \in \mathbb{N}$ be a positive integer. Then for all $w\notin S$, the function $P(z) = \prod_{s \in S} (z-s)^{n_s}$ is analyticAt $w$ and $P(w)\neq0$.
+\end{lemma}
+\begin{proof}
+\leanok
+Let $w$ be an arbitrary point in $\C \setminus S$.
+First, we show that $P(z)$ is analytic at $w$.
+For each $s \in S$, consider the factor $f_s(z) = (z-s)^{n_s}$. This is a polynomial in $z$, and all polynomials are analytic on the entire complex plane $\C$. Therefore, each function $f_s(z)$ is analytic at $w$.
+The function $P(z)$ is defined as the product of the functions $f_s(z)$ for all $s$ in the finite set $S$. A finite product of functions that are analytic at a point $w$ is itself analytic at $w$.
+Therefore, $P(z)$ is analytic at $w$.
+
+Next, we show that $P(w) \neq 0$.
+The value of the function at $w$ is given by $P(w) = \prod_{s \in S} (w-s)^{n_s}$.
+A product of complex numbers is zero if and only if at least one of the factors is zero.
+Let's examine an arbitrary factor $(w-s)^{n_s}$ for some $s \in S$.
+We are given the assumption that $w \notin S$. This means that for any $s \in S$, we have $w \neq s$, which implies $w-s \neq 0$.
+Since $n_s$ is a positive integer, $(w-s)^{n_s}$ is also non-zero.
+As this holds for every $s \in S$, none of the factors in the product $P(w)$ are zero.
+Therefore, the product $P(w)$ is not zero.
+\end{proof}
+
+\begin{lemma}[Ratio analytic]\label{lem:ratioAnalAt} \leanok \lean{lem_ratioAnalAt}
+Let $w\in\C$, $0<R_1<R<1$, and $h:\overline{\D}_R\to\C$ be a function that is AnalyticAt $w$. Let $S \subset \overline{\D}_{R_1}$ be a finite set, and for each $s \in S$, let $n_s \in \mathbb{N}$ be a positive integer. Then for all $w\in \overline{\D}_1\setminus S$, the function $h(z)/\prod_{s \in S} (z-s)^{n_s}$ is analyticAt $w$.
+\end{lemma}
+\begin{proof}
+\uses{lem:analDiv, lem:denomAnalAt}
+\leanok
+Let $F(z) = \frac{h(z)}{\prod_{s \in S} (z-s)^{n_s}}$. We want to show that $F(z)$ is analytic at an arbitrary point $w \in \overline{\D}_1 \setminus S$.
+Let's define the denominator as $g(z) = \prod_{s \in S} (z-s)^{n_s}$. Then $F(z) = h(z)/g(z)$.
+We will use \cref{lem:analDiv}. To do so, we must verify its hypotheses for the point $w$:
+1.  $h(z)$ is analytic at $w$. This is given as an assumption in the lemma statement.
+2.  $g(z)$ is analytic at $w$.
+3.  $g(w) \neq 0$.
+
+We can verify the second and third hypotheses using \cref{lem:denomAnalAt}. The function $g(z)$ has the precise form required by \cref{lem:denomAnalAt}, with the set of roots being $S$ and the exponents being $n_s$.
+The assumptions of \cref{lem:denomAnalAt} are:
+a. $S$ is a finite set. This is given in the current lemma's assumptions.
+b. For each $s \in S$, $n_s$ is a positive integer. This is also given.
+c. The point of evaluation $w$ is not in $S$. Our assumption is $w \in \overline{\D}_1 \setminus S$, which explicitly states $w \notin S$.
+
+Since all assumptions of \cref{lem:denomAnalAt} are met, we can conclude that the function $g(z)$ is analytic at $w$ and that $g(w) \neq 0$.
+Now we have verified all three hypotheses for \cref{lem:analDiv}. Therefore, we can conclude that the ratio $F(z) = h(z)/g(z)$ is analytic at $w$.
+\end{proof}
+
+\begin{lemma}[Zero factorization]\label{lem:analytic_zero_factor} \leanok \lean{lem_analytic_zero_factor}
+Let $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. For each $\sigma \in \mathcal{K}_f(R_1)$, there exists a function $h_\sigma(z)$ that is AnalyticAt $\sigma$, and $h_\sigma(\sigma) \neq 0$, and $f(z) = (z-\sigma)^{m_{\sigma,f}} h_\sigma(z)$ Eventually for $z$ in nbhds of $\sigma$.
+\end{lemma}
+\begin{proof}
+\uses{def:m_rho_order}
+\leanok
+Let $\sigma$ be an arbitrary zero in $\mathcal{K}_f(R_1)$.
+By assumption, $f$ is `AnalyticOnNhd` $\overline{\D}_1$. This means there is an open neighborhood $U$ of $\sigma$ where $f$ is analytic. On this neighborhood, $f$ can be represented by its Taylor series centered at $\sigma$:
+$f(z) = \sum_{n=0}^\infty a_n (z-\sigma)^n$, where $a_n = \frac{f^{(n)}(\sigma)}{n!}$.
+Let $m = m_{\sigma,f}$. By \cref{def:m_rho_order}, $m$ is the analytic order of $f$ at $\sigma$. By definition of analytic order, this means that $m$ is the smallest non-negative integer such that $f^{(m)}(\sigma) \neq 0$.
+Since $\sigma \in \mathcal{K}_f(R_1)$, we have $f(\sigma)=0$. This implies that $m \ge 1$.
+The definition of order $m$ implies that $f^{(k)}(\sigma) = 0$ for all integers $0 \le k < m$, and $f^{(m)}(\sigma) \neq 0$.
+Consequently, the Taylor coefficients $a_k = f^{(k)}(\sigma)/k!$ are zero for $k < m$, and $a_m = f^{(m)}(\sigma)/m! \neq 0$.
+The Taylor series for $f(z)$ can thus be written as:
+$f(z) = a_m(z-\sigma)^m + a_{m+1}(z-\sigma)^{m+1} + a_{m+2}(z-\sigma)^{m+2} + \dots$
+We can factor out the term $(z-\sigma)^m$ from the series:
+$f(z) = (z-\sigma)^m \left( a_m + a_{m+1}(z-\sigma) + a_{m+2}(z-\sigma)^2 + \dots \right)$.
+This holds for all $z$ in the disk of convergence of the Taylor series, which is a neighborhood of $\sigma$.
+Let us define the function $h_\sigma(z)$ as the series in the parenthesis:
+$h_\sigma(z) = \sum_{j=0}^\infty a_{m+j} (z-\sigma)^j$.
+A power series defines an analytic function within its radius of convergence. This series for $h_\sigma(z)$ has the same radius of convergence as the series for $f(z)$, so $h_\sigma(z)$ is analytic in a neighborhood of $\sigma$, i.e., it is `AnalyticAt` $\sigma$.
+By our construction, the identity $f(z) = (z-\sigma)^m h_\sigma(z)$ holds in this neighborhood.
+Finally, we must verify that $h_\sigma(\sigma) \neq 0$. We evaluate $h_\sigma(z)$ at $z=\sigma$:
+$h_\sigma(\sigma) = a_m + a_{m+1}(\sigma-\sigma) + a_{m+2}(\sigma-\sigma)^2 + \dots = a_m$.
+As we established that $a_m \neq 0$, we have $h_\sigma(\sigma) \neq 0$. This completes the proof.
+\end{proof}
+
+\begin{definition}[C function] \label{def:C_function} \leanok
+Let $0<R_1<R<1$, and $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. We define the function $C_f:\overline{\D}_R\to\C$ as follows. This function is constructed by dividing $f(z)$ by a polynomial whose roots are the zeros of $f$ inside $\overline{\D}_{R_1}$. The definition is split into two cases to handle the points where the denominator would otherwise be zero.
+\[ C_f(z) = \begin{cases} \displaystyle\frac{f(z)}{\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}}} & \text{if } z \neq \rho \text{ for all } \rho \in \mathcal{K}_f(R_1) \\ \\ \displaystyle\frac{h_\sigma(\sigma)}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(\sigma-\rho)^{m_{\rho,f}}} & \text{if } z = \sigma \text{ for some } \sigma \in \mathcal{K}_f(R_1) \end{cases} \]
+\end{definition}
+
+\begin{lemma}[C analytic off K]\label{lem:C_analytic_off_K} \leanok \lean{lem_Cf_analytic_off_K}
+Let $0<R_1<R<1$, and $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. Then $C_f(z)$ is analyticAt $z$ for all $z \in \overline{\D}_R \setminus \mathcal{K}_f(R_1)$.
+\end{lemma}
+\begin{proof}
+\uses{def:C_function, lem:ratioAnalAt, lem:Contra_finiteKR, lem:m_rho_ge_1}
+\leanok
+Let $z$ be an arbitrary point in the set $\overline{\D}_R \setminus \mathcal{K}_f(R_1)$.
+By the definition of this set, $z \notin \mathcal{K}_f(R_1)$.
+According to \cref{def:C_function}, for such a point $z$, the function $C_f(z)$ is defined by the first case:
+$C_f(z) = \frac{f(z)}{\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}}}$.
+We can prove this function is analytic at $z$ by applying \cref{lem:ratioAnalAt}. Let's verify its hypotheses:
+\begin{itemize}
+    \item Let $h(z) = f(z)$, $S = \mathcal{K}_f(R_1)$, and for each $\rho \in S$, let $n_\rho = m_{\rho,f}$. The point of evaluation is $w=z$.
+    \item The function $h(z)=f(z)$ is `AnalyticOnNhd` $\overline{\D}_1$, so it is analytic at $z \in \overline{\D}_R \subset \overline{\D}_1$.
+    \item The set $S = \mathcal{K}_f(R_1)$ is the set of zeros of a non-zero analytic function in a compact set $\overline{\D}_{R_1}$, and is therefore a finite set, as stated by \cref{lem:Contra_finiteKR}.
+    \item For each $\rho \in S$, the exponent $n_\rho = m_{\rho,f}$ is a positive integer by \cref{lem:m_rho_ge_1}.
+    \item The point of evaluation $w=z$ is in $\overline{\D}_R \setminus S$, which is a subset of $\overline{\D}_1 \setminus S$.
+\end{itemize}
+All hypotheses of \cref{lem:ratioAnalAt} are satisfied. Therefore, we conclude that $C_f(z)$ is analytic at $z$. Since $z$ was an arbitrary point in $\overline{\D}_R \setminus \mathcal{K}_f(R_1)$, the statement holds for all such points.
+\end{proof}
+
+\begin{lemma}[C at zero] \label{lem:C_at_sigma_onK} \leanok \lean{lem_Cf_at_sigma_onK}
+Let $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. For each $\sigma \in \mathcal{K}_f(R_1)$, we have Eventually for $z$ in nbhds of $\sigma$, if $z=\sigma$ then
+\[C_f(z) = \frac{h_\sigma(z)}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}}}.\]
+\end{lemma}
+\begin{proof}
+\uses{def:C_function}
+\leanok
+Let $\sigma$ be an arbitrary point in $\mathcal{K}_f(R_1)$. We are interested in the case where $z=\sigma$.
+By \cref{def:C_function}, when $z = \sigma$, $C_f(z)$ is defined by the second case:
+$C_f(\sigma) = \frac{h_\sigma(\sigma)}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(\sigma-\rho)^{m_{\rho,f}}}$.
+The expression we are asked to prove is $C_f(z) = \frac{h_\sigma(z)}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}}}$.
+Evaluating the right-hand side at $z=\sigma$ gives:
+$\frac{h_\sigma(\sigma)}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(\sigma-\rho)^{m_{\rho,f}}}$.
+This is precisely the definition of $C_f(\sigma)$. Thus, the equality holds at $z=\sigma$. The phrase "Eventually for $z$ in nbhds of $\sigma$" is satisfied trivially, as the statement only concerns the point $z=\sigma$ itself and holds true at that point regardless of the neighborhood.
+\end{proof}
+
+\begin{lemma}[Zeros isolated]\label{lem:K_isolated} \leanok \lean{lem_K_isolated}
+Let $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. For any $\sigma,\rho \in \mathcal{K}_f(R_1)$ with $\sigma\neq\rho$,
+Eventually for $z$ in nbhds of $\sigma$, we have $z\neq\rho$.
+\end{lemma}
+\begin{proof}
+\leanok
+The statement "Eventually for $z$ in nbhds of $\sigma$, we have $z\neq\rho$" means that there exists a neighborhood of $\sigma$ that does not contain $\rho$.
+Let $\sigma$ and $\rho$ be two distinct points in $\mathcal{K}_f(R_1)$.
+Let $d = |\sigma - \rho|$ be the distance between them. Since $\sigma \neq \rho$, we have $d > 0$.
+Consider the open disk $U = D(\sigma, d)$ centered at $\sigma$ with radius $d$. This is a neighborhood of $\sigma$.
+For any point $z \in U$, the distance from $z$ to $\sigma$ is less than $d$, i.e., $|z - \sigma| < d$.
+The distance from any such $z$ to $\rho$ is $|z - \rho|$. By the reverse triangle inequality, $|z - \rho| = |(z - \sigma) - (\rho - \sigma)| \ge ||\rho - \sigma| - |z - \sigma|| = |d - |z - \sigma||$.
+Since $|z - \sigma| < d$, the value $d - |z - \sigma|$ is positive. Thus, $|z - \rho| > 0$, which implies $z \neq \rho$.
+Therefore, the neighborhood $U$ of $\sigma$ does not contain the point $\rho$. This proves the claim.
+\end{proof}
+
+\begin{lemma}[C near zero]\label{lem:C_at_sigma_offK0} \leanok \lean{lem_Cf_at_sigma_offK0}
+Let $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. For each $\sigma \in \mathcal{K}_f(R_1)$, we have Eventually for $z$ in nbhds of $\sigma$, if $z\neq\sigma$ then
+\[C_f(z) = \frac{(z-\sigma)^{m_{\sigma,f}} h_\sigma(z)}{\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}}}.\]
+\end{lemma}
+\begin{proof}
+\uses{lem:Contra_finiteKR, lem:K_isolated, def:C_function, lem:analytic_zero_factor}
+\leanok
+Let $\sigma$ be an arbitrary point in $\mathcal{K}_f(R_1)$.
+By \cref{lem:Contra_finiteKR}, the set $\mathcal{K}_f(R_1)$ is finite. Let $\mathcal{K}_f(R_1) \setminus \{\sigma\} = \{\rho_1, \rho_2, \dots, \rho_k\}$.
+For each $\rho_i$ in this set, since $\rho_i \neq \sigma$, by \cref{lem:K_isolated} there exists a neighborhood $U_i$ of $\sigma$ such that for all $z \in U_i$, $z \neq \rho_i$.
+Let $U = \bigcap_{i=1}^k U_i$. As a finite intersection of neighborhoods of $\sigma$, $U$ is also a neighborhood of $\sigma$. For any $z \in U$, we have $z \neq \rho_i$ for all $i=1, \dots, k$.
+Now, consider a point $z$ in this neighborhood $U$ such that $z \neq \sigma$. For such a $z$, we have $z \notin \{\rho_1, \dots, \rho_k\}$ and $z \neq \sigma$, which means $z \notin \mathcal{K}_f(R_1)$.
+By the first case of \cref{def:C_function}, for such a $z$, we have $C_f(z) = \frac{f(z)}{\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}}}$.
+From \cref{lem:analytic_zero_factor}, there exists a neighborhood of $\sigma$, say $V$, and a function $h_\sigma(z)$ such that $f(z) = (z-\sigma)^{m_{\sigma,f}} h_\sigma(z)$ for all $z \in V$.
+Let $W = U \cap V$. This is also a neighborhood of $\sigma$. For any $z \in W$ with $z \neq \sigma$, both of the above representations are valid. Substituting the expression for $f(z)$ into the one for $C_f(z)$, we get:
+$C_f(z) = \frac{(z-\sigma)^{m_{\sigma,f}} h_\sigma(z)}{\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}}}$.
+This holds for all $z$ in the punctured neighborhood $W \setminus \{\sigma\}$, which satisfies the "Eventually" condition.
+\end{proof}
+
+\begin{lemma}[Product split]\label{lem:prod_no_sigma1} \leanok \lean{lem_prod_no_sigma1}
+Let $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. For each $\sigma \in \mathcal{K}_f(R_1)$ we have
+\[\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}} =(z-\sigma)^{m_{\sigma,f}}\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}} \]
+\end{lemma}
+\begin{proof}
+\uses{lem:Contra_finiteKR}
+\leanok
+Let $S = \mathcal{K}_f(R_1)$. By \cref{lem:Contra_finiteKR}, $S$ is a finite set. Let $\sigma$ be any element of $S$.
+The set $S$ can be partitioned into two disjoint subsets: $\{\sigma\}$ and $S \setminus \{\sigma\}$.
+The product over the finite set $S$ can be split into the product of the terms corresponding to these two subsets. Let $a_\rho(z) = (z-\rho)^{m_{\rho,f}}$.
+The product over $S$ is $\prod_{\rho \in S} a_\rho(z)$.
+By the commutative property of multiplication, we can separate the term for $\rho=\sigma$:
+$\prod_{\rho \in S} a_\rho(z) = a_\sigma(z) \cdot \left( \prod_{\rho \in S \setminus \{\sigma\}} a_\rho(z) \right)$.
+Substituting the definition of $a_\rho(z)$ back into this identity gives:
+$\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}} = (z-\sigma)^{m_{\sigma,f}} \cdot \left( \prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}} \right)$.
+This is a fundamental property of products over finite sets.
+\end{proof}
+
+\begin{lemma}[Product quotient]\label{lem:prod_no_sigma2} \leanok \lean{lem_prod_no_sigma2}
+Let $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. For each $\sigma \in \mathcal{K}_f(R_1)$ and $z\notin \mathcal{K}_f(R_1)$, we have
+\[\frac{(z-\sigma)^{m_{\sigma,f}}}{\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}}} = \frac{1}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}}}\]
+\end{lemma}
+\begin{proof}
+\uses{lem:prod_no_sigma1}
+\leanok
+From \cref{lem:prod_no_sigma1}, we have the identity:
+$\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}} = (z-\sigma)^{m_{\sigma,f}} \prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}}$.
+To manipulate this equation by division, we must ensure the terms we divide by are non-zero.
+The crucial assumption is that $z \notin \mathcal{K}_f(R_1)$. This means that for every $\rho \in \mathcal{K}_f(R_1)$, we have $z \neq \rho$, and therefore $z-\rho \neq 0$.
+Since $m_{\rho,f} \ge 1$, it follows that $(z-\rho)^{m_{\rho,f}} \neq 0$ for all $\rho \in \mathcal{K}_f(R_1)$.
+This implies that all factors in the products are non-zero. In particular, the denominator on the left-hand side, $\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}}$, is non-zero. Also, the term $(z-\sigma)^{m_{\sigma,f}}$ is non-zero.
+We can therefore divide both sides of the identity from \cref{lem:prod_no_sigma1} by the non-zero quantity $(z-\sigma)^{m_{\sigma,f}} \cdot \left(\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}}\right)$.
+Starting with the identity and dividing by $\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}}$ gives:
+$1 = \frac{(z-\sigma)^{m_{\sigma,f}} \prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}}}{\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}}}$.
+Now, dividing by the non-zero term $\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}}$ yields the desired result:
+$\frac{1}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}}} = \frac{(z-\sigma)^{m_{\sigma,f}}}{\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}}}$.
+\end{proof}
+
+\begin{lemma}[C off K]\label{lem:C_at_sigma_offK} \leanok \lean{lem_Cf_at_sigma_offK}
+Let $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. For each $\sigma \in \mathcal{K}_f(R_1)$, we have Eventually for $z$ in nbhds of $\sigma$, if $z\neq\sigma$ then
+\[C_f(z) = \frac{h_\sigma(z)}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}}}.\]
+\end{lemma}
+\begin{proof}
+\uses{lem:C_at_sigma_offK0, lem:prod_no_sigma2}
+\leanok
+By \cref{lem:C_at_sigma_offK0}, there exists a neighborhood $W$ of $\sigma$ such that for all $z \in W$ with $z \neq \sigma$, we have the identity:
+$C_f(z) = \frac{(z-\sigma)^{m_{\sigma,f}} h_\sigma(z)}{\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}}}$.
+We can rewrite the right-hand side as a product:
+$C_f(z) = h_\sigma(z) \cdot \left( \frac{(z-\sigma)^{m_{\sigma,f}}}{\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}}} \right)$.
+For a point $z \in W$ with $z \neq \sigma$, we established in the proof of \cref{lem:C_at_sigma_offK0} that $z \notin \mathcal{K}_f(R_1)$.
+Therefore, the conditions for \cref{lem:prod_no_sigma2} are met for such a point $z$. Applying this lemma, we can replace the fractional part:
+$\frac{(z-\sigma)^{m_{\sigma,f}}}{\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}}} = \frac{1}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}}}$.
+Substituting this back into the expression for $C_f(z)$ gives:
+$C_f(z) = h_\sigma(z) \cdot \frac{1}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}}} = \frac{h_\sigma(z)}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}}}$.
+This equality holds for all $z \in W \setminus \{\sigma\}$, which satisfies the "Eventually" condition.
+\end{proof}
+
+\begin{lemma}[C local form]\label{lem:C_at_sigma} \leanok \lean{lem_Cf_at_sigma}
+Let $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. For each $\sigma \in \mathcal{K}_f(R_1)$, we have Eventually for $z$ in nbhds of $\sigma$,
+\[C_f(z) = \frac{h_\sigma(z)}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}}}.\]
+\end{lemma}
+\begin{proof}
+\uses{lem:C_at_sigma_offK, lem:C_at_sigma_onK}
+\leanok
+Let $\sigma$ be an arbitrary point in $\mathcal{K}_f(R_1)$. Let us define the function $g_\sigma(z) = \frac{h_\sigma(z)}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}}}$.
+From \cref{lem:C_at_sigma_offK}, we know there exists a neighborhood of $\sigma$, let's call it $W$, such that for all $z \in W \setminus \{\sigma\}$, the equality $C_f(z) = g_\sigma(z)$ holds.
+From \cref{lem:C_at_sigma_onK}, we know that at the point $z=\sigma$, the equality $C_f(\sigma) = g_\sigma(\sigma)$ also holds.
+Combining these two results, we see that $C_f(z) = g_\sigma(z)$ for all points $z$ in the neighborhood $W$. This proves the statement.
+\end{proof}
+
+
+
+\begin{lemma}[h ratio analytic]\label{lem:h_ratio_anal} \leanok \lean{lem_h_ratio_anal}
+Let $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. For each $\sigma \in \mathcal{K}_f(R_1)$, the function $\frac{h_\sigma(z)}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}}}$ is analyticAt $\sigma$.
+\end{lemma}
+\begin{proof}
+\uses{lem:ratioAnalAt, lem:analytic_zero_factor, lem:Contra_finiteKR, lem:m_rho_ge_1}
+\leanok
+Let $\sigma$ be an arbitrary point in $\mathcal{K}_f(R_1)$. We want to prove that the function $g_\sigma(z) = \frac{h_\sigma(z)}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}}}$ is analytic at $\sigma$.
+We will use \cref{lem:ratioAnalAt} with the point of evaluation $w=\sigma$. Let's identify the components and verify the hypotheses:
+\begin{itemize}
+    \item The numerator function is $h(z) = h_\sigma(z)$.
+    \item The set of roots in the denominator is $S = \mathcal{K}_f(R_1) \setminus \{\sigma\}$.
+    \item The exponents are $n_\rho = m_{\rho,f}$ for each $\rho \in S$.
+\end{itemize}
+Now we check the conditions of \cref{lem:ratioAnalAt}:
+\begin{enumerate}
+    \item $h(z)$ must be analytic at $\sigma$. By \cref{lem:analytic_zero_factor}, the function $h_\sigma(z)$ is analytic at $\sigma$. This condition is met.
+    \item $S$ must be a finite set. Since $\mathcal{K}_f(R_1)$ is finite (by \cref{lem:Contra_finiteKR}), its subset $S$ is also finite. This condition is met.
+    \item For each $\rho \in S$, $n_\rho$ must be a positive integer. For $\rho \in S$, $n_\rho = m_{\rho,f}$. By \cref{lem:m_rho_ge_1}, $m_{\rho,f} \ge 1$. This condition is met.
+    \item The point of evaluation $\sigma$ must not be in $S$. By definition, $S = \mathcal{K}_f(R_1) \setminus \{\sigma\}$, so $\sigma \notin S$. This condition is met.
+\end{enumerate}
+Since all hypotheses of \cref{lem:ratioAnalAt} are satisfied, we can conclude that the function $g_\sigma(z)$ is analytic at $\sigma$.
+\end{proof}
+
+\begin{lemma}[C analytic at K]\label{lem:C_analytic_at_K} \leanok \lean{lem_Cf_analytic_at_K}
+Let $0<R_1<R<1$, and $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. Then for every $\sigma \in \mathcal{K}_f(R_1)$, the function $C_f(z)$ is analyticAt $\sigma$.
+\end{lemma}
+\begin{proof}
+\uses{lem:C_at_sigma, lem:h_ratio_anal}
+\leanok
+Let $\sigma$ be an arbitrary point in $\mathcal{K}_f(R_1)$.
+By \cref{lem:C_at_sigma}, there exists a neighborhood of $\sigma$, say $W$, such that for all $z \in W$, $C_f(z)$ is equal to the function $g_\sigma(z) = \frac{h_\sigma(z)}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(z-\rho)^{m_{\rho,f}}}$.
+By \cref{lem:h_ratio_anal}, the function $g_\sigma(z)$ is analytic at $\sigma$.
+A function is defined to be analytic at a point $\sigma$ if it is equal to a function known to be analytic at $\sigma$ in a neighborhood of $\sigma$.
+Since $C_f(z) = g_\sigma(z)$ on the neighborhood $W$ and $g_\sigma(z)$ is analytic at $\sigma$, it follows directly that $C_f(z)$ is also analytic at $\sigma$.
+As $\sigma$ was an arbitrary element of $\mathcal{K}_f(R_1)$, this holds for all points in that set.
+\end{proof}
+
+\begin{lemma}[C is analytic]\label{lem:C_is_analytic} \leanok \lean{lem_Cf_is_analytic}
+Let $0<R_1<R<1$, and $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. Then $C_f(z)$ is analyticAt $z$ for all $z \in \overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:C_analytic_off_K, lem:C_analytic_at_K}
+Let $z$ be an arbitrary point in the closed disk $\overline{\D}_R$. We must show that $C_f$ is analytic at $z$.
+We can partition the domain $\overline{\D}_R$ into two disjoint sets: those points that are in $\mathcal{K}_f(R_1)$ and those that are not. Note that $\mathcal{K}_f(R_1) \subset \overline{\D}_{R_1} \subset \overline{\D}_R$.
+\textbf{Case 1:} The point $z$ is not in $\mathcal{K}_f(R_1)$.
+In this case, $z \in \overline{\D}_R \setminus \mathcal{K}_f(R_1)$. By \cref{lem:C_analytic_off_K}, the function $C_f$ is analytic at $z$.
+\textbf{Case 2:} The point $z$ is in $\mathcal{K}_f(R_1)$.
+In this case, let's call the point $\sigma = z$. By \cref{lem:C_analytic_at_K}, the function $C_f$ is analytic at $\sigma$.
+Since any point $z \in \overline{\D}_R$ must fall into one of these two cases, and we have shown that $C_f$ is analytic at $z$ in both cases, we conclude that $C_f(z)$ is analytic for all $z \in \overline{\D}_R$.
+\end{proof}
+
+
+
+
+\begin{lemma}[f nonzero off K]\label{lem:f_nonzero_off_K} \leanok \lean{lem_f_nonzero_off_K}
+Let $0<R_1<R<1$, and $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. Then $f(z)\neq0$ for all $z \in \overline{\D}_{R_1} \setminus \mathcal{K}_f(R_1)$.
+\end{lemma}
+\begin{proof}
+\uses{def:zerosetKfR}
+\leanok
+We prove this by contraposition. The contrapositive statement is: if $z \in \overline{\D}_{R_1}$ and $f(z)=0$, then $z \in \mathcal{K}_f(R_1)$.
+Let $z$ be a point in $\overline{\D}_{R_1}$ such that $f(z)=0$.
+The set $\mathcal{K}_f(R_1)$ is defined (in \cref{def:zerosetKfR}) as the set of all points $w$ in the closed disk $\overline{\D}_{R_1}$ for which $f(w)=0$.
+Since $z \in \overline{\D}_{R_1}$ and $f(z)=0$, $z$ satisfies the condition for membership in $\mathcal{K}_f(R_1)$.
+Therefore, $z \in \mathcal{K}_f(R_1)$.
+This proves the contrapositive, and thus the original statement is true.
+\end{proof}
+
+\begin{lemma}[C nonzero off K]\label{lem:C_nonzero_off_K} \leanok \lean{lem_Cf_nonzero_off_K}
+Let $0<R_1<R<1$, and $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. Then $C_f(z)\neq0$ for all $z \in \overline{\D}_{R_1} \setminus \mathcal{K}_f(R_1)$.
+\end{lemma}
+\begin{proof}
+\uses{def:C_function, lem:f_nonzero_off_K}
+\leanok
+Let $z$ be an arbitrary point in the set $\overline{\D}_{R_1} \setminus \mathcal{K}_f(R_1)$.
+By definition, $z \notin \mathcal{K}_f(R_1)$. According to the first case of \cref{def:C_function}, $C_f(z)$ is given by the ratio:
+$C_f(z) = \frac{f(z)}{\prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}}}$.
+A fraction is non-zero if and only if its numerator is non-zero and its denominator is finite and non-zero.
+\textbf{Numerator:} The numerator is $f(z)$. Since $z \in \overline{\D}_{R_1} \setminus \mathcal{K}_f(R_1)$, by \cref{lem:f_nonzero_off_K}, we have $f(z) \neq 0$.
+\textbf{Denominator:} The denominator is the product $P(z) = \prod_{\rho\in\mathcal{K}_f(R_1)}(z-\rho)^{m_{\rho,f}}$. Since $\mathcal{K}_f(R_1)$ is finite, this is a finite product. For the product to be non-zero, each of its factors must be non-zero. A factor is of the form $(z-\rho)^{m_{\rho,f}}$. Since we assumed $z \notin \mathcal{K}_f(R_1)$, we have $z \neq \rho$ for all $\rho \in \mathcal{K}_f(R_1)$. This means $z-\rho \neq 0$. As $m_{\rho,f} \ge 1$, it follows that $(z-\rho)^{m_{\rho,f}} \neq 0$. Since every factor is non-zero, the denominator is non-zero.
+Since the numerator is non-zero and the denominator is non-zero, their ratio $C_f(z)$ must be non-zero.
+\end{proof}
+
+\begin{lemma}[C nonzero on K]\label{lem:C_nonzero_on_K} \leanok \lean{lem_Cf_nonzero_on_K}
+Let $0<R_1<R<1$, and $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. Then $C_f(\sigma)\neq0$ for all $\sigma \in \mathcal{K}_f(R_1)$.
+\end{lemma}
+\begin{proof}
+\uses{def:C_function, lem:analytic_zero_factor}
+\leanok
+Let $\sigma$ be an arbitrary point in $\mathcal{K}_f(R_1)$.
+By the second case of \cref{def:C_function}, the value of $C_f$ at $\sigma$ is given by:
+$C_f(\sigma) = \frac{h_\sigma(\sigma)}{\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(\sigma-\rho)^{m_{\rho,f}}}$.
+We must show this expression is non-zero.
+\textbf{Numerator:} The numerator is $h_\sigma(\sigma)$. By \cref{lem:analytic_zero_factor}, the function $h_\sigma$ is constructed specifically to satisfy $h_\sigma(\sigma) \neq 0$.
+\textbf{Denominator:} The denominator is the product $\prod_{\rho\in\mathcal{K}_f(R_1) \setminus\{\sigma\}}(\sigma-\rho)^{m_{\rho,f}}$. This is a finite product. For any $\rho$ in the indexing set $\mathcal{K}_f(R_1) \setminus\{\sigma\}$, we have $\rho \neq \sigma$, which implies $\sigma-\rho \neq 0$. Since $m_{\rho,f} \ge 1$, the factor $(\sigma-\rho)^{m_{\rho,f}}$ is also non-zero. As a finite product of non-zero terms, the denominator is non-zero.
+Since the numerator is non-zero and the denominator is non-zero, their ratio $C_f(\sigma)$ is non-zero.
+\end{proof}
+
+\begin{lemma}[C never zero]\label{lem:C_never_zero} \leanok \lean{lem_Cf_never_zero}
+Let $0<R_1<R<1$, and $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. Then $C_f(z)\neq0$ for all $z\in\overline{\D}_{R_1}$.
+\end{lemma}
+\begin{proof}
+\uses{lem:C_nonzero_off_K, lem:C_nonzero_on_K}
+\leanok
+Let $z$ be an arbitrary point in the closed disk $\overline{\D}_{R_1}$.
+We partition the domain $\overline{\D}_{R_1}$ into two disjoint sets: $\mathcal{K}_f(R_1)$ and $\overline{\D}_{R_1} \setminus \mathcal{K}_f(R_1)$. Any point $z \in \overline{\D}_{R_1}$ must belong to exactly one of these sets.
+\textbf{Case 1:} $z \in \overline{\D}_{R_1} \setminus \mathcal{K}_f(R_1)$.
+By \cref{lem:C_nonzero_off_K}, we have $C_f(z) \neq 0$.
+\textbf{Case 2:} $z \in \mathcal{K}_f(R_1)$.
+By \cref{lem:C_nonzero_on_K}, we have $C_f(z) \neq 0$.
+In both possible cases, $C_f(z)$ is non-zero. Therefore, we conclude that $C_f(z) \neq 0$ for all $z \in \overline{\D}_{R_1}$.
+\end{proof}
+
+\begin{lemma}[Blaschke diff]\label{lem:bl_num_diff} \lean{bl_num_diff} \leanok
+Let $0<R_1<R<1$ and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then the function $z \mapsto \prod_{\rho\in \mathcal K_f(R_1)} (R-\bar\rho z/R)^{m_{\rho,f}}$ is differentiableAt $z$ for all $z\in \overline{\D}_{R}$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:blaschke_pow_diff_nonzero, lem:Contra_finiteKR}
+By \cref{lem:blaschke_pow_diff_nonzero}. Note $\mathcal K_f(R_1)$ is finite by \cref{lem:Contra_finiteKR}
+\end{proof}
+
+
+\begin{lemma}[Blaschke nonzero]\label{lem:bl_num_nonzero} \leanok \lean{lem_bl_num_nonzero}
+Let $0<R_1<R<1$ and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then $\prod_{\rho\in \mathcal K_f(R_1)} (R-\bar\rho z/R)^{m_{\rho,f}}\neq0$ for all $z\in \overline{\D}_{R_1}\setminus\mathcal K_f(R_1)$.
+\end{lemma}
+\begin{proof}
+\uses{lem:blaschke_pow_diff_nonzero, lem:Contra_finiteKR}
+\leanok
+By \cref{lem:blaschke_pow_diff_nonzero}. Note $\mathcal K_f(R_1)$ is finite by \cref{lem:Contra_finiteKR}
+\end{proof}
+
+\begin{definition}[Blaschke B] \label{def:Bf}  \lean{Bf} \leanok
+Let $0<R_1<R<1$, and $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. Define the function $B_f:\overline{\D}_R\to\C$ as $B_f(z)=C_f(z)\prod_{\rho\in \mathcal K_f(R_1)} (R-\bar\rho z/R)^{m_{\rho,f}}$.
+\end{definition}
+
+\begin{lemma}[B and C relation] \label{lem:BfCf} \lean{lem_BfCf} \leanok
+Let $0<R_1<R<1$, and $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. For $z\in \overline{\D}_R\setminus\mathcal K_f(R_1)$, we have
+\begin{align*}
+B_f(z)= f(z) \frac{\prod_{\rho\in \mathcal K_f(R_1)} (R-\bar\rho z/R)^{m_{\rho,f}}}{\prod_{\rho\in \mathcal K_f(R_1)} (z-\rho)^{m_{\rho,f}}}
+\end{align*}
+\end{lemma}
+\begin{proof}
+\uses{def:Bf, def:C_function}
+\leanok
+By \cref{def:Bf,def:C_function}
+\end{proof}
+
+\begin{lemma}[B division]\label{lem:Bf_div} \lean{lem_Bf_div} \leanok
+Let $0<R_1<R<1$, and $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. For $z\in \overline{\D}_R\setminus\mathcal K_f(R_1)$, we have
+\begin{align*}
+\frac{\prod_{\rho\in \mathcal K_f(R_1)} (R-\bar\rho z/R)^{m_{\rho,f}}}{\prod_{\rho\in \mathcal K_f(R_1)} (z-\rho)^{m_{\rho,f}}} = \prod_{\rho\in \mathcal K_f(R_1)}\frac{ (R-\bar\rho z/R)^{m_{\rho,f}}}{(z-\rho)^{m_{\rho,f}}}
+\end{align*}
+\end{lemma}
+\begin{proof}
+\uses{lem:Contra_finiteKR}
+\leanok
+By Mathlib: Finset.prod\_div\_distrib
+Note $\mathcal K_f(R_1)$ is finite by \cref{lem:Contra_finiteKR}.
+\end{proof}
+
+\begin{lemma}[B product pow]\label{lem:Bf_prodpow} \lean{lem_Bf_prodpow} \leanok
+Let $0<R_1<R<1$, and $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. For $z\in \overline{\D}_R\setminus\mathcal K_f(R_1)$, we have
+\begin{align*}
+\prod_{\rho\in \mathcal K_f(R_1)}\frac{ (R-\bar\rho z/R)^{m_{\rho,f}}}{(z-\rho)^{m_{\rho,f}}}=
+\prod_{\rho\in \mathcal K_f(R_1)} \left(\frac{R-\bar\rho z/R}{z-\rho} \right)^{m_{\rho,f}}
+\end{align*}
+\end{lemma}
+\begin{proof}
+\uses{lem:Bf_div, lem:Contra_finiteKR}
+\leanok
+By \cref{lem:Bf_div} and Mathlib: div\_pow
+Note $m_{\rho,f}\in\N$.
+Note $\mathcal K_f(R_1)$ is finite by \cref{lem:Contra_finiteKR}.
+\end{proof}
+
+\begin{lemma}[B off K]\label{lem:Bf_off_K} \lean{lem_Bf_off_K} \leanok
+Let $0<R_1<R<1$, and $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. For $z\in \overline{\D}_R\setminus\mathcal K_f(R_1)$, we have
+\begin{align*}
+B_f(z)= f(z)\prod_{\rho\in \mathcal K_f(R_1)} \left(\frac{R-\bar\rho z/R}{z-\rho} \right)^{m_{\rho,f}}.
+\end{align*}
+\end{lemma}
+\begin{proof}
+\uses{lem:BfCf, lem:Bf_div, lem:Bf_prodpow}
+\leanok
+By \cref{lem:BfCf} and \cref{lem:Bf_div,lem:Bf_prodpow}
+\end{proof}
+
+
+\section{Bounding $K\le 3\log B$}
+
+\begin{lemma}[Zero value] \label{lem:frho_zero} \lean{lem_frho_zero} \leanok
+Let $0<R_1<R<1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$. If $\rho\in \mathcal K_f(R_1)$ then $f(\rho)=0$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{def:zerosetKfR}
+Unfold definition \ref{def:zerosetKfR}.
+\end{proof}
+
+\begin{lemma}[Zero contrapositive] \label{lem:frho_zero_contra} \lean{lem_frho_zero_contra} \leanok
+Let $0<R_1<R<1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$. If $f(\rho)\neq 0$ then $\rho\notin \mathcal K_f(R_1)$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:frho_zero}
+Contrapositive of \cref{lem:frho_zero}
+\end{proof}
+
+\begin{lemma}[Not zero]\label{lem:f_is_nonzero} \lean{lem_f_is_nonzero} \leanok
+Let $f:\C\to\C$. If $f(0)\neq0$, then $f$ is not the identically zero function.
+\end{lemma}
+\begin{proof} \leanok
+
+By definition of the identically zero function.
+\end{proof}
+
+\begin{lemma}[Disk bound]\label{lem:rho_in_disk_R1} \leanok \lean{lem_rho_in_disk_R1}
+Let $0<R_1<R<1$, and $f:\C\to\C$. If $\rho\in \mathcal K_f(R_1)$ then $|\rho|\le R_1$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{def:zerosetKfR}
+By \cref{def:zerosetKfR}, as $\mathcal{K}_f(R_1)$ is a subset of $\overline{\D}_{R_1}$.
+\end{proof}
+
+\begin{lemma}[Zero excluded]\label{lem:zero_not_in_Kf} \leanok \lean{lem_zero_not_in_Kf}
+Let $0<R_1<R<1$, and $f:\C\to\C$. If $f(0)\neq0$ then $0\notin \mathcal K_f(R_1)$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:frho_zero_contra}
+By \cref{lem:frho_zero_contra}.
+\end{proof}
+
+\begin{lemma}[Nonzero rho]\label{lem:rho_ne_zero} \leanok \lean{lem_rho_ne_zero}
+Let $0<R_1<R<1$, and $f:\C\to\C$. If $f(0)\neq0$ then $\rho\neq0$ for all $\rho\in \mathcal K_f(R_1)$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:zero_not_in_Kf}
+By \cref{lem:zero_not_in_Kf}, as $\rho$ is an element of $\mathcal{K}_f(R_1)$.
+\end{proof}
+
+\begin{lemma}[Mod positive]\label{lem:mod_pos_iff_ne_zero} \leanok \lean{lem_mod_pos_iff_ne_zero}
+Let $z \in \C$. If $z \neq 0$ then $|z| > 0$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:abspos}
+Shown in \cref{lem:abspos}
+\end{proof}
+
+\begin{lemma}[Rho positive]\label{lem:mod_rho_pos} \lean{lem_mod_rho_pos} \leanok
+Let $0<R_1<R<1$, and $f:\C\to\C$. If $f(0)\neq0$ then $|\rho|>0$ for all $\rho\in \mathcal K_f(R_1)$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:rho_ne_zero, lem:mod_pos_iff_ne_zero}
+By \cref{lem:rho_ne_zero} and \cref{lem:mod_pos_iff_ne_zero}.
+\end{proof}
+
+\begin{lemma}[Disk bound]\label{lem:rho_in_disk_R1_repeat} \lean{lem_rho_in_disk_R1_repeat} \leanok
+Let $0<R_1<R<1$, and $f:\C\to\C$. If $\rho\in \mathcal K_f(R_1)$ then $|\rho|\le R_1$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{def:zerosetKfR}
+By \cref{def:zerosetKfR}, as $\mathcal{K}_f(R_1)$ is a subset of $\overline{\D}_{R_1}$.
+\end{proof}
+
+\begin{lemma}[Inverse mono]\label{lem:inv_mono_decr} \lean{lem_inv_mono_decr} \leanok
+Let $x, y \in \R$. If $0 < x \le y$, then $1/x \ge 1/y$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Inverse bound]\label{lem:inv_mod_rho_ge_inv_R1} \lean{lem_inv_mod_rho_ge_inv_R1} \leanok
+Let $0<R_1<R<1$, and $f:\C\to\C$ with $f(0)\neq0$. If $\rho\in \mathcal K_f(R_1)$ then $1/|\rho|\ge 1/R_1$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:mod_rho_pos, lem:rho_in_disk_R1_repeat, lem:inv_mono_decr}
+By \cref{lem:mod_rho_pos}, \cref{lem:rho_in_disk_R1_repeat}, and \cref{lem:inv_mono_decr}.
+\end{proof}
+
+\begin{lemma}[Mult inequality]\label{lem:mul_pos_preserves_ineq} \lean{lem_mul_pos_preserves_ineq} \leanok
+Let $a, b, c \in \R$. If $a \le b$ and $c > 0$, then $ac \le bc$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Ratio bound]\label{lem:R_div_mod_rho_ge_R_div_R1} \lean{lem_R_div_mod_rho_ge_R_div_R1} \leanok
+Let $0<R_1<R<1$, and $f:\C\to\C$ with $f(0)\neq0$. If $\rho\in \mathcal K_f(R_1)$ then $R/|\rho|\ge R/R_1$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:inv_mod_rho_ge_inv_R1, lem:mul_pos_preserves_ineq}
+By \cref{lem:inv_mod_rho_ge_inv_R1} and \cref{lem:mul_pos_preserves_ineq}, using the hypothesis $R>0$.
+\end{proof}
+
+
+\begin{lemma}[Mod product]\label{lem:mod_of_prod2} \lean{lem_mod_of_prod2} \leanok
+Let $\{w_\rho\}_{\rho\in K}$ be a finite collection of complex numbers. We have $|\prod_{\rho\in I} w_\rho| = \prod_{\rho\in K} |w_\rho|$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[B modulus]\label{lem:mod_Bf_is_prod_mod} \lean{lem_mod_Bf_is_prod_mod} \leanok
+Let $0<R_1<R<1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$. If $\mathcal K_f(R_1)$ if finite, then $z\in \overline{\D}_R\setminus\mathcal K_f(R_1)$, we have
+$$|B_f(z)|=|f(z)|\prod_{\rho\in\mathcal K_f(R_1)}\Big|\left(\frac{R-z\bar\rho/R}{z-\rho}\right)^{m_\rho}\Big|$$.
+\end{lemma}
+\begin{proof}
+\uses{lem:Bf_off_K, lem:mod_of_prod2}
+\leanok
+By \cref{lem:Bf_off_K} and \cref{lem:mod_of_prod2} with $I=\mathcal K_f(R_1)$ and $w_\rho = (\frac{R-z\bar\rho/R}{z-\rho})^{m_\rho}$.
+\end{proof}
+
+\begin{lemma}[Abs power]\label{lem:abs_pow} \lean{lem_abs_pow} \leanok
+For $n\in\N$ and $w\in\C$, we have $|w^n|=|w|^n$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Power mod]\label{lem:Bmod_pow} \lean{lem_Bmod_pow} \leanok
+Let $0<R_1<R<1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. Then $\Big|\left(\frac{R-z\bar\rho/R}{z-\rho}\right)^{m_\rho}\Big|=\left|\frac{R-z\bar\rho/R}{z-\rho}\right|^{m_\rho}$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:abs_pow}
+By \cref{lem:abs_pow} with $n=m_\rho$ and $w=\frac{R-z\bar\rho/R}{z-\rho}$.
+\end{proof}
+
+
+\begin{lemma}[B modulus]\label{lem:mod_Bf_prod_mod} \lean{lem_mod_Bf_prod_mod} \leanok
+Let $0<R_1<R<1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$. If $\mathcal K_f(R_1)$ if finite, then $|B_f(z)|=|f(z)|\prod_{\rho\in\mathcal K_f(R_1)}\left|\frac{R-z\bar\rho/R}{z-\rho}\right|^{m_\rho}$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:mod_Bf_is_prod_mod, lem:Bmod_pow}
+By \cref{lem:mod_Bf_is_prod_mod,lem:Bmod_pow}.
+\end{proof}
+
+
+\begin{lemma}[B at zero]\label{lem:mod_Bf_at_0} \lean{lem_mod_Bf_at_0} \leanok
+Let $0<R_1<R<1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. Then $|B_f(0)|=|f(0)|\prod_{\rho\in\mathcal K_f(R_1)}\left|\frac{R}{-\rho}\right|^{m_\rho}|$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:mod_Bf_is_prod_mod}
+By evaluating the expression in \cref{lem:mod_Bf_is_prod_mod} at $z=0$.
+\end{proof}
+
+
+\begin{lemma}[Abs division]\label{lem:mod_div_} \lean{lem_mod_div_} \leanok
+Let $w_1, w_2 \in \C$ with $w_2 \neq 0$. We have $|w_1/w_2| = |w_1|/|w_2|$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Abs neg] \label{lem:mod_neg} \lean{lem_mod_neg}\leanok
+Let $w \in \C$. We have $|-w| = |w|$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Abs ratio] \label{lem:mod_div_and_neg} \lean{lem_mod_div_and_neg} \leanok
+Let $R>0$ and $\rho\in\C$ with $\rho \neq 0$. We have $|\frac{R}{-\rho}| = |R|/|\rho|$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:mod_div_, lem:rho_ne_zero, lem:mod_neg}
+By \cref{lem:mod_div_,lem:rho_ne_zero,lem:mod_neg} with $w_1=R$ and $\rho$.
+\end{proof}
+
+
+\begin{lemma}[B zero form]\label{lem:mod_Bf_at_0_eval} \lean{lem_mod_Bf_at_0_eval} \leanok
+Let $0<R_1<R<1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. Then $|B_f(0)|=|f(0)|\prod_{\rho\in\mathcal K_f(R_1)}(|R|/|\rho|)^{m_\rho}$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:mod_div_and_neg, lem:rho_ne_zero, lem:mod_Bf_at_0}
+By applying \cref{lem:mod_div_and_neg,lem:rho_ne_zero} to the expression in \cref{lem:mod_Bf_at_0}.
+\end{proof}
+
+\begin{lemma}[Abs positive]\label{lem:mod_of_pos_real} \lean{lem_mod_of_pos_real}\leanok
+Let $x \in \R$. If $x>0$, then $|x|=x$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+
+\begin{lemma}[B zero form]\label{lem:mod_Bf_at_0_as_ratio} \lean{lem_mod_Bf_at_0_as_ratio} \leanok
+Let $0<R_1<R<1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. Then $|B_f(0)|=|f(0)|\prod_{\rho\in\mathcal K_f(R_1)}(R/|\rho|)^{m_\rho}$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:mod_of_pos_real, lem:mod_Bf_at_0_eval}
+By applying \cref{lem:mod_of_pos_real} with $x=R>0$ to the expression in \cref{lem:mod_Bf_at_0_eval}.
+\end{proof}
+
+
+\begin{lemma}[Prod inequality]\label{lem:prod_ineq} \lean{lem_prod_ineq} \leanok
+Let $K$ be a finite set, $a:K\to\R$, and $b:K\to\R$. If $0\le a_\rho \le b_\rho$ for all $\rho\in K$, then $\prod_{\rho\in K} a_\rho \le \prod_{\rho\in K} b_\rho$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Power bound]\label{lem:power_ineq} \lean{lem_power_ineq}\leanok
+Let $n \in \N$. If $c > 1$ and $n \ge 1$, then $c \le c^n$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Power one]\label{lem:power_ineq_1}\lean{lem_power_ineq_1}\leanok
+Let $n \in \N$. If $c \ge 1$ and $n \ge 1$, then $1 \le c^n$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:power_ineq}
+Apply \cref{lem:power_ineq}, and then assumption $1 \le c$.
+\end{proof}
+
+\begin{lemma}[Product power]\label{lem:prod_power_ineq} \lean{lem_prod_power_ineq} \leanok
+Let $K$ be a finite set. If $c_{\rho} \ge 1$, $n_\rho \in \N$, and $n_{\rho} \ge 1$ for all $\rho\in K$, then $\prod_{\rho\in K} c_{\rho}^{n_{\rho}} \ge \prod_{\rho\in K} 1$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:prod_ineq, lem:power_ineq}
+By \cref{lem:prod_ineq} $c_{\rho} \le c_{\rho}^{n_\rho}$. Then apply \cref{lem:power_ineq} with $a_{\rho}=c_{\rho}$, $b_{\rho}=c_{\rho}^{n_\rho}$.
+\end{proof}
+
+
+\begin{lemma}[Product one]\label{lem:prod_1} \lean{lem_prod_1}\leanok
+Let $K$ be a finite set. Then $\prod_{\rho\in K} 1=1$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Power bound]\label{lem:prod_power_ineq1} \lean{lem_prod_power_ineq1} \leanok
+Let $K$ be a finite set. If $c_{\rho} \ge 1$, $n_\rho \in \N$, and $n_{\rho} \ge 1$ for all $\rho\in K$, then $\prod_{\rho\in K} c_{\rho}^{n_{\rho}} \ge 1$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:prod_power_ineq, lem:prod_1}
+By \cref{lem:prod_power_ineq,lem:prod_1}.
+\end{proof}
+
+
+\begin{lemma}[Modulus bound]\label{lem:mod_lower_bound_1} \lean{lem_mod_lower_bound_1} \leanok
+Let $0<R_1<R<1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then $\prod_{\rho\in\mathcal K_f(R_1)}(3/2)^{m_\rho} \ge 1$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:m_rho_ge_1, lem:m_rho_is_nat, lem:Contra_finiteKR, lem:prod_power_ineq1}
+First $m_\rho\in\N$ and $m_\rho\ge1$ by \cref{lem:m_rho_ge_1,lem:m_rho_is_nat}. Also $\mathcal K_f(R_1)$ is finite by \cref{lem:Contra_finiteKR}. Now apply \cref{lem:prod_power_ineq1} with $K=\mathcal K_f(R_1)$, $b_\rho=3/2$, and $n=m_\rho$.
+\end{proof}
+
+\begin{lemma}[B analytic]\label{lem:Bf_is_analytic} \lean{lem_Bf_is_analytic} \leanok
+Let $0<R_1<R<1$ and $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)\neq0$. Then $B_f(z)$ is AnalyticOnNhd $\overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\uses{lem:C_is_analytic}
+\leanok
+By \cref{lem:C_is_analytic}.
+\end{proof}
+
+\begin{lemma}[Boundary mod]\label{lem:mod_Bf_eq_mod_f_on_boundary} \lean{lem_mod_Bf_eq_mod_f_on_boundary} \leanok
+Let $R>0$ and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$. Then $|B_f(z)|=|f(z)|$ for all $|z|=R$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+
+\begin{lemma}[Boundary bound]\label{lem:Bf_bounded_on_boundary} \lean{lem_Bf_bounded_on_boundary} \leanok
+Let $B>1$, $0<R<1$ and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$. If $|f(z)|\le B$ on $|z|\le R$ then $|B_f(z)|\le B$ for all $|z|=R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:mod_Bf_eq_mod_f_on_boundary}
+By \cref{lem:mod_Bf_eq_mod_f_on_boundary} and the hypothesis $|f(z)| \le B$.
+\end{proof}
+
+
+\begin{lemma}[Max modulus]\label{lem:max_mod_principle_for_Bf} \lean{lem_max_mod_principle_for_Bf} \leanok
+Let $B>1$, $0<R<1$ and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$. If $B_f(z)$ is AnalyticOnNhd $\overline{\D}_R$ and $|B_f(z)|\le B$ for all $|z|=R$, then $|B_f(z)|\le B$ for all $|z|\le R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:HardMMP}
+By applying \cref{lem:HardMMP} with $h(z)=B_f(z)$.
+\end{proof}
+
+\begin{lemma}[Disk bound]\label{lem:Bf_bounded_in_disk_from_boundary} \lean{lem_Bf_bounded_in_disk_from_boundary} \leanok
+Let $B>1$, $0<R<1$ and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$. If $|B_f(z)|\le B$ for all $|z|=R$, then $|B_f(z)|\le B$ for all $|z|\le R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:Bf_is_analytic, lem:max_mod_principle_for_Bf}
+By \cref{lem:Bf_is_analytic} and \cref{lem:max_mod_principle_for_Bf}.
+\end{proof}
+
+\begin{lemma}[Disk bound]\label{lem:Bf_bounded_in_disk_from_f} \lean{lem_Bf_bounded_in_disk_from_f} \leanok
+Let $B>1$, $0<R<1$ and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$. If $|f(z)|\le B$ on $|z|\le R$, then $|B_f(z)|\le B$ for all $|z|\le R$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:Bf_bounded_on_boundary, lem:Bf_bounded_in_disk_from_boundary}
+By \cref{lem:Bf_bounded_on_boundary} and \cref{lem:Bf_bounded_in_disk_from_boundary}.
+\end{proof}
+
+\begin{lemma}[Zero bound]\label{lem:Bf_at_0_le_M} \lean{lem_Bf_at_0_le_M} \leanok
+Let $B>1$, $0<R<1$ and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$. If $|f(z)|\le B$ on $|z|\le R$, then $|B_f(0)|\le B$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:Bf_bounded_in_disk_from_f}
+By evaluating the inequality in \cref{lem:Bf_bounded_in_disk_from_f} at $z=0$.
+\end{proof}
+
+\begin{lemma}[Combine bounds]\label{lem:combine_bounds_on_Bf0} \lean{lem_combine_bounds_on_Bf0} \leanok
+Let $B>1$, $0<R_1<R<1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. If $|B_f(0)|\le B$ then $(3/2)^{\sum_{\rho\in\mathcal K_f(R_1)} m_\rho} \le B$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:mod_Bf_at_0_eval}
+\end{proof}
+
+\begin{lemma}[Jensen form]\label{lem:jensen_inequality_form} \lean{lem_jensen_inequality_form} \leanok
+Let $B>1$, $0<R_1<R<1$, and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$. If $f(0)=1$ and $|f(z)|\le B$ on $|z|\le R$, then $(3/2)^{\sum_{\rho\in\mathcal K_f(R_1)} m_\rho} \le B$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:Bf_at_0_le_M, lem:combine_bounds_on_Bf0}
+By \cref{lem:Bf_at_0_le_M} and \cref{lem:combine_bounds_on_Bf0}.
+\end{proof}
+
+\begin{lemma}[Log monotone]\label{lem:log_mono_inc} \lean{lem_log_mono_inc} \leanok
+Let $x,y \in \R$. If $0 < x \le y$, then $\log x \le \log y$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Jensen log]\label{lem:jensen_log_form} \lean{lem_jensen_log_form} \leanok
+Let $B>1$, $0<R_1<R<1$, and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$. If $f(0)=1$ and $|f(z)|\le B$ on $|z|\le R$, then $\sum_{\rho\in\mathcal K_f(R_1)} m_\rho \log(3/2) \le \log B$.
+\end{lemma}
+\begin{proof} \leanok
+\uses{lem:log_mono_inc, lem:jensen_inequality_form}
+By applying \cref{lem:log_mono_inc} to the inequality in \cref{lem:jensen_inequality_form}.
+\end{proof}
+
+\begin{lemma}[Three exceeds e]\label{lem:3_gt_e} \lean{lem_three_gt_e} \leanok
+We have $3 > \exp(1)$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+
+\begin{lemma}[Multiplicity bound]\label{lem:sum_m_rho_bound} \lean{lem_sum_m_rho_bound} \leanok
+Let $B>1$, $0<R_1<R<1$, and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$. If $f(0)=1$ and $|f(z)|\le B$ on $|z|\le R$, then $\sum_{\rho\in\mathcal K_f(R_1)} m_\rho \le \frac{\log B}{\log(R/R_1)}$.
+\end{lemma}
+\begin{proof}
+\uses{lem:jensen_log_form}
+\leanok
+Note $\log(R/R_1)>0$ since $R/R_1>1$.
+By \cref{lem:jensen_log_form}, and then divide both sides by $\log(R/R_1)$.
+\end{proof}
+
+
+\begin{lemma}[Sum inequality]\label{lem:sum_ineq} \lean{lem_sum_ineq} \leanok
+Let $K$ be a finite set, $a:K\to\R$, and $b:K\to\R$. If $a_\rho \le b_\rho$ for all $\rho\in K$, then $\sum_{\rho\in K} a_\rho \le \sum_{\rho\in K} b_\rho$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Multiplicity one]\label{lem:sum_m_rho_1} \lean{lem_sum_m_rho_1} \leanok
+Let $B>1$, $0<R_1<R<1$, and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$. Then $\sum_{\rho\in\mathcal K_f(R_1)} 1 \le \sum_{\rho\in\mathcal K_f(R_1)} m_\rho$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:Contra_finiteKR, lem:m_rho_ge_1, lem:sum_ineq}
+$\mathcal K_f(R_1)$ is finite by \cref{lem:Contra_finiteKR}.
+Now apply \cref{lem:m_rho_ge_1,lem:sum_ineq} with $K=\mathcal K_f(R_1)$, $a_\rho=1$, and $b_{\rho}=m_\rho$.
+\end{proof}
+
+\begin{lemma}[Ones bound]\label{lem:sum_1_bound} \lean{lem_sum_1_bound} \leanok
+Let $B>1$, $0<R_1<R<1$, and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$. If $f(0)=1$ and $|f(z)|\le B$ on $|z|\le R$, then $\sum_{\rho\in\mathcal K_f(R_1)} 1 \le \frac{\log B}{\log(R/R_1)}$.
+\end{lemma}
+\begin{proof}
+\uses{lem:sum_m_rho_1, lem:sum_m_rho_bound}
+\leanok
+By \cref{lem:sum_m_rho_1,lem:sum_m_rho_bound}.
+\end{proof}
+
+\begin{lemma}[Count identity]\label{lem:sum_1_is_card} \lean{lem_sum_1_is_card} \leanok
+Let $S$ be a finite set. Then $\sum_{s \in S} 1 = |S|$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+\begin{lemma}[Zeros bound]\label{lem:num_zeros_bound} \lean{lem_num_zeros_bound} \leanok
+Let $B>1$, $0<R_1<R<1$, and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$. If $f(0)=1$ and $|f(z)|\le B$ on $|z|\le R$, then $|\mathcal K_f(R_1)| \le \frac{\log B}{\log(R/R_1)}$.
+\end{lemma}
+\begin{proof}
+\uses{lem:Contra_finiteKR, lem:sum_1_bound, lem:sum_1_is_card}
+\leanok
+$\mathcal K_f(R_1)$ is finite by \cref{lem:Contra_finiteKR}.
+Now apply \cref{lem:sum_1_bound,lem:sum_1_is_card} with $S=\mathcal K_f(R_1)$
+\end{proof}
+
+
+\section{Log $L_f$}
+
+
+\begin{definition}[Log function]\label{def:Lf}\leanok
+\uses{def:Bf, lem:log_of_analytic}
+Let $0<R<1$, $B>1$, and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Define $L_f(z) = J_{B_f}(z)$ from \cref{lem:log_of_analytic}, where $B_f$ from \cref{def:Bf}.
+\end{definition}
+
+%%%
+
+\begin{lemma}[Disk analytic]\label{lem:Bf_is_analytic_on_disk} \lean{Bf_is_analytic_on_disk} \leanok
+Let $0<R_1<R<1$ and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$. Then $B_f(z)$ is AnalyticOnNhd $\overline{\D}_R$.
+\end{lemma}
+\begin{proof}
+\uses{lem:bl_num_diff,lem:C_is_analytic}
+\leanok
+By \cref{lem:bl_num_diff,lem:C_is_analytic}
+\end{proof}
+
+\begin{lemma}[Never zero]\label{lem:Bf_never_zero} \lean{Bf_never_zero} \leanok
+Let $0<R_1<R<1$ and $f:\overline{\D}_1\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$. Then $B_f(z) \neq 0$ for all $z \in \overline{\D}_{R_1}$.
+\end{lemma}
+\begin{proof}
+\uses{lem:bl_num_nonzero,lem:C_never_zero}
+\leanok
+By \cref{lem:bl_num_nonzero,lem:C_never_zero}
+\end{proof}
+%%%
+
+\begin{lemma}[B zero]\label{lem:Bf0_not_zero} \lean{Bf0_not_zero} \leanok
+Let $0<R_1<R<1$ and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$. Then $B_f(0) \neq 0$.
+\end{lemma}
+\begin{proof}\uses{lem:Bf_never_zero}
+\leanok
+By \cref{lem:Bf_never_zero} with $z=0$.
+\end{proof}
+%%%
+
+\begin{lemma}[Lf analytic]\label{lem:Lf_is_analytic} \lean{Lf_is_analytic} \leanok
+Let $0<R_1<R<1$ and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then $L_f(z)$ is AnalyticOnNhd $\overline{\D}_{r}$.
+\end{lemma}
+\begin{proof}\uses{def:Lf, lem:log_of_analytic}
+\leanok
+By \cref{def:Lf,lem:log_of_analytic}.
+\end{proof}
+%%%
+
+\begin{lemma}[Lf at zero]\label{lem:Lf_at_0_is_0} \lean{Lf_at_0_is_0} \leanok
+Let $0<R_1<R<1$ and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. We have $L_f(0) = 0$.
+\end{lemma}
+\begin{proof} \uses{def:Lf,lem:log_of_analytic}
+\leanok
+By \cref{def:Lf,lem:log_of_analytic}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Real part diff]\label{lem:re_Lf_as_diff_of_log_mods} \lean{re_Lf_as_diff_of_log_mods} \leanok
+Let $0<R_1<R<1$ and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then $\Re(L_f(z)) = \log|B_f(z)| - \log|B_f(0)|$ on $\overline{\D}_{r}$.
+\end{lemma}
+\begin{proof}
+\uses{def:Lf,lem:log_of_analytic, lem:real_log_of_modulus_difference}
+\leanok
+By \cref{def:Lf,lem:log_of_analytic} and \cref{lem:real_log_of_modulus_difference}
+\end{proof}
+%%%
+
+\begin{lemma}[Log bound]\label{lem:log_Bf_le_log_B} \lean{log_Bf_le_log_B} \leanok
+Let $B>1$, $0<R_1<R<1$ and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$. If $0<|B_f(z)|$ and $|B_f(z)|\le B$ for all $|z|\le R_1$, then $\log|B_f(z)| \le \log B$ for all $|z|\le R_1$.
+\end{lemma}
+\begin{proof} \uses{lem:log_mono_inc}
+\leanok
+By \cref{lem:log_mono_inc} with $x=|B_f(z)|$ and $y=B$.
+\end{proof}
+%%%
+
+\begin{lemma}[Log bound]\label{lem:log_Bf_le_log_B2} \lean{log_Bf_le_log_B2} \leanok
+Let $B>1$, $0<R_1<R<1$ and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$. If $|B_f(z)|\le B$ for all $|z|\le R$, then $\log|B_f(z)| \le \log B$ for all $|z|\le R_1$.
+\end{lemma}
+\begin{proof} \uses{lem:log_Bf_le_log_B, lem:Bf_never_zero} \leanok
+By \cref{lem:log_Bf_le_log_B,lem:Bf_never_zero}.
+\end{proof}
+%%%
+
+\begin{lemma}[Log bound]\label{lem:log_Bf_le_log_B3} \lean{log_Bf_le_log_B3} \leanok
+Let $B>1$, $0<R_1<R<1$ and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$. If $|f(z)|\le B$ on $|z|\le R$, then $\log|B_f(z)| \le \log B$ for all $|z|\le R_1$.
+\end{lemma}
+\begin{proof} \uses{lem:log_Bf_le_log_B2, lem:Bf_bounded_in_disk_from_f} \leanok
+By \cref{lem:log_Bf_le_log_B2,lem:Bf_bounded_in_disk_from_f}.
+\end{proof}
+%%%
+
+\begin{lemma}[Log nonnegative]\label{lem:log_Bf0_ge_0} \lean{log_Bf0_ge_0} \leanok
+Let $0<R_1<R<1$ and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then $\log|B_f(0)| \ge 0$.
+\end{lemma}
+\begin{proof} \uses{lem:log_mono_inc,lem:mod_lower_bound_1} \leanok
+By \cref{lem:log_mono_inc} with $x=1$ and $y=|B_f(0)|$, giving $\log|B_f(0)| \ge\log(1)=0$.
+\end{proof}
+%%%
+
+\begin{lemma}[Real part bound]\label{lem:re_Lf_le_log_B} \lean{re_Lf_le_log_B} \leanok
+Let $B>1$, $0<r<R_1<R<1$ and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$. If $f(0)=1$ and $|f(z)|\le B$ on $|z|\le R$, then $\Re(L_f(z)) \le \log B$ for all $|z|\le r$.
+\end{lemma}
+\begin{proof} \uses{lem:re_Lf_as_diff_of_log_mods, lem:log_Bf_le_log_B3, lem:log_Bf0_ge_0} \leanok
+By \cref{lem:re_Lf_as_diff_of_log_mods,lem:log_Bf_le_log_B3,lem:log_Bf0_ge_0}.
+\end{proof}
+
+%%%
+
+\begin{lemma}[BC inequality]\label{lem:BCII} \lean{lem_BCII} \leanok
+Let $M>0$ and $0<r_1<r<1$. Let $L$ be analytic on $|z| \le r$ such that $L(0)=0$ and suppose $\Re(L(z)) \le M$ for all $|z| \le r$. Then for any $|z|\le r_1$,
+\[ |L'(z)| \le \frac{16M r^2}{(r-r_1)^3}. \]
+\end{lemma}
+\begin{proof} \uses{thm:BCII}
+\leanok
+By \cref{thm:BCII}.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Apply BC]\label{lem:apply_BC_to_Lf} \lean{apply_BC_to_Lf} \leanok
+Let $B>1$, $0< r_1 < r<R_1<R<1$ and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$. If $f(0)=1$ and $|f(z)|\le B$ on $|z|\le R$. For any $|z|\le r_1$
+\[ |L_f'(z)| \le \frac{16\log(B) r^2}{(r-r_1)^3}. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:BCII, lem:Lf_is_analytic, lem:Lf_at_0_is_0, lem:re_Lf_le_log_B}
+\leanok
+By \cref{lem:BCII} with $r:=r$, $r_1:= r_1$, $L(z)=L_f(z)$ and $M=\log B$, using \cref{lem:Lf_is_analytic,lem:Lf_at_0_is_0,lem:re_Lf_le_log_B}.
+\end{proof}
+
+%%%
+
+
+\section{Log derivative $L_f'$ expansion}
+
+\begin{lemma}[Constant rule]\label{lem:logDerivconst} \lean{logDerivconst}
+\leanok
+Let $a\in\C$ with $a\neq0$ and $g:\overline{D}_1\to\C$ AnalyticOnNhd $\overline{\D}_1$. Then $\text{logDeriv}(a\cdot g(z)) = \text{logDeriv}(g(z))$.
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib: logDeriv\_const\_mul
+\end{proof}
+
+\begin{lemma}[One minus B]\label{lem:1Bneq0} \lean{oneBneq0}
+\leanok
+Let $0<R<1$ and $f:\overline{\D}_1\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then $B_f(0)\neq0$ and
+$1/B_f(0)\neq0$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{def:Bf, lem:Bf_is_analytic_on_disk, lem:Bf0_not_zero}
+By \cref{lem:Bf_is_analytic_on_disk} and \cref{lem:Bf0_not_zero}
+\end{proof}
+
+\begin{lemma}[Derivative form]\label{lem:Lf_deriv_is_logBf_deriv} \lean{Lf_deriv_is_logBf_deriv}
+\leanok
+Let $0<R<1$ and $f:\overline{\D}_1\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. We have $\text{logDeriv}(B_f(z)/B_f(0))=\text{logDeriv}(B_f(z))$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{def:Bf, lem:logDerivconst, lem:1Bneq0}
+By \cref{lem:logDerivconst,lem:1Bneq0} with $g(z)=B_f(z)$ and $a=1/B_f(0)$.
+\end{proof}
+
+\begin{lemma}[Product rule]\label{lem:logDerivmul} \lean{logDerivmul}
+\leanok
+Let $f,g$ be functions differentiableAt $z$ with $f(z),g(z)\neq0$. Then $\text{logDeriv}(f\cdot g) =  \text{logDeriv}(f)+\text{logDeriv}(g)$ at $z$.
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib: logDeriv\_mul
+\end{proof}
+
+
+\begin{lemma}[Product sum]\label{lem:logDerivprod} \lean{logDerivprod}
+\leanok
+Let $K$ be a finite set and $\{g_\rho(z)\}_{\rho \in K}$ be a collection of functions differentiableAt $z$ with $g_\rho(z)\neq0$ for all $\rho\in K$. Then $\text{logDeriv}(\prod_{\rho \in K} g_\rho(z)) = \sum_{\rho \in K} \text{logDeriv}(g_\rho(z))$.
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib: logDeriv\_prod
+\end{proof}
+
+\begin{lemma}[Quotient rule]\label{lem:logDerivdiv} \lean{logDerivdiv}
+\leanok
+Let $h,g$ be functions differentiableAt $z$ with $h(z),g(z)\neq0$. Then $\text{logDeriv}(h/g) =  \text{logDeriv}(h)-\text{logDeriv}(g)$ at $z$.
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib: logDeriv\_div
+\end{proof}
+
+\begin{lemma}[Power rule]\label{lem:logDerivfunpow} \lean{logDerivfunpow}
+\leanok
+Let $m\in\N$ and let $g$ be a function differentiableAt $z$. Then  $\text{logDeriv}(g(z)^m)=m\cdot\text{logDeriv}(g(z))$.
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib: logDeriv\_fun\_pow
+\end{proof}
+
+
+\begin{lemma}[Difference nonzero]\label{lem:z_minus_rho_diff_nonzero} \lean{z_minus_rho_diff_nonzero}
+\leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for any $\rho \in \mathcal{K}_f(R_1)$, the function $z \mapsto z-\rho$ is never equal to zero, and differentiableAt $z$ for all $z\in \overline{\D}_{R_1}\setminus\mathcal K_f(R_1)$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{def:zerosetKfR}
+By definition $z \notin \mathcal{K}_f(R_1)$ and $\rho \in \mathcal{K}_f(R_1)$. This implies that $z \neq \rho$, and therefore $z-\rho \neq 0$.
+The function $z\mapsto z-\rho$ is a linear function, therefore differentiableAt $z$.
+\end{proof}
+
+
+\begin{lemma}[Numerator nonzero]\label{lem:blaschke_num_diff_nonzero} \lean{blaschke_num_diff_nonzero}
+\leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ AnalyticOnNhd $\overline{D}_{R_1}$ with $f(0)=1$. Then for any $\rho \in \mathcal{K}_f(R_1)$, the function $z \mapsto R-\bar\rho z/R$ is never equal to zero, and differentiableAt $z$ for all $z\in \overline{\D}_1$.
+\end{lemma}
+\begin{proof}
+\leanok
+$R-\bar\rho z/R \neq 0$ for all $z\in  \overline{D}_R \setminus\mathcal{K}_f(R_1)$.
+
+The function $R-\bar\rho z/R$ is a linear function, therefore differentiableAt $z$.
+\end{proof}
+
+\begin{lemma}[Fraction nonzero]\label{lem:blaschke_frac_diff_nonzero} \lean{blaschke_frac_diff_nonzero}
+\leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for any $\rho \in \mathcal{K}_f(R_1)$, the function $z \mapsto \frac{R-\bar\rho z/R}{z-\rho}$ is never equal to zero, and differentiableAt $z$ for all $z\in \overline{\D}_{R_1}\setminus\mathcal K_f(R_1)$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:blaschke_num_diff_nonzero, lem:z_minus_rho_diff_nonzero}
+By \cref{lem:blaschke_num_diff_nonzero,lem:z_minus_rho_diff_nonzero}
+\end{proof}
+
+\begin{lemma}[Power nonzero]\label{lem:blaschke_pow_diff_nonzero} \lean{blaschke_pow_diff_nonzero}
+\leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for any $\rho \in \mathcal{K}_f(R_1)$, the function $z \mapsto (\frac{R-\bar\rho z/R}{z-\rho})^{m_{\rho,f}}$ is never equal to zero, and differentiableAt $z$ for all $z\in \overline{\D}_{R_1}\setminus\mathcal K_f(R_1)$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:blaschke_frac_diff_nonzero}
+By \cref{lem:blaschke_frac_diff_nonzero}. Note $m_{\rho,f}\in\N$.
+\end{proof}
+
+\begin{lemma}[Product nonzero]\label{lem:blaschke_prod_diff_nonzero} \lean{blaschke_prod_diff_nonzero}
+\leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then the function $z \mapsto \prod_{\rho\in \mathcal K_f(R_1)} (\frac{R-\bar\rho z/R}{z-\rho})^{m_{\rho,f}}$ is never equal to zero, and differentiableAt $z$ for all $z\in \overline{\D}_{R_1}\setminus\mathcal K_f(R_1)$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:blaschke_pow_diff_nonzero, lem:Contra_finiteKR}
+By \cref{lem:blaschke_pow_diff_nonzero}. Note $\mathcal K_f(R_1)$ is finite by \cref{lem:Contra_finiteKR}
+\end{proof}
+
+\begin{lemma}[Outside zeros]\label{lem:f_diff_nonzero_outside_Kf} \lean{f_diff_nonzero_outside_Kf}
+\leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then the function $f(z)$ is never equal to zero, and differentiableAt $z$ for all $z\in \overline{\D}_{R_1}\setminus\mathcal K_f(R_1)$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{def:zerosetKfR}
+By definition of $\mathcal{K}_f(R_1)$ in \cref{def:zerosetKfR}.
+\end{proof}
+
+\begin{lemma}[Outside zeros]\label{lem:Bf_diff_nonzero_outside_Kf} \lean{Bf_diff_nonzero_outside_Kf}
+\leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then the function $B_f(z)$ is never equal to zero, and differentiableAt $z$ for all $z\in \overline{\D}_{R_1}\setminus\mathcal K_f(R_1)$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:f_diff_nonzero_outside_Kf, lem:blaschke_prod_diff_nonzero, def:Bf}
+By \cref{lem:f_diff_nonzero_outside_Kf,lem:blaschke_prod_diff_nonzero}, recalling \cref{def:Bf}.
+\end{proof}
+
+
+\begin{lemma}[Log sum]\label{lem:logDeriv_fprod_is_sum} \lean{logDeriv_fprod_is_sum}
+\leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for all $z\in \overline{\D}_{R_1}\setminus\mathcal K_f(R_1)$ we have
+\[\text{logDeriv}\left(f(z)\prod_{\rho\in\mathcal K_f(R_1)}\left(\frac{R-z\bar\rho/R}{z-\rho}\right)^{m_{\rho,f}}\right)=\text{logDeriv}(f(z)) + \text{logDeriv}\left(\prod_{\rho\in\mathcal K_f(R_1)}\left(\frac{R-z\bar\rho/R}{z-\rho}\right)^{m_{\rho,f}}\right).\]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:logDerivmul, lem:blaschke_prod_diff_nonzero}
+By \cref{lem:logDerivmul} with $g(z)=\prod_{\rho\in\mathcal K_f(R_1)}\left(\frac{R-z\bar\rho/R}{z-\rho}\right)^{m_{\rho,f}}$.
+
+Note diffAt, nonzero conditions hold by \cref{lem:blaschke_prod_diff_nonzero}.
+\end{proof}
+
+\begin{lemma}[Log sum]\label{lem:logDeriv_Bf_is_sum} \lean{logDeriv_Bf_is_sum}
+\leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for all $z\in \overline{\D}_{R_1}\setminus\mathcal K_f(R_1)$ we have
+\[\text{logDeriv}(B_f(z))=\text{logDeriv}(f(z)) + \text{logDeriv}\left(\prod_{\rho\in\mathcal K_f(R_1)}\left(\frac{R-z\bar\rho/R}{z-\rho}\right)^{m_{\rho,f}}\right).\]
+\end{lemma}
+\begin{proof}
+\uses{lem:logDeriv_fprod_is_sum, def:Bf}
+\leanok
+By \cref{lem:logDeriv_fprod_is_sum,def:Bf}.
+\end{proof}
+
+\begin{lemma}[Fraction form]\label{lem:logDeriv_def_as_frac} \lean{logDeriv_def_as_frac}
+\leanok
+Let $f$ be a non-zero analytic function. Then $\text{logDeriv}(f(z)) = \frac{f'}{f}(z)$.
+\end{lemma}
+\begin{proof}
+\leanok
+By definition of logDeriv in Mathlib.
+\end{proof}
+
+\begin{lemma}[Step one]\label{lem:Lf_deriv_step1} \lean{Lf_deriv_step1}
+\leanok
+Let $0<r<R_1<R<1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for all $z\in \overline{\D}_{r}\setminus\mathcal K_f(R_1)$ we have
+\[L'_f(z)=\frac{f'}{f}(z) + \text{logDeriv}\left(\prod_{\rho\in\mathcal K_f(R_1)}\left(\frac{R-z\bar\rho/R}{z-\rho}\right)^{m_{\rho,f}}\right)\]
+\end{lemma}
+\begin{proof}
+\uses{lem:Lf_deriv_is_logBf_deriv, lem:logDeriv_Bf_is_sum, lem:logDeriv_def_as_frac}
+\leanok
+By \cref{lem:Lf_deriv_is_logBf_deriv}, \cref{lem:logDeriv_Bf_is_sum}, and \cref{lem:logDeriv_def_as_frac}.
+\end{proof}
+
+
+\begin{lemma}[Product sum]\label{lem:logDeriv_prod_is_sum} \lean{logDeriv_prod_is_sum}
+\leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for all $z\in \overline{\D}_{R_1}\setminus\mathcal K_f(R_1)$ we have
+\[\text{logDeriv}\left(\prod_{\rho\in\mathcal K_f(R_1)}\left(\frac{R-z\bar\rho/R}{z-\rho}\right)^{m_{\rho,f}}\right) = \sum_{\rho\in\mathcal K_f(R_1)}\text{logDeriv}\left(\left(\frac{R-z\bar\rho/R}{z-\rho}\right)^{m_{\rho,f}}\right)\]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:logDerivprod, lem:Contra_finiteKR, lem:blaschke_pow_diff_nonzero}
+By \cref{lem:logDerivprod} with $K=\mathcal K_f(R_1)$ and $g_\rho(z) = \left(\frac{R-z\bar\rho/R}{z-\rho}\right)^{m_{\rho,f}}$.
+
+Note $K=\mathcal K_f(R_1)$ is finite by \cref{lem:Contra_finiteKR}.
+The diffAt, nonzero conditions hold by \cref{lem:blaschke_pow_diff_nonzero}.
+\end{proof}
+
+
+\begin{lemma}[Power multiple]\label{lem:logDeriv_power_is_mul} \lean{logDeriv_power_is_mul}
+\leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for all $z\in \overline{\D}_{R_1}\setminus\mathcal K_f(R_1)$ and $\rho\in\mathcal K_f(R_1)$ we have
+\[\text{logDeriv}\left(\left(\frac{R-z\bar\rho/R}{z-\rho}\right)^{m_{\rho,f}}\right) = m_{\rho,f} \,\text{logDeriv}\left(\frac{R-z\bar\rho/R}{z-\rho}\right).\]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:logDerivfunpow, lem:blaschke_frac_diff_nonzero}
+By \cref{lem:logDerivfunpow} with $m=m_{\rho,f}$ and $g(z) = \frac{R-z\bar\rho/R}{z-\rho}$.
+Note $m_{\rho,f}\in\N$.
+The diffAt, nonzero conditions hold by \cref{lem:blaschke_frac_diff_nonzero}.
+\end{proof}
+
+\begin{lemma}[Sum multiple]\label{lem:logDeriv_prod_is_sum_mul} \lean{logDeriv_prod_is_sum_mul}
+\leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for all $z\in \overline{\D}_{R_1}\setminus\mathcal K_f(R_1)$ we have
+\[\text{logDeriv}\left(\prod_{\rho\in\mathcal K_f(R_1)}\left(\frac{R-z\bar\rho/R}{z-\rho}\right)^{m_{\rho,f}}\right) = \sum_{\rho\in\mathcal K_f(R_1)}m_{\rho,f} \text{logDeriv}\left(\frac{R-z\bar\rho/R}{z-\rho}\right).\]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:logDeriv_prod_is_sum, lem:logDeriv_power_is_mul}
+By \cref{lem:logDeriv_prod_is_sum} and \cref{lem:logDeriv_power_is_mul}.
+\end{proof}
+
+\begin{lemma}[Step two]\label{lem:Lf_deriv_step2} \lean{Lf_deriv_step2}
+\leanok
+Let $0<r<R_1<R$, $R < 1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for all $z\in \overline{\D}_{r}\setminus\mathcal K_f(R_1)$ we have
+\[L'_f(z)=\frac{f'}{f}(z) + \sum_{\rho\in\mathcal K_f(R_1)}m_{\rho,f} \text{logDeriv}\left(\frac{R-z\bar\rho/R}{z-\rho}\right).\]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:Lf_deriv_step1, lem:logDeriv_prod_is_sum_mul}
+By \cref{lem:Lf_deriv_step1} and \cref{lem:logDeriv_prod_is_sum_mul}.
+\end{proof}
+
+
+\begin{lemma}[Difference form]\label{lem:logDeriv_Blaschke_is_diff} \lean{logDeriv_Blaschke_is_diff}
+\leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for all $z\in \overline{\D}_{R_1}\setminus\mathcal K_f(R_1)$ and $\rho \in \mathcal{K}_f(R_1)$ we have
+\[\text{logDeriv}\left(\frac{R-z\bar\rho/R}{z-\rho}\right) = \text{logDeriv}(R-z\bar\rho/R) - \text{logDeriv}(z-\rho). \]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:logDerivdiv, lem:z_minus_rho_diff_nonzero, lem:blaschke_num_diff_nonzero}
+By \cref{lem:logDerivdiv} with $h(z)=R-z\bar\rho/R$ and $g(z)=z-\rho$.
+
+Note diffAt, nonzero conditions hold by \cref{lem:z_minus_rho_diff_nonzero,lem:blaschke_num_diff_nonzero}.
+\end{proof}
+
+\begin{lemma}[Linear rule]\label{lem:logDeriv_linear} \lean{logDeriv_linear}
+\leanok
+Let $a,b \in \C$ with $a\neq0$. We have $\text{logDeriv}(az+b) = \frac{a}{az+b}$ at $z\neq -b/a$.
+\end{lemma}
+\begin{proof}
+\leanok
+Note linear polynomial has derivative $(az+b)'=a$.
+
+Now unfold logDeriv definition and calculate $\text{logDeriv}(az+b) = \frac{(az+b)'}{az+b} =\frac{a}{az+b}$.
+\end{proof}
+
+\begin{lemma}[Denominator rule]\label{lem:logDeriv_denominator} \lean{logDeriv_denominator}
+\leanok
+Let $\rho \in \C$. We have $\text{logDeriv}(z-\rho) = \frac{1}{z-\rho}$ at $z\neq\rho$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:logDeriv_linear}
+By \cref{lem:logDeriv_linear} with $a=1$ and $b=-\rho$.
+\end{proof}
+
+\begin{lemma}[Numerator rule]\label{lem:logDeriv_numerator_pre} \lean{logDeriv_numerator_pre}
+\leanok
+Let $R, \rho \in \C$. We have $\text{logDeriv}(R-z\bar\rho/R) = \frac{-\bar\rho/R}{R-z\bar\rho/R}$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:logDeriv_linear}
+By \cref{lem:logDeriv_linear} with $a=-\bar\rho/R$ and $b=R$.
+\end{proof}
+
+\begin{lemma}[Rearranged form]\label{lem:logDeriv_numerator_rearranged} \lean{logDeriv_numerator_rearranged}
+\leanok
+Let $R, \rho \in \C$. We have $\frac{-\bar\rho/R}{R-z\bar\rho/R} = \frac{1}{z-R^2/\bar\rho}$.
+\end{lemma}
+\begin{proof}
+\leanok
+This is an algebraic simplification. For the expression to be well-defined, we must make some assumptions that are implicit in the context of the larger proof:
+\begin{itemize}
+    \item $R \neq 0$ and $\bar\rho \neq 0$ (which implies $\rho \neq 0$), so that the fractions are defined.
+    \item The denominator $R-z\bar\rho/R \neq 0$.
+    \item The denominator $z-R^2/\bar\rho \neq 0$.
+\end{itemize}
+These conditions hold in the domains where this lemma is applied.
+
+Our goal is to show the equality of the two fractions. We will start with the left-hand side (LHS) and manipulate it to obtain the right-hand side (RHS). The strategy is to multiply the numerator and the denominator of the LHS by the same non-zero quantity, chosen to simplify the expression. A suitable choice is the factor $-R/\bar\rho$.
+
+Let's start with the LHS:
+\[ \text{LHS} = \frac{-\bar\rho/R}{R-z\bar\rho/R} \]
+Now, we multiply the numerator and the denominator by $-R/\bar\rho$:
+\[ \text{LHS} = \frac{(-\bar\rho/R) \cdot (-R/\bar\rho)}{(R-z\bar\rho/R) \cdot (-R/\bar\rho)} \]
+Let's simplify the new numerator and denominator separately.
+
+\textbf{Numerator simplification:}
+\[ (-\bar\rho/R) \cdot (-R/\bar\rho) = \frac{-\bar\rho}{R} \cdot \frac{-R}{\bar\rho} = \frac{(-\bar\rho)(-R)}{R\bar\rho} = \frac{\bar\rho R}{R\bar\rho} = 1 \]
+
+\textbf{Denominator simplification:}
+We distribute the factor $(-R/\bar\rho)$ across the terms in the denominator:
+\begin{align*} (R-z\bar\rho/R) \cdot (-R/\bar\rho) &= R \cdot (-R/\bar\rho) - (z\bar\rho/R) \cdot (-R/\bar\rho) \\ &= -\frac{R^2}{\bar\rho} - \left( \frac{z\bar\rho}{R} \cdot \frac{-R}{\bar\rho} \right) \\ &= -\frac{R^2}{\bar\rho} - \left( z \cdot \frac{\bar\rho(-R)}{R\bar\rho} \right) \\ &= -\frac{R^2}{\bar\rho} - (z \cdot (-1)) \\ &= -\frac{R^2}{\bar\rho} + z \\ &= z - \frac{R^2}{\bar\rho} \end{align*}
+
+\textbf{Conclusion:}
+Substituting the simplified numerator and denominator back into the fraction, we get:
+\[ \text{LHS} = \frac{1}{z - R^2/\bar\rho} \]
+This is exactly the RHS of the equation we wanted to prove.
+\end{proof}
+
+\begin{lemma}[Numerator form]\label{lem:logDeriv_numerator} \lean{logDeriv_numerator}
+\leanok
+Let $R, \rho \in \C$. We have $\text{logDeriv}(R-z\bar\rho/R) = \frac{1}{z-R^2/\bar\rho}$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:logDeriv_numerator_pre, lem:logDeriv_numerator_rearranged}
+By \cref{lem:logDeriv_numerator_pre,lem:logDeriv_numerator_rearranged}
+\end{proof}
+
+
+
+\begin{lemma}[Diff fraction]\label{lem:logDeriv_Blaschke_is_diff_frac} \lean{logDeriv_Blaschke_is_diff_frac}
+\leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$. For $\rho \in \mathcal{K}_f(R_1)$, we have $\text{logDeriv}\left(\frac{R-z\bar\rho/R}{z-\rho}\right) = \frac{1}{z-R^2/\bar\rho} - \frac{1}{z-\rho}$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:logDeriv_Blaschke_is_diff, lem:logDeriv_numerator, lem:logDeriv_denominator, lem:blaschke_num_diff_nonzero, lem:z_minus_rho_diff_nonzero}
+The proof proceeds by first applying the division rule for the logarithmic derivative and then evaluating each resulting term. This is valid for any $z \in \overline{\D}_{R_1} \setminus \mathcal{K}_f(R_1)$ and any $\rho \in \mathcal{K}_f(R_1)$.
+
+\textbf{Step 1: Apply the division rule for logDeriv}
+We use \cref{lem:logDeriv_Blaschke_is_diff}, which is an application of the general rule $\text{logDeriv}(h/g) = \text{logDeriv}(h) - \text{logDeriv}(g)$.
+Let $h(z) = R-z\bar\rho/R$ and $g(z) = z-\rho$.
+To apply this rule, we must ensure that $h(z)$ and $g(z)$ are differentiable and non-zero at $z$.
+\begin{itemize}
+    \item For $h(z) = R-z\bar\rho/R$: \Cref{lem:blaschke_num_diff_nonzero} confirms that this function is differentiable and non-zero for all $z \in \overline{\D}_1$, which includes our domain of interest.
+    \item For $g(z) = z-\rho$: \Cref{lem:z_minus_rho_diff_nonzero} confirms that this function is differentiable and non-zero for all $z \in \overline{\D}_{R_1} \setminus \mathcal{K}_f(R_1)$, given $\rho \in \mathcal{K}_f(R_1)$.
+\end{itemize}
+Since the conditions are met, we can apply \cref{lem:logDeriv_Blaschke_is_diff} to get:
+\[ \text{logDeriv}\left(\frac{R-z\bar\rho/R}{z-\rho}\right) = \text{logDeriv}(R-z\bar\rho/R) - \text{logDeriv}(z-\rho). \]
+
+\textbf{Step 2: Evaluate the first term, $\text{logDeriv}(R-z\bar\rho/R)$}
+We use \cref{lem:logDeriv_numerator}. This lemma states:
+\[ \text{logDeriv}(R-z\bar\rho/R) = \frac{1}{z-R^2/\bar\rho}. \]
+This is valid provided $R \neq 0$ and $\rho \neq 0$, which are true under our assumptions ($0<R<1$ and $\rho \in \mathcal{K}_f(R_1)$ implies $\rho \neq 0$ as $f(0)=1$).
+
+\textbf{Step 3: Evaluate the second term, $\text{logDeriv}(z-\rho)$}
+We use \cref{lem:logDeriv_denominator}. This lemma states:
+\[ \text{logDeriv}(z-\rho) = \frac{1}{z-\rho}. \]
+This is valid for $z \neq \rho$. This condition is satisfied, as our domain for $z$ is $\overline{\D}_{R_1} \setminus \mathcal{K}_f(R_1)$ and $\rho$ is an element of $\mathcal{K}_f(R_1)$, so $z$ cannot be equal to $\rho$.
+
+\textbf{Step 4: Substitute the results back}
+Now we substitute the expressions found in Step 2 and Step 3 into the equation from Step 1:
+\[ \text{logDeriv}\left(\frac{R-z\bar\rho/R}{z-\rho}\right) = \left(\frac{1}{z-R^2/\bar\rho}\right) - \left(\frac{1}{z-\rho}\right). \]
+This gives the final desired formula.
+\end{proof}
+
+\begin{lemma}[Step three]\label{lem:Lf_deriv_step3} \lean{Lf_deriv_step3}
+\leanok
+Let $0<r<R_1<R$, $R < 1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for all $z\in \overline{\D}_{r}\setminus\mathcal K_f(R_1)$ we have $L'_f(z)=\frac{f'}{f}(z) + \sum_{\rho\in\mathcal K_f(R_1)}m_{\rho,f}\left( \frac{1}{z-R^2/\bar\rho} - \frac{1}{z-\rho}\right)$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:Lf_deriv_step2, lem:logDeriv_Blaschke_is_diff_frac}
+The proof is a direct substitution into a previously established formula. The assumptions on $R$ and $f$ are used to justify the application of the necessary lemmas. The result holds for all $z \in \overline{\D}_{R_1} \setminus \mathcal{K}_f(R_1)$.
+
+\textbf{Step 1: Recall the formula for $L'_f(z)$ from \cref{lem:Lf_deriv_step2}}
+\Cref{lem:Lf_deriv_step2} provides an expression for $L'_f(z)$ under the same assumptions as the current lemma. The formula is:
+\[ L'_f(z)=\frac{f'}{f}(z) + \sum_{\rho\in\mathcal K_f(R_1)}m_{\rho,f} \text{logDeriv}\left(\frac{R-z\bar\rho/R}{z-\rho}\right). \]
+This equation holds for all $z \in \overline{\D}_{R_1} \setminus \mathcal{K}_f(R_1)$.
+
+\textbf{Step 2: Find a replacement for the $\text{logDeriv}$ term}
+Our goal is to replace the term $\text{logDeriv}\left(\frac{R-z\bar\rho/R}{z-\rho}\right)$ inside the summation. We look to \cref{lem:logDeriv_Blaschke_is_diff_frac}. This lemma gives the following identity for each $\rho \in \mathcal{K}_f(R_1)$ and for all $z \in \overline{\D}_{R_1} \setminus \mathcal{K}_f(R_1)$:
+\[ \text{logDeriv}\left(\frac{R-z\bar\rho/R}{z-\rho}\right) = \frac{1}{z-R^2/\bar\rho} - \frac{1}{z-\rho}. \]
+
+\textbf{Step 3: Substitute the expression into the formula for $L'_f(z)$}
+We now substitute the expression from Step 2 into the formula from Step 1. The substitution is valid because the domains for $z$ and $\rho$ match in both lemmas.
+Starting with the formula from Step 1:
+\[ L'_f(z)=\frac{f'}{f}(z) + \sum_{\rho\in\mathcal K_f(R_1)}m_{\rho,f} \left( \text{logDeriv}\left(\frac{R-z\bar\rho/R}{z-\rho}\right) \right). \]
+We replace the parenthesized term with its equivalent from Step 2:
+\[ L'_f(z)=\frac{f'}{f}(z) + \sum_{\rho\in\mathcal K_f(R_1)}m_{\rho,f}\left( \frac{1}{z-R^2/\bar\rho} - \frac{1}{z-\rho}\right). \]
+This is the final expression we aimed to prove.
+\end{proof}
+
+\begin{lemma}[Sum difference]\label{lem:sum_of_diff} \lean{sum_of_diff}
+\leanok
+Let $K$ be a finite set and $a, b: K \to \C$. Then $\sum_{\rho \in K} (a_\rho - b_\rho) = \sum_{\rho \in K} a_\rho - \sum_{\rho \in K} b_\rho$.
+\end{lemma}
+\begin{proof}
+\leanok
+By the distributive property of summation.
+\end{proof}
+
+\begin{lemma}[Sum rearranged]\label{lem:sum_rearranged} \lean{sum_rearranged}
+\leanok
+Let $0<R<1$, $R_1=\frac{2}{3}R$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for all $z\in \overline{\D}_{R_1}\setminus\mathcal K_f(R_1)$ we have
+\[\sum_{\rho\in\mathcal K_f(R_1)}m_{\rho,f}\left( \frac{1}{z-R^2/\bar\rho} - \frac{1}{z-\rho}\right) = \sum_{\rho\in\mathcal K_f(R_1)}\frac{m_{\rho,f}}{z-R^2/\bar\rho} - \sum_{\rho\in\mathcal K_f(R_1)}\frac{m_{\rho,f}}{z-\rho}.\]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:sum_of_diff, lem:Contra_finiteKR}
+By \cref{lem:sum_of_diff}.
+Note $K=\mathcal K_f(R_1)$ is finite by \cref{lem:Contra_finiteKR}
+\end{proof}
+
+\begin{lemma}[Final formula]\label{lem:Lf_deriv_final_formula} \lean{Lf_deriv_final_formula}
+\leanok
+Let $0<r<R_1<R$, $R < 1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for all $z\in \overline{\D}_{r}\setminus\mathcal K_f(R_1)$ we have
+\[L'_f(z)=\frac{f'}{f}(z) - \sum_{\rho\in\mathcal K_f(R_1)}\frac{m_{\rho,f}}{z-\rho} + \sum_{\rho\in\mathcal K_f(R_1)}\frac{m_{\rho,f}}{z-R^2/\bar\rho}.\]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:Lf_deriv_step3, lem:sum_rearranged}
+By \cref{lem:Lf_deriv_step3} and \cref{lem:sum_rearranged}.
+\end{proof}
+
+\begin{lemma}[Rearranged deriv]\label{lem:rearrange_Lf_deriv} \lean{rearrange_Lf_deriv}
+\leanok
+Let $0<r<R_1<R$, $R < 1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for all $z\in \overline{\D}_{r}\setminus\mathcal K_f(R_1)$ we have
+\[\frac{f'}{f}(z) - \sum_{\rho\in\mathcal K_f(R_1)}\frac{m_{\rho,f}}{z-\rho} = L'_f(z) - \sum_{\rho\in\mathcal K_f(R_1)}\frac{m_{\rho,f}}{z-R^2/\bar\rho}.\]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:Lf_deriv_final_formula}
+By algebraic rearrangement of the equality in \cref{lem:Lf_deriv_final_formula}.
+\end{proof}
+
+\begin{lemma}[Triangle sum]\label{lem:triangle_ineq_sum} \lean{triangle_ineq_sum}
+\leanok
+Let $w_1, w_2 \in \C$. We have $|w_1 - w_2| \le |w_1| + |w_2|$.
+\end{lemma}
+\begin{proof}
+\leanok
+By the triangle inequality.
+\end{proof}
+
+\begin{lemma}[Setup inequality]\label{lem:target_inequality_setup} \lean{target_inequality_setup}
+\leanok
+Let $0<r<R_1<R$, $R < 1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for all $z\in \overline{\D}_{r}\setminus\mathcal K_f(R_1)$ we have
+\[\left|\frac{f'}{f}(z) - \sum_{\rho\in\mathcal K_f(R_1)}\frac{m_{\rho,f}}{z-\rho}\right| \le |L'_f(z)| + \left|\sum_{\rho\in\mathcal K_f(R_1)}\frac{m_{\rho,f}}{z-R^2/\bar\rho}\right|.\]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:triangle_ineq_sum, lem:rearrange_Lf_deriv}
+By applying the modulus and \cref{lem:triangle_ineq_sum} to the equality in \cref{lem:rearrange_Lf_deriv}.
+\end{proof}
+
+
+\begin{lemma}[Step two]\label{lem:sum_bound_step2} \lean{lem_sum_bound_step2}
+\leanok
+Let $0<R_1<R<1$ and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. Then for all $z\in \overline{\D}_{R_1}\setminus\mathcal K_f(R_1)$ we have
+\[\sum_{\rho\in\mathcal K_f(R_1)}\frac{m_{\rho,f}}{|z-R^2/\bar\rho|} \le \frac{1}{R^2/R_1 - R_1}\sum_{\rho\in\mathcal K_f(R_1)}m_{\rho,f}.\]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:Contra_finiteKR}
+Note $K=\mathcal K_f(R_1)$ is finite by \cref{lem:Contra_finiteKR}.
+\end{proof}
+
+\begin{lemma}[Final sum]\label{lem:final_sum_bound} \lean{final_sum_bound}
+\leanok
+Let $B>1$, $0<R_1< R<1$ and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. If $|f(z)|\le B$ on $|z|\le R$, then for all $z\in \overline{\D}_{R_1}\setminus\mathcal K_f(R_1)$ we have
+\[\left|\sum_{\rho\in\mathcal K_f(R_1)}\frac{m_{\rho,f}}{z-R^2/\bar\rho}\right| \le \frac{\log B}{(R^2/R_1 - R_1) \log(R/R_1)}.\]
+\end{lemma}
+\begin{proof}
+\uses{lem:sum_bound_step2, lem:sum_m_rho_bound}
+\leanok
+By \cref{lem:sum_bound_step2}, and \cref{lem:sum_m_rho_bound}.
+\end{proof}
+
+\begin{lemma}[Final bound]\label{lem:final_inequality} \lean{final_inequality} \leanok
+Let $B>1$, $0<r_1<r<R_1<R<1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. If $|f(z)|\le B$ on $|z|\le R$, then for all $z\in \overline{\D}_{r_1} \setminus\mathcal K_f(R_1)$ we have
+\[\left|\frac{f'}{f}(z) - \sum_{\rho\in\mathcal K_f(R_1)}\frac{m_{\rho,f}}{z-\rho}\right| \le \frac{16\log(B) r^2}{(r-r_1)^3} + \frac{\log B}{(R^2/R_1 - R_1)\log(R/R_1)}. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:target_inequality_setup, lem:final_sum_bound, lem:apply_BC_to_Lf}
+\leanok
+By \cref{lem:target_inequality_setup}, \cref{lem:final_sum_bound}, and \cref{lem:apply_BC_to_Lf}.
+\end{proof}
+
+
+\begin{lemma}[Final bound]\label{lem:final_ineq1} \leanok \lean{final_ineq1}
+Let $B>1$, $0<r_1<r<R_1<R<1$, and $f:\C\to\C$ AnalyticOnNhd $\overline{\D}_1$ with $f(0)=1$. If $|f(z)|\le B$ on $|z|\le R$, then for all $z\in \overline{\D}_{r_1}\setminus\mathcal K_f(R_1)$ we have
+\[\left|\frac{f'}{f}(z) - \sum_{\rho\in\mathcal K_f(R_1)}\frac{m_{\rho,f}}{z-\rho}\right| \le \left(\frac{16 r^2}{(r-r_1)^3} + \frac{1}{(R^2/R_1 - R_1)\log(R/R_1)}\right)\log B.\]
+\end{lemma}
+\begin{proof}
+\uses{lem:final_inequality}
+\leanok
+By \cref{lem:final_inequality}, factoring out $\log B$ from both terms.
+\end{proof}

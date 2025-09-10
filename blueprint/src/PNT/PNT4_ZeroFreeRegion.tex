@@ -1,0 +1,1399 @@
+\chapter{Zero Free Region}\label{zero_free_region}
+
+\begin{definition}[Log derivative]\label{def:logDerivZeta} \lean{logDerivZeta} \leanok
+For $s\in\C$ define $Z(s) = \frac{\zeta'(s)}{\zeta(s)}$.
+\end{definition}
+
+%%%
+
+\begin{definition}[Zero set]\label{def:zeroZ} \lean{zeroZ} \leanok
+Define the set $\mathcal{Z} = \{ \sigma+it\in\C : \sigma,t\in\R \;{\rm and}\; \zeta(\sigma+it)=0 \}$.
+\end{definition}
+
+%%%
+
+\begin{definition}[Window zeros]\label{def:Z_t} \lean{ZetaZerosNearPoint} \leanok \uses{def:zeroZ}
+For $t\in\R$ define the set $$\mathcal{Z}_t = \{\rho_1=\sigma_1+it_1\in\C : \zeta(\rho_1)=0 \; {\rm and} \; |\rho_1 - (3/2+it)| \le 5/6\}$$
+\end{definition}
+
+
+\begin{lemma}[Finite set]\label{lem:Ztfinite} \lean{ZetaZerosNearPoint_finite} \leanok
+\uses{def:Z_t}
+For each $t\in\R$ the set $\mathcal Z_t$ is finite.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:Contra_finiteKR}
+\end{proof}
+
+
+%%%
+
+\begin{lemma}[Reciprocal real]\label{lem:Re1zge0} \lean{lem_Re1zge0} \leanok
+Let $z\in\C$. If $\Re(z)>0$ then $\Re(1/z)>0$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+
+%%%
+
+\begin{lemma}[Zero free]\label{lem:sigmage1} \lean{lem_sigmage1} \leanok
+Let $\sigma,t\in\R$. If $\sigma > 1$ then $\zeta(\sigma + it) \neq0 $.
+\end{lemma}
+\begin{proof} \leanok
+Use {\tt lemma \_root\_.riemannZeta\_ne\_zero\_of\_one\_le\_re}
+
+in {\tt Nonvanishing.lean} in Mathlib / NumberTheory / LSeries .
+\end{proof}
+%%%
+
+\begin{lemma}[Zero bound]\label{lem:sigmale1} \lean{lem_sigmale1} \leanok
+Let $\sigma_1,t_1\in\R$.  If $\zeta(\sigma_1 + it_1) = 0$ then $\sigma_1\le 1$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:sigmage1}
+Contrapositive of Lemma \ref{lem:sigmage1}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Zero bound]\label{lem:sigmale1Zt} \lean{lem_sigmale1Zt} \leanok
+Let $t\in\R$. If $\rho_1=\sigma_1+it_1\in \mathcal Z_t$ then $\sigma_1\le 1$.
+\end{lemma}
+\begin{proof} \leanok \uses{def:Z_t,lem:sigmale1}
+By definition \ref{def:Z_t} $\rho_1\in \mathcal Z_t$ implies $\zeta(\rho_1)=0$. Now apply Lemma \ref{lem:sigmale1}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Outside zeros]\label{lem:s_notin_Zt} \lean{lem_s_notin_Zt} \leanok
+For $\delta>0$ and $t\in\R$, let $s=1+\delta+it$. Then $s\notin \mathcal Z_t$.
+\end{lemma}
+\begin{proof} \uses{lem:sigmage1}
+\leanok
+We have $\Re(s)=1+\delta>1$ since $\delta>0$. Thus $\zeta(s)\neq0$ by \cref{lem:sigmageq1}, and so $s\notin \mathcal Z_t$.
+\end{proof}
+
+\begin{lemma}[Half disk]\label{lem:s_in_D12} \lean{s_in_D12} \leanok
+For $0<\delta<1$ and $t\in\R$, let $c=3/2+it$. Then $1+\delta+it\in \mathcal \D_{1/2}(c)$.
+\end{lemma}
+\begin{proof}
+\leanok
+We calculate $1+\delta+it - c = 1+\delta - 3/2 = 1/2-\delta$. Hence $|(1+\delta+it) - c| \le |1/2-\delta| \le 1/2$ so $1+\delta+it\in \mathcal \D_{1/2}(c)$.
+\end{proof}
+
+\begin{lemma}[Sum bound]\label{lem:explicit1deltat} \lean{lem_explicit1deltat} \leanok
+There exists a constant $C>0$ such that for all $0<\delta<1$ and $t\in\R$, we have
+\[ \left| \sum_{\rho_1\in \mathcal Z_t} \frac{m_{\rho_1,\zeta}}{1+\delta+it-\rho_1} - Z(1+\delta+it)\right| \le C\log(|t|+2).\]
+\end{lemma}
+\begin{proof}
+\uses{lem:Zeta1_Zeta_Expansion,lem:s_notin_Zt,lem:s_in_D12}
+\leanok
+Apply Lemma \ref{lem:Zeta1_Zeta_Expansion} with $z=1+\delta+it$ and $r_1=1/2$ and $r=2/3$. For $c = 3/2+it$, note $z\in \D_{r_1}(c)$ by \cref{lem:s_in_D12}. Further $\mathcal Z_t = \mathcal K_\zeta(5/6;c)$ and $z\notin \mathcal K_\zeta(5/6;c)$ by \cref{lem:s_notin_Zt}.
+We choose $C_1=C(\frac{1}{(r-r_1)^3}+1)$.
+\end{proof}
+%%%
+
+\begin{lemma}[Real bound]\label{lem:explicit1Real} \leanok
+There exists a constant $C>0$ such that for all $0<\delta<1$ and $t\in\R$, we have
+\[ \Re\left(\sum_{\rho_1\in \mathcal Z_t} \frac{m_{\rho_1,\zeta}}{1+\delta+it-\rho_1} - Z(1+\delta+it)\right) \le C\log(|t|+2).\]
+\end{lemma}
+\begin{proof} \uses{lem:explicit1deltat} \leanok
+Apply Lemma \ref{lem:explicit1deltat} and use Mathlib: Complex.re\_le\_abs
+$\Re(w) \le |w|$ for $w=\sum_{\rho_1\in \mathcal Z_t} \frac{m_{\rho_1,\zeta}}{1+\delta+it-\rho_1} - Z(1+\delta+it)$.
+\end{proof}
+%%%
+
+\begin{lemma}[Split real]\label{lem:explicit1RealReal} \lean{lem_explicit1RealReal} \leanok
+There exists a constant $C>0$ such that for all $0<\delta<1$ and $t\in\R$, we have
+\[ \Re\left(\sum_{\rho_1\in \mathcal Z_t} \frac{m_{\rho_1,\zeta}}{1+\delta+it-\rho_1}\right) + \Re\left(- Z(1+\delta+it)\right) \le C\log(|t|+2).\]
+\end{lemma}
+\begin{proof} \uses{lem:explicit1Real} \leanok
+\end{proof}
+
+\begin{lemma}[Double real]\label{lem:explicit2Real} \lean{lem_explicit2Real} \leanok
+There exists a constant $C>0$ such that for all $0<\delta<1$ and $t\in\R$, we have
+\[ \Re\left(\sum_{\rho_1\in \mathcal Z_{2t}} \frac{m_{\rho_1,\zeta}}{1+\delta+2it-\rho_1}\right) + \Re\left(-Z(1+\delta+2it)\right) \le C\log(|2t|+2).\]
+\end{lemma}
+\begin{proof}
+\uses{lem:explicit1Real}
+\leanok
+Apply Lemma \ref{lem:explicit1Real} with $2t$.
+\end{proof}
+%%%
+
+\begin{lemma}[Real sum]\label{lem:Realsum} \lean{lem_Realsum} \leanok
+If $\mathcal Z$ is a finite set and $c_z\in\C$ for $z\in\mathcal Z$, then $\Re(\sum_{z\in \mathcal Z}c_{z}) = \sum_{z\in \mathcal Z} \Re(c_{z})$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Sum split]\label{lem:sumrho1} \lean{lem_sumrho1} \leanok
+For $t\in\R$ and $0<\delta<1$, we have
+\begin{align*}
+\Re\Big(\sum_{\rho_1\in \mathcal Z_t} \frac{m_{\rho_1,\zeta}}{1+\delta+it-\rho_1}\Big) = \sum_{\rho_1\in \mathcal Z_t} \Re\Big(\frac{m_{\rho_1,\zeta}}{1+\delta+it-\rho_1}\Big)
+\end{align*}
+\end{lemma}
+\begin{proof} \uses{lem:Ztfinite,lem:Realsum} \leanok
+Apply Lemmas \ref{lem:Ztfinite} and \ref{lem:Realsum} with $\mathcal Z = \mathcal Z_t$, $z = \rho_1$, and $c_{z}=\frac{m_{\rho_1,\zeta}}{1+\delta+it-z}$.
+\end{proof}
+%%%
+
+\begin{lemma}[Sum split]\label{lem:sumrho2} \lean{lem_sumrho2} \leanok
+For $t\in\R$ and $0<\delta<1$, we have
+\begin{align*}
+\Re\Big(\sum_{\rho_1\in \mathcal Z_{2t}} \frac{m_{\rho_1,\zeta}}{1+\delta+2it-\rho_1}\Big) = \sum_{\rho_1\in \mathcal Z_{2t}} \Re\Big(\frac{m_{\rho_1,\zeta}}{1+\delta+2it-\rho_1}\Big)
+\end{align*}
+\end{lemma}
+\begin{proof} \uses{lem:sumrho1} \leanok
+Apply Lemma \ref{lem:sumrho1} with $2t$.
+\end{proof}
+%%%
+
+\begin{lemma}[Difference form]\label{lem:1deltatrho1} \lean{lem_1deltatrho1} \leanok
+For $\delta>0$, $t\in\R$, and $\rho_1=\sigma_1+it_1\in \mathcal Z_t$ we have
+\begin{align*}
+1+\delta+it-\rho_1 = (1 + \delta -\sigma_1) + i(t-t_1).
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok
+We calculate $1+\delta+it-\rho_1 = 1+\delta+it - (\sigma_1+it_1) = (1 + \delta -\sigma_1) + i(t-t_1)$.
+\end{proof}
+%%%
+
+\begin{lemma}[Real part]\label{lem:Re1deltatrho1} \lean{lem_Re1deltatrho1} \leanok
+For $\delta>0$, $t\in\R$, and $\rho_1=\sigma_1+it_1\in \mathcal Z_t$ we have
+\begin{align*}
+\Re(1+\delta+it-\rho_1) = 1 + \delta -\sigma_1.
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:1deltatrho1}
+Apply Lemma \ref{lem:1deltatrho1}, then take the real part.
+\end{proof}
+%%%
+
+\begin{lemma}[Delta bound]\label{lem:Re1delta1} \lean{lem_Re1delta1} \leanok
+For $\delta>0$, $t\in\R$, and $\rho_1=\sigma_1+it_1\in \mathcal Z_t$ we have
+\begin{align*}
+1 + \delta -\sigma_1 \ge \delta.
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:sigmale1Zt}
+Apply Lemma \ref{lem:sigmale1Zt}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Real delta]\label{lem:Re1deltatge} \lean{lem_Re1deltatge} \leanok
+For $\delta>0$, $t\in\R$, and $\rho_1=\sigma_1+it_1\in \mathcal Z_t$ we have
+\begin{align*}
+\Re(1+\delta+it-\rho_1) \ge \delta.
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Re1deltatrho1,lem:Re1delta1}
+Apply Lemmas \ref{lem:Re1deltatrho1} and \ref{lem:Re1delta1}.
+\end{proof}
+%%%
+
+\begin{lemma}[Positive real]\label{lem:Re1deltatneq0} \lean{lem_Re1deltatneq0} \leanok
+For $\delta>0$, $t\in\R$, and $\rho_1=\sigma_1+it_1\in \mathcal Z_t$ we have
+\begin{align*}
+\Re(1+\delta+it-\rho_1) > 0.
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Re1deltatge}
+Apply Lemma \ref{lem:Re1deltatge} and $\delta>0$.
+\end{proof}
+%%%
+
+\begin{lemma}[Inverse real]\label{lem:Re1deltatge0} \lean{lem_Re1deltatge0} \leanok
+For $\delta>0$, $t\in\R$, and $\rho_1=\sigma_1+it_1\in \mathcal Z_t$ we have
+\begin{align*}
+\Re\Big(\frac{1}{1+\delta+it-\rho_1}\Big) \ge 0
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Re1deltatneq0,lem:Re1zge0}
+Apply Lemmas \ref{lem:Re1deltatneq0} and \ref{lem:Re1zge0} with $z=1+\delta+it-\rho_1$.
+\end{proof}
+%%%
+
+\begin{lemma}[Scaled real]\label{lem:Re1deltatge0m} \lean{lem_Re1deltatge0m} \leanok
+For $0<\delta<1$, $t\in\R$, and $\rho_1=\sigma_1+it_1\in \mathcal Z_t$ we have
+\begin{align*}
+\Re\Big(\frac{m_{\rho_1,\zeta}}{1+\delta+it-\rho_1}\Big) \ge 0
+\end{align*}
+\end{lemma}
+\begin{proof} \uses{lem:Re1deltatge0,lem:m_rho_is_nat} \leanok
+Apply \cref{lem:Re1deltatge0} and Complex.re\_nsmul with $n=m_{\rho_1,\zeta}$. Note $m_{\rho_1,\zeta}\in\N$ by \ref{lem:m_rho_is_nat}.
+\end{proof}
+
+\begin{lemma}[Double real]\label{lem:Re1delta2tge0} \lean{lem_Re1delta2tge0} \leanok
+For $0<\delta<1$, $t\in\R$, and $\rho_1=\sigma_1+it_1\in \mathcal Z_{2t}$ we have
+\begin{align*}
+\Re\Big(\frac{m_{\rho_1,\zeta}}{1+\delta+2it-\rho_1}\Big) \ge 0
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Re1deltatge0m}
+Apply Lemma \ref{lem:Re1deltatge0m} with $2t$.
+\end{proof}
+%%%
+
+\begin{lemma}[Sum nonneg]\label{lem:sumrho2ge} \lean{lem_sumrho2ge} \leanok
+For $t\in\R$ and $0<\delta<1$, we have
+\begin{align*}
+\sum_{\rho_1\in \mathcal Z_{2t}} \Re\Big(\frac{m_{\rho_1,\zeta}}{1+\delta+2it-\rho_1}\Big) \ge 0
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Re1delta2tge0}
+Apply Lemma \ref{lem:Re1delta2tge0}.
+\end{proof}
+%%%
+
+\begin{lemma}[Real nonneg]\label{lem:sumrho2ge02} \lean{lem_sumrho2ge02} \leanok
+For $t\in\R$ and $0<\delta<1$, we have
+\begin{align*}
+\Re\Big(\sum_{\rho_1\in \mathcal Z_{2t}} \frac{m_{\rho_1,\zeta}}{1+\delta+2it-\rho_1}\Big) \ge 0
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:sumrho2,lem:sumrho2ge}
+Apply Lemmas \ref{lem:sumrho2} and \ref{lem:sumrho2ge}.
+\end{proof}
+%%%
+
+\begin{lemma}[Double bound]\label{lem:explicit2Real2} \lean{lem_explicit2Real2} \leanok
+There exists a constant $C>0$ such that for all $0<\delta<1$ and $t\in\R$, we have
+\[ \Re\left(-Z(1+\delta+2it)\right) \le C\log(|2t|+2).\]
+\end{lemma}
+\begin{proof} \uses{lem:explicit2Real,lem:sumrho2ge02} \leanok
+Apply Lemmas \ref{lem:explicit2Real} and \ref{lem:sumrho2ge02}.
+\end{proof}
+%%%
+
+\begin{lemma}[Log compare]\label{lem:log2Olog} \lean{lem_log2Olog} \leanok
+For $t\ge 2$ we have $O(\log(2t)) \le O(\log t)$
+\end{lemma}
+\begin{proof} \leanok \uses{lem:2logOlog,lem:log22log} \leanok
+Apply Lemmas \ref{lem:2logOlog} and \ref{lem:log22log}.
+\end{proof}
+
+%%%
+
+\begin{lemma}[Trivial bound]\label{lem:w2t} \lean{lem_w2t} \leanok
+For $t\in\R$ we have $|2t|+2\ge0$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Log compare]\label{lem:log2Olog2} \lean{lem_log2Olog2} \leanok
+For $t\in\R$ we have $O(\log(|2t|+4)) \le O(\log(|t|+2))$
+\end{lemma}
+\begin{proof} \leanok \uses{lem:w2t,lem:log2Olog}
+Apply Lemmas \ref{lem:w2t} and \ref{lem:log2Olog} with $w=|t|+2$.
+\end{proof}
+%%%
+
+\begin{lemma}[Shift bound]\label{lem:Z2bound} \lean{lem_Z2bound} \leanok
+There exists a constant $C>0$ such that for all $0<\delta<1$ and $t\in\R$, we have
+\[ \Re\left(-Z(1+\delta+2it)\right) \le C\log(|t|+2).\]
+\end{lemma}
+\begin{proof} \uses{lem:explicit2Real2,lem:log2Olog2} \leanok
+Apply Lemmas \ref{lem:explicit2Real2} and \ref{lem:log2Olog2}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Split sum]\label{lem:Z1split} \lean{lem_Z1split} \leanok
+For $0<\delta<1$, $\sigma, t\in\R$, and $\rho=\sigma+it\in \mathcal Z$ we have
+\begin{align*}
+\sum_{\rho_1\in \mathcal Z_t} \Re\Big(\frac{m_{\rho_1,\zeta}}{1+\delta+it-\rho_1}\Big) = \Re\Big(\frac{m_{\rho,\zeta}}{1+\delta+it-\rho}\Big) + \sum_{\rho_1\in \mathcal Z_t, \rho_1 \neq \rho} \Re\Big(\frac{m_{\rho_1,\zeta}}{1+\delta+it-\rho_1}\Big).
+\end{align*}
+\end{lemma}
+\begin{proof} \uses{lem:rhoinZt} \leanok
+Apply Lemma \ref{lem:rhoinZt}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Split bound] \label{lem:Z1splitge} \lean{lem_Z1splitge} \leanok
+For $0<\delta<1$, $\sigma, t\in\R$, and $\rho=\sigma+it\in \mathcal Z$ we have
+\begin{align*}
+\sum_{\rho_1\in \mathcal Z_t} \Re\Big(\frac{m_{\rho_1,\zeta}}{1+\delta+it-\rho_1}\Big) \ge \Re\Big(\frac{1}{1+\delta+it-\rho}\Big).
+\end{align*}
+\end{lemma}
+\begin{proof} \uses{lem:Z1split,lem:Re1deltatge0}
+\leanok
+Apply Lemmas \ref{lem:Z1split} and \ref{lem:Re1deltatge0}. Note $m_{\rho_1,\zeta}\ge 1$ by \cref{lem:m_rho_ge_1}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Difference real]\label{lem:1deltatrho0} \lean{lem_1deltatrho0} \leanok
+For $\delta>0$, $\sigma, t\in\R$, and $\rho=\sigma+it\in \mathcal Z$ we have
+\begin{align*}
+1+\delta+it-\rho = 1 + \delta -\sigma.
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok
+We calculate $1+\delta+it-\rho = 1+\delta+it - (\sigma+it) = 1 + \delta -\sigma$.
+\end{proof}
+%%%
+
+\begin{lemma}[Real inverse]\label{lem:1delsigReal} \lean{lem_1delsigReal} \leanok
+For $0<\delta<1$, $\sigma, t\in\R$, and $\rho=\sigma+it\in \mathcal Z$ we have
+\begin{align*}
+\Re\Big(\frac{1}{1+\delta+it-\rho}\Big) = \Re\Big(\frac{1}{1 + \delta -\sigma}\Big)
+\end{align*}
+\end{lemma}
+\begin{proof} \uses{lem:1deltatrho0}
+\leanok
+Apply Lemma \ref{lem:1deltatrho0}.
+\end{proof}
+%%%
+
+\begin{lemma}[Inverse real]\label{lem:11delsiginR} \lean{lem_11delsiginR} \leanok
+For $0<\delta<1$, $\sigma\le 1$ we have $\frac{1}{1 + \delta -\sigma}\in\R$.
+\end{lemma}
+\begin{proof} \leanok
+We calculate $1+\delta-\sigma\ge\delta>0$. Thus $\frac{1}{1 + \delta -\sigma}\in\R$.
+\end{proof}
+%%%
+
+\begin{lemma}[Inverse real]\label{lem:11delsiginR2} \lean{lem_11delsiginR2} \leanok
+For $\delta>0$, $\sigma, t\in\R$, and $\rho=\sigma+it\in \mathcal Z$ we have $\frac{1}{1 + \delta -\sigma}\in\R$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:sigmale1,lem:11delsiginR}
+Apply Lemmas \ref{lem:sigmale1} and \ref{lem:11delsiginR}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Real part]\label{lem:ReReal} \lean{lem_ReReal} \leanok
+For $x\in\R$ we have $\Re(x)=x$.
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Real inverse]\label{lem:1delsigReal2} \lean{lem_1delsigReal2} \leanok
+For $\delta>0$, $\sigma, t\in\R$, and $\rho=\sigma+it\in \mathcal Z$ we have
+\begin{align*}
+\Re\Big(\frac{1}{1 + \delta -\sigma}\Big) = \frac{1}{1 + \delta -\sigma}
+\end{align*}
+\end{lemma}
+\begin{proof} \uses{lem:11delsiginR2,lem:ReReal}\leanok
+Apply Lemmas \ref{lem:11delsiginR2} and \ref{lem:ReReal} with $x=\frac{1}{1 + \delta -\sigma}$.
+\end{proof}
+%%%
+
+\begin{lemma}[Real inverse]\label{lem:1delsigReal3} \lean{lem_re_inv_one_plus_delta_minus_rho_real} \leanok
+For $\delta>0$, $\sigma, t\in\R$, and $\rho=\sigma+it\in \mathcal Z$ we have
+\begin{align*}
+\Re\Big(\frac{1}{1+\delta+it-\rho}\Big) = \frac{1}{1 + \delta -\sigma}
+\end{align*}
+\end{lemma}
+\begin{proof} \uses{lem:1delsigReal,lem:1delsigReal2}
+Apply Lemmas \ref{lem:1delsigReal} and \ref{lem:1delsigReal2} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Sum bound]\label{lem:Z1splitge2} \lean{lem_Z1splitge2} \leanok
+For $0<\delta<1$, $\sigma, t\in\R$, and $\rho=\sigma+it\in \mathcal Z$ we have
+\begin{align*}
+\sum_{\rho_1\in \mathcal Z_t} \Re\Big(\frac{m_{\rho_1,\zeta}}{1+\delta+it-\rho_1}\Big) \ge \frac{1}{1 + \delta -\sigma}.
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Z1splitge,lem:1delsigReal3}
+Apply Lemmas \ref{lem:Z1splitge} and \ref{lem:1delsigReal3}.
+\end{proof}
+%%%
+
+\begin{lemma}[Real bound]\label{lem:Z1splitge3} \lean{lem_Z1splitge3} \leanok
+For $0<\delta<1$, $\sigma, t\in\R$, and $\rho=\sigma+it\in \mathcal Z$ we have
+\begin{align*}
+\Re\Big(\sum_{\rho_1\in \mathcal Z_t} \frac{m_{\rho_1,\zeta}}{1+\delta+it-\rho_1}\Big) \ge \frac{1}{1 + \delta -\sigma}.
+\end{align*}
+\end{lemma}
+\begin{proof} \uses{lem:sumrho1,lem:Z1splitge2} \leanok
+Apply Lemmas \ref{lem:sumrho1} and \ref{lem:Z1splitge2}.
+\end{proof}
+%%%
+
+\begin{lemma}[In set] \label{lem:rhoinZt} \lean{lem_rho_in_Zt} \leanok
+For $\delta>0$, $t\in\R$, let $\rho=1 + \delta + it$.
+If $\rho \in \mathcal Z$, then $\rho \in \mathcal Z_t$.
+\end{lemma}
+\begin{proof}
+\leanok
+Let $c=3/2+it$.
+Then we calculate $|\rho - c| = |1+\delta - 3/2| = |1/2-\delta| \le 1/2$.
+And since $\rho\in \mathcal Z$, we have $\zeta(\rho)=0$. Thus $|\rho - c|\le1/2$ and $\zeta(\rho)=0$ together imply $\rho\in\mathcal{Z}_t$.
+\end{proof}
+%%%
+
+\begin{lemma}[Zeta bound]\label{lem:Z1bound} \lean{Z1bound} \leanok
+There exists a constant $C>1$ such that for all $0<\delta<1$ and $t\in\R$ and $\rho=\sigma+it\in \mathcal Z$, we have
+\[ \Re\Big(-Z(1+\delta+it)\Big) \le -\frac{1}{1+\delta-\sigma} + C\log(|t|+2).\]
+\end{lemma}
+\begin{proof} \uses{lem:explicit1RealReal,lem:Z1splitge3,lem:rhoinZt}
+\leanok
+Apply Lemma \ref{lem:rhoinZt} so that $\rho\in \mathcal Z$ implies $\rho\in \mathcal Z_t$. Then apply \ref{lem:explicit1RealReal} and \ref{lem:Z1splitge3}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[At one]\label{lem:Z0bound} \lean{Z0bound} \leanok
+For $\delta>0$ we have
+\[ -Z(1+\delta) = \frac{1}{\delta} + O(1). \]
+\end{lemma}
+\begin{proof} \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Real one]\label{lem:Z0boundRe} \lean{Z0boundRe} \leanok
+For $\delta>0$ we have
+\[ \Re\Big(-Z(1+\delta)\Big) = \frac{1}{\delta} + O(1). \]
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Z0bound}
+Apply Lemma \ref{lem:Z0bound}.
+\end{proof}
+%%%
+
+\begin{lemma}[One bound] \label{lem:Z0bound_const} \lean{Z0bound_const} \leanok
+There exists a constant $C>0$ such that for all $\delta>0$ we have
+\[ \Big|Z(1+\delta) - \frac{1}{\delta}\Big| \le C. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:Z0bound}
+\leanok
+By Lemma \ref{lem:Z0bound}.
+\end{proof}
+
+\begin{lemma}[Real bound] \label{lem:Z0boundRe_const} \lean{Z0boundRe_const} \leanok
+There exists a constant $C>0$ such that for all $\delta>0$ we have
+\[ \Re\Big(-Z(1+\delta) - \frac{1}{\delta}\Big) \le C. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:Z0bound_const}
+\leanok
+By Lemma \ref{lem:Z0bound_const} and Mathlib Complex.re\_le\_abs for $z=Z(1+\delta) + \frac{1}{\delta}$.
+\end{proof}
+
+\begin{lemma}[Real sum] \label{lem:Z0boundRe_const2} \lean{Z0boundRe_const2} \leanok
+There exists a constant $C>0$ such that for all $\delta>0$ we have
+\[ \Re\big(-Z(1+\delta)\big) + \Re\big(- \frac{1}{\delta}\big) \le C. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:Z0boundRe_const}
+\leanok
+By Lemma \ref{lem:Z0boundRe_const} and Mathlib: Complex.add\_re with $z=-Z(1+\delta)$ and $w=- \frac{1}{\delta}$.
+\end{proof}
+
+\begin{lemma}[Real diff] \label{lem:Z0boundRe_const3} \lean{Z0boundRe_const3} \leanok
+There exists a constant $C>0$ such that for all $\delta>0$ we have
+\[ \Re\big(-Z(1+\delta)\big) - \frac{1}{\delta} \le C. \]
+\end{lemma}
+\begin{proof}
+\uses{lem:Z0boundRe_const2}
+\leanok
+By Lemma \ref{lem:Z0boundRe_const2} and Mathlib: RCLike.re\_to\_real with $x=1/\delta$, since $1/\delta\in\R$.
+\end{proof}
+
+\begin{lemma}[Combined bound] \label{lem:Z341bounds_const} \lean{Z341bounds_const} \leanok
+There exists a constant $C>0$ such that for all $0<\delta<1$ and $t\in\R$ with $|t|>3$, if
+$\sigma +it\in \mathcal{Z}$ then
+\begin{align*}
+3\Re\big(&-Z(1+\delta)\big) + 4\Re\big(-Z(1+\delta+it)\big) + \Re\big(-Z(1+\delta+2it)\big) \\
+&\le \frac{3}{\delta} - \frac{4}{1+\delta-\sigma} + C\log(|t|+2)
+\end{align*}
+\end{lemma}
+\begin{proof}
+\uses{lem:Z0boundRe_const3,lem:Z1bound,lem:Z2bound,lem:3_gt_e}
+\leanok
+Apply Lemmas \ref{lem:Z0boundRe_const} and \ref{lem:Z1bound} and \ref{lem:Z2bound}
+\end{proof}
+
+
+\begin{lemma}[Series form]\label{lem:zeta1zetaseries} \lean{zeta1zetaseries} \leanok
+Let $s\in\C$. If ${\rm Re}(s)>1$ then
+\begin{align*}
+-Z(s) = \sum_{n=1}^{\infty} \Lambda(n)\,n^{-s}
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{def:logDerivZeta}
+Apply definition \ref{def:logDerivZeta} for $Z(s)$ and
+{\tt LSeries\_vonMangoldt\_eq\_deriv\_riemannZeta\_div} from Mathlib/NumberTheory/LSeries/Dirichlet.lean
+\end{proof}
+%%%
+
+\begin{lemma}[Series form]\label{lem:zeta1zetaseriesxy} \lean{zeta1zetaseriesxy} \leanok
+For $x,y\in\R$, if $x>1$ then
+\begin{align*}
+-Z(x+iy) = \sum_{n=1}^{\infty} \Lambda(n)\,n^{-(x+iy)}
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:zeta1zetaseries}
+Let $s=x+iy$ so that ${\rm Re}(s)=x>1$.
+Apply Lemma \ref{lem:zeta1zetaseries} with $s=x+iy$.
+\end{proof}
+%%%
+
+\begin{lemma}[Converges]\label{lem:Zconverges1} \lean{Zconverges1} \leanok
+Let $x,y\in\R$. If $x>1$ then $Z(x+iy)$ converges.
+\end{lemma}
+\begin{proof} \leanok \uses{def:logDerivZeta}
+Apply definition \ref{def:logDerivZeta} for $Z(x+iy)$.
+\end{proof}
+%%%
+
+\begin{lemma}[Real converges]\label{lem:ReZconverges1} \lean{ReZconverges1} \leanok
+Let $x,y\in\R$. If $x>1$ then $\Re\big(-Z(x+iy)\big)$ converges.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Zconverges1}
+Apply Lemma \ref{lem:Zconverges1}.
+\end{proof}
+%%%
+
+\begin{lemma}[Exponent split]\label{lem:nxy} \lean{lem_nxy} \leanok
+For any $n\ge1$ and $x,y\in\R$ we have $n^{-(x+iy)} = n^{-x} n^{-iy}$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:exprule}
+Use $-(x+iy) = -x-iy$, and Lemma \ref{lem:exprule} with $\alpha=-x$ and $\beta=-iy$.
+\end{proof}
+%%%
+
+\begin{lemma}[Series split]\label{lem:zeta1zetaseriesxy2} \lean{lem_zeta1zetaseriesxy2} \leanok
+For $x,y\in\R$, if $x>1$ then
+\begin{align*}
+-Z(x+iy) = \sum_{n=1}^{\infty} \Lambda(n)\,n^{-x} n^{-iy}
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:zeta1zetaseriesxy,lem:nxy}
+Apply Lemmas \ref{lem:zeta1zetaseriesxy} and \ref{lem:nxy}.
+\end{proof}
+%%%
+
+\begin{lemma}[Series converges]\label{lem:Zseriesconverges1} \lean{Zseriesconverges1} \leanok
+Let $x,y\in\R$. If $x>1$ then $\sum_{n=1}^{\infty} \Lambda(n)\,n^{-x} n^{-iy}$ converges.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Zconverges1,lem:zeta1zetaseriesxy2}
+Apply Lemmas \ref{lem:Zconverges1} and \ref{lem:zeta1zetaseriesxy2}.
+\end{proof}
+%%%
+
+\begin{lemma}[Real terms] \label{lem:realnx} \lean{lem_realnx} \leanok
+For $n,x\ge1$ we have $\Lambda(n)\,n^{-x}\ge0$
+\end{lemma}
+\begin{proof} \leanok
+Proven by definition of von Mangoldt $\Lambda(n)\ge0$ and $n^{-x}\ge0$.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Real sum]\label{lem:sumRealLambda} \lean{sumRealLambda} \leanok
+We have $\Re\Big(\sum_{n=1}^{\infty} \Lambda(n)\,n^{-x} n^{-iy}\Big) = \sum_{n=1}^{\infty} \Re(\Lambda(n)\,n^{-x} n^{-iy})$
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Zseriesconverges1,lem:sumReal}
+Apply Lemmas \ref{lem:Zseriesconverges1} and \ref{lem:sumReal}.
+\end{proof}
+%%%
+
+\begin{lemma}[Series real] \label{lem:sumRealZ} \lean{lem_sumRealZ} \leanok
+For $x>1$ and $y\in\R$, we have $\Re\big(-Z(x+iy)\big) = \sum_{n=1}^{\infty} \Re(\Lambda(n)\,n^{-x} n^{-iy})$
+\end{lemma}
+\begin{proof} \leanok \uses{lem:zeta1zetaseriesxy2,lem:sumRealLambda}
+Apply Lemmas \ref{lem:zeta1zetaseriesxy2} and \ref{lem:sumRealLambda}.
+\end{proof}
+%%%
+
+\begin{lemma}[Real factor]\label{lem:RealLambdaxy} \lean{RealLambdaxy} \leanok
+For $x>1$ and $y\in\R$, we have $\Re(\Lambda(n)\,n^{-x} n^{-iy}) = \Lambda(n)\,n^{-x}\,\Re(n^{-iy})$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:realnx,lem:realbw}
+Let $b=\Lambda(n)\,n^{-x}$.
+By Lemma \ref{lem:realnx} $b\in\R$.
+Apply Lemma \ref{lem:realbw} with $b=\Lambda(n)\,n^{-x}$ and $z=n^{-iy}$.
+\end{proof}
+%%%
+
+\begin{lemma}[Real series]\label{lem:ReZseriesRen} \lean{ReZseriesRen} \leanok
+For $x>1$ and $y\in\R$, we have $\Re\big(-Z(x+iy)\big) = \sum_{n=1}^{\infty} \Lambda(n)\,n^{-x}\,\Re(n^{-iy})$
+\end{lemma}
+\begin{proof} \leanok \uses{lem:sumRealZ,lem:RealLambdaxy}
+Apply Lemmas \ref{lem:sumRealZ} and \ref{lem:RealLambdaxy}.
+\end{proof}
+%%%
+
+
+
+\begin{lemma}[Cos form] \label{lem:Rezeta1zetaseries} \lean{Rezeta1zetaseries} \leanok
+For $x>1$ and $y\in\R$, $\Re\big(-Z(x+iy)\big) = \sum_{n=1}^{\infty} \Lambda(n) n^{-x}\cos(y\log n)$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:ReZseriesRen,lem:eacosalog3}
+Apply Lemmas \ref{lem:ReZseriesRen} and \ref{lem:eacosalog3}
+\end{proof}
+%%%
+
+\begin{lemma}[Cos series] \label{lem:Rezetaseries} \lean{Rezetaseries_convergence} \leanok
+For $x>1$ and $y\in\R$, $\sum_{n=1}^{\infty} \Lambda(n) n^{-x}\cos(y\log n)$ converges.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:ReZconverges1,lem:Rezeta1zetaseries}
+Apply Lemmas \ref{lem:ReZconverges1} and \ref{lem:Rezeta1zetaseries}.
+\end{proof}
+%%%
+
+\begin{lemma}[Double cos] \label{lem:Rezetaseries2t} \lean{Rezetaseries2t} \leanok
+For $x>1$ and $t\in\R$, $\sum_{n=1}^{\infty} \Lambda(n) n^{-x}\cos(2t\log n)$ converges.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Rezetaseries}
+Apply Lemma \ref{lem:Rezetaseries} with $y=2t$.
+\end{proof}
+%%%
+
+\begin{lemma}[Zero cos]\label{lem:cost0} \lean{lem_cost0} \leanok
+For $n\ge1$, if $t=0$ then $\cos(t\log n)=1$.
+\end{lemma}
+\begin{proof} \leanok
+For $t=0$, we calculate $\cos(t\log n)  = \cos(0\log n) = \cos(0)=1$.
+\end{proof}
+%%%
+
+\begin{lemma}[Zero series] \label{lem:Rezetaseries0} \lean{Rezetaseries0} \leanok
+For $x>1$, $\sum_{n=1}^{\infty} \Lambda(n) n^{-x}$ converges.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Rezetaseries,lem:cost0}
+Apply Lemma \ref{lem:Rezetaseries} with $y=0$,  and Lemma \ref{lem:cost0}.
+\end{proof}
+%%%
+
+\begin{lemma}[Delta series] \label{lem:Rezeta1zetaseries1} \lean{Rezeta1zetaseries1} \leanok
+For $t\in\R$ and $\delta>0$,
+\begin{align*}
+{\rm Re}\Big(-Z(1+\delta+it)\Big) = \sum_{n=1}^{\infty} \Lambda(n) n^{-(1+\delta)}\cos(t\log n)
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Rezeta1zetaseries}
+Apply Lemma \ref{lem:Rezeta1zetaseries} with $x=1+\delta$ and $y=t$. Note $x>1$ since $\delta>0$.
+\end{proof}
+%%%
+
+\begin{lemma}[Delta double] \label{lem:Rezeta1zetaseries2} \lean{Rezeta1zetaseries2} \leanok
+For $t\in\R$ and $\delta>0$, we have
+\begin{align*}
+{\rm Re}\Big(-Z(1+\delta+2it)\Big) = \sum_{n=1}^{\infty} \Lambda(n) n^{-(1+\delta)}\cos(2t\log n)
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Rezeta1zetaseries}
+Apply Lemma \ref{lem:Rezeta1zetaseries} with $x=1+\delta$ and $y=2t$. Note $x>1$ since $\delta>0$.
+\end{proof}
+%%%
+
+
+
+\begin{lemma}[Delta zero] \label{lem:Rezeta1zetaseries0} \lean{Rezeta1zetaseries0} \leanok
+Let $\delta>0$. We have
+\begin{align*}
+{\rm Re}\Big(-Z(1+\delta)\Big) = \sum_{n=1}^{\infty} \Lambda(n) n^{-(1+\delta)}
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Rezeta1zetaseries,lem:cost0}
+Apply Lemma \ref{lem:Rezeta1zetaseries} with $t=0$, and Lemma \ref{lem:cost0}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[341 series]\label{lem:341Zseries} \lean{Z341series} \leanok
+For $t\in\R$ and $\delta>0$, we have
+\begin{align*}
+3&\Re\big(-Z(1+\delta)\big) + 4\Re\big(-Z(1+\delta+it)\big) + \Re\big(-Z(1+\delta+2it)\big)\\
+&= 3\sum_{n=1}^{\infty} \Lambda(n) n^{-(1+\delta)}
++4\sum_{n=1}^{\infty} \Lambda(n) n^{-(1+\delta)}\cos(t\log n)
++\sum_{n=1}^{\infty} \Lambda(n) n^{-(1+\delta)}\cos(2t\log n).
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Rezeta1zetaseries0,lem:Rezeta1zetaseries1,lem:Rezeta1zetaseries2}
+Apply Lemmas \ref{lem:Rezeta1zetaseries0} and \ref{lem:Rezeta1zetaseries1} and \ref{lem:Rezeta1zetaseries2}.
+\end{proof}
+%%%
+
+\begin{lemma}[Sum converges]\label{lem:341seriesConv} \lean{lem341seriesConv} \leanok
+For $t\in\R$ and $\delta>0$,
+\begin{align*}
+3 \sum_{n=1}^{\infty} \Lambda(n) n^{-(1+\delta)}
++4\sum_{n=1}^{\infty} \Lambda(n) n^{-(1+\delta)}\cos(t\log n)
++\sum_{n=1}^{\infty} \Lambda(n) n^{-(1+\delta)}\cos(2t\log n)
+\end{align*}
+converges.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Rezetaseries0,lem:Rezetaseries,lem:Rezetaseries2t}
+Apply Lemmas \ref{lem:Rezetaseries0} and \ref{lem:Rezetaseries} and \ref{lem:Rezetaseries2t}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Factor form]\label{lem:341series} \lean{lem341series} \leanok
+For $t\in\R$ and $\delta>0$, we have
+\begin{align*}
+3& \sum_{n=1}^{\infty} \Lambda(n) n^{-(1+\delta)}
++4\sum_{n=1}^{\infty} \Lambda(n) n^{-(1+\delta)}\cos(t\log n)
++\sum_{n=1}^{\infty} \Lambda(n) n^{-(1+\delta)}\cos(2t\log n)\\
+& =  \sum_{n=1}^{\infty} \Lambda(n) n^{-(1+\delta)}(3 + 4\cos(t\log n) + \cos(2t\log n)).
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Rezetaseries0,lem:Rezetaseries,lem:Rezetaseries2t}
+Apply Lemmas \ref{lem:Rezetaseries0} and \ref{lem:Rezetaseries} and \ref{lem:Rezetaseries2t}.
+\end{proof}
+%%%
+
+\begin{lemma}[Factor conv]\label{lem:341seriesConverge} \lean{lem_341seriesConverge} \leanok
+For $t\in\R$ and $\delta>0$,
+\begin{align*}
+\sum_{n=1}^{\infty} \Lambda(n) n^{-(1+\delta)}(3 + 4\cos(t\log n) + \cos(2t\log n))
+\end{align*}
+converges.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:341seriesConv,lem:341series}
+Apply Lemmas \ref{lem:341seriesConv} and \ref{lem:341series}.
+\end{proof}
+%%%
+
+\begin{lemma}[Series equal]\label{lem:341series2} \lean{lem_341series2} \leanok
+For $t\in\R$ and $\delta>0$, we have
+\begin{align*}
+3&\Re\big(-Z(1+\delta)\big) + 4\Re\big(-Z(1+\delta+it)\big) + \Re\big(-Z(1+\delta+2it)\big)\\
+& =  \sum_{n=1}^{\infty} \Lambda(n) n^{-(1+\delta)}(3 + 4\cos(t\log n) + \cos(2t\log n)).
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:341Zseries,lem:341series}
+Apply Lemmas \ref{lem:341Zseries} and \ref{lem:341series}
+\end{proof}
+%%%
+
+
+\begin{lemma}[Term nonneg]\label{lem:Lambpostriglogn} \lean{lem_Lambda_pos_trig_sum} \leanok
+For $n\ge1$, $\delta>0$, and $t\in\R$, we have $0\le \Lambda(n)\, n^{-(1+\delta)}(3 + 4\cos(t\log n) + \cos(2t\log n))$.
+\end{lemma}
+\begin{proof} \leanok \uses{lem:postriglogn,lem:realnx}
+Apply Lemmas \ref{lem:postriglogn} and \ref{lem:realnx} with $x=1+\delta$.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Series nonneg]\label{lem:seriespos} \lean{lem_seriespos} \leanok
+For $t\in\R$ and $\delta>0$, we have
+$$0\le \sum_{n=1}^{\infty} \Lambda(n)\, n^{-(1+\delta)}(3 + 4\cos(t\log n) + \cos(2t\log n))$$
+\end{lemma}
+\begin{proof} \leanok \uses{lem:341seriesConverge,lem:postriglogn,lem:seriesPos,lem:Lambpostriglogn}
+Apply Lemmas \ref{lem:341seriesConverge}, \ref{lem:Lambpostriglogn}, \ref{lem:postriglogn}, and \ref{lem:seriesPos} with $r_n = \Lambda(n)\, n^{-(1+\delta)}(3 + 4\cos(t\log n) + \cos(2t\log n))$.
+\end{proof}
+%%%
+
+\begin{lemma}[Positive sum]\label{lem:341Zpos} \lean{Z341pos} \leanok
+For $t\in\R$ and $\delta>0$, we have
+\begin{align*}
+0\le 3\Re\big(-Z(1+\delta)\big) + 4\Re\big(-Z(1+\delta+it)\big) + \Re\big(-Z(1+\delta+2it)\big)
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:341series2,lem:seriespos}
+Apply Lemmas \ref{lem:341series2} and \ref{lem:seriespos}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Inequality]\label{lem:341tsC} \lean{lem341tsC} \leanok
+There exists a constant $C>1$ such that, for any $\sigma +it\in \mathcal{Z}$,
+\begin{align*}
+\frac{4}{1-\sigma+1/(2C\log(|t|+2))}\le 7C\log(|t|+2)
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:Z341bounds_const,lem:341Zpos,lem:3_gt_e}
+Apply Lemmas \ref{lem:Z341bounds_const} and \ref{lem:341Zpos} with $\delta  = 1/(2C\log(|t|+2))$.
+\end{proof}
+%%%
+
+\begin{lemma}[Rearranged]\label{lem:341tsC2} \lean{lem341tsC2} \leanok
+There exists a constant $C>0$ such that, for any $\sigma +it\in \mathcal{Z}$,
+\begin{align*}
+1-\sigma+1/(2C\log(|t|+2)) \ge 4/(7C\log(|t|+2))
+\end{align*}
+\end{lemma}
+\begin{proof}    \uses{lem:341tsC}
+Apply Lemma \ref{lem:341tsC}. \leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Final bound]\label{lem:341tsC3} \lean{lem341tsC3} \leanok
+There exists a constant $C>0$ such that, for any $\sigma +it\in \mathcal{Z}$,
+\begin{align*}
+1-\sigma \ge 1/(14C\log(|t|+2))
+\end{align*}
+\end{lemma}
+\begin{proof} \leanok \uses{lem:341tsC2}
+Apply Lemma \ref{lem:341tsC2}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Zero free]\label{lem:zerofree} \lean{zerofree} \leanok
+There exists a constant $1>c>0$ such that if $\zeta(\sigma+it)=0$ and $|t|>3$ for some $\sigma,t\in\R$, then $\sigma \le 1 - \frac{c}{\log(|t|+2)}$.
+\end{lemma}
+\begin{proof} \uses{lem:341tsC3,def:zeroZ}
+\leanok
+Apply Lemma \ref{lem:341tsC3} with $c=1/(14C)$, and Definition \ref{def:zeroZ} of $\mathcal{Z}$.
+\end{proof}
+%%%
+
+
+\section{Bound on \texorpdfstring{$\zeta'/\zeta$}{zeta'/zeta}}
+
+\begin{definition}[Delta zeros] \label{def:Yt} \lean{Yt}
+\leanok
+For $t\in\R$ and $0<\delta<1/9$, define
+$$\mathcal{Y}_t(\delta) = \{\rho_1\in\C : \zeta(\rho_1) = 0 \,\text{and} \, |\rho_1-(1-\delta+it)|\le 2\delta\}.$$
+\end{definition}
+%%%
+
+\begin{definition}[Delta def] \label{def:deltaz} \lean{deltaz,deltaz_t} \leanok
+Let $0<a<1$ be the constant in \ref{lem:zerofree}. For $z\in\C$ with $|\Im(z)|>2$, define the function $\delta(z) = \frac{a/20}{\log(|\Im(z)|+2)}$. For $t\in\R$ define $\delta_t = \delta(it)$.
+\end{definition}
+
+\begin{lemma}[Delta range] \label{lem:delta19} \lean{lem_delta19} \leanok
+For $z\in\C$ we have $0<\delta(z)<1/9$. For $t\in\R$ we have $0<\delta_t<1/9$.
+\end{lemma}
+\begin{proof}
+\uses{def:deltaz,lem:3_gt_e}
+\leanok
+Unfold \cref{def:deltaz}.
+\end{proof}
+
+\begin{lemma}[Zero free] \label{lem:ZFRdelta} \lean{lem_ZFRdelta} \leanok
+For $z\in\C$, if $\Re(z) > 1 - 9\delta(z)$ then $\zeta(z)\neq 0$. \end{lemma}
+\begin{proof}
+\uses{def:deltaz,lem:zerofree}
+\leanok
+Unfold definition of $\delta(z)$ in \cref{def:deltaz}, and apply contrapositive of \cref{lem:zerofree}.
+\end{proof}
+
+\begin{lemma}[Disk inclusion] \label{lem:ZFRinD} \lean{lem_ZFRinD} \leanok
+Let $t\in\R$ with $|t|>3$. For $c=3/2+it$ and $z=\sigma+it$ with $1-\delta_t \le \sigma \le 3/2$, we have $z\in \overline{\D}_{2/3}(c)$.
+\end{lemma}
+\begin{proof}
+\uses{def:deltaz,lem:delta19}
+\leanok
+We calculate $|z-c|= |\sigma - 3/2| \le 1/2 + \delta_t$. Note $\delta_t \le 1/9$ by \cref{lem:delta19}. Hence $|z-c|\le 2/3$.
+\end{proof}
+
+\begin{lemma}[Not zero] \label{lem:ZFRnotK} \lean{lem_ZFRnotK} \leanok
+Let $t\in\R$ with $|t|>3$. For $c=3/2+it$ and $z=\sigma+it$ with $1-\delta_t \le \sigma \le 3/2$, we have $z\notin \mathcal K_{\zeta}(5/6;c)$.
+\end{lemma}
+\begin{proof}
+\uses{def:deltaz,lem:ZFRinD,lem:ZFRdelta}
+\leanok
+Since $\Re(z) = \sigma \ge 1-\delta_t = 1 - \delta(z)$, we have $\zeta(z)\neq0$ by \cref{lem:ZFRdelta}. Thus $z\notin \mathcal K_{\zeta}(5/6;c)$.
+\end{proof}
+
+\begin{lemma}[Expansion]\label{lem:Zeta_Expansion_ZFR} \lean{lem_Zeta_Expansion_ZFR} \leanok
+There exists a constant $C_1>1$ such that for all $t\in\R$ with $|t|>3$, letting $c=3/2+it$, and all $z=\sigma+it$ with $1-\delta_t \le \sigma \le 3/2$ we have
+\begin{align*}
+\left|\frac{\zeta'(z)}{\zeta(z)} - \sum_{\rho\in\mathcal K_{\zeta}(5/6;c)} \frac{m_{\rho,\zeta}}{z-\rho} \right| \le C_1\log|t|
+\end{align*}
+\end{lemma}
+\begin{proof}
+\uses{lem:Zeta1_Zeta_Expansion,lem:ZFRinD,lem:ZFRnotK} \leanok
+Apply \cref{lem:Zeta1_Zeta_Expansion} with $z=\sigma+it$, $r_1 = 2/3$, $r = 3/4$, and choosing $C_1 = C\left(\frac{1}{(r-r_1)^3} + 1\right)$.
+Note $z\in\overline{\D}_{r_1}(c)\setminus \mathcal K_\zeta(5/6;c)$ by \cref{lem:ZFRinD,lem:ZFRnotK}.
+\end{proof}
+
+\begin{lemma}[Distance real] \label{lem:abszrhoReRe} \lean{lem_abszrhoReRe} \leanok
+For $z,\rho\in\C$ we have $|z-\rho| \ge \Re(z) - \Re(\rho)$
+\end{lemma}
+\begin{proof}
+\leanok
+Apply Mathlib: Complex.re\_le\_abs and then Complex.sub\_re
+to calculate $|z-\rho| \ge \Re(z-\rho) = \Re(z) - \Re(\rho)$.
+\end{proof}
+
+\begin{lemma}[Real bound] \label{lem:Rerhotodeltarho} \lean{lem_Rerhotodeltarho} \leanok
+For $t\in \R$ with $|t|>3$ and $\rho\in\mathcal K_{\zeta}(5/6;3/2+it)$ we have $\Re(\rho) \le 1 - 9\delta(\rho)$.
+\end{lemma}
+\begin{proof}
+\uses{lem:ZFRdelta}
+\leanok
+By definition $\rho\in\mathcal K_{\zeta}(5/6;3/2+it)$ implies $\zeta(\rho)=0$. Then $\zeta(\rho)=0$ implies $\Re(\rho) \le 1 - 9\delta(\rho)$ by the contrapositive of \cref{lem:ZFRdelta}.
+\end{proof}
+
+\begin{lemma}[Imag bound] \label{lem:DImt2d} \lean{lem_DImt2d} \leanok
+For $t\in \R$ with $|t|>3$ and $z\in \overline{\D}_{5/6}(3/2+it)$, we have  $|\Im(z)| \le |t|+5/6$.
+\end{lemma}
+\begin{proof}
+\leanok
+Unfold definition of $\overline{\D}_{2\delta_t}(1-\delta_t+it)$.
+\end{proof}
+
+\begin{lemma}[Imag growth] \label{lem:DIMt2} \lean{lem_DIMt2} \leanok
+For $t\in \R$ with $|t|>3$ and $z\in \overline{\D}_{5/6}(3/2+it)$, we have $|\Im(z)|+2 \le (|t|+2)^3$.
+\end{lemma}
+\begin{proof}
+\uses{lem:DImt2d}
+\leanok
+Apply \cref{lem:DImt2d} and $3<|t|$.
+\end{proof}
+
+\begin{lemma}[Log bound] \label{lem:DlogImlog} \lean{lem_DlogImlog} \leanok
+For $t\in \R$ with $|t|>3$ and $z\in \overline{\D}_{5/6}(3/2+it)$, we have $\log(|\Im(z)|+2) \le 3\log(|t|+2)$.
+\end{lemma}
+\begin{proof}
+\uses{lem:DIMt2}
+\leanok
+Apply \cref{lem:DIMt2} and Mathlib: Real.log\_le\_log
+\end{proof}
+
+\begin{lemma}[Log compare] \label{lem:D1logtlog} \lean{lem_D1logtlog} \leanok
+For $t\in \R$ with $|t|>3$ and $z\in \overline{\D}_{5/6}(3/2+it)$, we have $1/\log(|t|+2) \le 3/\log(|\Im(z)|+2)$.
+\end{lemma}
+\begin{proof}
+\uses{lem:DlogImlog}
+\leanok
+Apply \cref{lem:DlogImlog} and Mathlib: one\_div\_le\_one\_div
+\end{proof}
+
+\begin{lemma}[Delta compare] \label{lem:Ddt2dz} \lean{lem_Ddt2dz} \leanok
+For $t\in \R$ with $|t|>3$ and $z\in \overline{\D}_{5/6}(3/2+it)$, we have $\delta_t \le 3\delta(z)$.
+\end{lemma}
+\begin{proof}
+\uses{def:deltaz,lem:D1logtlog}
+\leanok
+Unfold definitions of $\delta_t$ and $\delta(z)$ from \cref{def:deltaz}. Then apply \cref{lem:D1logtlog}.
+\end{proof}
+
+\begin{lemma}[Delta bound] \label{lem:deltarhotodeltat} \lean{lem_deltarhotodeltat} \leanok
+Let $t\in\R$ with $|t|>3$, and $c=3/2+it$. For all $\rho\in\mathcal K_{\zeta}(5/6;c)$ we have $\delta(\rho) \ge \frac{1}{3}\delta_t$
+\end{lemma}
+\begin{proof}
+\uses{def:deltaz,lem:Ddt2dz}
+\leanok
+Apply \cref{lem:Ddt2dz} with $z=\rho$. Note $\mathcal K_{\zeta}(5/6;c)\subset \overline{\D}_{5/6}(c)$.
+\end{proof}
+
+\begin{lemma}[Real bound] \label{lem:Rerhotodeltat} \lean{lem_Rerhotodeltat} \leanok
+Let $t\in\R$ with $|t|>3$, and $c=3/2+it$. For all $\rho\in\mathcal K_{\zeta}(5/6;c)$ we have $\Re(\rho) \le 1 - 3\delta_t$
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:Rerhotodeltarho, lem:deltarhotodeltat}
+Apply \cref{lem:Rerhotodeltarho,lem:deltarhotodeltat}.
+\end{proof}
+
+\begin{lemma}[Gap bound] \label{lem:RezRerho} \lean{lem_RezRerho} \leanok
+Let $t\in\R$ with $|t|>3$, and $c=3/2+it$. For all $\rho\in\mathcal K_{\zeta}(5/6;c)$ and $z=\sigma+it$ with $1-\delta_t \le \sigma \le 3/2$ we have $\Re(z) - \Re(\rho) \ge 2\delta_t$.
+\end{lemma}
+\begin{proof}
+\uses{lem:Rerhotodeltat}
+\leanok
+Apply \cref{lem:Rerhotodeltat}, and calculate $\Re(z) - \Re(\rho) \ge (1 - \delta_t) - (1 - 3\delta_t) = 2\delta_t$.
+\end{proof}
+
+\begin{lemma}[Gap size] \label{lem:abszrhodelta} \lean{lem_abszrhodelta} \leanok
+Let $t\in\R$ with $|t|>3$, and $c=3/2+it$. For all $\rho\in\mathcal K_{\zeta}(5/6;c)$ and $z=\sigma+it$ with $1-\delta_t \le \sigma \le 3/2$ we have $|z-\rho| \ge 2\delta_t$.
+\end{lemma}
+\begin{proof}
+\uses{lem:abszrhoReRe,lem:RezRerho}
+\leanok
+Apply \cref{lem:abszrhoReRe,lem:RezRerho}
+\end{proof}
+
+\begin{lemma}[Nonzero gap] \label{lem:abszrhodeltanot0} \lean{lem_abszrhodeltanot0} \leanok
+Let $t\in\R$ with $|t|>3$, and $c=3/2+it$. For all $\rho\in\mathcal K_{\zeta}(5/6;c)$ and $z=\sigma+it$ with $1-\delta_t \le \sigma \le 3/2$ we have $|z-\rho| > 0$.
+\end{lemma}
+\begin{proof}
+\uses{lem:abszrhodelta,lem:delta19}
+\leanok
+Apply \cref{lem:abszrhodelta,lem:delta19}.
+\end{proof}
+
+\begin{lemma}[Inverse gap] \label{lem:1abszrho} \lean{lem_1abszrho} \leanok
+Let $t\in\R$ with $|t|>3$, and $c=3/2+it$. For all $\rho\in\mathcal K_{\zeta}(5/6;c)$ and $z=\sigma+it$ with $1-\delta_t \le \sigma \le 3/2$ we have $\frac{1}{|z-\rho|} \le \frac{1}{2\delta_t}$.
+\end{lemma}
+\begin{proof}
+\uses{lem:abszrhodelta,lem:delta19}
+\leanok
+Apply \cref{lem:abszrhodelta} and Mathlib: one\_div\_le\_one\_div with \cref{lem:delta19}.
+\end{proof}
+
+\begin{lemma}[Order nat]\label{lem:m_rho_zeta_nat} \lean{lem_m_rho_zeta_nat} \leanok
+For $t\in\R$ with $|t|>3$, let $c=3/2+it$. Then $m_{\rho,\zeta}\in\N$ for all $\rho\in K_{\zeta}(5/6;c)$.
+\end{lemma}
+\begin{proof}
+\uses{lem:fc_m_order,lem:m_rho_is_nat,lem:zetaanalOnD1c,lem:zetacnot0}
+\leanok
+Apply \cref{lem:fc_m_order,lem:m_rho_is_nat} with $\zeta$, $R_1=5/6$, $R=8/9$.
+Note $\zeta$ AnalyticOnNhd $\overline{\D}_1(c)$ by \cref{lem:zetaanalOnD1c}. Also $\zeta(c)\neq0$ by \cref{lem:zetacnot0}
+\end{proof}
+
+\begin{lemma}[Finite set]\label{lem:finiteKzeta} \lean{lem_finiteKzeta} \leanok
+For $t\in\R$ with $|t|>3$, let $c=3/2+it$. Then $K_{\zeta}(5/6;c)$ is finite.
+\end{lemma}
+\begin{proof}
+\uses{lem:fc_zeros,lem:Contra_finiteKR,lem:zetaanalOnD1c,lem:zetacnot0}
+\leanok
+Apply \cref{lem:fc_zeros,lem:Contra_finiteKR} with $\zeta$, $R_1=5/6$, $R=8/9$.
+Note $\zeta$ AnalyticOnNhd $\overline{\D}_1(c)$ by \cref{lem:zetaanalOnD1c}. Also $\zeta(c)\neq0$ by \cref{lem:zetacnot0}
+\end{proof}
+
+\begin{lemma}[Triangle]\label{lem:triangle_ZFR} \lean{lem_triangle_ZFR} \leanok
+For all $t\in\R$ with $|t|>3$, letting $c=3/2+it$, and all $z=\sigma+it$ with $1-\delta_t \le \sigma \le 3/2$ we have
+\begin{align*}
+\left|\sum_{\rho\in\mathcal K_{\zeta}(5/6;c)} \frac{m_{\rho,\zeta}}{z-\rho} \right| \le \sum_{\rho\in\mathcal K_{\zeta}(5/6;c)} \frac{m_{\rho,\zeta}}{|z-\rho|}
+\end{align*}
+\end{lemma}
+\begin{proof}
+\uses{lem:abszrhodeltanot0,lem:m_rho_zeta_nat,lem:finiteKzeta}
+\leanok
+Apply Mathlib: Finset.abs\_sum\_le\_sum\_ab. Note $\mathcal K_{\zeta}(5/6;c)$ is finite by \cref{lem:finiteKzeta}.
+Then apply Mathlib: abs\_div with \cref{lem:abszrhodeltanot0}. Note $m_{\rho,\zeta}\in \N$ by \cref{lem:m_rho_zeta_nat}.
+\end{proof}
+
+
+\begin{lemma}[Triangle]\label{lem:Zeta_Triangle_ZFR} \lean{lem_Zeta_Triangle_ZFR} \leanok
+There exists a constant $C_1>1$ such that for all $t\in\R$ with $|t|>3$, letting $c=3/2+it$, and all $z=\sigma+it$ with $1-\delta_t \le \sigma \le 3/2$ we have
+\begin{align*}
+\Big|\frac{\zeta'(z)}{\zeta(z)}\Big| \le  \sum_{\rho\in\mathcal K_{\zeta}(5/6;c)} \frac{m_{\rho,\zeta}}{|z-\rho|} + C_1\log|t|
+\end{align*}
+\end{lemma}
+\begin{proof}
+\uses{lem:Zeta_Expansion_ZFR,lem:triangle_ZFR}
+\leanok
+Apply \cref{lem:Zeta_Expansion_ZFR,lem:triangle_ZFR}.
+\end{proof}
+
+\begin{lemma}[Sum bound] \label{lem:sumK1abs} \lean{lem_sumK1abs} \leanok
+For all $t\in\R$ with $|t|>3$, letting $c=3/2+it$, and all $z=\sigma+it$ with $1-\delta_t \le \sigma \le 3/2$ we have
+\[\sum_{\rho\in\mathcal K_{\zeta}(5/6;c)} \frac{m_{\rho,\zeta}}{|z-\rho|} \le \frac{1}{2\delta_t}\sum_{\rho\in\mathcal K_{\zeta}(5/6;c)}m_{\rho,\zeta}\]
+\end{lemma}
+\begin{proof}
+\uses{lem:1abszrho}
+\leanok
+Apply \cref{lem:1abszrho}.
+\end{proof}
+
+\begin{lemma}[Order bound]\label{lem:sum_m_rho_bound_c} \lean{lem_sum_m_rho_bound_c} \leanok
+Let $B>1$, $0<R_1<R<1$, and $f:\C\to\C$ be a function that is AnalyticOnNhd $\overline{\D}_1(c)$. If $f(c)\neq0$ and $|f(z)|\le B$ on $z\in \overline{\D}_R(c)$, then $\sum_{\rho\in\mathcal K_f(R_1;c)} m_{\rho,f} \le \frac{\log(B/|f(c)|)}{\log(R/R_1)}$.
+\end{lemma}
+\begin{proof}
+\uses{lem:fc_zeros,lem:fc_m_order,lem:fc_bound,lem:sum_m_rho_bound,lem:zetaanalOnD1c,lem:zetacnot0}
+\leanok
+Use the conditions from \cref{lem:fc_zeros,lem:fc_m_order,lem:fc_bound} with $f=\zeta$, and then apply \cref{lem:sum_m_rho_bound} with $\zeta_c(z) = \zeta(z+c)/\zeta(c)$. Note $\zeta$ is AnalyticOnNhd $\overline{\D}_1(c)$ by \cref{lem:zetaanalOnD1c}.
+Also $\zeta(c)\neq0$ by \cref{lem:zetacnot0}.
+\end{proof}
+
+\begin{lemma}[Order sum] \label{lem:sum_m_rho_zeta} \lean{lem_sum_m_rho_zeta} \leanok
+There exists a constant $C_2>1$ such that for all $t\in\R$ with $|t|>3$, letting $c=3/2+it$, we have
+$\sum_{\rho\in\mathcal K_{\zeta}(5/6;c)}m_{\rho,\zeta} \le C_2 \log|t|$
+\end{lemma}
+\begin{proof}
+\uses{lem:sum_m_rho_bound_c,lem:zeta32upper,lem:3_gt_e}
+\leanok
+Apply \cref{lem:sum_m_rho_bound_c} with $R_1=5/6$, $R=8/9$.
+Then by \cref{lem:zeta32upper}, we set $B = b|t|$.
+Thus $\log(B/|f(c)|) \le \log|t| + \log(b/|f(c)|)$. Thus we may choose $C_2 = 2(1+\log(b/|f(c)|))/\log(R/R_1)$.
+\end{proof}
+
+
+\begin{lemma}[Sum bound] \label{lem:sumKdeltatlogt} \lean{lem_sumKdeltatlogt} \leanok
+There exists a constant $C_3>1$ such that for all $t\in\R$ with $|t|>3$, letting $c=3/2+it$, and all $z=\sigma+it$ with $1-\delta_t \le \sigma \le 3/2$ we have
+\[\sum_{\rho\in\mathcal K_{\zeta}(5/6;c)} \frac{m_{\rho,\zeta}}{|z-\rho|} \le \frac{C_3}{\delta_t} \log|t|\]
+\end{lemma}
+\begin{proof}
+\uses{lem:sumK1abs,lem:sum_m_rho_zeta}
+\leanok
+Apply \cref{lem:sumK1abs,lem:sum_m_rho_zeta}.
+\end{proof}
+
+
+\begin{lemma}[Sum bound] \label{lem:sumKlogt2} \lean{lem_sumKlogt2} \leanok
+There exists a constant $C_4>1$ such that for all $t\in\R$ with $|t|>3$, letting $c=3/2+it$, and all $z=\sigma+it$ with $1-\delta_t \le \sigma \le 3/2$ we have
+\[\sum_{\rho\in\mathcal K_{\zeta}(5/6;c)} \frac{m_{\rho,\zeta}}{|z-\rho|} \le C_4\log|t|^2\]
+\end{lemma}
+\begin{proof}
+\uses{lem:sumKdeltatlogt,def:deltaz}
+\leanok
+Apply \cref{lem:sumKdeltatlogt,def:deltaz}.
+\end{proof}
+
+\begin{lemma}[Log bound] \label{lem:logDerivZetalogt0} \lean{lem_logDerivZetalogt0} \leanok
+There exists a constant $C>1$ such that for all $t\in\R$ with $|t|>3$, and all $s=\sigma+it$ with $1-\delta_t \le \sigma \le 3/2$, we have
+\[ \Big|\frac{\zeta'}{\zeta}(s)\Big| \le C\log|t|^2\]
+\end{lemma}
+\begin{proof}
+\uses{lem:Zeta_Triangle_ZFR,lem:sumKlogt2,lem:3_gt_e}
+\leanok
+Apply \cref{lem:Zeta_Triangle_ZFR,lem:sumKlogt2,lem:3_gt_e}.
+\end{proof}
+
+\begin{lemma}[Log bound] \label{lem:logDerivZetalogt2} \lean{lem_logDerivZetalogt2} \leanok
+There exist constants $0<A<1$ and $C>1$ such that for all $t\in\R$ with $|t|>3$, and all $s=\sigma+it$ with $1 - A/\log(|t|+2) \le \sigma \le 3/2$, we have
+\[ \Big|\frac{\zeta'}{\zeta}(s)\Big| \le C\log|t|^2\]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:logDerivZetalogt0,def:deltaz}
+Apply \cref{lem:logDerivZetalogt0,def:deltaz}.
+\end{proof}
+
+
+\begin{lemma}[Real bound]\label{lem:rhoDRe4} \lean{lem_rhoDRe4} \leanok
+Let $t\in\R$. If $z\in \overline{\D}_{2\delta_t}(1-\delta_t+it)$ then $\Re(z) > 1-4\delta_t$
+\end{lemma}
+\begin{proof}
+\uses{lem:zRe4}
+\leanok
+Apply \cref{lem:zRe4} with $\delta=\delta_t$.
+\end{proof}
+
+\begin{lemma}[Real bound] \label{lem:DRez6dz} \lean{lem_DRez6dz} \leanok
+For $t\in \R$ with $|t|>3$ and $z\in \overline{\D}_{2\delta_t}(1-\delta_t+it)$, we have $\Re(z) \ge 1 - 6\delta(z)$
+\end{lemma}
+\begin{proof}
+\uses{lem:rhoDRe4,lem:Ddt2dz}
+\leanok
+Apply \cref{lem:rhoDRe4,lem:Ddt2dz}.
+\end{proof}
+
+\begin{lemma}[In disk] \label{lem:YinD} \lean{lem_YinD} \leanok
+For $t\in \R$ with $|t|>3$ we have $\mathcal{Y}_t(\delta_t)\subset \overline{\D}_{2\delta_t}(1-\delta_t+it)$.
+\end{lemma}
+\begin{proof}
+\uses{def:Yt}
+\leanok
+Unfold definition of $\mathcal{Y}_t(\delta_t)$ in \cref{def:Yt}
+\end{proof}
+
+\begin{lemma}[Zero set]\label{lem:rhoYzero} \lean{lem_rhoYzero} \leanok
+Let $t\in\R$ and $\delta>0$. If $\rho_1\in \mathcal{Y}_t(\delta)$ then $\zeta(\rho_1) = 0$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{def:Yt}
+Unfold definition \ref{def:Yt} for $\mathcal{Y}_t(\delta)$.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Real abs]\label{lem:absReabs} \lean{lem_absReabs}
+\leanok
+For $w\in\C$ we have $|\Re(w)| \le |w|$
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib (try Complex.abs\_re\_le\_abs)
+\end{proof}
+%%%
+
+\begin{lemma}[Real diff]\label{lem:zRe} \lean{lem_zRe}
+\leanok
+Let $t\in\R$, $1/9 > \delta >0$ and $z\in \C$. Then $|\Re(z-(1-\delta+it))| \le |z-(1-\delta+it)|$
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:absReabs}
+Apply Lemma \ref{lem:absReabs} with $w=z-(1-\delta+it)$.
+\end{proof}
+%%%
+
+\begin{lemma}[Real diff]\label{lem:zRe2} \lean{lem_zRe2}
+\leanok
+Let $t\in\R$, $1/9 > \delta >0$ and $z\in \C$. If $|z-(1-\delta+it)| \le \delta/2$ then $|\Re(z-(1-\delta+it))| \le \delta/2$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zRe}
+Apply Lemma \ref{lem:zRe}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Real diff]\label{lem:Rezit} \lean{lem_Rezit}
+\leanok
+Let $t\in\R$ and $1/9 > \delta >0$ and $z\in \C$. We have $\Re(z-(1-\delta+it)) = \Re(z)-(1-\delta)$
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+%%%
+
+\begin{lemma}[Real diff]\label{lem:zRe3} \lean{lem_zRe3}
+\leanok
+Let $t\in\R$, $1/9 > \delta >0$ and $z\in \C$. If $|z-(1-\delta+it)| \le \delta/2$ then $|\Re(z)-(1-\delta)| \le \delta/2$
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zRe2,lem:Rezit}
+Apply Lemmas \ref{lem:zRe2} and \ref{lem:Rezit}.
+\end{proof}
+%%%
+
+\begin{lemma}[Neg bound]\label{lem:negleabs} \lean{lem_negleabs}
+\leanok
+Let $a\in\R$ and $b>0$. If $|a|\le b$ then $a\ge -b$.
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib (try neg\_le\_of\_abs\_le)
+\end{proof}
+%%%
+
+
+\begin{lemma}[Real bound]\label{lem:absrez1d} \lean{lem_absrez1d}
+\leanok
+Let $1/ 9 > \delta >0$ and $z\in \C$. If $|\Re(z)-(1-\delta)| \le \delta/2$ then $\Re(z)-(1-\delta) \ge -\delta/2$
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:negleabs}
+\ref{lem:negleabs} with $a=\Re(z)-(1-\delta)$ and $b=\delta/2$.
+\end{proof}
+%%%
+
+\begin{lemma}[Real bound]\label{lem:absrez1d2} \lean{lem_absrez1d2} \leanok
+Let $0<\delta<1/9$ and $z\in \C$. If $|\Re(z)-(1-\delta)| \le 2\delta$ then $\Re(z) \ge 1-3\delta$
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:absrez1d}
+Apply Lemma \ref{lem:absrez1d} and then add $1-\delta$ to both sides.
+\end{proof}
+%%%
+
+\begin{lemma}[Real bound]\label{lem:absrez1d3} \lean{lem_absrez1d3}
+\leanok
+Let $0<\delta<1/9$ and $z\in \C$. If $|\Re(z)-(1-\delta)| \le 2\delta$ then $\Re(z) > 1-4\delta$
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:absrez1d2}
+Apply Lemma \ref{lem:absrez1d2}, and then use $1-\frac{3}{2}\delta > 1-2\delta$, since $\delta>0$.
+\end{proof}
+%%%
+
+\begin{lemma}[Real bound]\label{lem:zRe4} \lean{lem_zRe4}
+\leanok
+Let $t\in\R$, $0<\delta<1/9$ and $z\in \C$. If $|z-(1-\delta+it)| \le 2\delta$ then $\Re(z) > 1-4\delta$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:zRe3,lem:absrez1d3}
+Apply Lemmas \ref{lem:zRe3} and \ref{lem:absrez1d3}.
+\end{proof}
+%%%
+
+
+\begin{lemma}[Empty set]\label{lem:Kzetaempty} \lean{lem_Kzetaempty}
+\leanok
+For $t\in\R$ with $|t|>3$ we have $\mathcal{Y}_t(\delta_t)= \emptyset$.
+\end{lemma}
+\begin{proof}
+\uses{lem:rhoYzero,def:deltaz}
+\leanok
+\end{proof}
+%%%
+
+
+\begin{lemma}[Empty sum] \label{lem:sumempty} \lean{lem_sumempty}
+\leanok
+For any $g:\C\to\C$, if $S=\emptyset$ then
+\begin{align*}
+\sum_{s\in S}g(s) = 0
+\end{align*}
+\end{lemma}
+\begin{proof}
+\leanok
+Mathlib (try Mathlib.Meta.NormNum.Finset.sum\_empty)
+\end{proof}
+%%%
+
+\begin{lemma}[Zero sum]\label{lem:Ksumempty} \lean{lem_Ksumempty}
+\leanok
+For $t\in\R$ with $|t|>3$ we have
+\begin{align*}
+\sum_{\rho_1\in \mathcal{Y}_t(\delta_t)} \frac{m_{\rho_1,\zeta}}{1-\delta_t+it-\rho_1} = 0.
+\end{align*}
+\end{lemma}
+\begin{proof}
+\uses{lem:Kzetaempty,lem:sumempty}
+\leanok
+Apply Lemmas \ref{lem:Kzetaempty} and \ref{lem:sumempty} with $g(s) = \frac{m_{\rho_1,\zeta}}{1-\delta_t+it-s}$ and $S=\mathcal{Y}_t(\delta_t)$.
+\end{proof}
+%%%
+
+\begin{lemma}[Center bound]\label{lem:zetacenterbd} \lean{lem_zetacenterbd} \leanok
+For $\sigma \ge 3/2$ and $t\in\R$ we have $|\frac{\zeta'}{\zeta}(\sigma + it)| \le |\frac{\zeta'}{\zeta}(\sigma)|$
+\end{lemma}
+\begin{proof}
+\leanok
+By Mathlib: ArithmeticFunction.LSeries\_vonMangoldt\_eq\_deriv\_riemannZeta\_div
+
+we have $-\frac{\zeta'}{\zeta}(\sigma + it) = \sum_{n=1}^\infty \frac{\Lambda(n)}{n^s}$.
+
+Note this series is summable by Mathlib: ArithmeticFunction.LSeriesSummable\_vonMangoldt
+
+Then apply Mathlib: norm\_tsum\_le\_tsum\_norm so that
+$|\frac{\zeta'}{\zeta}(\sigma + it)| \le \sum_{n=1}^\infty \frac{\Lambda(n)}{|n^s|}$.
+
+Observe $|n^s| = n^{\Re(s)}e^{-\Arg(s)\Im(n)}$ by Mathlib: Complex.abs\_cpow\_le.
+Note $n\in\R$ so $\Im(n)=0$ by imaginaryPart\_ofReal. Thus $e^{-\Arg(s)\Im(n)} = e^0 = 1$.
+And $\Re(s)=\sigma$. Hence $|n^s| = n^{\sigma}$.
+
+Thus $|\frac{\zeta'}{\zeta}(\sigma + it)| \le \sum_{n=1}^\infty \frac{\Lambda(n)}{n^\sigma}$.
+
+Again by Mathlib: ArithmeticFunction.LSeries\_vonMangoldt\_eq\_deriv\_riemannZeta\_div
+we have$\sum_{n=1}^\infty \frac{\Lambda(n)}{n^\sigma} = -\frac{\zeta'}{\zeta}(\sigma)$.
+
+Take absolute values to get $|\frac{\zeta'}{\zeta}(\sigma + it)| \le |\frac{\zeta'}{\zeta}(\sigma)|$.
+\end{proof}
+
+\begin{lemma}[Log bound] \label{lem:logDerivZetalogt32} \lean{lem_logDerivZetalogt32} \leanok
+There exists a constant $C>1$ such that for all $t\in\R$ with $|t|>3$, and all $s=\sigma+it$ with $\sigma \ge 3/2$, we have
+\[ \Big|\frac{\zeta'}{\zeta}(s)\Big| \le C\]
+\end{lemma}
+\begin{proof}
+\uses{lem:zetacenterbd,lem:Z0bound_const}
+\leanok
+Apply \cref{lem:zetacenterbd} and then \cref{lem:Z0bound_const}.
+\end{proof}
+
+
+\begin{theorem}[Bound on $\zeta'/\zeta$] \label{thm:final_result} \lean{thm_final_result} \leanok
+There exist constants $0<A<1$ and $C>1$ such that for any $t\in\R$ with $|t|>3$ and $\sigma \ge 1 - A/\log(|t|+2)$, we have
+\[ \left|\frac{\zeta'}{\zeta}(\sigma + it)\right| \le C\log|t|^2. \]
+\end{theorem}
+\begin{proof}
+\uses{lem:logDerivZetalogt2,lem:logDerivZetalogt32,lem:3_gt_e}
+\leanok
+Apply \cref{lem:logDerivZetalogt2,lem:logDerivZetalogt32,lem:3_gt_e}
+\end{proof}
+
+
+\begin{lemma}[Zero-free region near 1] \label{lem:ZetaZeroFree} \lean{ZetaZeroFree_p} \leanok
+There exists a constant $A\in(0,\tfrac12)$ such that for every real $t$ with $|t|>3$ and every real $\sigma$ with
+$$\sigma \in [1 - A/\log|t|,\; 1),$$
+we have
+$$\zeta(\sigma + i t) \neq 0.$$
+In other words, a uniform zero-free region of the form $\Re s \ge 1 - A/\log|\Im s|$ holds for large $|\Im s|$.
+\end{lemma}
+\begin{proof}
+\uses{lem:zerofree}
+\leanok
+\end{proof}
+
+\begin{lemma}[Uniform bound on the logarithmic derivative of $\zeta$] \label{lem:LogDerivZetaBndUnif} \lean{LogDerivZetaBndUnif2} \leanok
+There exist constants $A\in(0,\tfrac12)$ and $C>0$ such that for every real $t$ with $|t|>3$ and every real $\sigma$ with
+$$\sigma \ge 1 - A/\log|t|,$$
+the logarithmic derivative of the Riemann zeta function satisfies the uniform bound
+$$\left|\frac{\zeta'(\sigma + i t)}{\zeta(\sigma + i t)}\right| \le C\,\log|t|^2.
+$$
+The constants $A,C$ are absolute (independent of $\sigma$ and $t$) and give a uniform control of $\zeta'/\zeta$ in the stated region.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{thm:final_result}
+\end{proof}
