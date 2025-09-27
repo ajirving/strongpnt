@@ -1,6 +1,4 @@
-import PrimeNumberTheoremAnd.ZetaBounds
-import PrimeNumberTheoremAnd.ZetaConj
-import PrimeNumberTheoremAnd.SmoothExistence
+import PrimeNumberTheoremAnd.MediumPNT
 import Mathlib.Algebra.Group.Support
 import Mathlib.Analysis.SpecialFunctions.Log.Monotone
 import Mathlib.Data.Real.Pi.Bounds
@@ -10,6 +8,8 @@ import StrongPNT.ZetaZeroFree
 set_option lang.lemmaCmd true
 set_option maxHeartbeats 400000
 
+--Put in a namespace to avoid collisions with MediumPNT
+namespace Strong
 open Set Function Filter Complex Real
 
 open ArithmeticFunction (vonMangoldt)
