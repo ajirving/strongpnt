@@ -120,7 +120,7 @@ lemma lift_multipliable_of_nonzero {P : Type*} (a : P → ℂ) (ha : Multipliabl
     Units.mk0_val x' (Units.ne_zero x')
   have this2 : (Units.mk0 (∏ b ∈ b, a b)
     (Finset.prod_ne_zero_iff.mpr fun a a_1 => h_a_nonzero a)) = x' :=
-      Units.eq_iff.mp (id (Eq.symm x'_spec_eq))
+      Units.val_inj.mp (id (Eq.symm x'_spec_eq))
   rw [Units.mk0_prod] at this2
   rw [←this2]
   conv =>
