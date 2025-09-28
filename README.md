@@ -3,6 +3,7 @@
 This repo was forked from <https://github.com/math-inc/strongpnt>.  My aim is to attempt to tidy their AI generated code and keep it current with Mathlib and the PrimeNumberTheoremAnd project.  Changes from the original so far:
 * bump to Mathlib 4.22.0 and the latest version of PrimeNumberTheoremAnd.
 * Make the StrongPNT proof depend on results in MediumPNT.lean rather than lots of duplication.
+* Minimize imports.
 
 Original Readme.md follows:
 
