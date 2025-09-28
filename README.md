@@ -1,3 +1,12 @@
+# Strong PNT Fork
+
+This repo was forked from <https://github.com/math-inc/strongpnt>.  My aim is to attempt to tidy their AI generated code and keep it current with Mathlib and the PrimeNumberTheoremAnd project.  Changes from the original so far:
+* bump to Mathlib 4.22.0 and the latest version of PrimeNumberTheoremAnd.
+* Make the StrongPNT proof depend on results in MediumPNT.lean rather than lots of duplication.
+
+Original Readme.md follows:
+
+
 # *The strong Prime Number Theorem*
 
 [![Blueprint](https://img.shields.io/badge/Blueprint-web-blue?style=for-the-badge)](https://math-inc.github.io/strongpnt/blueprint) [![Blueprint PDF](https://img.shields.io/badge/Blueprint-PDF-red?style=for-the-badge)](https://math-inc.github.io/strongpnt/blueprint.pdf) [![Dependency graph](https://img.shields.io/badge/Dependency-Graph-orange?style=for-the-badge)](https://math-inc.github.io/strongpnt/blueprint/dep_graph_document.html) [![Docs](https://img.shields.io/badge/Docs-blueviolet?style=for-the-badge)](https://math-inc.github.io/strongpnt/docs/) [![Math Inc.](https://img.shields.io/badge/MathInc-website-9cf?style=for-the-badge)](https://www.math.inc/)

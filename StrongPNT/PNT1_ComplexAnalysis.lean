@@ -1798,7 +1798,7 @@ lemma mul_comm_div_cancel (a b : ℂ) (ha : a ≠ 0) (hb : b ≠ 0) : a * b / (b
 lemma complex_coeff_I_cancel : (1 : ℂ) / (2 * Real.pi * I) * I = 1 / (2 * Real.pi) := by
   field_simp [Complex.I_ne_zero, Real.pi_pos.ne']
   -- After field_simp, we have: I * (2 * ↑Real.pi) / (2 * ↑Real.pi * I) = 1
-  exact mul_comm_div_cancel I (2 * ↑Real.pi) Complex.I_ne_zero (by norm_num; exact Real.pi_pos.ne')
+  exact mul_comm_div_cancel I (2 * ↑Real.pi) Complex.I_ne_zero (by norm_num)
 
 lemma factor_I_from_integrand (f : ℂ → ℂ) (r_int : ℝ) (z : ℂ) :
   ∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi), I * ↑r_int * Complex.exp (I * ↑t) * (↑r_int * Complex.exp (I * ↑t) - z)⁻¹ ^ 2 * f (↑r_int * Complex.exp (I * ↑t)) =
@@ -2510,7 +2510,7 @@ lemma continuous_f_parameterized {f : ℂ → ℂ} {R r : ℝ}     (hf_domain : 
     exact hparam_range t
 
   -- Convert ContinuousOn Set.univ to Continuous using the equivalence
-  rwa [← continuous_iff_continuousOn_univ] at hcomp_on
+  rwa [continuousOn_univ] at hcomp_on
 
 lemma continuous_denominator_parameterized (r : ℝ) (z : ℂ) : Continuous (fun t : ℝ => (r * Complex.exp (I * t) - z) ^ 2) := by
   -- Break down the function: (fun t => (r * Complex.exp (I * t) - z) ^ 2)
