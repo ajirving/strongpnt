@@ -1,8 +1,4 @@
 import PrimeNumberTheoremAnd.MediumPNT
-import Mathlib.Algebra.Group.Support
-import Mathlib.Analysis.SpecialFunctions.Log.Monotone
-import Mathlib.Data.Real.Pi.Bounds
-import Mathlib.Data.Complex.ExponentialBounds
 import StrongPNT.ZetaZeroFree
 
 set_option lang.lemmaCmd true
