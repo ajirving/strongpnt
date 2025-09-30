@@ -518,7 +518,7 @@ lemma lem_explicit1deltat :
   -- Apply the abstract inequality
   have hmain :=
     log_Deriv_Expansion_Zeta t ht
-      r1 r R1 R hr1_pos hr1_lt_r hr_pos hr_lt_R1 hR1_pos hR1_lt_R hR_lt_1
+      r1 r R1 R hr1_pos hr1_lt_r hr_lt_R1 hR1_lt_R hR_lt_1
   -- B = b * |t| > 1
   have hbpos : 0 < b := lt_trans (by norm_num) hb_gt1
   have ht1 : 1 < |t| := lt_trans (by norm_num) ht
@@ -4335,8 +4335,7 @@ lemma helper_apply_jensen_to_g
   simpa [one_div, div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using hbound
 
 lemma helper_sum_f_equals_sum_g
-  (r : ℝ) (hr : r > 0) (c : ℂ) (f : ℂ → ℂ) (hc : f c ≠ 0)
-  (h_analytic : AnalyticOnNhd ℂ f (Metric.closedBall c 1))
+  (r : ℝ) (c : ℂ) (f : ℂ → ℂ) (hc : f c ≠ 0)
   (hfin : (zerosetKfRc r c f).Finite) :
   (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt f ρ).toNat : ℝ))
   =
@@ -4379,7 +4378,7 @@ by
       simp [g', φ, hc, hρ_fzero, sub_eq_add_neg, add_comm, add_left_comm, add_assoc]
     have hρ'_mem : (φ ρ) ∈ zerosetKfRc r (0 : ℂ) g' := ⟨hρ'_ball, hρ'_gzero⟩
     -- Apply fc_m_order to equate multiplicities
-    have h_m_eq := fc_m_order r hr c f hc h_analytic (ρ' := φ ρ) hρ'_mem
+    have h_m_eq := fc_m_order c f hc (ρ' := φ ρ)
     -- (φ ρ) + c = ρ
     have h_m_eq' : analyticOrderAt g' (φ ρ) = analyticOrderAt f ρ := by
       simpa [g', φ, sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using h_m_eq
@@ -4415,22 +4414,20 @@ by
           simp [S, φ, g', h_img_toFinset]
 
 lemma helper_zero_set_shift_eq
-  (r : ℝ) (hr : r > 0) (c : ℂ) (f : ℂ → ℂ) (hc : f c ≠ 0)
-  (h_analytic : AnalyticOnNhd ℂ f (Metric.closedBall c 1)) :
+  (r : ℝ) (c : ℂ) (f : ℂ → ℂ) (hc : f c ≠ 0) :
   zerosetKfRc r (0 : ℂ) (fun z => f (z + c) / f c)
   = (fun ρ => ρ - c) '' (zerosetKfRc r c f) := by
-  simpa using fc_zeros r hr c f hc h_analytic
+  simpa using fc_zeros r c f hc
 
 lemma helper_fin_zero_g_is_image
-  (r : ℝ) (hr : r > 0) (c : ℂ) (f : ℂ → ℂ) (hc : f c ≠ 0)
-  (h_analytic : AnalyticOnNhd ℂ f (Metric.closedBall c 1))
+  (r : ℝ) (c : ℂ) (f : ℂ → ℂ) (hc : f c ≠ 0)
   (hfin : (zerosetKfRc r c f).Finite) :
   (zerosetKfRc r (0 : ℂ) (fun z => f (z + c) / f c)).Finite :=
 by
   classical
   have hset : zerosetKfRc r (0 : ℂ) (fun z => f (z + c) / f c)
       = (fun ρ => ρ - c) '' (zerosetKfRc r c f) :=
-    by simpa using fc_zeros r hr c f hc h_analytic
+    by simpa using fc_zeros r c f hc
   have hfin_img : ((fun ρ => ρ - c) '' (zerosetKfRc r c f)).Finite := hfin.image _
   simpa [hset] using hfin_img
 
@@ -4568,7 +4565,7 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
   have hAnal_f : AnalyticOnNhd ℂ f (Metric.closedBall c 1) :=
     helper_pointwise_to_AnalyticOnNhd h_f_analytic
   have hfin_g0 : (zerosetKfRc R1 (0 : ℂ) g).Finite :=
-    helper_fin_zero_g_is_image R1 hR1_pos c f h_f_nonzero_at_zero hAnal_f hfin
+    helper_fin_zero_g_is_image R1 c f h_f_nonzero_at_zero hfin
   have hZR_eq : zerosetKfR R1 hR1_pos g = zerosetKfRc R1 (0 : ℂ) g :=
     helper_zerosetKfR_eq_center0 R1 hR1_pos g
   have hfin_g : (zerosetKfR R1 (by exact hR1_pos) g).Finite := by
@@ -4598,8 +4595,8 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
       (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt f ρ).toNat : ℝ))
         = (∑ ρ' ∈ ((hfin.image (fun ρ => ρ - c)).toFinset),
             ((analyticOrderAt g ρ').toNat : ℝ)) :=
-    helper_sum_f_equals_sum_g (r := R1) (hr := hR1_pos) (c := c)
-      (f := f) (hc := h_f_nonzero_at_zero) (h_analytic := hAnal_f) (hfin := hfin)
+    helper_sum_f_equals_sum_g (r := R1) (c := c)
+      (f := f) (hc := h_f_nonzero_at_zero) (hfin := hfin)
 
   -- Equality of sets for g-zeros and the image of f-zeros
   have hST_g_img : zerosetKfR R1 hR1_pos g
@@ -4608,7 +4605,7 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
       helper_zerosetKfR_eq_center0 R1 hR1_pos g
     have h2 : zerosetKfRc R1 (0 : ℂ) g
         = (fun ρ => ρ - c) '' (zerosetKfRc R1 c f) :=
-      helper_zero_set_shift_eq R1 hR1_pos c f h_f_nonzero_at_zero hAnal_f
+      helper_zero_set_shift_eq R1 c f h_f_nonzero_at_zero
     simpa [h1] using h2
 
   -- Now split into cases depending on whether B/‖f c‖ > 1 or = 1
