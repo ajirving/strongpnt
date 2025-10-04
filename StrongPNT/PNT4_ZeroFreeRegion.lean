@@ -2362,50 +2362,6 @@ lemma Z341series (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
      ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (2 * t * Real.log (n : ℝ))) := by
   rw [Rezeta1zetaseries0 delta hdelta, Rezeta1zetaseries1 t delta hdelta, Rezeta1zetaseries2 t delta hdelta]
 
-lemma lem341seriesConv (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
-    Summable (fun n : ℕ =>
-      3 * (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) +
-      4 * (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (t * Real.log (n : ℝ)) +
-      (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (2 * t * Real.log (n : ℝ))) := by
-  -- First establish that 1 < 1 + delta
-  have h1 : 1 < 1 + delta := by linarith [hdelta]
-
-  -- Apply the three convergence results from the context
-  have h2 : Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta))) :=
-    Rezetaseries0 (1 + delta) h1
-
-  have h3 : Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (t * Real.log (n : ℝ))) :=
-    Rezetaseries_convergence (1 + delta) t h1
-
-  have h4 : Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (2 * t * Real.log (n : ℝ))) :=
-    Rezetaseries2t (1 + delta) t h1
-
-  -- Use scalar multiplication to get summability of the scaled terms
-  have h5 : Summable (fun n : ℕ => 3 * ((ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)))) :=
-    Summable.mul_left 3 h2
-
-  have h6 : Summable (fun n : ℕ => 4 * ((ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (t * Real.log (n : ℝ)))) :=
-    Summable.mul_left 4 h3
-
-  -- Rewrite the scalar multiplications
-  have h5' : Summable (fun n : ℕ => 3 * (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta))) := by
-    convert h5 using 1
-    ext n
-    ring
-
-  have h6' : Summable (fun n : ℕ => 4 * (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (t * Real.log (n : ℝ))) := by
-    convert h6 using 1
-    ext n
-    ring
-
-  -- Use summability of sums
-  have h7 : Summable (fun n : ℕ =>
-    3 * (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) +
-    4 * (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (t * Real.log (n : ℝ))) :=
-    h5'.add h6'
-
-  -- Finally add the third term
-  exact h7.add h4
 
 lemma lem341series (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
     (3 * ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)))
@@ -4379,32 +4335,6 @@ lemma lem_logDerivZetalogt0 :
       _ = (C_1 + C_4) * Real.log |t|^2 := by ring
 
 
-lemma helper_absIm_le_add_smallball (t : ℝ) (z : ℂ)
-  (hz : z ∈ Metric.closedBall (1 - deltaz_t t + t * Complex.I) (2 * deltaz_t t)) :
-  |z.im| ≤ |t| + 2 * deltaz_t t := by
-  -- From membership in the closed ball, we get a bound on the norm of the difference
-  have hnorm : ‖z - (1 - deltaz_t t + t * Complex.I)‖ ≤ 2 * deltaz_t t := by
-    simpa [Metric.mem_closedBall, Complex.dist_eq] using hz
-  -- The imaginary part of the difference is bounded by its norm
-  have h_im_diff : |(z - (1 - deltaz_t t + t * Complex.I)).im| ≤ 2 * deltaz_t t :=
-    le_trans (Complex.abs_im_le_norm _) hnorm
-  -- Compute the imaginary part of the center
-  have center_im : (1 - deltaz_t t + t * Complex.I).im = t := by
-    simp [Complex.add_im, Complex.mul_im]
-  -- Rewrite the imaginary part of the difference
-  have diff_im : (z - (1 - deltaz_t t + t * Complex.I)).im = z.im - t := by
-    simp [Complex.sub_im, center_im]
-  -- Thus |z.im - t| ≤ 2 δ_t
-  have h_im_sub : |z.im - t| ≤ 2 * deltaz_t t := by
-    simpa [diff_im] using h_im_diff
-  -- Triangle inequality: |z.im| ≤ |z.im - t| + |t|
-  have tri : |z.im| ≤ |z.im - t| + |t| := by
-    simpa [sub_eq_add_neg] using (abs_add (z.im - t) t)
-  -- Combine the bounds
-  have : |z.im - t| + |t| ≤ 2 * deltaz_t t + |t| := add_le_add_right h_im_sub _
-  have hfinal : |z.im| ≤ 2 * deltaz_t t + |t| := le_trans tri this
-  simpa [add_comm] using hfinal
-
 lemma helper_one_div_log_le_two_div_smallball (t : ℝ) (ht : |t| > 3) (z : ℂ)
   (hz : z ∈ Metric.closedBall (1 - deltaz_t t + t * Complex.I) (2 * deltaz_t t)) :
   (1 : ℝ) / Real.log (|t| + 2) ≤ 2 / Real.log (|z.im| + 2) := by
@@ -4561,17 +4491,6 @@ theorem lem_Rezit (t : ℝ) (δ : ℝ) (z : ℂ) :
   -- Goal: 1 - δ + (t * 0 - 0 * 1) = 1 - δ
   simp
 
-theorem lem_zRe3 (t : ℝ) (δ : ℝ) (z : ℂ)
-    (h_le : ‖(z - (1 - δ + t * Complex.I))‖ ≤ 2 * δ) :
-    |z.re - (1 - δ)| ≤ 2 * δ := by
-  -- Control the real part by the absolute value
-  have h1 : |(z - (1 - δ + t * Complex.I)).re| ≤ 2 * δ :=
-    lem_zRe2 t δ z h_le
-  -- Rewrite the real part explicitly
-  have hRe : (z - (1 - δ + t * Complex.I)).re = z.re - (1 - δ) :=
-    lem_Rezit t δ z
-  simpa [hRe] using h1
-
 /--
 Let $a\in\R$ and $b>0$. If $|a|\le b$ then $a\ge -b$.
 -/
@@ -4600,12 +4519,6 @@ theorem lem_absrez1d2 (δ : ℝ) (z : ℂ)
   -- 1 - δ - 2 * δ >= 1 - (3/2) * δ
   convert this using 1
   ring
-theorem lem_absrez1d3 (δ : ℝ) (z : ℂ) (hδ : δ > 0)
-    (h_le : |z.re - (1 - δ)| ≤ 2 * δ) :
-    z.re > 1 - 4 * δ := by
-  have h1 : z.re ≥ 1 - 3 * δ := lem_absrez1d2 δ z h_le
-  linarith [h1, hδ]
-
 lemma lem_Imzit (t : ℝ) (δ : ℝ) (z : ℂ) :
     (z - (1 - δ + t * Complex.I)).im = z.im - t := by
   have him : (1 - δ + t * Complex.I).im = t := by
@@ -4661,32 +4574,6 @@ lemma lem_zIm3 (t : ℝ) (δ : ℝ) (z : ℂ)
 --   have hchain : 3 * c / 4 < (Real.log (|t| + 2))^2 * (|t| + 2) := lt_trans h1 hprod_gt_absplus
 --   exact hchain
 
-lemma log_add_lt_log_add_div {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
-  Real.log (x + y) < Real.log x + y / x := by
-  have hxne : x ≠ 0 := ne_of_gt hx
-  have hxy_pos : 0 < x + y := add_pos hx hy
-  have hxy_ne : x + y ≠ 0 := ne_of_gt hxy_pos
-  have hy_div_pos : 0 < y / x := div_pos hy hx
-  have hdiv_eq : (x + y) / x = 1 + y / x := by
-    have : (x + y) / x = x / x + y / x := by simp [add_div]
-    simpa [div_self hxne] using this
-  have hgt1 : 1 < (x + y) / x := by
-    have : 1 < 1 + y / x := by linarith [hy_div_pos]
-    simpa [hdiv_eq] using this
-  have hposu : 0 < (x + y) / x := lt_trans zero_lt_one hgt1
-  have hne1 : (x + y) / x ≠ 1 := ne_of_gt hgt1
-  have hloglt : Real.log ((x + y) / x) < (x + y) / x - 1 :=
-    Real.log_lt_sub_one_of_pos hposu hne1
-  have hrhs : (x + y) / x - 1 = y / x := by
-    have : (1 + y / x) - 1 = y / x := by
-      simp
-    simp [hdiv_eq]
-  have hldiv : Real.log ((x + y) / x) = Real.log (x + y) - Real.log x :=
-    Real.log_div hxy_ne hxne
-  have hcore : Real.log (x + y) - Real.log x < y / x := by
-    simpa [hldiv, hrhs] using hloglt
-  have := add_lt_add_right hcore (Real.log x)
-  simpa [sub_add_cancel, add_comm, add_left_comm, add_assoc] using this
 
 -- lemma exists_T_im_large (c T0 : ℝ) (hc : 0 < c) :
 --   ∃ T : ℝ, T > 0 ∧ ∀ t : ℝ, |t| > T → |t| - (c / 4) / Real.log (|t| + 2) ≥ T0 := by
@@ -4743,64 +4630,6 @@ lemma abs_lower_bound_sub (x y : ℝ) : |x| ≥ |y| - |x - y| := by
   -- Rearrange to get the desired bound
   simpa [ge_iff_le] using (sub_le_iff_le_add).2 h1
 
-lemma lem_Kzetaempty :
-  ∀ t : ℝ, |t| > 3 →
-    Yt t (deltaz_t t) = ∅ := by
-  intro t ht
-  -- Use the fact that a set is empty iff no element belongs to it
-  rw [Set.eq_empty_iff_forall_notMem]
-  intro ρ_1 h_mem
-  -- ρ_1 ∈ Yt t (deltaz_t t)
-  -- By lem_rhoYzero, we have riemannZeta ρ_1 = 0
-  have h_zero : riemannZeta ρ_1 = 0 := lem_rhoYzero t (deltaz_t t) ρ_1 h_mem
-
-  -- From membership in Yt, extract the norm condition
-  have h_norm : ‖ρ_1 - (1 - deltaz_t t + t * Complex.I)‖ ≤ 2 * deltaz_t t := by
-    exact h_mem.2
-
-  -- Bound the imaginary part: |ρ_1.im - t| ≤ 2 * deltaz_t t
-  have h_im_bound : |ρ_1.im - t| ≤ 2 * deltaz_t t := by
-    exact lem_zIm3 t (deltaz_t t) ρ_1 h_norm
-
-  -- Since |t| > 3, we can show |ρ_1.im| > 2
-  have h_delta_small : deltaz_t t < 1/9 := by
-    have h_bounds := lem_delta19
-    exact (h_bounds.2 t (by linarith [ht])).2
-
-  have h_im_large : 2 < |ρ_1.im| := by
-    -- Use triangle inequality: ||ρ_1.im| - |t|| ≤ |ρ_1.im - t|
-    have h_tri : |ρ_1.im| ≥ |t| - |ρ_1.im - t| := by
-      exact abs_lower_bound_sub ρ_1.im t
-    have h_bound : |ρ_1.im| ≥ |t| - 2 * deltaz_t t := by
-      exact ge_trans h_tri (by gcongr)
-    have h_small_delta : 2 * deltaz_t t < 2/9 := by
-      linarith [h_delta_small]
-    have h_final : |t| - 2 * deltaz_t t > 3 - 2/9 := by
-      linarith [ht, h_small_delta]
-    have h_gt_2 : 3 - 2/9 > 2 := by norm_num
-    linarith [h_bound, h_final, h_gt_2]
-
-  -- Get bound on real part from being in the ball
-  have h_in_ball : ρ_1 ∈ Metric.closedBall (1 - deltaz_t t + t * Complex.I) (2 * deltaz_t t) := by
-    exact Metric.mem_closedBall.mpr h_norm
-
-  have h_re_bound : ρ_1.re ≥ 1 - 6 * deltaz ρ_1 := by
-    exact lem_DRez6dz t ht ρ_1 h_in_ball
-
-  -- Apply zero-free region lemma to get contradiction
-  have h_delta_pos : 0 < deltaz ρ_1 := by
-    have h_bounds := lem_delta19
-    exact (h_bounds.1 ρ_1 (by linarith [h_im_large])).1
-
-  have h_re_strict : ρ_1.re > 1 - 9 * deltaz ρ_1 := by
-    linarith [h_re_bound, h_delta_pos]
-
-  have h_nonzero : riemannZeta ρ_1 ≠ 0 := by
-    exact lem_ZFRdelta ρ_1 h_im_large h_re_strict
-
-  -- This contradicts h_zero
-  exact h_nonzero h_zero
-
 lemma Yt_subset_closedBall (t : ℝ) (δ : ℝ) :
     Yt t δ ⊆ Metric.closedBall (1 - δ + t * Complex.I) (2 * δ) := by
   -- Show subset by taking an arbitrary element
@@ -4817,49 +4646,6 @@ lemma Yt_subset_closedBall (t : ℝ) (δ : ℝ) :
   -- This is exactly our condition
   exact h_abs
 
-lemma Yt_finite (t : ℝ) (δ : ℝ) : (Yt t δ).Finite := by
-  -- Yt t δ is a subset of the closed ball
-  have h_subset := Yt_subset_closedBall t δ
-
-  -- The closed ball is compact
-  let K := Metric.closedBall (1 - δ + t * Complex.I) (2 * δ)
-  have h_compact : IsCompact K := closedBall_compact_complex (1 - δ + t * Complex.I) (2 * δ)
-
-  -- The zeros of riemannZeta in this compact set are finite
-  have h_zeros_finite := riemannZeta_zeros_finite_of_compact K h_compact
-
-  -- Show that Yt t δ is a subset of {z ∈ K | riemannZeta z = 0}
-  have h_sub : Yt t δ ⊆ {z ∈ K | riemannZeta z = 0} := by
-    intro ρ hρ
-    -- hρ tells us ρ ∈ Yt t δ
-    -- From the definition of Yt, we get riemannZeta ρ = 0 and ρ is in the closed ball
-    constructor
-    · -- ρ is in K (the closed ball)
-      exact h_subset hρ
-    · -- riemannZeta ρ = 0
-      unfold Yt at hρ
-      exact hρ.1
-
-  -- A subset of a finite set is finite
-  exact Set.Finite.subset h_zeros_finite h_sub
-
-/--
-For any $g:\C\to\C$, if $S=\emptyset$ then
-$\sum_{s\in S}g(s) = 0$
--/
-lemma lem_sumempty (g : ℂ → ℂ) : (∑ s ∈ (∅ : Finset ℂ), g s) = 0 := by
-  rfl
-
-lemma ArithmeticFunction.summable_vonMangoldt_norm_rw {s : ℂ} :
-  Summable (fun n : ℕ => ‖(ArithmeticFunction.vonMangoldt n : ℂ) / ((n : ℂ) ^ s)‖)
-  ↔ Summable (fun n : ℕ => (|ArithmeticFunction.vonMangoldt n|) / ‖(n : ℂ) ^ s‖) := by
-  classical
-  have hfun :
-      (fun n : ℕ => ‖(ArithmeticFunction.vonMangoldt n : ℂ) / ((n : ℂ) ^ s)‖)
-        = (fun n : ℕ => (|ArithmeticFunction.vonMangoldt n|) / ‖(n : ℂ) ^ s‖) := by
-    funext n
-    simp [norm_div, Complex.norm_real, div_eq_mul_inv]
-  simp [hfun]
 
 lemma lem_term_real_nonneg (n : ℕ) (σ : ℝ) : ∃ r ≥ (0:ℝ), ((ArithmeticFunction.vonMangoldt n : ℂ) / ((n : ℂ) ^ (σ : ℂ))) = (r : ℂ) := by
   -- Define the real number r to be the real quotient
