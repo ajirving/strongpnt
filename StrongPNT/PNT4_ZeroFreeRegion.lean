@@ -2299,9 +2299,6 @@ lemma Z341bounds_const :
       _ = 3 / δ - 4 / (1 + δ - σ) + C * Real.log (|t| + 2) := by ring
 
 
-def ZeroAt (σ t : ℝ) : Prop :=
-  (σ + t * I) ∈ zeroZ
-
 lemma Rezeta1zetaseries1 (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
     (-logDerivZeta ((1 : ℂ) + delta + t * I)).re = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (t * Real.log (n : ℝ)) := by
   -- Apply Rezeta1zetaseries with x = 1 + delta and y = t
