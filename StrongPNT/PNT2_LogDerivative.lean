@@ -693,65 +693,6 @@ lemma lem_Cf_never_zero
     have hz_diff : z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 (by linarith) f := ⟨hz, h⟩
     exact lem_Cf_nonzero_off_K h_finite_zeros h_σ h_σ_spec z hz_diff
 
-lemma factor_nonzero_outside_domain (R R1 : ℝ) (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
-    (ρ : ℂ) (hρ_bound : ‖ρ‖ ≤ R1) (hρ_ne_zero : ρ ≠ 0) (z : ℂ) (hz_in_R1 : ‖z‖ ≤ R1) :
-    (R : ℂ) - star ρ * z / (R : ℂ) ≠ 0 := by
-  -- Proof by contradiction
-  intro h_eq_zero
-  have hR_pos : 0 < R := by linarith
-
-  -- From the equation being zero, we get star ρ * z = R²
-  have h_mul_eq_R_sq : star ρ * z = (R : ℂ) ^ 2 := by
-    have hR_ne_zero : (R : ℂ) ≠ 0 := by
-      rw [Ne, ← norm_eq_zero]
-      simp [Complex.norm_of_nonneg (le_of_lt hR_pos)]
-      linarith
-    -- From h_eq_zero: (R : ℂ) - star ρ * z / (R : ℂ) = 0
-    -- Rearrange to: (R : ℂ) = star ρ * z / (R : ℂ)
-    -- Multiply by (R : ℂ): (R : ℂ)² = star ρ * z
-    rw [sub_eq_zero] at h_eq_zero
-    rw [eq_div_iff_mul_eq hR_ne_zero] at h_eq_zero
-    rw [← pow_two] at h_eq_zero
-    exact h_eq_zero.symm
-
-  -- Taking norms of both sides: ‖star ρ * z‖ = ‖(R : ℂ) ^ 2‖
-  have h_norm_eq : ‖ρ‖ * ‖z‖ = R ^ 2 := by
-    have h_left : ‖star ρ * z‖ = ‖ρ‖ * ‖z‖ := by
-      rw [norm_mul, norm_star]
-    have h_right : ‖(R : ℂ) ^ 2‖ = R ^ 2 := by
-      rw [Complex.norm_pow, Complex.norm_of_nonneg (le_of_lt hR_pos)]
-    rw [← h_left, h_mul_eq_R_sq, h_right]
-
-  -- Since ‖ρ‖ ≤ R1 and ‖z‖ ≤ R1, we have R² = ‖ρ‖ * ‖z‖ ≤ R1 * R1 = R1²
-  have h_R_sq_le : R ^ 2 ≤ R1 ^ 2 := by
-    calc R ^ 2
-      = ‖ρ‖ * ‖z‖ := h_norm_eq.symm
-      _ ≤ R1 * ‖z‖ := mul_le_mul_of_nonneg_right hρ_bound (norm_nonneg z)
-      _ ≤ R1 * R1 := mul_le_mul_of_nonneg_left hz_in_R1 (le_of_lt hR1_pos)
-      _ = R1 ^ 2 := by rw [← pow_two]
-
-  -- This gives R ≤ R1
-  have h_R_le_R1 : R ≤ R1 := by
-    exact le_of_pow_le_pow_left₀ (by norm_num) (le_of_lt hR1_pos) h_R_sq_le
-
-  -- This contradicts the hypothesis R1 < R
-  linarith
-
-lemma linear_pow_analytic (a b : ℂ) (n : ℕ) (z : ℂ) :
-    AnalyticAt ℂ (fun w => (a - b * w) ^ n) z := by
-  -- The function w ↦ a - b * w is linear, hence analytic
-  have h_linear : AnalyticAt ℂ (fun w => a - b * w) z := by
-    -- a is constant, hence analytic
-    have h_const : AnalyticAt ℂ (fun _ => a) z := analyticAt_const
-    -- b * w is analytic (scalar multiplication of identity)
-    have h_mul : AnalyticAt ℂ (fun w => b * w) z := by
-      have h_id : AnalyticAt ℂ (fun w => w) z := analyticAt_id
-      exact h_id.const_smul
-    -- subtraction of analytic functions is analytic
-    exact h_const.sub h_mul
-  -- Powers of analytic functions are analytic
-  exact h_linear.fun_pow n
-
 noncomputable def Bf
     (R R1 : ℝ)
     (hR1_pos : 0 < R1)
@@ -766,61 +707,6 @@ noncomputable def Bf
   Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z *
   ∏ ρ ∈ h_finite_zeros.toFinset,
     ((R : ℂ) - star ρ * z / (R : ℂ)) ^ (analyticOrderAt f ρ).toNat
-
-lemma lem_BfCf
-    {R R1 : ℝ} {hR1_pos : 0 < R1} {hR1_lt_R : R1 < R} {hR_lt_1 : R < 1}
-    {f : ℂ → ℂ}
-    {h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z}
-    {h_f_nonzero_at_zero : f 0 ≠ 0}
-    (h_finite_zeros : (zerosetKfR R1 (by linarith) f).Finite)
-    (h_σ : ℂ → (ℂ → ℂ))
-    (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R \ zerosetKfR R1 (by linarith) f) :
-    Bf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z =
-    f z * (∏ ρ ∈ h_finite_zeros.toFinset,
-      ((R : ℂ) - star ρ * z / (R : ℂ)) ^ (analyticOrderAt f ρ).toNat) /
-    (∏ ρ ∈ h_finite_zeros.toFinset, (z - ρ) ^ (analyticOrderAt f ρ).toNat) := by
-  -- Since z ∉ zerosetKfR R1, we know z is not in the zero set
-  have hz_not_in : z ∉ zerosetKfR R1 (by linarith) f := hz.2
-
-  -- Unfold Bf definition
-  unfold Bf
-
-  -- Unfold Cf definition and use the else branch since z ∉ zerosetKfR R1
-  unfold Cf
-  simp [hz_not_in]
-
-  -- Now we have: (f z / ∏ ρ, (z - ρ)^m) * ∏ ρ, Blaschke_factor = goal
-  -- Use div_mul_eq_mul_div: (a / b) * c = (a * c) / b
-  exact div_mul_eq_mul_div _ _ _
-
-lemma lem_Bf_div
-    {R R1 : ℝ} {hR1_pos : 0 < R1} {hR1_lt_R : R1 < R} {hR_lt_1 : R < 1}
-    {f : ℂ → ℂ}
-    {h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z}
-    {h_f_nonzero_at_zero : f 0 ≠ 0}
-    (h_finite_zeros : (zerosetKfR R1 (by linarith) f).Finite)
-    (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R \ zerosetKfR R1 (by linarith) f) :
-    (∏ ρ ∈ h_finite_zeros.toFinset,
-      ((R : ℂ) - star ρ * z / (R : ℂ)) ^ (analyticOrderAt f ρ).toNat) /
-    (∏ ρ ∈ h_finite_zeros.toFinset, (z - ρ) ^ (analyticOrderAt f ρ).toNat) =
-    ∏ ρ ∈ h_finite_zeros.toFinset,
-      (((R : ℂ) - star ρ * z / (R : ℂ)) ^ (analyticOrderAt f ρ).toNat /
-       (z - ρ) ^ (analyticOrderAt f ρ).toNat) := by
-  rw [Finset.prod_div_distrib]
-
-lemma lem_Bf_prodpow
-    {R R1 : ℝ} {hR1_pos : 0 < R1} {hR1_lt_R : R1 < R} {hR_lt_1 : R < 1}
-    {f : ℂ → ℂ}
-    {h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z}
-    {h_f_nonzero_at_zero : f 0 ≠ 0}
-    (h_finite_zeros : (zerosetKfR R1 (by linarith) f).Finite)
-    (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R \ zerosetKfR R1 (by linarith) f) :
-    ∏ ρ ∈ h_finite_zeros.toFinset,
-      (((R : ℂ) - star ρ * z / (R : ℂ)) ^ (analyticOrderAt f ρ).toNat /
-       (z - ρ) ^ (analyticOrderAt f ρ).toNat) =
-    ∏ ρ ∈ h_finite_zeros.toFinset,
-      (((R : ℂ) - star ρ * z / (R : ℂ)) / (z - ρ)) ^ (analyticOrderAt f ρ).toNat := by
-  simp only [div_pow]
 
 theorem lem_rho_in_disk_R1
     (R R1 : ℝ)
@@ -1120,24 +1006,6 @@ lemma lem_prod_ineq {ι : Type*} (K : Finset ι) (a b : ι → ℝ)
   exact Finset.prod_le_prod h_nonneg h_le
 
 
-lemma lem_prod_power_ineq {ι : Type*} (K : Finset ι) (c : ι → ℝ) (n : ι → ℕ)
-    (h_c_ge_1 : ∀ ρ ∈ K, 1 ≤ c ρ)
-    (h_n_ge_1 : ∀ ρ ∈ K, 1 ≤ n ρ) :
-    ∏ ρ ∈ K, (c ρ) ^ (n ρ) ≥ 1 := by
-  classical
-  induction K using Finset.induction with
-  | empty => simp
-  | insert i s h_not_in ih =>
-    rw [Finset.prod_insert h_not_in]
-    have h_pow_ge_1 : 1 ≤ c i ^ n i :=
-      one_le_pow₀ (h_c_ge_1 i (Finset.mem_insert_self i s))
-    have h_prod_ge_1 : 1 ≤ ∏ ρ ∈ s, (c ρ) ^ (n ρ) := by
-      apply ih
-      · intro ρ hρ; exact h_c_ge_1 ρ (Finset.mem_insert_of_mem hρ)
-      · intro ρ hρ; exact h_n_ge_1 ρ (Finset.mem_insert_of_mem hρ)
-    exact one_le_mul_of_one_le_of_one_le h_pow_ge_1 h_prod_ge_1
-
-
 lemma lem_mod_lower_bound_1 (R R1 : ℝ) (hR1_pos : 0 < R1)
 (hR1_lt_R : R1 < R) (f : ℂ → ℂ)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
@@ -1235,108 +1103,6 @@ lemma lem_finset_prod_analyticAt {α : Type*} {S : Finset α} {g : α → ℂ �
       intro b hb
       apply h
       exact Finset.mem_insert_of_mem hb
-
-lemma analyticOrderAt_top_iff_eventually_zero (f : ℂ → ℂ) (z : ℂ) (hf : AnalyticAt ℂ f z) :
-  analyticOrderAt f z = ⊤ ↔ ∀ᶠ w in nhds z, f w = 0 := by
-  simp [analyticOrderAt, hf]
-
-lemma isPreconnected_closedBall (x : ℂ) (r : ℝ) : IsPreconnected (Metric.closedBall x r) := by
-  -- Closed balls are convex
-  have h_convex : Convex ℝ (Metric.closedBall x r) := convex_closedBall _ _
-  -- Convex sets are preconnected
-  exact h_convex.isPreconnected
-
-lemma Set.infinite_Icc_of_lt {a b : ℝ} (h : a < b) : (Set.Icc a b).Infinite := by
-  -- Proof by contradiction
-  intro h_finite
-  -- The open interval (a,b) is a subset of [a,b]
-  have h_subset : Set.Ioo a b ⊆ Set.Icc a b := Set.Ioo_subset_Icc_self
-  -- If [a,b] is finite, then (a,b) is finite as a subset
-  have h_Ioo_finite : (Set.Ioo a b).Finite := h_finite.subset h_subset
-  -- But (a,b) is infinite for a < b
-  have h_Ioo_infinite : (Set.Ioo a b).Infinite := Set.Ioo_infinite h
-  -- This is a contradiction
-  exact h_Ioo_infinite h_Ioo_finite
-
-lemma infinite_closedBall_of_pos (x : ℂ) (r : ℝ) (hr : 0 < r) : (Metric.closedBall x r).Infinite := by
-  -- We'll show the closed ball contains an infinite line segment
-  -- Consider the horizontal line segment from x in the real direction
-  let f : ℝ → ℂ := fun t => x + t
-
-  -- Show that f maps [0, r/2] into the closed ball
-  have h_maps_to : Set.MapsTo f (Set.Icc 0 (r/2)) (Metric.closedBall x r) := by
-    intro t ht
-    rw [Metric.mem_closedBall]
-    -- Need to show: dist (f t) x ≤ r
-    have h_eq : f t = x + t := rfl
-    rw [h_eq, Complex.dist_eq, add_sub_cancel_left]
-    -- Now need to show: ‖(t : ℂ)‖ ≤ r
-    have h_norm : ‖(t : ℂ)‖ = |t| := by
-      exact Complex.norm_real t
-    rw [h_norm, abs_of_nonneg ht.1]
-    exact le_trans ht.2 (le_of_lt (half_lt_self hr))
-
-  -- f is injective on [0, r/2]
-  have h_inj : Set.InjOn f (Set.Icc 0 (r/2)) := by
-    intro s hs t ht h_eq
-    have : x + s = x + t := h_eq
-    have : (s : ℂ) = (t : ℂ) := add_left_cancel this
-    exact Complex.ofReal_inj.mp this
-
-  -- The interval [0, r/2] is infinite
-  have h_infinite_interval : (Set.Icc (0:ℝ) (r/2)).Infinite :=
-    Set.infinite_Icc_of_lt (half_pos hr)
-
-  -- Therefore the image f '' [0, r/2] is infinite
-  have h_infinite_image : (f '' Set.Icc 0 (r/2)).Infinite :=
-    Set.Infinite.image h_inj h_infinite_interval
-
-  -- The image is contained in the closed ball
-  have h_subset : f '' Set.Icc 0 (r/2) ⊆ Metric.closedBall x r :=
-    Set.MapsTo.image_subset h_maps_to
-
-  -- Use contradiction: if the closed ball were finite, its subset would be finite
-  intro h_finite
-  exact h_infinite_image (h_finite.subset h_subset)
-
-lemma analyticOrderAt_ne_top_of_finite_zeros_in_ball (f : ℂ → ℂ) (R : ℝ) (hR_pos : 0 < R)
-    (hf_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) R, AnalyticAt ℂ f z)
-    (ρ : ℂ) (hρ_zero : f ρ = 0) (hρ_in_ball : ρ ∈ Metric.closedBall (0 : ℂ) R)
-    (h_finite_zeros : {z ∈ Metric.closedBall (0 : ℂ) R | f z = 0}.Finite) :
-    analyticOrderAt f ρ ≠ ⊤ := by
-  -- Proof by contradiction
-  by_contra htop
-  -- From order = ⊤ we get that f is eventually zero near ρ
-  have h_eventually_zero : ∀ᶠ z in nhds ρ, f z = 0 := by
-    rw [← analyticOrderAt_top_iff_eventually_zero f ρ (hf_analytic ρ hρ_in_ball)]
-    exact htop
-  -- f is analytic on a neighborhood of the closed ball
-  have hf_on_ball : AnalyticOnNhd ℂ f (Metric.closedBall (0 : ℂ) R) := by
-    intro z
-    exact hf_analytic z
-  -- The closed ball is preconnected
-  have h_preconn : IsPreconnected (Metric.closedBall (0 : ℂ) R) :=
-    isPreconnected_closedBall (0 : ℂ) R
-  -- By identity principle, f = 0 on the closed ball
-  have h_eqOn_zero : Set.EqOn f 0 (Metric.closedBall (0 : ℂ) R) :=
-    AnalyticOnNhd.eqOn_zero_of_preconnected_of_eventuallyEq_zero hf_on_ball h_preconn hρ_in_ball h_eventually_zero
-  -- Hence every point in the closed ball is a zero
-  have h_all_zeros : ∀ z ∈ Metric.closedBall (0 : ℂ) R, f z = 0 := by
-    intro z hz
-    have := h_eqOn_zero hz
-    simpa [Pi.zero_apply] using this
-  -- This means the zero set equals the entire closed ball
-  have h_zero_set_eq : {z ∈ Metric.closedBall (0 : ℂ) R | f z = 0} = Metric.closedBall (0 : ℂ) R := by
-    ext z
-    constructor
-    · intro hz; exact hz.1
-    · intro hz; exact ⟨hz, h_all_zeros z hz⟩
-  -- But the closed ball is infinite (for R > 0), contradicting finite zeros
-  have h_ball_infinite : (Metric.closedBall (0 : ℂ) R).Infinite :=
-    infinite_closedBall_of_pos (0 : ℂ) R hR_pos
-  -- This contradicts the finite zeros assumption
-  rw [h_zero_set_eq] at h_finite_zeros
-  exact h_ball_infinite h_finite_zeros
 
 theorem lem_Bf_is_analytic (R R1 : ℝ) (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
@@ -1762,83 +1528,6 @@ lemma lem_jensen_log_form (B R R1 : ℝ) (hB : 1 < B)
   simpa [S, hlog_rpow] using hlog_le
 
 
-lemma lem_sum_ineq {ι : Type*} (K : Finset ι) (a b : ι → ℝ)
-  (h_le : ∀ i ∈ K, a i ≤ b i) :
-  Finset.sum K a ≤ Finset.sum K b := by
-  classical
-  exact Finset.sum_le_sum (by intro i hi; exact h_le i hi)
-
-lemma ENat_coe_ge_one_iff_nat_ge_one (n : ℕ) : (n : ENat) ≥ 1 ↔ 1 ≤ n := by
-  -- Convert ≥ to ≤ and use ENat.coe_le_coe
-  rw [ge_iff_le]
-  -- Now we have 1 ≤ (n : ENat) ↔ 1 ≤ n
-  -- Since 1 = (1 : ℕ) when coerced to ENat, we can use ENat.coe_le_coe
-  exact ENat.coe_le_coe
-
-lemma nat_one_le_cast_real (n : ℕ) : 1 ≤ n → (1 : ℝ) ≤ (n : ℝ) := by
-  intro h
-  rw [← Nat.cast_one]
-  exact Nat.cast_le.mpr h
-
-lemma lem_frho_zero' (R R1 : ℝ)
-    (hR_pos : 0 < R1)
-    (hR1 : R1 < R)
-    (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (ρ : ℂ) (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 (by linarith) f) :
-    f ρ = 0 := h_rho_in_KfR1.2
-
-lemma lem_sum_m_rho_1 (R R1 : ℝ)
-    (hR1_pos : 0 < R1)
-    (hR1_lt_R : R1 < R)
-     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_finite_zeros : (zerosetKfR R1 (by linarith) f).Finite)
-    (hR_lt_1 : R < 1) :
-    (h_finite_zeros.toFinset.card : ℝ) ≤ ∑ ρ ∈ h_finite_zeros.toFinset, ((analyticOrderAt f ρ).toNat : ℝ) := by
-  -- Apply lem_sum_ineq as mentioned in the informal proof, with a_ρ = 1 and b_ρ = m_ρ
-  -- First convert card to sum of 1's
-  have h_card_as_sum : (h_finite_zeros.toFinset.card : ℝ) = ∑ ρ ∈ h_finite_zeros.toFinset, (1 : ℝ) := by
-    simp [Finset.sum_const, smul_eq_mul]
-  rw [h_card_as_sum]
-  -- Now apply lem_sum_ineq
-  apply lem_sum_ineq h_finite_zeros.toFinset (fun _ => (1 : ℝ)) (fun ρ => ((analyticOrderAt f ρ).toNat : ℝ))
-  -- Show 1 ≤ m_ρ for each zero ρ (following the approach from lem_m_rho_ge_1)
-  intro ρ hρ
-  -- Get that ρ is a zero
-  have hρ_in_zeros : ρ ∈ zerosetKfR R1 (by linarith) f :=
-    (Set.Finite.mem_toFinset h_finite_zeros).mp hρ
-  have h_f_rho_zero : f ρ = 0 :=
-    lem_frho_zero' R R1 (by linarith) hR1_lt_R f h_f_analytic ρ hρ_in_zeros
-  -- f is analytic at ρ
-  have h_f_analytic_at_rho : AnalyticAt ℂ f ρ := by
-    apply h_f_analytic
-    have h_R1_lt_1 : R1 < 1 := by linarith [hR_lt_1]
-    exact Metric.closedBall_subset_closedBall (le_of_lt h_R1_lt_1) hρ_in_zeros.1
-  -- The order is finite (following lem_m_rho_is_nat approach)
-  have h_order_finite : analyticOrderAt f ρ ≠ ⊤ := by
-    have h_R1_pos : 0 < R1 := by linarith [hR1_pos]
-    apply analyticOrderAt_ne_top_of_finite_zeros_in_ball f R1 h_R1_pos
-    · intro z hz
-      apply h_f_analytic
-      have h_R1_lt_1 : R1 < 1 := by linarith [hR_lt_1]
-      exact Metric.closedBall_subset_closedBall (le_of_lt h_R1_lt_1) hz
-    · exact h_f_rho_zero
-    · exact hρ_in_zeros.1
-    · exact h_finite_zeros
-  -- Use analyticOrderAt_ge_one_of_zero: order ≥ 1 for zeros
-  have h_order_ge_one : analyticOrderAt f ρ ≥ 1 :=
-    analyticOrderAt_ge_one_of_zero f ρ h_f_analytic_at_rho h_f_rho_zero h_order_finite
-  -- Convert to natural number bound
-  have h_toNat_ge_one : 1 ≤ (analyticOrderAt f ρ).toNat := by
-    cases' h_cases : analyticOrderAt f ρ with n
-    · rw [h_cases] at h_order_finite; contradiction
-    · rw [h_cases] at h_order_ge_one
-      rw [ENat.toNat_coe]
-      exact (ENat_coe_ge_one_iff_nat_ge_one n).mp h_order_ge_one
-  -- Convert to real
-  exact nat_one_le_cast_real _ h_toNat_ge_one
-
 lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
@@ -1866,27 +1555,6 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
       gcongr
       rw [mul_comm]
       exact h_div_log
-
-lemma lem_sum_1_bound (B R R1 : ℝ) (hB : 1 < B)
-    (hR1_pos : 0 < R1)
-    (hR1_lt_R : R1 < R)
-    (hR_lt_1 : R < 1)
-    (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
-    (hf0_eq_one : f 0 = 1)
-    (h_finite_zeros : (zerosetKfR R1 (by linarith) f).Finite)
-    (h_σ : ℂ → (ℂ → ℂ))
-    (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B)
-    (h_σ_spec : ∀ σ ∈ zerosetKfR R1 (by linarith) f,
-      AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
-      ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z) :
-    (h_finite_zeros.toFinset.card : ℝ) ≤ (1/Real.log (R/R1)) * Real.log B := by
-  have h1 :=
-    lem_sum_m_rho_1 R R1 hR1_pos hR1_lt_R f h_f_analytic h_finite_zeros hR_lt_1
-  have h2 :=
-    lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero hf0_eq_one h_finite_zeros h_σ hf_le_B h_σ_spec
-  exact le_trans h1 h2
 
 variable {R R1 r B : ℝ} {f : ℂ → ℂ} {h_σ : ℂ → (ℂ → ℂ)}
 variable (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
