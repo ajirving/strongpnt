@@ -89,7 +89,7 @@ lemma I2Bound {SmoothingF : ℝ → ℝ}
     rw[sub_le_iff_le_add]
     nth_rw 1 [← add_zero 1]
     rw[add_assoc]
-    apply add_le_add_left
+    apply add_le_add_right
     refine Left.add_nonneg ?_ ?_
     · rw[inv_nonneg, log_nonneg_iff Xpos]
       exact le_trans (by norm_num) (le_of_lt X_gt)
@@ -194,16 +194,15 @@ lemma I2Bound {SmoothingF : ℝ → ℝ}
             exact le_add_of_nonneg_left (sq_nonneg _)
       calc
         C' * X * T / (ε * ‖↑σ - ↑T * I‖ ^ 2) ≤ C' * X * T / (ε * T ^ 2) := by
-          rw[div_le_div_iff_of_pos_left, mul_le_mul_left]
-          exact this
-          exact ε_pos
+          rw[div_le_div_iff_of_pos_left]
+          gcongr
           positivity
           apply mul_pos ε_pos
           exact lt_of_lt_of_le (pow_pos Tpos 2) this
           positivity
         _ = C' * X / (ε * T) := by
-          field_simp
-          ring
+          field
+
 /-%%
 \begin{proof}\uses{MellinOfSmooth1b, LogDerivZetaBndUniform, I2, I8}\leanok
 Unfold the definitions and apply the triangle inequality.
@@ -729,13 +728,7 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
             apply Real.log_nonneg
             linarith [tbounds1.1]
           positivity
-        · field_simp
-          apply div_nonneg
-          · linarith
-          · apply mul_nonneg
-            · linarith
-            · rw [Complex.sq_norm]
-              exact normSq_nonneg (↑σ₁ + ↑t * I)
+        · positivity
         · apply Real.rpow_nonneg
           linarith
 
@@ -754,8 +747,7 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
       ring_nf
       exact rpow_zero X
     field_simp
-    rw[mul_assoc, h₁]
-    ring
+    rw[mul_comm, ← neg_div, h₁]
 
   rw[this]
 
@@ -889,7 +881,7 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
      rw [← integral_const_mul]
      apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioo
      intro t ht
-     ring
+     ring_nf
 
   rw [factor_out_constants]
 
@@ -911,7 +903,7 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
   apply le_trans this
   ring_nf
   field_simp
-
+  rfl
 
 lemma I7Bound {SmoothingF : ℝ → ℝ}
     (suppSmoothingF : Function.support SmoothingF ⊆ Icc (1 / 2) 2)
@@ -1110,9 +1102,7 @@ lemma I4Bound {SmoothingF : ℝ → ℝ}
     norm_num
   use this
 
-  intro X X_gt_three ε ε_pos ε_lt_one
-
-  intro T T_gt_Tlb σ₁
+  intro X X_gt_three ε ε_pos ε_lt_one T T_gt_Tlb σ₁
   have σ₂_le_σ₁ : σ₂ ≤ σ₁ := by
     have logTlb_pos : 0 < Real.log Tlb := by
       rw[← Real.log_one]
@@ -1849,10 +1839,7 @@ theorem Strong_PNT : ∃ c > 0,
       c₅ * rexp (Real.log x - (A ^ ((1 : ℝ) / 2) / 4) * Real.log x ^ ((1 : ℝ) / 2)) := by
     filter_upwards [eventually_gt_atTop 3, event_4_aux1 σ₂_lt_one (A ^ ((1 : ℝ) / 2) / 2)
       (A ^ ((1 : ℝ) / 2) / 4) (by norm_num : (1 : ℝ) / 2 < 1)] with x x_gt hx
-    rw [mul_le_mul_left c₅pos]
-    apply Real.exp_monotone
-    convert hx
-
+    gcongr
   have event_4 : ∀ᶠ (x : ℝ) in atTop, c₅ * x ^ σ₂ / (εx x) ≤
       c₅ * x * rexp (-c * Real.log x ^ ((1 : ℝ) / 2)) := by
     unfold εx c_εx c

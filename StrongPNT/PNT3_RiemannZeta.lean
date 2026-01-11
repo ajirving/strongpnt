@@ -2,7 +2,8 @@ import Mathlib.Algebra.Order.Ring.Star
 import Mathlib.Analysis.SpecialFunctions.Log.Summable
 import Mathlib.NumberTheory.AbelSummation
 import Mathlib.NumberTheory.EulerProduct.DirichletLSeries
-import Mathlib.Topology.Compactness.PseudometrizableLindelof
+import Mathlib.Topology.Metrizable.Basic
+import Mathlib.Topology.Compactness.Lindelof
 import StrongPNT.PNT2_LogDerivative
 
 
@@ -688,13 +689,13 @@ lemma term_eq_ofRealC (x : ℝ) (n : ℕ) : (1 / ((n + 1 : ℂ) ^ (x : ℂ))) = 
     _ = ((1 / ((n + 1 : ℝ) ^ x) : ℝ) : ℂ) := hdiv
 
 lemma im_tsum_ofReal (g : ℕ → ℝ) : (∑' n : ℕ, (g n : ℂ)).im = 0 := by
-  have him := congrArg Complex.im (Complex.ofReal_tsum (f := g)).symm
+  have him := congrArg Complex.im (Complex.ofReal_tsum (L := SummationFilter.unconditional _) (f := g)).symm
   have hz : (((∑' n : ℕ, g n) : ℝ) : ℂ).im = 0 := by
     simp
   exact Eq.trans him hz
 
 lemma re_tsum_ofReal (g : ℕ → ℝ) : (∑' n : ℕ, (g n : ℂ)).re = ∑' n : ℕ, g n := by
-  have h := congrArg Complex.re (Complex.ofReal_tsum (f := g)).symm
+  have h := congrArg Complex.re (Complex.ofReal_tsum (L := SummationFilter.unconditional _) (f := g)).symm
   simpa [Complex.ofReal_re] using h
 
 lemma zetapos (x : ℝ) (hx : 1 < x) : (riemannZeta x).im = 0 ∧ 0 < (riemannZeta x).re := by
@@ -2359,8 +2360,7 @@ lemma exists_radius_ball_two_step_subset_halfspace (s : ℂ) {ε : ℝ} (hε : �
   have hpos : 0 < s.re - ε := sub_pos.mpr hε
   have hδpos : 0 < δ := by simpa [hδdef] using (half_pos hpos)
   refine ⟨δ, hδpos, ?_⟩
-  intro x hx
-  intro y hy
+  intro x hx y hy
   -- Triangle inequality: dist y s ≤ dist y x + dist x s < δ + δ = s.re - ε
   have htri : dist y s ≤ dist y x + dist x s := by
     simpa using (dist_triangle y x s)
@@ -2385,7 +2385,7 @@ lemma exists_radius_ball_two_step_subset_halfspace (s : ℂ) {ε : ℝ} (hε : �
     have hpair := (abs_le.mp hre_abs)
     exact hpair.left
   have hyge : s.re - ‖y - s‖ ≤ y.re := by
-    have h' : s.re + (-‖y - s‖) ≤ s.re + (y - s).re := add_le_add_left hre_lower s.re
+    have h' : s.re + (-‖y - s‖) ≤ s.re + (y - s).re := by gcongr
     have h'' : s.re + (y - s).re = y.re := by
       simp [Complex.sub_re, sub_eq_add_neg, add_comm, add_left_comm, add_assoc]
     simpa [sub_eq_add_neg, h''] using h'
@@ -2926,7 +2926,7 @@ lemma lem_zetaBound2 (s : ℂ) (hs_re : 1/10 < s.re) (hs_ne : s ≠ 1) : ‖riem
   -- Add the other terms
   have hsum0 : (1 + ‖1 / (s - 1)‖) + ‖s‖ * ‖∫ u in Ioi (1 : ℝ), f u‖
       ≤ (1 + ‖1 / (s - 1)‖) + ‖s‖ * (1 / s.re) := by
-    exact add_le_add_left hmul (1 + ‖1 / (s - 1)‖)
+    gcongr
   have hsum : 1 + ‖1 / (s - 1)‖ + ‖s‖ * ‖∫ u in Ioi (1 : ℝ), f u‖
       ≤ 1 + ‖1 / (s - 1)‖ + ‖s‖ * (1 / s.re) := by
     simpa [add_assoc] using hsum0
@@ -2962,7 +2962,7 @@ lemma lem_sBound (s : ℂ) (hs : (1/2 : ℝ) ≤ s.re ∧ s.re < (3 : ℝ)) : �
   have h_re_sq_lt : s.re ^ 2 < (3 : ℝ) ^ 2 := by
     simpa using (sq_lt_sq' hnegthree_lt_re hlt3)
   have hsumlt : s.re ^ 2 + s.im ^ 2 < (3 : ℝ) ^ 2 + s.im ^ 2 := by
-    exact add_lt_add_right h_re_sq_lt _
+    gcongr
   have hsq : ‖s‖ ^ 2 < (3 + |s.im|) ^ 2 := by
     have h := lt_of_lt_of_le hsumlt (helper_three_abs_sq s.im)
     simpa [helper_normsq s] using h
@@ -3031,7 +3031,7 @@ lemma lem_finalBoundCombination (s : ℂ) (hs_re : (1/2 : ℝ) ≤ s.re ∧ s.re
     _ ≤ 1 + 1 + ‖s‖ / s.re := by linarith [h3]
     _ ≤ 1 + 1 + ‖s‖ * 2 := by
       have s_nonneg : 0 ≤ ‖s‖ := norm_nonneg _
-      exact add_le_add_left (div_le_mul_of_one_div_le s_nonneg h5) _
+      exact add_le_add_right (div_le_mul_of_one_div_le s_nonneg h5) _
     _ < 1 + 1 + ((3 : ℝ) + |s.im|) * 2 := by linarith [h4]
 
 /-- Lemma: Final algebraic simplification. -/
@@ -3122,7 +3122,7 @@ lemma lem_zfroms_conditions (s : ℂ) (t : ℝ)
 lemma lem_abs_im_bound (s : ℂ) (t : ℝ) (hs : ‖s‖ ≤ 1) : |s.im + t| ≤ 1 + |t| := by
   have h1 : |s.im| ≤ ‖s‖ := Complex.abs_im_le_norm s
   have h2 : |s.im| ≤ 1 := le_trans h1 hs
-  have h3 : |s.im + t| ≤ |s.im| + |t| := abs_add s.im t
+  have h3 : |s.im + t| ≤ |s.im| + |t| := abs_add_le s.im t
   linarith
 
 /-- Lemma: Final zeta upper bound with shift. -/
@@ -3840,7 +3840,7 @@ lemma zeta32upper_pre : ∃ b > 1, ∀ t : ℝ, ∀ s : ℂ, ‖s‖ ≤ 1 → (
   have hle2 : (10 : ℝ) + 2 * |t| ≤ (12 : ℝ) * |t| := by
     have htmp := add_le_add_right h10le (2 * |t|)
     have hcalc : 10 * |t| + 2 * |t| = (12 : ℝ) * |t| := by ring
-    simpa [hcalc] using htmp
+    linarith
   exact lt_of_lt_of_le hlt hle2
 
 -- Lemma 19: zeta32upper
@@ -3887,8 +3887,7 @@ lemma Zeta1_Zeta_Expand :
 
   -- Provide the constants A, b as required
   refine ⟨A, hAgt1, b, hbgt1, ?_⟩
-  intro t ht r1 r R1 R hr1_pos hr1_lt_r hr_pos hr_lt_R1 hR1_pos hR1_lt_R hR_lt_1
-  intro c hfin z hz
+  intro t ht r1 r R1 R hr1_pos hr1_lt_r hr_pos hr_lt_R1 hR1_pos hR1_lt_R hR_lt_1 c hfin z hz
 
   -- Apply log_Deriv_Expansion_Zeta
   have hexp_lemma := log_Deriv_Expansion_Zeta t ht r1 r R1 R hr1_pos hr1_lt_r hr_lt_R1 hR1_lt_R hR_lt_1
@@ -3959,8 +3958,7 @@ lemma Zeta1_Zeta_Expand :
             · exact h_gt
             · exact hR1_pos
           have h_sq_div : R^2/R1 = R * (R/R1) := by
-            field_simp [ne_of_gt hR1_pos]
-            ring
+            field [ne_of_gt hR1_pos]
           rw [h_sq_div]
           have h_r_pos : (0 : ℝ) < R := by linarith [hR1_pos, h_gt]
           have : R * (R/R1) > R * 1 := by
@@ -4090,8 +4088,8 @@ lemma Zeta1_Zeta_Expansion
       _ ≤ (S / Real.log 3) * Real.log |t| := mul_le_mul_of_nonneg_left hL_ge_log3' hratio_nonneg
 
   have hsum_bound : Real.log |t| + S ≤ (1 + S / Real.log 3) * Real.log |t| := by
-    have hstep : Real.log |t| + S ≤ Real.log |t| + (S / Real.log 3) * Real.log |t| :=
-      add_le_add_left hS_le (Real.log |t|)
+    have hstep : Real.log |t| + S ≤ Real.log |t| + (S / Real.log 3) * Real.log |t| := by
+      gcongr
     -- Real.log |t| + (S / Real.log 3) * Real.log |t| = (1 + S / Real.log 3) * Real.log |t|
     have h_factor : Real.log |t| + (S / Real.log 3) * Real.log |t| = (1 + S / Real.log 3) * Real.log |t| := by ring
     rw [← h_factor]
