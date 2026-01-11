@@ -60,7 +60,7 @@ theorem LogDerivZetaHolcLargeT' :
       _ ≥ 1 - (((1 - σ₁) * Real.log 3 ^ 1)) / Real.log 3 ^ 1:= by
         gcongr
         apply min_le_right
-      _ = _ := by field_simp
+      _ = _ := by field
 
 /-%%
 \begin{proof}\uses{ZetaZeroFree}\leanok

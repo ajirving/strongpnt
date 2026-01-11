@@ -1,7 +1,8 @@
 import Mathlib.Algebra.Lie.OfAssociative
-import Mathlib.Analysis.NormedSpace.Connected
-import Mathlib.Data.Complex.ExponentialBounds
+import Mathlib.Analysis.Normed.Module.Connected
+import Mathlib.Analysis.Complex.ExponentialBounds
 import StrongPNT.PNT1_ComplexAnalysis
+import Mathlib.Tactic.Cases
 
 lemma DRinD1 (R : ℝ) (hR' : R < 1) :
     Metric.closedBall (0 : ℂ) R ⊆ Metric.ball (0 : ℂ) 1 := by
@@ -729,8 +730,7 @@ theorem lem_zero_not_in_Kf (R R1 : ℝ)
   (f : ℂ → ℂ)
   (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z) :
     f 0 ≠ 0 → 0 ∉ zerosetKfR R1 (by linarith) f := by
-  intro h_f_zero_ne_zero
-  intro h_zero_in_KfR1
+  intro h_f_zero_ne_zero h_zero_in_KfR1
   -- From membership in zerosetKfR, we get f 0 = 0
   have h_f_zero_eq_zero : f 0 = 0 := h_zero_in_KfR1.2
   -- This contradicts the assumption that f 0 ≠ 0
@@ -744,8 +744,7 @@ lemma lem_rho_ne_zero (R R1 : ℝ)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (h_f_nonzero_at_zero : f 0 ≠ 0) :
     ∀ ρ ∈ zerosetKfR R1 (by linarith) f, ρ ≠ 0 := by
-  intro ρ h_ρ_in_zeros
-  intro h_ρ_eq_zero
+  intro ρ h_ρ_in_zeros h_ρ_eq_zero
   -- If ρ = 0, then ρ ∈ zerosetKfR implies 0 ∈ zerosetKfR
   rw [h_ρ_eq_zero] at h_ρ_in_zeros
   -- But this contradicts lem_zero_not_in_Kf
@@ -1214,21 +1213,7 @@ lemma lem_mod_Bf_eq_mod_f_on_boundary (R R1 : ℝ)
 
     -- Rewrite numerator: R - z * star ρ / R = (R² - z * star ρ) / R
     have num_rewrite : (R : ℂ) - z * star ρ / (R : ℂ) = ((R : ℂ)^2 - z * star ρ) / (R : ℂ) := by
-      field_simp [ne_of_gt hR1_pos]
-      ring_nf
-      field_simp
-      ring_nf
-      norm_cast
-      rw [pow_two]
-      rw [mul_assoc R R R⁻¹]
-      -- rw [(mul_inv_cancel R)]
-      have : R * R⁻¹ = 1 := by
-        have : R > 0 := by linarith
-        -- apply mul_inv_cancel
-        field_simp
-      rw [this]
-      simp
-
+      field [ne_of_gt hR1_pos]
     rw [num_rewrite, Complex.norm_div]
 
     -- Key step: R² - z * star ρ = z * star(z - ρ) using z * star z = R²
@@ -1238,7 +1223,6 @@ lemma lem_mod_Bf_eq_mod_f_on_boundary (R R1 : ℝ)
 
     rw [factor_eq, Complex.norm_mul, norm_star, ←hz]
     field_simp
-    field_simp [hz, z_ne_rho]
 
     have h_denom_ne_zero : R * ‖z - ρ‖ ≠ 0 := by
       apply mul_ne_zero
@@ -1247,7 +1231,9 @@ lemma lem_mod_Bf_eq_mod_f_on_boundary (R R1 : ℝ)
       -- Prove the norm is not zero
       · simp [norm_ne_zero_iff, sub_ne_zero, z_ne_rho]
     -- field_simp can now use this fact to solve the goal.
+    rw [Complex.norm_real, norm_norm, hz]
     field_simp [h_denom_ne_zero]
+    exact div_self h_denom_ne_zero
 
 
   -- Apply this to show the product equals 1
@@ -2180,7 +2166,7 @@ lemma blaschke_num_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
     have hposR : 0 < R := hR1_pos.trans hR1_lt_R
     have hposRR : 0 < R * R := by nlinarith [hposR]
     have hlt : R1 * R < R * R := by
-      exact (mul_lt_mul_right hposR).mpr hR1_lt_R
+      gcongr
     exact (lt_irrefl _ (lt_of_le_of_lt hle' hlt))
   · -- Differentiability: linear function
     have h_const : DifferentiableAt ℂ (fun _ : ℂ => (R : ℂ)) z := by
