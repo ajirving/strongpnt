@@ -432,11 +432,6 @@ lemma tendsto_finprod_coe_iff_tendsto_coe_finprod {i : Type*} (f : i → NNReal)
   -- Since the functions are equal, their convergence is equivalent
   rw [h_comp, ← h_eq]
 
-lemma NNReal.isEmbedding_coe : Topology.IsEmbedding (fun x : NNReal => (x : ℝ)) := by
-  refine ⟨?_, NNReal.coe_injective⟩
-  -- NNReal has the subspace topology, so coercion is inducing
-  exact Topology.IsInducing.subtypeVal
-
 lemma HasProd.of_coe_hasProd {i : Type*} (f : i → NNReal) (a : NNReal) (h : HasProd (fun i => (f i : ℝ)) (a : ℝ)) : HasProd f a := by
   -- Use tendsto_finprod_coe_iff_tendsto_coe_finprod to convert h to composition form
   have h_comp : Filter.Tendsto ((fun x : NNReal => (x : ℝ)) ∘ (fun s => ∏ i ∈ s, f i)) Filter.atTop (𝓝 (a : ℝ)) := by
@@ -892,7 +887,7 @@ by
       simpa using hcont_at.continuousWithinAt
   have hcont_g : ContinuousOn g (Set.Icc a b) := by
     have hconst : ContinuousOn (fun _ : ℝ => (-s : ℂ)) (Set.Icc a b) := continuousOn_const
-    simpa [g] using hconst.mul hcont_pow
+    exact hconst.mul hcont_pow
   -- On [a,b], the derivative equals g pointwise (by the explicit formula for u>0)
   have hEqOn : EqOn (deriv f) g (Set.Icc a b) := by
     intro u hu
@@ -1961,7 +1956,7 @@ lemma helper_tendsto_add {f g : ℕ → ℂ} {a b : ℂ}
 
 lemma helper_tendsto_neg {f : ℕ → ℂ} {a : ℂ}
   (hf : Tendsto f atTop (𝓝 a)) : Tendsto (fun n => - f n) atTop (𝓝 (-a)) := by
-  simpa using ((continuous_neg.tendsto a).comp hf)
+  exact hf.neg
 
 lemma helper_tendsto_sub {f g : ℕ → ℂ} {a b : ℂ}
   (hf : Tendsto f atTop (𝓝 a)) (hg : Tendsto g atTop (𝓝 b)) :
@@ -2507,11 +2502,10 @@ lemma hasDerivAt_integral_param_dominated_Ioi
     hasDerivAt_integral_of_dominated_loc_of_deriv_le
       (μ := MeasureTheory.volume.restrict (Ioi (1 : ℝ)))
       (F := F) (F' := F') (x₀ := s)
-      (ε_pos := hδ)
       (hF_meas := hmeas) (hF_int := hFint)
       (hF'_meas := hF'meas)
       (h_bound := hbound) (bound_integrable := hbound_int)
-      (h_diff := hderiv)
+      (h_diff := hderiv) (Metric.ball_mem_nhds _ hδ)
   rcases h with ⟨_hint, hDeriv⟩
   -- The set integral notation matches the integral w.r.t. the restricted measure
   simpa using hDeriv
@@ -3298,8 +3292,7 @@ lemma fc_analytic_normalized (c : ℂ) (f : ℂ → ℂ)
       intro z _
       exact h_nonzero
   · -- Second part: show evaluation at 0 equals 1
-    simp
-    exact div_self h_nonzero
+    simpa
 
 lemma frac_cancel_const {x y c : ℂ} (hc : c ≠ 0) (hy : y ≠ 0) : (x / c) / (y / c) = x / y := by
   field_simp [hc, hy]

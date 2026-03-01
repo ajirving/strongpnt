@@ -301,14 +301,14 @@ def ballDR (R : ℝ) : Set ℂ := Metric.ball (0 : ℂ) R
 
 theorem analyticWithinAt_to_analyticAt_aux {f : ℂ → ℂ} {S : Set ℂ} {z : ℂ}
   (p : FormalMultilinearSeries ℂ ℂ ℂ) (r : ENNReal)
-  (hasSumt : ∀ {y : ℂ}, z + y ∈ insert z S → y ∈ EMetric.ball 0 r → HasSum (fun n => (p n) fun _ => y) (f (z + y)))
+  (hasSumt : ∀ {y : ℂ}, z + y ∈ insert z S → y ∈ Metric.eball 0 r → HasSum (fun n => (p n) fun _ => y) (f (z + y)))
   (ε : ℝ) (hε_pos : ε > 0) (h_ball_subset_S : Metric.ball z ε ⊆ S) :
   let r' := min r (ENNReal.ofReal ε);
-  ∀ {y : ℂ}, y ∈ EMetric.ball 0 r' → HasSum (fun n => (p n) fun _ => y) (f (z + y)) := by
+  ∀ {y : ℂ}, y ∈ Metric.eball 0 r' → HasSum (fun n => (p n) fun _ => y) (f (z + y)) := by
   intro r' y hy
   apply hasSumt
   · -- Prove z + y ∈ insert z S
-    -- Since y ∈ EMetric.ball 0 r', we have ‖y‖ < r'
+    -- Since y ∈ Metric.eball 0 r', we have ‖y‖ < r'
     -- Since r' ≤ ENNReal.ofReal ε, we have ‖y‖ < ε
     -- Therefore z + y ∈ Metric.ball z ε ⊆ S
     right  -- Choose to prove z + y ∈ S (not z + y = z)
@@ -317,17 +317,17 @@ theorem analyticWithinAt_to_analyticAt_aux {f : ℂ → ℂ} {S : Set ℂ} {z : 
     -- Need to show dist z (z + y) < ε
     simp [dist_self_add_right]
     -- Now need to show ‖y‖ < ε
-    have : y ∈ EMetric.ball 0 (ENNReal.ofReal ε) := by
-      apply EMetric.ball_subset_ball (min_le_right r (ENNReal.ofReal ε)) hy
+    have : y ∈ Metric.eball 0 (ENNReal.ofReal ε) := by
+      apply Metric.eball_subset_eball (min_le_right r (ENNReal.ofReal ε)) hy
 
     have ε_nn : ENNReal.ofReal ε = ↑(ε.toNNReal) := by
       simp [ENNReal.ofReal, hε_pos.le]
     rw [ε_nn] at this
-    rw [@Metric.emetric_ball_nnreal] at this
+    rw [@Metric.eball_coe] at this
     simpa [Metric.mem_ball, dist_self_add_right, Real.toNNReal_of_nonneg hε_pos.le]
 
-  · -- Prove y ∈ EMetric.ball 0 r
-    exact EMetric.ball_subset_ball (min_le_left r (ENNReal.ofReal ε)) hy
+  · -- Prove y ∈ Metric.eball 0 r
+    exact Metric.eball_subset_eball (min_le_left r (ENNReal.ofReal ε)) hy
 
 
 theorem analyticWithinAt_to_analyticAt {f : ℂ → ℂ} {S : Set ℂ} {z : ℂ}
@@ -340,10 +340,10 @@ theorem analyticWithinAt_to_analyticAt {f : ℂ → ℂ} {S : Set ℂ} {z : ℂ}
 
   -- Now the goal is to show `HasFPowerSeriesAt f p z`.
   -- By definition, this means there exists a radius `r' > 0` such that `p`
-  -- converges to `f` on the open ball `EMetric.ball z r'`.
+  -- converges to `f` on the open ball `Metric.eball z r'`.
 
   -- From `hp : HasFPowerSeriesWithinAt f p S z`, we get a radius `r > 0`
-  -- where `p` converges to `f` on the *intersection* `EMetric.ball z r ∩ S`.
+  -- where `p` converges to `f` on the *intersection* `Metric.eball z r ∩ S`.
   rcases hp with ⟨r, h_conv_on_inter, hr_pos⟩
 
   -- From `hS : S ∈ nhds z`, we know `S` contains an open ball around `z`.
@@ -364,7 +364,7 @@ theorem analyticWithinAt_to_analyticAt {f : ℂ → ℂ} {S : Set ℂ} {z : ℂ}
   -- The minimum of two positive numbers is positive.
   · exact inf_le_of_left_le h_conv_on_inter
 
-  -- Goal 2: Prove convergence on the ball `EMetric.ball z r'`.
+  -- Goal 2: Prove convergence on the ball `Metric.eball z r'`.
   -- We know from `h_conv_on_inter` that `p` converges on a larger set.
   -- We can use `HasFPowerSeriesOnBall.mono` to restrict the convergence to a smaller set.
   ·
@@ -4478,8 +4478,8 @@ lemma uniqueDiffWithinAt_convex_complex {s : Set ℂ} (hconv : Convex ℝ s)
   -- The real tangent cone is included in the complex tangent cone
   have h_tc_subset : tangentConeAt ℝ s x ⊆ tangentConeAt ℂ s x := by
     intro y hy
-    rcases hy with ⟨c, d, hmem, hctend, hsmullim⟩
-    refine ⟨(fun n => (c n : ℂ)), d, hmem, ?_, ?_⟩
+    rcases exists_fun_of_mem_tangentConeAt hy with ⟨_, l, _, c, d, hmem, hctend, hsmullim⟩
+    refine mem_tangentConeAt_of_seq l (fun n => (c n : ℂ)) d hmem ?_ ?_
     · -- norms are preserved under coercion ℝ → ℂ
       simpa [Complex.norm_real] using hctend
     · -- scalar multiplications agree when viewing ℂ as an ℝ-module
@@ -4987,7 +4987,7 @@ lemma fderivWithin_eq_zero_of_derivWithin_eq_zero {s : Set ℂ} {f : ℂ → ℂ
   have h₁ : fderivWithin ℂ f s x =
       ContinuousLinearMap.smulRight (1 : ℂ →L[ℂ] ℂ) (derivWithin f s x) := by
     simpa using
-      (derivWithin_fderivWithin (𝕜 := ℂ) (f := f) (s := s) (x := x)).symm
+      (toSpanSingleton_derivWithin (𝕜 := ℂ) (f := f) (s := s) (x := x)).symm
   have h₂ : fderivWithin ℂ f s x =
       ContinuousLinearMap.smulRight (1 : ℂ →L[ℂ] ℂ) (0 : ℂ) := by
     simpa [hderiv] using h₁
