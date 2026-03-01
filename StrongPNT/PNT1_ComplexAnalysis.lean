@@ -1,6 +1,7 @@
 import Mathlib.Analysis.Analytic.Order
 import Mathlib.Analysis.CStarAlgebra.Classes
 import Mathlib.Analysis.Complex.AbsMax
+import Mathlib.Analysis.Complex.HasPrimitives
 import Mathlib.Analysis.Complex.RemovableSingularity
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.Data.Real.StarOrdered
@@ -3621,82 +3622,15 @@ lemma I_is_antiderivative
   let L : ℂ → ℂ := fun z => deriv B z / B z
   have hL_on_R' : AnalyticOnNhd ℂ L (Metric.closedBall (0 : ℂ) R') := by
     simpa [L] using AnalyticOnNhd.div hderiv_on_R' hB_on_R' hB_ne_zero
-  -- Choose R_mid with r1 < R_mid < R'
-  let δ : ℝ := (R' - r1) / 2
-  have hδ_pos : 0 < δ := by
-    have : 0 < R' - r1 := sub_pos.mpr hr1_lt_R'
-    simpa [δ] using half_pos this
-  let R_mid : ℝ := r1 + δ
-  have hR_mid_pos : 0 < R_mid := by
-    have : 0 < r1 + δ := add_pos_of_pos_of_nonneg hr1_pos (le_of_lt hδ_pos)
-    simpa [R_mid] using this
-  have hr1_lt_R_mid : r1 < R_mid := by
-    have : 0 < δ := hδ_pos
-    simpa [R_mid] using (lt_add_of_pos_right r1 this)
-  have hR_mid_lt_R' : R_mid < R' := by
-    have hδlt : δ < R' - r1 := by
-      simpa [δ] using (half_lt_self (sub_pos.mpr hr1_lt_R'))
-    have : r1 + δ < r1 + (R' - r1) := by gcongr
-    simpa [R_mid, sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using this
-  -- Define J as the primitive of L on radius R_mid with outer radius R'
-  let J : ℂ → ℂ :=
-    If_ext (r1 := R_mid) (R := R') (R0 := R) hR_mid_pos hR_mid_lt_R' hR'_lt_R hR_lt_one L hL_on_R'
-  -- If_is_differentiable_on gives differentiability on closedBall R_mid and
-  -- the within-derivative there equals L
-  have hIf :=
-    (If_is_differentiable_on (r1 := R_mid) (R := R') (R0 := R)
-      hR_mid_pos hR_mid_lt_R' hR'_lt_R hR_lt_one (f := L) hL_on_R')
-  have hDiffOn_mid : DifferentiableOn ℂ J (Metric.closedBall (0 : ℂ) R_mid) := by
-    simpa [J] using hIf.1
-  -- Differentiable on the open ball R_mid by restriction
-  have hDiffOn_ball_R_mid : DifferentiableOn ℂ J (Metric.ball (0 : ℂ) R_mid) :=
-    hDiffOn_mid.mono Metric.ball_subset_closedBall
-  -- 1) J is analytic on a neighborhood of every point of closedBall r1
-  have hJ_analyticOnNhd : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1) := by
-    intro z hz
-    -- z is strictly inside radius R_mid since ‖z‖ ≤ r1 < R_mid
-    have hz_le : dist z (0 : ℂ) ≤ r1 := by
-      simpa [Metric.mem_closedBall] using hz
-    have hz_lt : dist z (0 : ℂ) < R_mid := lt_of_le_of_lt hz_le hr1_lt_R_mid
-    have hz_ball : z ∈ Metric.ball (0 : ℂ) R_mid := by simpa [Metric.mem_ball] using hz_lt
-    -- Differentiability on the open ball of radius R_mid yields AnalyticAt at z
-    exact (DifferentiableOn.analyticAt (s := Metric.ball (0 : ℂ) R_mid)
-      (f := J) hDiffOn_ball_R_mid (Metric.isOpen_ball.mem_nhds hz_ball))
-  -- 2) J(0) = 0
-  have h0_in_mid : (0 : ℂ) ∈ Metric.closedBall (0 : ℂ) R_mid := by
-    simpa [Metric.mem_closedBall, dist_self] using (le_of_lt hR_mid_pos)
-  have hJ0 : J 0 = 0 := by
-    simp [J, If_ext, If_taxicab, h0_in_mid]
-  -- 3) For each z in closedBall r1, deriv J z = L z = B'/B
-  have hderiv_eq : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = L z := by
-    intro z hz
-    -- z is strictly inside radius R_mid
-    have hz_le : dist z (0 : ℂ) ≤ r1 := by simpa [Metric.mem_closedBall] using hz
-    have hz_lt : dist z (0 : ℂ) < R_mid := lt_of_le_of_lt hz_le hr1_lt_R_mid
-    have hz_ball : z ∈ Metric.ball (0 : ℂ) R_mid := by simpa [Metric.mem_ball] using hz_lt
-    have hz_cb_mid : z ∈ Metric.closedBall (0 : ℂ) R_mid := Metric.ball_subset_closedBall hz_ball
-    -- closedBall R_mid is a neighborhood of z since it contains an open ball around z
-    have h_cb_nhds : Metric.closedBall (0 : ℂ) R_mid ∈ 𝓝 z :=
-      Filter.mem_of_superset (Metric.isOpen_ball.mem_nhds hz_ball) Metric.ball_subset_closedBall
-    -- We have: derivWithin J (closedBall R_mid) z = L z from If_is_differentiable_on
-    have hDW_eq_L : derivWithin J (Metric.closedBall (0 : ℂ) R_mid) z = L z := by
-      simpa [J] using hIf.2 z hz_cb_mid
-    -- From differentiability within on closedBall R_mid, get a HasDerivWithinAt with derivative L z
-    have hHasWithin : HasDerivWithinAt J (derivWithin J (Metric.closedBall (0 : ℂ) R_mid) z)
-        (Metric.closedBall (0 : ℂ) R_mid) z :=
-      (hDiffOn_mid z hz_cb_mid).hasDerivWithinAt
-    have hHasWithinL : HasDerivWithinAt J (L z) (Metric.closedBall (0 : ℂ) R_mid) z := by
-      simpa [hDW_eq_L]
-        using hHasWithin
-    -- Since closedBall R_mid is a neighborhood of z, upgrade to HasDerivAt
-    have hHasDerivAt : HasDerivAt J (L z) z :=
-      HasDerivWithinAt.hasDerivAt hHasWithinL h_cb_nhds
-    -- Conclude the equality of derivatives
-    simpa using hHasDerivAt.deriv
-  -- Package the result
-  refine ⟨J, hJ_analyticOnNhd, hJ0, ?_⟩
-  intro z hz
-  simpa [L] using hderiv_eq z hz
+  obtain ⟨J, hJ⟩ := DifferentiableOn.isExactOn_ball <| hL_on_R'.mono Metric.ball_subset_closedBall|>.differentiableOn
+  refine ⟨(fun z ↦ J z - J 0), ?_, (by simp), ?_⟩
+  · apply AnalyticOnNhd.sub _ analyticOnNhd_const
+    refine AnalyticOnNhd.mono ?_ <| Metric.closedBall_subset_ball hr1_lt_R'
+    exact DifferentiableOn.analyticOnNhd (fun z hz ↦ DifferentiableAt.differentiableWithinAt (hJ z hz |>.differentiableAt)) Metric.isOpen_ball
+  · intro z hz
+    rw [deriv_sub_const]
+    refine hJ z ?_|>.deriv
+    exact Set.mem_of_subset_of_mem (Metric.closedBall_subset_ball hr1_lt_R') hz
 
 /-- Definition: H(z) := exp(J(z))/B(z) where J is from I_is_antiderivative. -/
 noncomputable def H_auxiliary
