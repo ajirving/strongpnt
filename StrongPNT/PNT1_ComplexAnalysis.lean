@@ -8,6 +8,8 @@ import Mathlib.GroupTheory.MonoidLocalization.Basic
 import Mathlib.Order.CompletePartialOrder
 import Mathlib.RingTheory.SimpleRing.Principal
 import Mathlib.Topology.Algebra.Module.ModuleTopology
+import PrimeNumberTheoremAnd.BorelCaratheodory
+
 lemma lem_exprule (n : ℕ) (hn : n ≥ 1) (α β : ℂ) : (n : ℂ) ^ (α + β) = (n : ℂ) ^ α * (n : ℂ) ^ β := by
   apply Complex.cpow_add
   -- Need to prove (n : ℂ) ≠ 0
@@ -1364,46 +1366,9 @@ lemma lem_BCI (R M : ℝ) (hR : R > 0) (hM : M > 0)
     (r : ℝ) (hr_pos : r > 0) (hr_lt_R : r < R)
     (z : ℂ) (hz_in_ball : norm z ≤ r) :
 norm (f z) ≤ (2 * r / (R - r)) * M := by
-  -- Set B = (2 * r / (R - r)) * M
-  let B := (2 * r / (R - r)) * M
-
-  -- Show that B ≥ 0
-  have hB : B ≥ 0 := by
-    unfold B
-    apply mul_nonneg
-    · apply div_nonneg
-      · apply mul_nonneg
-        · norm_num
-        · linarith [hr_pos]
-      · linarith [hr_lt_R]
-    · linarith [hM]
-
-  -- Show that f is analytic on closure (ballDR r)
-  have h_analytic_r : AnalyticOn ℂ f (closure (ballDR r)) := by
-    apply AnalyticOn.mono h_analytic
-    -- Show closure (ballDR r) ⊆ closure (ballDR R)
-    apply closure_mono
-    unfold ballDR
-    exact Metric.ball_subset_ball (le_of_lt hr_lt_R)
-
-  -- Show that z ∈ closure (ballDR r)
-  have hz_in_closure_r : z ∈ closure (ballDR r) := by
-    rw [lem_ballDR r hr_pos]
-    rw [Metric.mem_closedBall]
-    rw [Complex.dist_eq]
-    simp
-    exact hz_in_ball
-
-  -- Establish boundary condition using lem_final_bound_on_circle
-  have h_boundary : ∀ w : ℂ, norm w = r → norm (f w) ≤ B := by
-    intro w hw_boundary
-    exact lem_final_bound_on_circle R M hR hM f h_analytic h_zero h_re_bound r hr_pos hr_lt_R w hw_boundary
-
-  -- Apply Maximum Modulus Principle to extend from boundary to closure
-  have h_closure := (lem_MMP r B hr_pos hB f h_analytic_r).mpr h_boundary
-
-  -- Apply to our specific point z
-  exact h_closure z hz_in_closure_r
+  rw [lem_ballDR R hR] at *
+  convert borelCaratheodory_closedBall hR h_analytic h_zero hM h_re_bound hr_lt_R (mem_closedBall_zero_iff.mpr hz_in_ball) using 1
+  ring
 
 theorem thm_BorelCaratheodoryI (R M : ℝ) (hR : R > 0) (hM : M > 0)
     (f : ℂ → ℂ)
