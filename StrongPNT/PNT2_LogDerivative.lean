@@ -2084,7 +2084,7 @@ lemma logDerivprod {K : Finset ℂ} {g : ℂ → ℂ → ℂ} {z : ℂ}
     (hg_diff : ∀ ρ ∈ K, DifferentiableAt ℂ (g ρ) z)
     (hg_ne : ∀ ρ ∈ K, g ρ z ≠ 0) :
     logDeriv (fun w ↦ ∏ ρ ∈ K, g ρ w) z = ∑ ρ ∈ K, logDeriv (g ρ) z := by
-  exact logDeriv_prod K g z hg_ne hg_diff
+  exact logDeriv_prod hg_ne hg_diff
 
 -- Lemma 10: logDerivdiv
 lemma logDerivdiv {h g : ℂ → ℂ} {z : ℂ}
