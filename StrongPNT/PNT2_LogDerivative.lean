@@ -30,12 +30,7 @@ lemma lem_bolzano_weierstrass {D : Set ℂ} (hD : IsCompact D) {Z : Set ℂ} (hZ
   Set.Infinite.exists_accPt_of_subset_isCompact hZ_inf hD hZ_sub_D
 lemma lem_zeros_have_limit_point (R : ℝ) (hR : 0 < R) (f : ℂ → ℂ) (h_Kf_inf : Set.Infinite (zerosetKfR R hR f)) :
     ∃ ρ₀ ∈ Metric.closedBall (0 : ℂ) R, AccPt ρ₀ (Filter.principal (zerosetKfR R hR f)) := by
-  apply lem_bolzano_weierstrass
-  · -- Show IsCompact (Metric.closedBall (0 : ℂ) R)
-    rw [← lem_ballDR R hR]
-    exact lem_DRcompact R hR
-  · exact h_Kf_inf
-  · exact lemKinDR R hR f
+  exact h_Kf_inf.exists_accPt_of_subset_isCompact (isCompact_closedBall ..) <| lemKinDR R hR f
 
 open Filter Metric Set Bornology Function
 
@@ -44,28 +39,10 @@ lemma lem_identity_theorem (f : ℂ → ℂ)
     (ρ₀ : ℂ) (hρ₀_in_D1 : ρ₀ ∈ Metric.ball (0 : ℂ) 1)
     (h_acc : AccPt ρ₀ (Filter.principal ({ρ : ℂ | ρ ∈ Metric.ball (0 : ℂ) 1 ∧ f ρ = 0}))) :
     EqOn f 0 (Metric.ball (0 : ℂ) 1) := by
-  -- The open ball is a subset of the closed ball
-  have h_subset : Metric.ball (0 : ℂ) 1 ⊆ Metric.closedBall (0 : ℂ) 1 := Metric.ball_subset_closedBall
-  -- So f is analytic on a neighborhood of the open ball
-  have hf_open : AnalyticOnNhd ℂ f (Metric.ball (0 : ℂ) 1) := AnalyticOnNhd.mono hf h_subset
-  -- The open ball is preconnected (since it's connected)
-  have h_conn : IsConnected (Metric.ball (0 : ℂ) 1) := Metric.isConnected_ball (by norm_num : (0 : ℝ) < 1)
-  have h_preconn : IsPreconnected (Metric.ball (0 : ℂ) 1) := h_conn.isPreconnected
-  -- Convert accumulation point to closure membership
-  have h_zeros_subset : {ρ : ℂ | ρ ∈ Metric.ball (0 : ℂ) 1 ∧ f ρ = 0} ⊆ {z | f z = 0} := by
-    intro z hz
-    exact hz.2
-  -- From AccPt over the smaller set, get AccPt over the zero set using filter monotonicity
-  have h_acc_zero : AccPt ρ₀ (Filter.principal ({z | f z = 0})) := by
-    exact AccPt.mono h_acc (principal_mono.2 h_zeros_subset)
-  -- AccPt principal is equivalent to ClusterPt on the punctured set; then use closure equivalence
-  have h_closure : ρ₀ ∈ closure ({z | f z = 0} \ {ρ₀}) := by
-    -- accPt_principal_iff_clusterPt : AccPt x (𝓟 C) ↔ ClusterPt x (𝓟 (C \ {x}))
-    have h_cluster : ClusterPt ρ₀ (Filter.principal ({z | f z = 0} \ {ρ₀})) :=
-      (accPt_principal_iff_clusterPt).mp h_acc_zero
-    exact (mem_closure_iff_clusterPt).2 h_cluster
-  -- Apply the identity theorem
-  exact AnalyticOnNhd.eqOn_zero_of_preconnected_of_mem_closure hf_open h_preconn hρ₀_in_D1 h_closure
+  exact (hf.mono ball_subset_closedBall).eqOn_zero_of_preconnected_of_mem_closure
+    (isConnected_ball (by norm_num)).isPreconnected hρ₀_in_D1 
+    (mem_closure_iff_clusterPt.mpr (accPt_principal_iff_clusterPt.mp (h_acc.mono (by simp))))
+
 lemma lem_identity_theoremR (R : ℝ) (hR : 0 < R) (hR' : R < 1)
     (f : ℂ → ℂ) (hf : AnalyticOnNhd ℂ f (Metric.closedBall (0 : ℂ) 1))
     (ρ₀ : ℂ) (hρ₀_in_DR : ρ₀ ∈ Metric.closedBall (0 : ℂ) R)
