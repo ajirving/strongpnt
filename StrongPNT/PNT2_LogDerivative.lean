@@ -57,14 +57,6 @@ lemma lem_Contra_finiteKR (R : ℝ) (hR : 0 < R) (hR' : R < 1)
 
 open Classical
 
-lemma lem_frho_zero (R R1 : ℝ)
-    (hR1_pos : 0 < R1)
-    (hR1_lt_R : R1 < R)
-    (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (ρ : ℂ) (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 (by linarith) f) :
-    f ρ = 0 := h_rho_in_KfR1.2
-
 lemma lem_m_rho_is_nat (R R1 : ℝ) (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (f : ℂ → ℂ)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (h_f_nonzero_at_zero : f 0 ≠ 0)
@@ -154,8 +146,7 @@ lemma lem_m_rho_ge_1 (R R1 : ℝ) (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (f : �
     ∀ (ρ : ℂ) (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 (by linarith) f),
     analyticOrderAt f ρ ≥ 1 := by
   intro ρ h_rho_in_KfR1
-  -- Use lem_frho_zero as mentioned in informal proof
-  have h_f_rho_zero : f ρ = 0 := lem_frho_zero R R1 hR1_pos hR1_lt_R f h_f_analytic ρ h_rho_in_KfR1
+  have h_f_rho_zero : f ρ = 0 := h_rho_in_KfR1.2
   -- Use lem_m_rho_is_nat as mentioned in informal proof
   have h_order_finite : analyticOrderAt f ρ ≠ ⊤ := lem_m_rho_is_nat R R1 hR1_pos hR1_lt_R f h_f_analytic h_f_nonzero_at_zero hR_lt_1 ρ h_rho_in_KfR1
   -- f is analytic at ρ
