@@ -4,26 +4,8 @@ import Mathlib.Analysis.Complex.ExponentialBounds
 import StrongPNT.PNT1_ComplexAnalysis
 import Mathlib.Tactic.Cases
 
-lemma DRinD1 (R : ℝ) (hR' : R < 1) :
-    Metric.closedBall (0 : ℂ) R ⊆ Metric.ball (0 : ℂ) 1 := by
-  exact Metric.closedBall_subset_ball hR'
 def zerosetKfR (R : ℝ) (hR : 0 < R) (f : ℂ → ℂ) : Set ℂ :=
   {ρ : ℂ | ρ ∈ Metric.closedBall (0 : ℂ) R ∧ f ρ = 0}
-lemma lemKinDR (R : ℝ) (hR : 0 < R) (f : ℂ → ℂ) :
-    zerosetKfR R hR f ⊆ Metric.closedBall (0 : ℂ) R := by
-  intro ρ hρ
-  -- hρ : ρ ∈ zerosetKfR R hR f
-  -- By definition of zerosetKfR, this means ρ ∈ Metric.closedBall (0 : ℂ) R ∧ f ρ = 0
-  rw [zerosetKfR] at hρ
-  -- Now hρ : ρ ∈ {ρ : ℂ | ρ ∈ Metric.closedBall (0 : ℂ) R ∧ f ρ = 0}
-  exact hρ.1
-lemma lemKRinK1 (R : ℝ) (hR : 0 < R) (hR' : R < 1) (f : ℂ → ℂ) :
-    zerosetKfR R hR f ⊆ {ρ : ℂ | ρ ∈ Metric.ball (0 : ℂ) 1 ∧ f ρ = 0} := by
-  intro ρ hρ
-  simp only [zerosetKfR, Set.mem_setOf_eq] at hρ ⊢
-  constructor
-  · exact DRinD1 R hR' hρ.1
-  · exact hρ.2
 
 lemma lem_bolzano_weierstrass {D : Set ℂ} (hD : IsCompact D) {Z : Set ℂ} (hZ_inf : Z.Infinite) (hZ_sub_D : Z ⊆ D) :
     ∃ ρ₀ ∈ D, AccPt ρ₀ (Filter.principal Z) :=
@@ -70,36 +52,6 @@ lemma lem_m_rho_is_nat (R R1 : ℝ) (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (f : 
   apply hf.analyticOrderAt_ne_top_of_isPreconnected (isConnected_closedBall (by norm_num)).isPreconnected (by simp) _ this
   exact mem_of_mem_of_subset h_rho_in_KfR1.1 (closedBall_subset_closedBall (by linarith))
 
-lemma analyticOrderAt_ge_one_of_zero (f : ℂ → ℂ) (z : ℂ) (hf : AnalyticAt ℂ f z) (hz : f z = 0) (hfinite : analyticOrderAt f z ≠ ⊤) : analyticOrderAt f z ≥ 1 := by
-  -- Show that analyticOrderAt f z ≠ 0 using the characterization
-  have h_order_ne_zero : analyticOrderAt f z ≠ 0 := by
-    intro h_order_zero
-    -- If the order is 0, then f z ≠ 0 by the characterization
-    have h_f_ne_zero : f z ≠ 0 := by
-      rw [← AnalyticAt.analyticOrderAt_eq_zero hf]
-      exact h_order_zero
-    -- This contradicts hz : f z = 0
-    exact h_f_ne_zero hz
-  -- Since analyticOrderAt f z is finite (≠ ⊤) and ≠ 0, it must be ≥ 1
-  cases' h : analyticOrderAt f z with n
-  · -- Case: analyticOrderAt f z = ⊤
-    -- This contradicts hfinite
-    rw [h] at hfinite
-    exact False.elim (hfinite rfl)
-  · -- Case: analyticOrderAt f z = ↑n for some n : ℕ
-    -- We need to show ↑n ≥ 1
-    -- From h_order_ne_zero and h : analyticOrderAt f z = ↑n, we get ↑n ≠ 0, so n ≠ 0
-    rw [h] at h_order_ne_zero
-    have n_ne_zero : n ≠ 0 := by
-      intro n_zero
-      rw [n_zero, Nat.cast_zero] at h_order_ne_zero
-      exact h_order_ne_zero rfl
-    -- Since n ≠ 0, we have n ≥ 1
-    have n_ge_one : n ≥ 1 := Nat.one_le_iff_ne_zero.mpr n_ne_zero
-    -- Therefore ↑n ≥ ↑1 = 1
-    exact Nat.cast_le.mpr n_ge_one
-
-
 lemma lem_m_rho_ge_1 (R R1 : ℝ) (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (f : ℂ → ℂ)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (h_f_nonzero_at_zero : f 0 ≠ 0)
@@ -107,18 +59,9 @@ lemma lem_m_rho_ge_1 (R R1 : ℝ) (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (f : �
     ∀ (ρ : ℂ) (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 (by linarith) f),
     analyticOrderAt f ρ ≥ 1 := by
   intro ρ h_rho_in_KfR1
-  have h_f_rho_zero : f ρ = 0 := h_rho_in_KfR1.2
-  -- Use lem_m_rho_is_nat as mentioned in informal proof
-  have h_order_finite : analyticOrderAt f ρ ≠ ⊤ := lem_m_rho_is_nat R R1 hR1_pos hR1_lt_R f h_f_analytic h_f_nonzero_at_zero hR_lt_1 ρ h_rho_in_KfR1
-  -- f is analytic at ρ
-  have h_f_analytic_at_rho : AnalyticAt ℂ f ρ := by
-    apply h_f_analytic
-    -- With R < 1 and R1 < R, we have R1 < 1
-    have h_R1_lt_1 : R1 < 1 := by linarith
-    have h_rho_in_R1 : ρ ∈ Metric.closedBall 0 R1 := h_rho_in_KfR1.1
-    exact Metric.closedBall_subset_closedBall (le_of_lt h_R1_lt_1) h_rho_in_R1
-  -- Apply the helper lemma (combining results from both mentioned lemmas)
-  exact analyticOrderAt_ge_one_of_zero f ρ h_f_analytic_at_rho h_f_rho_zero h_order_finite
+  apply ENat.one_le_iff_ne_zero.mpr
+  refine (h_f_analytic ρ ?_).analyticOrderAt_ne_zero.mpr h_rho_in_KfR1.2
+  exact mem_of_mem_of_subset h_rho_in_KfR1.1 (closedBall_subset_closedBall (by linarith))
 
 /-! ### The quotient `Cf` (no core wrapper) -/
 
