@@ -64,50 +64,11 @@ lemma lem_m_rho_is_nat (R R1 : ℝ) (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (f : 
     ∀ (ρ : ℂ) (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 (by linarith) f),
     analyticOrderAt f ρ ≠ ⊤ := by
   intro ρ h_rho_in_KfR1
-  -- ρ lies in the closed ball of radius R1
-  have hρ_closed_R1 : ρ ∈ Metric.closedBall (0 : ℂ) R1 := h_rho_in_KfR1.1
-  -- R1 < R and R < 1 implies R1 < 1
-  have hR1_le_R : R1 ≤ R := by linarith
-  have hR1_lt_one : R1 < 1 := by linarith
-  -- Hence ρ ∈ ball 0 1
-  have hρ_ball1 : ρ ∈ Metric.ball (0 : ℂ) 1 := by
-    have hdist_le : dist ρ (0 : ℂ) ≤ R1 := (Metric.mem_closedBall.mp hρ_closed_R1)
-    have hdist_lt : dist ρ (0 : ℂ) < 1 := by linarith
-    simpa [Metric.mem_ball] using hdist_lt
-  -- f is analytic at ρ
-  have hf_at_ρ : AnalyticAt ℂ f ρ := by
-    -- ρ ∈ closedBall 0 1 since R1 < 1
-    have hsubset : Metric.closedBall (0 : ℂ) R1 ⊆ Metric.closedBall (0 : ℂ) 1 :=
-      Metric.closedBall_subset_closedBall (le_of_lt hR1_lt_one)
-    have hρ_closed1 : ρ ∈ Metric.closedBall (0 : ℂ) 1 := hsubset hρ_closed_R1
-    exact h_f_analytic ρ hρ_closed1
-  -- Suppose, for contradiction, that the order is ⊤
-  by_contra htop
-  -- From order = ⊤ we get that f is eventually zero near ρ
-  have h_eventually_zero : ∀ᶠ z in nhds ρ, f z = 0 := by
-    have h_equiv : (analyticOrderAt f ρ = ⊤ ↔ ∀ᶠ z in nhds ρ, f z = 0) := by
-      simp [analyticOrderAt, hf_at_ρ]
-    exact h_equiv.mp (by simpa using htop)
-  -- f is analytic on a neighborhood of the unit ball
-  have hf_on_ball : AnalyticOnNhd ℂ f (Metric.ball (0 : ℂ) 1) := by
-    intro z hz
-    have hz' : z ∈ Metric.closedBall (0 : ℂ) 1 :=
-      (Metric.ball_subset_closedBall : Metric.ball (0 : ℂ) 1 ⊆ Metric.closedBall (0 : ℂ) 1) hz
-    exact h_f_analytic z hz'
-  -- The unit ball is preconnected
-  have h_preconn : IsPreconnected (Metric.ball (0 : ℂ) 1) :=
-    (Metric.isConnected_ball (by exact (zero_lt_one : (0 : ℝ) < 1))).isPreconnected
-  -- By identity principle, f = 0 on the unit ball
-  have h_eqOn_zero : Set.EqOn f 0 (Metric.ball (0 : ℂ) 1) :=
-    AnalyticOnNhd.eqOn_zero_of_preconnected_of_eventuallyEq_zero hf_on_ball h_preconn hρ_ball1
-      h_eventually_zero
-  -- Hence f 0 = 0, contradiction
-  have h0_in_ball : (0 : ℂ) ∈ Metric.ball (0 : ℂ) 1 := by
-    simp [Metric.mem_ball]
-  have : f 0 = 0 := by
-    have h := h_eqOn_zero h0_in_ball
-    simpa [Pi.zero_apply] using h
-  exact h_f_nonzero_at_zero this
+  have := h_f_analytic 0 (by simp)|>.analyticOrderAt_eq_zero.mpr h_f_nonzero_at_zero
+  have : analyticOrderAt f 0 ≠ ⊤ := by simp [this]
+  have hf : AnalyticOnNhd ℂ f (closedBall 0 1) := fun z hz ↦ h_f_analytic z hz
+  apply hf.analyticOrderAt_ne_top_of_isPreconnected (isConnected_closedBall (by norm_num)).isPreconnected (by simp) _ this
+  exact mem_of_mem_of_subset h_rho_in_KfR1.1 (closedBall_subset_closedBall (by linarith))
 
 lemma analyticOrderAt_ge_one_of_zero (f : ℂ → ℂ) (z : ℂ) (hf : AnalyticAt ℂ f z) (hz : f z = 0) (hfinite : analyticOrderAt f z ≠ ⊤) : analyticOrderAt f z ≥ 1 := by
   -- Show that analyticOrderAt f z ≠ 0 using the characterization
