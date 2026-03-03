@@ -28,60 +28,32 @@ lemma lemKRinK1 (R : ℝ) (hR : 0 < R) (hR' : R < 1) (f : ℂ → ℂ) :
 lemma lem_bolzano_weierstrass {D : Set ℂ} (hD : IsCompact D) {Z : Set ℂ} (hZ_inf : Z.Infinite) (hZ_sub_D : Z ⊆ D) :
     ∃ ρ₀ ∈ D, AccPt ρ₀ (Filter.principal Z) :=
   Set.Infinite.exists_accPt_of_subset_isCompact hZ_inf hD hZ_sub_D
-lemma lem_zeros_have_limit_point (R : ℝ) (hR : 0 < R) (f : ℂ → ℂ) (h_Kf_inf : Set.Infinite (zerosetKfR R hR f)) :
-    ∃ ρ₀ ∈ Metric.closedBall (0 : ℂ) R, AccPt ρ₀ (Filter.principal (zerosetKfR R hR f)) := by
-  exact h_Kf_inf.exists_accPt_of_subset_isCompact (isCompact_closedBall ..) <| lemKinDR R hR f
 
 open Filter Metric Set Bornology Function
 
-lemma lem_identity_theorem (f : ℂ → ℂ)
-    (hf : AnalyticOnNhd ℂ f (Metric.closedBall (0 : ℂ) 1))
-    (ρ₀ : ℂ) (hρ₀_in_D1 : ρ₀ ∈ Metric.ball (0 : ℂ) 1)
-    (h_acc : AccPt ρ₀ (Filter.principal ({ρ : ℂ | ρ ∈ Metric.ball (0 : ℂ) 1 ∧ f ρ = 0}))) :
-    EqOn f 0 (Metric.ball (0 : ℂ) 1) := by
-  exact (hf.mono ball_subset_closedBall).eqOn_zero_of_preconnected_of_mem_closure
-    (isConnected_ball (by norm_num)).isPreconnected hρ₀_in_D1 
-    (mem_closure_iff_clusterPt.mpr (accPt_principal_iff_clusterPt.mp (h_acc.mono (by simp))))
-
-lemma lem_identity_theoremR (R : ℝ) (hR : 0 < R) (hR' : R < 1)
-    (f : ℂ → ℂ) (hf : AnalyticOnNhd ℂ f (Metric.closedBall (0 : ℂ) 1))
-    (ρ₀ : ℂ) (hρ₀_in_DR : ρ₀ ∈ Metric.closedBall (0 : ℂ) R)
-    (h_acc : AccPt ρ₀ (Filter.principal ({ρ : ℂ | ρ ∈ Metric.ball (0 : ℂ) 1 ∧ f ρ = 0}))) :
-    EqOn f 0 (Metric.ball (0 : ℂ) 1) := by
-  have hρ₀_in_D1 : ρ₀ ∈ Metric.ball (0 : ℂ) 1 := DRinD1 R hR' hρ₀_in_DR
-  exact lem_identity_theorem f hf ρ₀ hρ₀_in_D1 h_acc
-lemma lem_identity_theoremKR (R : ℝ) (hR : 0 < R) (hR' : R < 1)
-    (f : ℂ → ℂ) (hf : AnalyticOnNhd ℂ f (Metric.closedBall (0 : ℂ) 1))
-    (h_exists_rho0 : ∃ ρ₀ ∈ Metric.closedBall (0 : ℂ) R, AccPt ρ₀ (Filter.principal (zerosetKfR R hR f))) :
-    EqOn f 0 (Metric.ball (0 : ℂ) 1) := by
-  -- Extract the existence of ρ₀
-  obtain ⟨ρ₀, hρ₀_in_R, h_acc⟩ := h_exists_rho0
-  -- Apply lem_identity_theoremR
-  apply lem_identity_theoremR R hR hR' f hf ρ₀ hρ₀_in_R
-  -- Convert the accumulation point using monotonicity and lemKRinK1
-  exact AccPt.mono h_acc (principal_mono.2 (lemKRinK1 R hR hR' f))
-lemma lem_identity_infiniteKR (R : ℝ) (hR : 0 < R) (hR' : R < 1)
-    (f : ℂ → ℂ) (hf : AnalyticOnNhd ℂ f (Metric.closedBall (0 : ℂ) 1))
-    (h_Kf_inf : Set.Infinite (zerosetKfR R hR f)) :
-    EqOn f 0 (Metric.ball (0 : ℂ) 1) := by
-  have h_exists_rho0 := lem_zeros_have_limit_point R hR f h_Kf_inf
-  exact lem_identity_theoremKR R hR hR' f hf h_exists_rho0
 lemma lem_Contra_finiteKR (R : ℝ) (hR : 0 < R) (hR' : R < 1)
     (f : ℂ → ℂ) (hf : AnalyticOnNhd ℂ f (Metric.closedBall (0 : ℂ) 1))
     (h_exists_nonzero : ∃ z ∈ Metric.ball (0 : ℂ) 1, f z ≠ 0) :
     Set.Finite (zerosetKfR R hR f) := by
-  -- Use contrapositive of lem_identity_infiniteKR
-  by_contra h_not_finite
-  -- h_not_finite: ¬Set.Finite (zerosetKfR R hR f)
-  -- This is equivalent to Set.Infinite (zerosetKfR R hR f) by definition
-  have h_Kf_inf : Set.Infinite (zerosetKfR R hR f) := h_not_finite
-  -- Apply lem_identity_infiniteKR
-  have h_eq_zero := lem_identity_infiniteKR R hR hR' f hf h_Kf_inf
-  -- h_eq_zero : EqOn f 0 (Metric.ball (0 : ℂ) 1)
-  -- But we have h_exists_nonzero which contradicts this
-  obtain ⟨z, hz_in_ball, hz_nonzero⟩ := h_exists_nonzero
-  have h_f_z_zero : f z = 0 := h_eq_zero hz_in_ball
-  exact hz_nonzero h_f_z_zero
+  apply Set.Finite.subset (s := (zerosetKfR 1 (by linarith) f))
+  swap
+  · unfold zerosetKfR
+    intro z hz
+    simp_all
+    grind
+  rcases h_exists_nonzero with ⟨z, hz1, hz2⟩
+  have := hf.preimage_zero_mem_codiscreteWithin hz2 (mem_of_mem_of_subset hz1 ball_subset_closedBall) (isConnected_closedBall (by linarith))
+  have disc := isDiscrete_of_codiscreteWithin this
+  have : zerosetKfR 1 (by norm_num) f = (f ⁻¹' {0}) ∩ closedBall 0 1 := by
+    unfold zerosetKfR
+    ext
+    simp
+    grind
+  rw [this]
+  refine IsCompact.finite ?_ disc
+  refine IsCompact.of_isClosed_subset (isCompact_closedBall 0 1) ?_ inter_subset_right
+  rw [inter_comm]
+  exact hf.continuousOn.preimage_isClosed_of_isClosed  isClosed_closedBall (by simp)
 
 open Classical
 
