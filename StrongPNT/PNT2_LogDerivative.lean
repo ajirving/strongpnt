@@ -95,28 +95,13 @@ lemma lem_denomAnalAt (S : Finset ℂ) (n : ℂ → ℕ)
     let f : ℂ → ℂ → ℂ := fun s z => (z - s) ^ (n s)
     have h_each_analytic : ∀ s ∈ S, AnalyticAt ℂ (f s) w := by
       intro s hs
-      simp only [f]
-      -- Need to show AnalyticAt ℂ (fun z => (z - s) ^ (n s)) w
-      have h_sub : AnalyticAt ℂ (fun z => z - s) w := by
-        exact AnalyticAt.sub analyticAt_id analyticAt_const
-      -- Apply pow with the natural number n s
-      exact h_sub.pow (n s)
-    have h_prod := Finset.analyticAt_prod S h_each_analytic
-    convert h_prod using 1
-    ext z
+      fun_prop
+    convert S.analyticAt_prod h_each_analytic using 1
+    ext
     simp [f]
   · -- Second part: nonzero product
-    apply Finset.prod_ne_zero_iff.mpr
-    intro s hs
-    apply pow_ne_zero
-    -- Need w - s ≠ 0
-    intro h_eq
-    -- Use sub_eq_zero: a - b = 0 ↔ a = b
-    have h_w_eq_s : w = s := by
-      rwa [← sub_eq_zero]
-    -- This contradicts hw : w ∉ S since s ∈ S
-    rw [h_w_eq_s] at hw
-    exact hw hs
+    apply Finset.prod_ne_zero_iff.mpr fun s hs ↦ pow_ne_zero _ ?_
+    grind
 
 lemma lem_ratioAnalAt (w : ℂ) (R R1 : ℝ) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
     (h : ℂ → ℂ) (hh : AnalyticAt ℂ h w)
