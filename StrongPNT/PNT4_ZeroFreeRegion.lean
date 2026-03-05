@@ -3579,7 +3579,7 @@ lemma helper_g_zero_eq_one (f : ℂ → ℂ) (c : ℂ) (hc : f c ≠ 0) :
   (fun z => f (z + c) / f c) 0 = 1 := by
   simp [hc]
 
-lemma helper_zerosetKfR_eq_center0 (r : ℝ) (hr : r > 0) (f : ℂ → ℂ) :
+lemma helper_zerosetKfR_eq_center0 (r : ℝ) (f : ℂ → ℂ) :
   zerosetKfR r f = zerosetKfRc r (0 : ℂ) f := by
   ext ρ; simp [zerosetKfR, zerosetKfRc]
 
@@ -3850,7 +3850,7 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
   have hfin_g0 : (zerosetKfRc R1 (0 : ℂ) g).Finite :=
     helper_fin_zero_g_is_image R1 c f h_f_nonzero_at_zero hfin
   have hZR_eq : zerosetKfR R1 g = zerosetKfRc R1 (0 : ℂ) g :=
-    helper_zerosetKfR_eq_center0 R1 hR1_pos g
+    helper_zerosetKfR_eq_center0 R1 g
   have hfin_g : (zerosetKfR R1 g).Finite := by
     simpa [hZR_eq] using hfin_g0
 
@@ -3885,7 +3885,7 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
   have hST_g_img : zerosetKfR R1 g
       = (fun ρ => ρ - c) '' (zerosetKfRc R1 c f) := by
     have h1 : zerosetKfR R1 g = zerosetKfRc R1 (0 : ℂ) g :=
-      helper_zerosetKfR_eq_center0 R1 hR1_pos g
+      helper_zerosetKfR_eq_center0 R1 g
     have h2 : zerosetKfRc R1 (0 : ℂ) g
         = (fun ρ => ρ - c) '' (zerosetKfRc R1 c f) :=
       helper_zero_set_shift_eq R1 c f h_f_nonzero_at_zero
