@@ -69,12 +69,7 @@ lemma lem_m_rho_ge_1 (R R1 : ℝ) (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (f : �
     use the local factor function `h_σ σ` in the numerator (so the expression extends analytically). -/
 noncomputable def Cf
     (R R1 : ℝ)
-    (hR1_pos : 0 < R1)
-    (hR1_lt_R : R1 < R)
-    (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))  -- for each σ in the zero set, a local factor function
     (z : ℂ) : ℂ :=
@@ -124,25 +119,14 @@ lemma lem_analytic_zero_factor (R R1 : ℝ) (hR1_pos : 0 < R1) (hR1_lt_R : R1 < 
     (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 f) :
     ∃ h_σ : ℂ → ℂ, AnalyticAt ℂ h_σ σ ∧ h_σ σ ≠ 0 ∧
     ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ z := by
-  classical
-  -- f is analytic at σ
-  have hσ_closed_R1 : σ ∈ Metric.closedBall (0 : ℂ) R1 := hσ.1
-  have hR1_le_R : R1 ≤ R := by linarith
-  have hR1_lt_one : R1 < 1 := by linarith
   have hσ_closed1 : σ ∈ Metric.closedBall (0 : ℂ) 1 :=
-    (Metric.closedBall_subset_closedBall (le_of_lt hR1_lt_one)) hσ_closed_R1
+    (Metric.closedBall_subset_closedBall (by linarith)) hσ.1
   have hfσ : AnalyticAt ℂ f σ := h_f_analytic σ hσ_closed1
-  -- the order at σ is finite
   have h_order_finite : analyticOrderAt f σ ≠ ⊤ :=
     lem_m_rho_is_nat R R1 hR1_pos hR1_lt_R f h_f_analytic h_f_nonzero_at_zero hR_lt_1 σ hσ
-  -- use the characterization of finite order to get the factorization
   rcases (hfσ.analyticOrderAt_ne_top).mp h_order_finite with ⟨g, hgσ, hgσ_ne, h_eq⟩
-  -- turn scalar multiplication into multiplication on ℂ and rewrite the exponent
-  have h_eq' : ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * g z := by
-    refine h_eq.mono ?_
-    intro z hz
-    simpa [smul_eq_mul, analyticOrderNatAt] using hz
-  exact ⟨g, hgσ, hgσ_ne, h_eq'⟩
+  simp_rw [smul_eq_mul, analyticOrderNatAt] at h_eq
+  exact ⟨g, hgσ, hgσ_ne, h_eq⟩
 
 /-! ### Cf lemmas (renamed to use `Cf` directly) -/
 
@@ -157,7 +141,7 @@ lemma lem_Cf_analytic_off_K
       AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
       ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R \ zerosetKfR R1  f) :
-    AnalyticAt ℂ (Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ) z := by
+    AnalyticAt ℂ (Cf R R1 f h_finite_zeros h_σ) z := by
 
   -- Apply lem_ratioAnalAt to get analyticity of the ratio function
   have h_ratio_analytic : AnalyticAt ℂ (fun w => f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ (analyticOrderAt f ρ).toNat) z := by
@@ -199,7 +183,7 @@ lemma lem_Cf_analytic_off_K
 
   -- Show that the ratio function equals Cf in a neighborhood of z
   have h_eventually_eq : (fun w => f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ (analyticOrderAt f ρ).toNat) =ᶠ[nhds z]
-    (fun w => Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ w) := by
+    (fun w => Cf R R1 f h_finite_zeros h_σ w) := by
     -- Since the zero set is finite, its complement is open
     have hz_not_in : z ∉ zerosetKfR R1 f := hz.2
     have h_open : IsOpen (Set.compl (zerosetKfR R1 f)) := h_finite_zeros.isClosed.isOpen_compl
@@ -209,7 +193,7 @@ lemma lem_Cf_analytic_off_K
     have hw_not_in_zeros : w ∉ zerosetKfR R1 f := hw_not_in_compl
     -- Since w ∉ zerosetKfR R1, Cf w uses the else branch
     show f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ (analyticOrderAt f ρ).toNat =
-         Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ w
+         Cf R R1 f h_finite_zeros h_σ w
     -- Apply the definition of Cf using dif_neg for dependent if-then-else
     rw [Cf, dif_neg hw_not_in_zeros]
 
@@ -228,7 +212,7 @@ lemma lem_Cf_at_sigma_onK
       ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 f) :
     ∀ᶠ z in nhds σ, z = σ →
-      Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z =
+      Cf R R1 f h_finite_zeros h_σ z =
       h_σ z z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase σ), (z - ρ) ^ (analyticOrderAt f ρ).toNat := by
   refine Filter.Eventually.of_forall ?_
   intro z hz
@@ -247,7 +231,7 @@ lemma lem_Cf_at_sigma_offK0
       ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 f) :
     ∀ᶠ z in nhds σ, z ≠ σ →
-      Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z =
+      Cf R R1 f h_finite_zeros h_σ z =
       (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z /
       ∏ ρ ∈ h_finite_zeros.toFinset, (z - ρ) ^ (analyticOrderAt f ρ).toNat := by
   -- Get the factorization from h_σ_spec
@@ -310,7 +294,7 @@ lemma lem_Cf_at_sigma_offK
       ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 f) :
     ∀ᶠ z in nhds σ, z ≠ σ →
-      Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z =
+      Cf R R1 f h_finite_zeros h_σ z =
       h_σ σ z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase σ), (z - ρ) ^ (analyticOrderAt f ρ).toNat := by
   -- Get the form from lem_Cf_at_sigma_offK0
   have h_cf_form := @lem_Cf_at_sigma_offK0 R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ h_σ_spec σ hσ
@@ -341,7 +325,7 @@ lemma lem_Cf_at_sigma
       ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 f) :
     ∀ᶠ z in nhds σ,
-      Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z =
+      Cf R R1 f h_finite_zeros h_σ z =
       h_σ σ z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase σ), (z - ρ) ^ (analyticOrderAt f ρ).toNat := by
   -- Get the eventually statements for both cases
   have h_on := @lem_Cf_at_sigma_onK R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ h_σ_spec σ hσ
@@ -406,7 +390,7 @@ lemma lem_Cf_analytic_at_K
       AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
       ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 f) :
-    AnalyticAt ℂ (Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ) σ := by
+    AnalyticAt ℂ (Cf R R1 f h_finite_zeros h_σ) σ := by
   -- Get the eventual equality from lem_Cf_at_sigma with all explicit arguments
   have h_eventually_eq := @lem_Cf_at_sigma R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ h_σ_spec σ hσ
 
@@ -416,7 +400,7 @@ lemma lem_Cf_analytic_at_K
 
   -- Reverse the direction of the eventual equality
   have h_rev_eq : (fun z => h_σ σ z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase σ), (z - ρ) ^ (analyticOrderAt f ρ).toNat) =ᶠ[nhds σ]
-                  (Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ) := by
+                  (Cf R R1 f h_finite_zeros h_σ) := by
     filter_upwards [h_eventually_eq] with z h_z
     exact h_z.symm
 
@@ -441,12 +425,12 @@ lemma lem_Cf_nonzero_off_K
       AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
       ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f) :
-    Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z ≠ 0 := by
+    Cf R R1 f h_finite_zeros h_σ z ≠ 0 := by
   -- Since z ∉ zerosetKfR R1, Cf uses the else branch
   have hz_not_in : z ∉ zerosetKfR R1 f := hz.2
 
   -- Unfold Cf definition using the else branch
-  have h_cf_eq : Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z =
+  have h_cf_eq : Cf R R1 f h_finite_zeros h_σ z =
     f z / ∏ ρ ∈ h_finite_zeros.toFinset, (z - ρ) ^ (analyticOrderAt f ρ).toNat := by
     unfold Cf
     simp [hz_not_in]
@@ -485,7 +469,7 @@ lemma lem_Cf_nonzero_on_K
       AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
       ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 f) :
-    Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ σ ≠ 0 := by
+    Cf R R1 f h_finite_zeros h_σ σ ≠ 0 := by
   have hnum : h_σ σ σ ≠ 0 := (h_σ_spec σ hσ).2.1
   have hden :
       (∏ ρ ∈ (h_finite_zeros.toFinset.erase σ),
@@ -514,14 +498,14 @@ lemma lem_Cf_never_zero
       AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
       ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R1) :
-    Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z ≠ 0 := by
+    Cf R R1 f h_finite_zeros h_σ z ≠ 0 := by
   -- Split into cases: either z is in the zero set or not
   by_cases h : z ∈ zerosetKfR R1 f
   · -- Case: z ∈ zerosetKfR R1 f
-    exact lem_Cf_nonzero_on_K h_finite_zeros h_σ h_σ_spec z h
+    apply lem_Cf_nonzero_on_K h_finite_zeros h_σ h_σ_spec z h <;> assumption
   · -- Case: z ∉ zerosetKfR R1 f
     have hz_diff : z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f := ⟨hz, h⟩
-    exact lem_Cf_nonzero_off_K h_finite_zeros h_σ h_σ_spec z hz_diff
+    apply lem_Cf_nonzero_off_K h_finite_zeros h_σ h_σ_spec z hz_diff <;> assumption
 
 noncomputable def Bf
     (R R1 : ℝ)
@@ -534,7 +518,7 @@ noncomputable def Bf
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
     (z : ℂ) : ℂ :=
-  Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z *
+  Cf R R1 f h_finite_zeros h_σ z *
   ∏ ρ ∈ h_finite_zeros.toFinset,
     ((R : ℂ) - star ρ * z / (R : ℂ)) ^ (analyticOrderAt f ρ).toNat
 
@@ -689,7 +673,7 @@ lemma lem_mod_Bf_is_prod_mod (R R1 : ℝ)
   -- Use lem_mod_of_prod2 to distribute norm over the product as suggested in informal proof
   rw [lem_mod_of_prod2]
   -- When z ∉ zerosetKfR R1, we have Cf z = f z / ∏ ρ, (z - ρ)^{m_ρ} by definition
-  have hCf : Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z =
+  have hCf : Cf R R1 f h_finite_zeros h_σ z =
     f z / ∏ ρ ∈ h_finite_zeros.toFinset, (z - ρ) ^ (analyticOrderAt f ρ).toNat := by
     unfold Cf
     simp only [hz, ↓reduceDIte]
@@ -1420,7 +1404,7 @@ lemma lem_Bf_eq_prod_Cf
     ∀ z, Bf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z =
       (∏ ρ ∈ h_finite_zeros.toFinset,
         ((R : ℂ) - star ρ * z / (R : ℂ)) ^ (analyticOrderAt f ρ).toNat) *
-      (Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z) := by
+      (Cf R R1 f h_finite_zeros h_σ z) := by
   intro z
   rw [Bf]
   ring
@@ -1517,7 +1501,7 @@ lemma Bf_never_zero
   · -- First factor: the product over zeros (numerator part) using lem:bl_num_nonzero
     exact lem_num_prod_never_zero_all R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic (f_zero_ne_zero h_f_zero) h_finite_zeros h_σ h_σ_spec z hz
   · -- Second factor: Cf never zero using lem:C_never_zero
-    exact lem_Cf_never_zero h_finite_zeros h_σ h_σ_spec z hz
+    apply lem_Cf_never_zero h_finite_zeros h_σ h_σ_spec z hz <;> grind
 
 noncomputable def Lf : ℂ → ℂ :=
   let B_f := Bf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic (f_zero_ne_zero h_f_zero) h_finite_zeros h_σ
@@ -2256,10 +2240,10 @@ lemma logDeriv_Bf_is_sum :
     -- Rewrite Bf and Cf at points away from the zero set
     have hBf_w :
         Bf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic (f_zero_ne_zero h_f_zero) h_finite_zeros h_σ w
-          = Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic (f_zero_ne_zero h_f_zero) h_finite_zeros h_σ w * BN w := by
+          = Cf R R1 f  h_finite_zeros h_σ w * BN w := by
       simp [Bf, BN, K]
     have hCf_w :
-        Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic (f_zero_ne_zero h_f_zero) h_finite_zeros h_σ w
+        Cf R R1 f h_finite_zeros h_σ w
           = f w / A w := by
       simp [Cf, S, A, K, hw_notin]
     -- Use functional identities to simplify to f * RatProd
