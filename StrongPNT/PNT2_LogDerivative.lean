@@ -52,11 +52,10 @@ lemma lem_m_rho_is_nat (R R1 : ℝ) (hR1_lt_R : R1 < R) (f : ℂ → ℂ)
   apply hf.analyticOrderAt_ne_top_of_isPreconnected (isConnected_closedBall (by norm_num)).isPreconnected (by simp) _ this
   exact mem_of_mem_of_subset h_rho_in_KfR1.1 (closedBall_subset_closedBall (by linarith))
 
-lemma lem_m_rho_ge_1 (R R1 : ℝ) (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (f : ℂ → ℂ)
+lemma lem_m_rho_ge_1 (R R1 : ℝ) (hR1_lt_R : R1 < R) (f : ℂ → ℂ)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
     (hR_lt_1 : R < 1) :
-    ∀ (ρ : ℂ) (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 f),
+    ∀ (ρ : ℂ) (_ : ρ ∈ zerosetKfR R1 f),
     analyticOrderAt f ρ ≥ 1 := by
   intro ρ h_rho_in_KfR1
   apply ENat.one_le_iff_ne_zero.mpr
@@ -81,7 +80,7 @@ noncomputable def Cf
 /-! ### Helper lemmas used by the Cf proofs (statements only) -/
 
 lemma lem_denomAnalAt (S : Finset ℂ) (n : ℂ → ℕ)
-    (hn_pos : ∀ s ∈ S, 0 < n s) (w : ℂ) (hw : w ∉ S) :
+    (w : ℂ) (hw : w ∉ S) :
     AnalyticAt ℂ (fun z => ∏ s ∈ S, (z - s) ^ (n s)) w ∧
     (∏ s ∈ S, (w - s) ^ (n s)) ≠ 0 := by
   constructor
@@ -101,13 +100,12 @@ lemma lem_denomAnalAt (S : Finset ℂ) (n : ℂ → ℕ)
 lemma lem_ratioAnalAt (w : ℂ)
     (h : ℂ → ℂ) (hh : AnalyticAt ℂ h w)
     (S : Finset ℂ) (n : ℂ → ℕ)
-    (hn_pos : ∀ s ∈ S, 0 < n s)
     (hw : w ∈ Metric.closedBall (0 : ℂ) 1 \ ↑S) :
     AnalyticAt ℂ (fun z => h z / ∏ s ∈ S, (z - s) ^ (n s)) w := by
   classical
   -- Denominator is analytic at w and nonzero at w
   have hden := lem_denomAnalAt (S := S) (n := n)
-      (hn_pos := hn_pos) (w := w)
+      (w := w)
       (hw := by simpa using hw.2)
   -- Apply the division rule for analytic functions
   exact AnalyticAt.div hh hden.1 hden.2
@@ -131,10 +129,9 @@ lemma lem_analytic_zero_factor (R R1 : ℝ) (hR1_pos : 0 < R1) (hR1_lt_R : R1 < 
 /-! ### Cf lemmas (renamed to use `Cf` directly) -/
 
 lemma lem_Cf_analytic_off_K
-    {R R1 : ℝ} {hR1_pos : 0 < R1} {hR1_lt_R : R1 < R} {hR_lt_1 : R < 1}
+    {R R1 : ℝ} {hR_lt_1 : R < 1}
     {f : ℂ → ℂ}
     {h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z}
-    {h_f_nonzero_at_zero : f 0 ≠ 0}
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
     (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R \ zerosetKfR R1  f) :
@@ -147,24 +144,6 @@ lemma lem_Cf_analytic_off_K
     -- f is analytic at z
     · apply h_f_analytic
       exact Metric.closedBall_subset_closedBall (le_of_lt hR_lt_1) hz.1
-
-    -- All orders are positive
-    · intro s hs
-      have h_s_in_zeros : s ∈ zerosetKfR R1 f := h_finite_zeros.mem_toFinset.mp hs
-      have h_order_ge_1 := lem_m_rho_ge_1 R R1 hR1_pos hR1_lt_R f h_f_analytic h_f_nonzero_at_zero hR_lt_1 s h_s_in_zeros
-      have h_order_finite := lem_m_rho_is_nat R R1 hR1_lt_R f h_f_analytic h_f_nonzero_at_zero hR_lt_1 s h_s_in_zeros
-
-      cases' h_cases : analyticOrderAt f s with n
-      · -- Case: order is ∞
-        rw [h_cases] at h_order_finite
-        exact False.elim (h_order_finite rfl)
-      · -- Case: order is finite n ≥ 1
-        have n_ge_1 : n ≥ 1 := by
-          rw [h_cases] at h_order_ge_1
-          exact Nat.cast_le.mp h_order_ge_1
-        simp [h_cases]
-        exact Nat.pos_iff_ne_zero.mpr (ne_of_gt n_ge_1)
-
     -- z is in closedBall 0 1 but not in the zero set
     · constructor
       · exact Metric.closedBall_subset_closedBall (le_of_lt hR_lt_1) hz.1
@@ -323,10 +302,8 @@ lemma lem_Cf_at_sigma
     exact hz_off h
 
 lemma lem_h_ratio_anal
-    {R R1 : ℝ} {hR1_pos : 0 < R1} {hR1_lt_R : R1 < R} {hR_lt_1 : R < 1}
+    {R1 : ℝ}
     {f : ℂ → ℂ}
-    {h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z}
-    {h_f_nonzero_at_zero : f 0 ≠ 0}
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (σ : ℂ)
     (g : ℂ → ℂ) (hg_analytic : AnalyticAt ℂ g σ) :
@@ -336,24 +313,6 @@ lemma lem_h_ratio_anal
   -- Use lem_denomAnalAt to show the denominator is analytic and nonzero at σ
   have hden := lem_denomAnalAt (S := h_finite_zeros.toFinset.erase σ)
     (n := fun ρ => (analyticOrderAt f ρ).toNat)
-    (hn_pos := by
-      intro s hs
-      have h_s_in_zeros : s ∈ zerosetKfR R1 f := by
-        have h_mem_erase : s ∈ h_finite_zeros.toFinset.erase σ := hs
-        have h_mem_orig : s ∈ h_finite_zeros.toFinset := Finset.mem_of_mem_erase h_mem_erase
-        exact h_finite_zeros.mem_toFinset.mp h_mem_orig
-      have h_order_ge_1 := lem_m_rho_ge_1 R R1 hR1_pos hR1_lt_R f h_f_analytic h_f_nonzero_at_zero hR_lt_1 s h_s_in_zeros
-      have h_order_finite := lem_m_rho_is_nat R R1 hR1_lt_R f h_f_analytic h_f_nonzero_at_zero hR_lt_1 s h_s_in_zeros
-      cases' h_cases : analyticOrderAt f s with n
-      · -- Case: order is ∞
-        rw [h_cases] at h_order_finite
-        exact False.elim (h_order_finite rfl)
-      · -- Case: order is finite n ≥ 1
-        have n_ge_1 : n ≥ 1 := by
-          rw [h_cases] at h_order_ge_1
-          exact Nat.cast_le.mp h_order_ge_1
-        simp [h_cases]
-        exact Nat.pos_iff_ne_zero.mpr (ne_of_gt n_ge_1))
     (w := σ)
     (hw := by
       simp [Finset.mem_erase])
@@ -361,10 +320,8 @@ lemma lem_h_ratio_anal
   exact AnalyticAt.div hg_analytic hden.1 hden.2
 
 lemma lem_Cf_analytic_at_K
-    {R R1 : ℝ} {hR1_pos : 0 < R1} {hR1_lt_R : R1 < R} {hR_lt_1 : R < 1}
+    {R R1 : ℝ}
     {f : ℂ → ℂ}
-    {h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z}
-    {h_f_nonzero_at_zero : f 0 ≠ 0}
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
     (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
@@ -377,7 +334,7 @@ lemma lem_Cf_analytic_at_K
 
   -- Get analyticity of the ratio function from lem_h_ratio_anal
   obtain ⟨h_σ_analytic, _, _⟩ := h_σ_spec σ hσ
-  have h_ratio_analytic := @lem_h_ratio_anal R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros σ (h_σ σ) h_σ_analytic
+  have h_ratio_analytic := @lem_h_ratio_anal R1 f h_finite_zeros σ (h_σ σ) h_σ_analytic
 
   -- Reverse the direction of the eventual equality
   have h_rev_eq : (fun z => h_σ σ z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase σ), (z - ρ) ^ (analyticOrderAt f ρ).toNat) =ᶠ[nhds σ]
@@ -894,7 +851,7 @@ theorem lem_Bf_is_analytic (R R1 : ℝ) (hR1_pos : 0 < R1)
   -- Now handle two cases: z is in the finite zero set or not
   by_cases hz_in : z ∈ zerosetKfR R1 f
   · -- z is a zero: use the local factor specification to get analyticity of Cf at σ
-    have h_cf_at_sigma := @lem_Cf_analytic_at_K R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ h_σ_spec z hz_in
+    have h_cf_at_sigma := @lem_Cf_analytic_at_K R R1 f h_finite_zeros h_σ h_σ_spec z hz_in
     -- Multiply analytic functions to get analyticity of Bf = Cf * product
     exact AnalyticAt.fun_mul h_cf_at_sigma h_product
 
@@ -903,7 +860,7 @@ theorem lem_Bf_is_analytic (R R1 : ℝ) (hR1_pos : 0 < R1)
       constructor
       · exact hz
       · exact hz_in
-    have h_cf_off := @lem_Cf_analytic_off_K R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z hz_in_compl
+    have h_cf_off := @lem_Cf_analytic_off_K R R1 hR_lt_1 f h_f_analytic h_finite_zeros h_σ z hz_in_compl
     exact AnalyticAt.fun_mul h_cf_off h_product
 
 lemma complex_mul_star_eq_norm_sq (z : ℂ) : z * star z = (‖z‖ ^ 2 : ℂ) := by
