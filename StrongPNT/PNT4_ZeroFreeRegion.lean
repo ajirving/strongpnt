@@ -2275,7 +2275,7 @@ lemma Z341bounds_const :
     -- Show log(|t| + 2) ≥ 1 for constant absorption
     have hlog_ge_one : 1 ≤ Real.log (|t| + 2) := by
       have h1 : 2 < |t| := ht
-      have h2 : Real.exp 1 < 3 := lem_three_gt_e
+      have h2 : Real.exp 1 < 3 := by linarith [Real.exp_one_lt_d9]
       have he_lt_t2 : Real.exp 1 < |t| + 2 := by linarith
       have ht2_pos : 0 < |t| + 2 := by linarith [abs_nonneg t]
       exact Real.le_log_iff_exp_le ht2_pos |>.mpr (le_of_lt he_lt_t2)
@@ -2491,9 +2491,7 @@ lemma lem341tsC :
       have h5_lt : 4 < |s.im| + 2 := by linarith [hTim]
       have hL_gt_log5 : Real.log 4 < L := Real.log_lt_log (by norm_num) h5_lt
       have hlog5_gt_1 : 1 < Real.log 4 := by
-        have h5_gt_e : Real.exp 1 < 4 := by
-          have h3_gt_e := lem_three_gt_e
-          linarith [h3_gt_e]
+        have h5_gt_e : Real.exp 1 < 4 := by linarith[Real.exp_one_lt_d9]
         rw [← Real.log_exp 1]
         exact Real.log_lt_log (Real.exp_pos 1) h5_gt_e
       linarith [hlog5_gt_1, hL_gt_log5]
@@ -2749,7 +2747,7 @@ lemma lem_delta19 :
         have h_log2_ge_half : (1/2 : ℝ) ≤ Real.log 2 := by
           have h_exp_half_le_two : Real.exp (1/2) ≤ 2 := by
             -- exp(1/2)^2 = exp(1) < 3 < 4 = 2^2, so exp(1/2) < 2
-            have h_exp_one_lt_three : Real.exp 1 < 3 := lem_three_gt_e
+            have h_exp_one_lt_three : Real.exp 1 < 3 := by linarith[Real.exp_one_lt_d9]
             have h_exp_sq : (Real.exp (1/2))^2 = Real.exp 1 := by
               rw [pow_two, ← Real.exp_add]; norm_num
             have h_exp_sq_lt_four : (Real.exp (1/2))^2 < 4 := by
@@ -2919,7 +2917,7 @@ lemma riemannZeta_zeros_finite_of_compact (K : Set ℂ) (hK : IsCompact K) :
   have hZ_sub : Z ⊆ K := fun z hz => hz.1
 
   -- Apply Bolzano-Weierstrass to get an accumulation point
-  obtain ⟨z₀, hz₀_K, hz₀_acc⟩ := lem_bolzano_weierstrass hK hZ_inf hZ_sub
+  obtain ⟨z₀, hz₀_K, hz₀_acc⟩ := hZ_inf.exists_accPt_of_subset_isCompact hK hZ_sub
 
   -- Case 1: If z₀ = 1
   by_cases h_eq_one : z₀ = 1
@@ -4085,7 +4083,7 @@ lemma lem_sum_m_rho_zeta :
     -- log |t| ≥ log 3 ≥ 1
     have h3le : (3 : ℝ) ≤ |t| := le_of_lt ht
     have hlog3_le : Real.log 3 ≤ Real.log |t| := Real.log_le_log (by norm_num) h3le
-    have h_exp_le : Real.exp (1 : ℝ) ≤ 3 := le_of_lt lem_three_gt_e
+    have h_exp_le : Real.exp (1 : ℝ) ≤ 3 := by linarith[Real.exp_one_lt_d9]
     have hlog3_ge_one : (1 : ℝ) ≤ Real.log 3 :=
       (Real.le_log_iff_exp_le (by norm_num : 0 < (3 : ℝ))).mpr h_exp_le
     exact le_trans hlog3_ge_one hlog3_le
@@ -4287,9 +4285,7 @@ lemma lem_logDerivZetalogt0 :
       have h_log_ge_one : (1 : ℝ) ≤ Real.log |t| := by
         -- Since |t| > 3 > e, we have log |t| > log e = 1
         have h_t_gt_e : Real.exp 1 < |t| := by
-          have h_e_bound : Real.exp 1 < 3 := by
-            -- Use the fact that e < 3 from lem_three_gt_e
-            simpa using lem_three_gt_e
+          have h_e_bound : Real.exp 1 < 3 := by linarith[Real.exp_one_lt_d9]
           linarith [ht]
         -- Apply log monotonicity: exp 1 ≤ |t| implies 1 ≤ log |t|
         have h_t_pos : 0 < |t| := by linarith [ht, abs_nonneg t]
@@ -4736,7 +4732,7 @@ theorem thm_final_result :
       have hlog_ge_one : 1 ≤ Real.log (abs t) := by
         have h_ge : Real.exp 1 ≤ abs t := by
           -- Since |t| > 3 and e < 3, we have e < |t|
-          have he_lt_3 : Real.exp 1 < 3 := lem_three_gt_e  -- Use the existing lemma
+          have he_lt_3 : Real.exp 1 < 3 := by linarith[Real.exp_one_lt_d9]
           linarith [ht, abs_nonneg t]
         exact (Real.le_log_iff_exp_le (by linarith [abs_nonneg t])).2 h_ge
       have h_one_le_sq : 1 ≤ (Real.log (abs t)) ^ 2 := by

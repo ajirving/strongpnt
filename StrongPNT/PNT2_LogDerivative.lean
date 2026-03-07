@@ -7,10 +7,6 @@ import Mathlib.Tactic.Cases
 def zerosetKfR (R : ℝ) (f : ℂ → ℂ) : Set ℂ :=
   {ρ : ℂ | ρ ∈ Metric.closedBall (0 : ℂ) R ∧ f ρ = 0}
 
-lemma lem_bolzano_weierstrass {D : Set ℂ} (hD : IsCompact D) {Z : Set ℂ} (hZ_inf : Z.Infinite) (hZ_sub_D : Z ⊆ D) :
-    ∃ ρ₀ ∈ D, AccPt ρ₀ (Filter.principal Z) :=
-  Set.Infinite.exists_accPt_of_subset_isCompact hZ_inf hD hZ_sub_D
-
 open Filter Metric Set Bornology Function
 
 lemma lem_Contra_finiteKR (R : ℝ) (hR : 0 < R) (hR' : R < 1)
@@ -1120,12 +1116,6 @@ lemma lem_jensen_inequality_form (B R R1 : ℝ) (hB : 1 < B)
 
 lemma lem_log_mono_inc {x y : ℝ} (hx : 0 < x) (hxy : x ≤ y) : Real.log x ≤ Real.log y := by
   exact Real.log_le_log hx hxy
-
-lemma lem_three_gt_e : (3 : ℝ) > Real.exp 1 := by
-  have h1 : Real.exp 1 < 2.7182818286 := Real.exp_one_lt_d9
-  have h2 : (2.7182818286 : ℝ) < 3 := by norm_num
-  exact lt_trans h1 h2  -- This is a numerical fact: e ≈ 2.718 < 3
-
 
 lemma lem_jensen_log_form (B R R1 : ℝ) (hB : 1 < B)
     (hR1_pos : 0 < R1)
