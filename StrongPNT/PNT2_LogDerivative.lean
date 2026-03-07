@@ -945,7 +945,7 @@ lemma lem_max_mod_principle_for_Bf (B R : ℝ) (hB : 1 < B) (hR_pos : 0 < R)
     simpa [ballDR, closure_ball_eq_closedBall_center R hR_pos] using h_analytic.analyticOn
   -- Apply Hard maximum modulus principle on the closed ball of radius R
   have h_le :=
-    lem_HardMMP R B hR_pos hB0 fB h_an_on_closure (by
+    lem_HardMMP R B hR_pos fB h_an_on_closure (by
       intro z hzR; exact h_bd_boundary z hzR)
   -- It remains to see that z belongs to the closure of the open ball of radius R
   have hz_cl : z ∈ closure (ballDR R) := by
