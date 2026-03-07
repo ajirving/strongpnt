@@ -52,16 +52,6 @@ lemma lem_m_rho_is_nat (R R1 : ℝ) (hR1_lt_R : R1 < R) (f : ℂ → ℂ)
   apply hf.analyticOrderAt_ne_top_of_isPreconnected (isConnected_closedBall (by norm_num)).isPreconnected (by simp) _ this
   exact mem_of_mem_of_subset h_rho_in_KfR1.1 (closedBall_subset_closedBall (by linarith))
 
-lemma lem_m_rho_ge_1 (R R1 : ℝ) (hR1_lt_R : R1 < R) (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (hR_lt_1 : R < 1) :
-    ∀ (ρ : ℂ) (_ : ρ ∈ zerosetKfR R1 f),
-    analyticOrderAt f ρ ≥ 1 := by
-  intro ρ h_rho_in_KfR1
-  apply ENat.one_le_iff_ne_zero.mpr
-  refine (h_f_analytic ρ ?_).analyticOrderAt_ne_zero.mpr h_rho_in_KfR1.2
-  exact mem_of_mem_of_subset h_rho_in_KfR1.1 (closedBall_subset_closedBall (by linarith))
-
 /-! ### The quotient `Cf` (no core wrapper) -/
 
 /-- The “deflated” quotient: divide `f` by the product of `(z-ρ)^{m_ρ}`, and at a zero `z=σ`
