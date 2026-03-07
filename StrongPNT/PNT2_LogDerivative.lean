@@ -72,7 +72,7 @@ noncomputable def Cf
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))  -- for each σ in the zero set, a local factor function
     (z : ℂ) : ℂ :=
-  if hz : z ∈ zerosetKfR R1 f then
+  if _ : z ∈ zerosetKfR R1 f then
     h_σ z z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase z), (z - ρ) ^ (analyticOrderAt f ρ).toNat
   else
     f z / ∏ ρ ∈ h_finite_zeros.toFinset, (z - ρ) ^ (analyticOrderAt f ρ).toNat
@@ -110,7 +110,7 @@ lemma lem_ratioAnalAt (w : ℂ)
   -- Apply the division rule for analytic functions
   exact AnalyticAt.div hh hden.1 hden.2
 
-lemma lem_analytic_zero_factor (R R1 : ℝ) (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R)
+lemma lem_analytic_zero_factor (R R1 : ℝ) (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1)
     (f : ℂ → ℂ) (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (h_f_nonzero_at_zero : f 0 ≠ 0)
@@ -561,12 +561,7 @@ theorem lem_mod_of_prod2 {ι : Type*} (K : Finset ι) (w : ι → ℂ) :
 
 
 lemma lem_mod_Bf_is_prod_mod (R R1 : ℝ)
-    (hR1_pos : 0 < R1)
-    (hR1_lt_R : R1 < R)
-    (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
     (z : ℂ)
@@ -606,12 +601,8 @@ lemma lem_abs_pow (w : ℂ) (n : ℕ) : ‖w ^ n‖ = ‖w‖ ^ n := by
   simp
 
 
-lemma lem_mod_Bf_prod_mod (R R1 : ℝ) (hR1_pos : 0 < R1)
-    (hR1_lt_R : R1 < R)
-    (hR_lt_1 : R < 1)
+lemma lem_mod_Bf_prod_mod (R R1 : ℝ)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
   (z : ℂ)
@@ -620,7 +611,7 @@ lemma lem_mod_Bf_prod_mod (R R1 : ℝ) (hR1_pos : 0 < R1)
     ‖f z‖ * ∏ ρ ∈ h_finite_zeros.toFinset,
       ‖(((R : ℂ) - z * star ρ / (R : ℂ)) / (z - ρ))‖ ^ (analyticOrderAt f ρ).toNat := by
   -- Apply lem_mod_Bf_is_prod_mod to get the first form (use hz that z ∉ zeroset)
-  have h1 := lem_mod_Bf_is_prod_mod R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z hz
+  have h1 := lem_mod_Bf_is_prod_mod R R1 f h_finite_zeros h_σ z hz
   rw [h1]
   -- Now use lem_abs_pow to transform each term in the product
   congr 2
@@ -628,10 +619,7 @@ lemma lem_mod_Bf_prod_mod (R R1 : ℝ) (hR1_pos : 0 < R1)
   rw [lem_abs_pow]
 
 lemma lem_mod_Bf_at_0 (R R1 : ℝ)
-    (hR1_pos : 0 < R1)
-    (hR1_lt_R : R1 < R)
-    (hR_lt_1 : R < 1) (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (f : ℂ → ℂ)
     (h_f_nonzero_at_zero : f 0 ≠ 0)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ)) :
@@ -641,7 +629,7 @@ lemma lem_mod_Bf_at_0 (R R1 : ℝ)
   -- Apply the general result at z = 0 (0 is not in the zero set by lem_zero_not_in_Kf)
   have hz0 : 0 ∉ zerosetKfR R1 f :=
     lem_zero_not_in_Kf R1 f h_f_nonzero_at_zero
-  rw [lem_mod_Bf_prod_mod R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ 0 hz0]
+  rw [lem_mod_Bf_prod_mod R R1 f h_finite_zeros h_σ 0 hz0]
   -- Now simplify: when z = 0, we have ((R - 0 * star ρ / R) / (0 - ρ)) = R / (-ρ)
   congr 2
   ext ρ
@@ -668,8 +656,7 @@ lemma lem_mod_div_and_neg (R : ℝ) (hR_pos : 0 < R) (ρ : ℂ) (h_rho_ne_zero :
 theorem lem_mod_Bf_at_0_eval  (R R1 : ℝ)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
-    (hR_lt_1 : R < 1) (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (f : ℂ → ℂ)
     (h_f_nonzero_at_zero : f 0 ≠ 0)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ)) :
@@ -677,7 +664,7 @@ theorem lem_mod_Bf_at_0_eval  (R R1 : ℝ)
     ‖f 0‖ * ∏ ρ ∈ h_finite_zeros.toFinset,
       (R / ‖ρ‖) ^ (analyticOrderAt f ρ).toNat := by
   -- Start with lem_mod_Bf_at_0
-  rw [lem_mod_Bf_at_0 R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ]
+  rw [lem_mod_Bf_at_0 R R1 f h_f_nonzero_at_zero h_finite_zeros h_σ]
   -- Now we need to show the products are equal
   congr 1
   -- Use Finset.prod_congr to show the products are equal
@@ -697,15 +684,14 @@ theorem lem_mod_Bf_at_0_eval  (R R1 : ℝ)
 theorem lem_mod_Bf_at_0_as_ratio  (R R1 : ℝ)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
-    (hR_lt_1 : R < 1) (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (f : ℂ → ℂ)
     (h_f_nonzero_at_zero : f 0 ≠ 0)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ)) :
     ‖Bf R R1 f h_finite_zeros h_σ 0‖ =
     ‖f 0‖ * ∏ ρ ∈ h_finite_zeros.toFinset,
       (R / ‖ρ‖) ^ (analyticOrderAt f ρ).toNat := by
-  exact lem_mod_Bf_at_0_eval R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ
+  exact lem_mod_Bf_at_0_eval R R1 hR1_pos hR1_lt_R f h_f_nonzero_at_zero h_finite_zeros h_σ
 
 lemma lem_prod_ineq {ι : Type*} (K : Finset ι) (a b : ι → ℝ)
     (h_nonneg : ∀ ρ ∈ K, 0 ≤ a ρ) (h_le : ∀ ρ ∈ K, a ρ ≤ b ρ) :
@@ -735,8 +721,6 @@ theorem lem_mod_Bf_at_0_ge_1 (R R1 : ℝ) (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
     (hf0_eq_one : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ)) :
@@ -747,7 +731,7 @@ theorem lem_mod_Bf_at_0_ge_1 (R R1 : ℝ) (hR1_pos : 0 < R1)
   have h_f_nonzero_at_zero : f 0 ≠ 0 := by
     rw [hf0_eq_one]; norm_num
   -- Use lem_mod_Bf_at_0_as_ratio to express ‖Bf ... 0‖ as a product
-  rw [lem_mod_Bf_at_0_as_ratio R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros]
+  rw [lem_mod_Bf_at_0_as_ratio R R1 hR1_pos hR1_lt_R f h_f_nonzero_at_zero h_finite_zeros]
   -- Since f 0 = 1, we have ‖f 0‖ = 1
   rw [hf0_eq_one, norm_one, one_mul]
   -- Show that the product ∏ (R / ‖ρ‖)^n ≥ ∏ (3/2)^n
@@ -804,11 +788,9 @@ lemma lem_finset_prod_analyticAt {α : Type*} {S : Finset α} {g : α → ℂ �
       apply h
       exact Finset.mem_insert_of_mem hb
 
-theorem lem_Bf_is_analytic (R R1 : ℝ) (hR1_pos : 0 < R1)
-    (hR1_lt_R : R1 < R)
+theorem lem_Bf_is_analytic (R R1 : ℝ)
     (hR_lt_1 : R < 1) (f : ℂ → ℂ)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
     (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
@@ -867,10 +849,7 @@ lemma complex_mul_star_eq_norm_sq (z : ℂ) : z * star z = (‖z‖ ^ 2 : ℂ) :
 lemma lem_mod_Bf_eq_mod_f_on_boundary (R R1 : ℝ)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
-    (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ)) :
     ∀ z : ℂ, ‖z‖ = R →
@@ -884,7 +863,7 @@ lemma lem_mod_Bf_eq_mod_f_on_boundary (R R1 : ℝ)
     -- hz gives ‖z‖ = R, and R1 < R, contradiction
     have h_norm_eq_R : ‖z‖ = R := by simpa using hz
     linarith [h_norm_le_R1, h_norm_eq_R, hR1_lt_R]
-  rw [lem_mod_Bf_prod_mod R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z hz_not_in]
+  rw [lem_mod_Bf_prod_mod R R1 f h_finite_zeros h_σ z hz_not_in]
 
   -- Show each Blaschke factor has norm 1 when |z| = R
   have h_each_factor_one : ∀ ρ ∈ h_finite_zeros.toFinset, ‖(((R : ℂ) - z * star ρ / (R : ℂ)) / (z - ρ))‖ = 1 := by
@@ -946,9 +925,7 @@ lemma lem_mod_Bf_eq_mod_f_on_boundary (R R1 : ℝ)
 lemma lem_Bf_bounded_on_boundary (B R R1 : ℝ)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
-    (hR_lt_1 : R < 1) (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
+    (f : ℂ → ℂ)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
     (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
@@ -958,7 +935,7 @@ lemma lem_Bf_bounded_on_boundary (B R R1 : ℝ)
   intro z hz
   have hz_le : ‖z‖ ≤ R := le_of_eq hz
   have h_eq :=
-    lem_mod_Bf_eq_mod_f_on_boundary R R1 (by linarith) hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ z hz
+    lem_mod_Bf_eq_mod_f_on_boundary R R1 (by linarith) hR1_lt_R f h_finite_zeros h_σ z hz
   simpa [h_eq] using hf_le_B z hz_le
 
 lemma mem_closedBall_of_norm_le {z : ℂ} {R : ℝ} (hz : ‖z‖ ≤ R) : z ∈ Metric.closedBall (0 : ℂ) R := by
@@ -997,7 +974,6 @@ lemma lem_Bf_bounded_in_disk_from_boundary (B R R1 : ℝ)
     (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1) (f : ℂ → ℂ)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
     (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
@@ -1007,7 +983,7 @@ lemma lem_Bf_bounded_in_disk_from_boundary (B R R1 : ℝ)
       ‖Bf R R1 f h_finite_zeros h_σ z‖ ≤ B) :
     ∀ z : ℂ, ‖z‖ ≤ R →
       ‖Bf R R1 f h_finite_zeros h_σ z‖ ≤ B := by
-  have hA := lem_Bf_is_analytic R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ h_σ_spec
+  have hA := lem_Bf_is_analytic R R1 hR_lt_1 f h_f_analytic h_finite_zeros h_σ h_σ_spec
   exact lem_max_mod_principle_for_Bf B R hB (by linarith)
     (Bf R R1 f h_finite_zeros h_σ) hA h_bd_boundary
 
@@ -1018,7 +994,6 @@ lemma lem_Bf_bounded_in_disk_from_f (B R R1 : ℝ)
     (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1) (f : ℂ → ℂ)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
     (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
@@ -1030,8 +1005,8 @@ lemma lem_Bf_bounded_in_disk_from_f (B R R1 : ℝ)
   intro z hz
   have h_bd_boundary : ∀ z : ℂ, ‖z‖ = R →
       ‖Bf R R1 f h_finite_zeros h_σ z‖ ≤ B :=
-    lem_Bf_bounded_on_boundary B R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ hf_le_B
-  exact (lem_Bf_bounded_in_disk_from_boundary B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ h_σ_spec h_bd_boundary) z hz
+    lem_Bf_bounded_on_boundary B R R1 hR1_pos hR1_lt_R f h_finite_zeros h_σ hf_le_B
+  exact (lem_Bf_bounded_in_disk_from_boundary B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_finite_zeros h_σ h_σ_spec h_bd_boundary) z hz
 
 
 lemma lem_Bf_at_0_le_M (B R R1 : ℝ) (hB : 1 < B)
@@ -1040,7 +1015,6 @@ lemma lem_Bf_at_0_le_M (B R R1 : ℝ) (hB : 1 < B)
     (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
     (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
@@ -1049,7 +1023,7 @@ lemma lem_Bf_at_0_le_M (B R R1 : ℝ) (hB : 1 < B)
     (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
   ‖Bf R R1 f h_finite_zeros h_σ 0‖ ≤ B := by
   have h :=
-    lem_Bf_bounded_in_disk_from_f B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero h_finite_zeros h_σ h_σ_spec hf_le_B
+    lem_Bf_bounded_in_disk_from_f B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_finite_zeros h_σ h_σ_spec hf_le_B
   have h0 : ‖(0 : ℂ)‖ ≤ R := by simpa using (le_of_lt (by linarith))
   simpa using h 0 h0
 
@@ -1057,10 +1031,7 @@ lemma lem_Bf_at_0_le_M (B R R1 : ℝ) (hB : 1 < B)
 lemma lem_combine_bounds_on_Bf0 (B R R1 : ℝ)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
-    (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
     (hf0_eq_one : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
@@ -1073,7 +1044,7 @@ lemma lem_combine_bounds_on_Bf0 (B R R1 : ℝ)
   have hf0_ne0 : f 0 ≠ 0 := by simp [hf0_eq_one]
   have hf0_norm : ‖f 0‖ = 1 := by simp [hf0_eq_one]
   have h_eval0 :=
-    lem_mod_Bf_at_0_eval R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic hf0_ne0 h_finite_zeros h_σ
+    lem_mod_Bf_at_0_eval R R1 hR1_pos hR1_lt_R f hf0_ne0 h_finite_zeros h_σ
   have h_eval_prod :
       ‖Bf R R1 f h_finite_zeros h_σ 0‖
         = ∏ ρ ∈ K, (R / ‖ρ‖) ^ (analyticOrderAt f ρ).toNat := by
@@ -1136,7 +1107,6 @@ lemma lem_jensen_inequality_form (B R R1 : ℝ) (hB : 1 < B)
     (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
     (hf0_eq_one : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
@@ -1150,10 +1120,10 @@ lemma lem_jensen_inequality_form (B R R1 : ℝ) (hB : 1 < B)
     rw [hf0_eq_one]; norm_num
   -- Bound Bf at 0 using the maximum modulus arguments
   have hBf0 :=
-    lem_Bf_at_0_le_M B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic hf0_ne0 h_finite_zeros h_σ h_σ_spec hf_le_B
+    lem_Bf_at_0_le_M B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_finite_zeros h_σ h_σ_spec hf_le_B
   -- Convert that bound into the desired product bound
   let K := h_finite_zeros.toFinset
-  have hres := lem_combine_bounds_on_Bf0 B R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero hf0_eq_one h_finite_zeros h_σ hBf0
+  have hres := lem_combine_bounds_on_Bf0 B R R1 hR1_pos hR1_lt_R f hf0_eq_one h_finite_zeros h_σ hBf0
   -- Align coercions and finish (adjust numerical coercions if necessary)
   simpa using hres
 
@@ -1173,7 +1143,6 @@ lemma lem_jensen_log_form (B R R1 : ℝ) (hB : 1 < B)
     (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
     (hf0_eq_one : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
@@ -1187,7 +1156,7 @@ lemma lem_jensen_log_form (B R R1 : ℝ) (hB : 1 < B)
   -- From the Jensen-type inequality
   have hpow_le : (R / R1 : ℝ) ^ S ≤ B := by
     simpa [S] using
-      (lem_jensen_inequality_form B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero hf0_eq_one h_finite_zeros h_σ h_σ_spec hf_le_B)
+      (lem_jensen_inequality_form B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic hf0_eq_one h_finite_zeros h_σ h_σ_spec hf_le_B)
   -- Base positivity
   have hbase_pos : 1 < (R / R1 : ℝ) := by exact (one_lt_div hR1_pos).mpr hR1_lt_R
   have hbase_pos' : 0 < (R / R1 : ℝ) := by
@@ -1222,7 +1191,7 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
       ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z) :
     (∑ ρ ∈ h_finite_zeros.toFinset, ((analyticOrderAt f ρ).toNat : ℝ)) ≤ (1/Real.log (R/R1)) * Real.log B := by
   have h_div_log : (∑ ρ ∈ h_finite_zeros.toFinset, ((analyticOrderAt f ρ).toNat : ℝ)) * Real.log (R/R1) ≤ Real.log B := by
-    apply lem_jensen_log_form B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero_at_zero hf0_eq_one h_finite_zeros h_σ h_σ_spec hf_le_B
+    apply lem_jensen_log_form B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic hf0_eq_one h_finite_zeros h_σ h_σ_spec hf_le_B
   have log_pos' : R/R1 > 1 := by exact (one_lt_div hR1_pos).mpr hR1_lt_R
   have log_pos : Real.log (R/R1) > 0 := by exact Real.log_pos log_pos'
   calc
@@ -1264,17 +1233,12 @@ lemma Bf_is_analytic_on_disk
       ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z) :
     AnalyticOnNhd ℂ (Bf R R1 f  h_finite_zeros h_σ) (Metric.closedBall (0 : ℂ) R) :=
     let hspec := h_σ_spec
-    lem_Bf_is_analytic R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic (f_zero_ne_zero h_f_zero)
+    lem_Bf_is_analytic R R1 hR_lt_1 f h_f_analytic
       h_finite_zeros h_σ hspec
 
 lemma lem_Bf_eq_prod_Cf
     (R R1 : ℝ)
-    (hR1_pos : 0 < R1)
-    (hR1_lt_R : R1 < R)
-    (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ)) :
     ∀ z, Bf R R1 f h_finite_zeros h_σ z =
@@ -1352,10 +1316,7 @@ lemma Bf_never_zero
     (R R1 : ℝ)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
-    (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
     (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
@@ -1364,7 +1325,7 @@ lemma Bf_never_zero
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1, Bf R R1 f h_finite_zeros h_σ z ≠ 0 := by
   intro z hz
   -- Use the factorization of Bf as product of numerator and Cf
-  rw [lem_Bf_eq_prod_Cf R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic (f_zero_ne_zero h_f_zero) h_finite_zeros h_σ]
+  rw [lem_Bf_eq_prod_Cf R R1 f h_finite_zeros h_σ]
   -- Show the product is nonzero by showing each factor is nonzero
   apply mul_ne_zero
   · -- First factor: the product over zeros (numerator part) using lem:bl_num_nonzero
@@ -1382,7 +1343,7 @@ noncomputable def Lf : ℂ → ℂ :=
     (hB_ne_zero := by
       intro z hz
       have h_num_ne_zero : B_f z ≠ 0 :=
-        Bf_never_zero R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_σ h_σ_spec z hz
+        Bf_never_zero R R1 hR1_pos hR1_lt_R f h_finite_zeros h_σ h_σ_spec z hz
       assumption
     )
 )
@@ -1413,7 +1374,7 @@ lemma Lf_is_analytic
     (hB := Bf_is_analytic_on_disk R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_σ h_σ_spec)
     (hB_ne_zero := by
       intro z hz
-      exact Bf_never_zero R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_σ h_σ_spec z hz
+      exact Bf_never_zero R R1 hR1_pos hR1_lt_R f h_finite_zeros h_σ h_σ_spec z hz
     )
   )).1
 
@@ -1443,7 +1404,7 @@ lemma Lf_at_0_is_0
     (hB_ne_zero := by
       intro z hz
       have h_num_ne_zero : B_f z ≠ 0 :=
-        Bf_never_zero R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_σ h_σ_spec z hz
+        Bf_never_zero R R1 hR1_pos hR1_lt_R f h_finite_zeros h_σ h_σ_spec z hz
       assumption
     )
   exact (Classical.choose_spec log_exists).2.1
@@ -1488,7 +1449,7 @@ lemma re_Lf_as_diff_of_log_mods
     Bf_is_analytic_on_disk R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_σ h_σ_spec
   have h_Bf_ne_zero : ∀ w ∈ Metric.closedBall (0 : ℂ) R1, B_f w ≠ 0 := by
     intro w hw
-    exact Bf_never_zero R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_σ h_σ_spec w hw
+    exact Bf_never_zero R R1 hR1_pos hR1_lt_R f h_finite_zeros h_σ h_σ_spec w hw
 
   -- Apply lem:log_of_analytic
   have h_log_exists := log_of_analytic hr_pos hr_lt_R1 hR1_lt_R hR_lt_1 h_Bf_analytic h_Bf_ne_zero
@@ -1505,12 +1466,7 @@ lemma re_Lf_as_diff_of_log_mods
 
 lemma log_Bf_le_log_B
     (B R R1 : ℝ)
-    (hR1_pos : 0 < R1)
-    (hR1_lt_R : R1 < R)
-    (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
     (h_Bf_pos : ∀ z, norm z ≤ R1 →
@@ -1529,10 +1485,7 @@ lemma log_Bf_le_log_B2
     (B R R1 : ℝ)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
-    (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
     (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
@@ -1543,13 +1496,13 @@ lemma log_Bf_le_log_B2
     ∀ z, ‖z‖ ≤ R1 →
       Real.log (‖Bf R R1 f h_finite_zeros h_σ z‖) ≤ Real.log B := by
   -- Use log_Bf_le_log_B directly
-  apply log_Bf_le_log_B B R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_σ
+  apply log_Bf_le_log_B B R R1 f h_finite_zeros h_σ
   · -- Prove h_Bf_pos: ∀ z, ‖z‖ ≤ R1 → 0 < ‖Bf ... z‖
     intro z hz
     have hz_mem : z ∈ Metric.closedBall (0 : ℂ) R1 := by
       rw [Metric.mem_closedBall, dist_zero_right]
       exact hz
-    have hBf_ne_zero := Bf_never_zero R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_σ h_σ_spec z hz_mem
+    have hBf_ne_zero := Bf_never_zero R R1 hR1_pos hR1_lt_R f h_finite_zeros h_σ h_σ_spec z hz_mem
     exact norm_pos_iff.mpr hBf_ne_zero
   · -- Prove h_Bf_bound: ∀ z, ‖z‖ ≤ R1 → ‖Bf ... z‖ ≤ B
     intro z hz
@@ -1574,9 +1527,9 @@ lemma log_Bf_le_log_B3
     ∀ z, norm z ≤ R1 →
       Real.log (norm (Bf R R1 f h_finite_zeros h_σ z)) ≤ Real.log B := by
   -- Apply log_Bf_le_log_B2, which needs a bound on Bf on the disk of radius R
-  apply log_Bf_le_log_B2 B R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_σ h_σ_spec
+  apply log_Bf_le_log_B2 B R R1 hR1_pos hR1_lt_R f h_finite_zeros h_σ h_σ_spec
   -- Get this bound using lem_Bf_bounded_in_disk_from_f
-  apply lem_Bf_bounded_in_disk_from_f B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic (f_zero_ne_zero h_f_zero) h_finite_zeros h_σ h_σ_spec
+  apply lem_Bf_bounded_in_disk_from_f B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_finite_zeros h_σ h_σ_spec
   -- Apply the hypothesis h_f_bound (norm = ‖·‖ definitionally)
   exact h_f_bound
 
@@ -1586,7 +1539,6 @@ lemma log_Bf0_ge_0
     (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ)) :
@@ -1594,7 +1546,7 @@ lemma log_Bf0_ge_0
   -- Apply log monotonicity with x = 1 and y = |Bf(...,0)|
   have h_pos : 0 < (1 : ℝ) := by norm_num
   have h_Bf_ge_1 : 1 ≤ ‖Bf R R1 f  h_finite_zeros h_σ 0‖ :=
-    lem_mod_Bf_at_0_ge_1 R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic (f_zero_ne_zero h_f_zero) h_f_zero h_finite_zeros h_σ
+    lem_mod_Bf_at_0_ge_1 R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_zero h_finite_zeros h_σ
   have h_log_mono := lem_log_mono_inc h_pos h_Bf_ge_1
   rw [Real.log_one] at h_log_mono
   exact h_log_mono
@@ -1625,7 +1577,7 @@ lemma re_Lf_le_log_B
     -- derive the required bound ‖z‖ ≤ R1 from ‖z‖ ≤ r and r < R1
     have hz_apply_BC_to_Lfle_R1 : ‖z‖ ≤ R1 := by linarith [hz, hr_lt_R1]
     have h1 := log_Bf_le_log_B3 B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_σ h_σ_spec h_f_bound z hz_apply_BC_to_Lfle_R1
-    have h2 := log_Bf0_ge_0 R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_σ
+    have h2 := log_Bf0_ge_0 R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_zero h_finite_zeros h_σ
     linarith
   · -- Show z is in the closed ball of radius r
     exact Metric.mem_closedBall.mpr (by simpa [dist_zero_right] using hz)
@@ -1712,8 +1664,7 @@ lemma logDerivconst {a : ℂ} {g : ℂ → ℂ} (ha : a ≠ 0) :
   exact logDeriv_const_mul z a ha
 
 -- Lemma 6: Lf_deriv_is_logBf_deriv
-lemma Lf_deriv_is_logBf_deriv (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1) (hR1_pos : 0 < R1) (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_zero : f 0 = 1)
+lemma Lf_deriv_is_logBf_deriv (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
     (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
       AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
       ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z) :
@@ -1735,7 +1686,7 @@ lemma Lf_deriv_is_logBf_deriv (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 :
   have h0_in_ball : (0 : ℂ) ∈ Metric.closedBall (0 : ℂ) R1 := by
     simp [Metric.mem_closedBall, dist_zero_right]
     exact le_of_lt hR1_pos
-  have h_Bf0_ne_zero := Bf_never_zero R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_σ h_σ_spec 0 h0_in_ball
+  have h_Bf0_ne_zero := Bf_never_zero R R1 hR1_pos hR1_lt_R f h_finite_zeros h_σ h_σ_spec 0 h0_in_ball
   -- Show that the inverse is non-zero
   have h_inv_ne_zero : (Bf R R1 f h_finite_zeros h_σ 0)⁻¹ ≠ 0 :=
     inv_ne_zero h_Bf0_ne_zero
@@ -2060,7 +2011,7 @@ lemma logDeriv_congr_of_eventuallyEq {f g : ℂ → ℂ} {z : ℂ}
   have hg := deriv_over_fun_is_logDeriv (g := g) z
   simp [hf.symm, hg.symm, hval, hderiv]
 
-lemma logDeriv_Bf_is_sum (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1) (hR1_pos : 0 < R1)
+lemma logDeriv_Bf_is_sum (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1) (hR1_pos : 0 < R1)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
 :
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \
@@ -2166,7 +2117,7 @@ lemma Lf_deriv_step1 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (h
   -- From Lfderiv_is_logderivBf
   have hLf :=
   --
-    (Lf_deriv_is_logBf_deriv h_finite_zeros hr_lt_R1 hR1_lt_R hR_lt_1 hR1_pos h_f_analytic h_f_zero h_σ_spec
+    (Lf_deriv_is_logBf_deriv h_finite_zeros hR1_lt_R hR1_pos h_σ_spec
       z (in_r_minus_kf hr_pos hr_lt_R1 _ hz)).symm
   -- Expand logDeriv of Bf into sum
   have hsum :
@@ -2177,7 +2128,7 @@ lemma Lf_deriv_step1 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (h
             ((R - (star ρ) * w / R) / (w - ρ)) ^ (analyticOrderAt f ρ).toNat) z := by
     have h :=
       (logDeriv_Bf_is_sum (R := R) (R1 := R1) (f := f) (h_σ := h_σ)
-        h_finite_zeros hr_lt_R1 hR1_lt_R hR_lt_1 hR1_pos h_f_analytic z (in_r_minus_kf hr_pos hr_lt_R1 _ hz))
+        h_finite_zeros hR1_lt_R hR_lt_1 hR1_pos h_f_analytic z (in_r_minus_kf hr_pos hr_lt_R1 _ hz))
     simpa using h
   -- Turn logDeriv f into deriv f / f using differentiability and nonvanishing
   obtain ⟨hf_ne, hfdiff⟩ :=
@@ -2205,8 +2156,7 @@ lemma Lf_deriv_step1 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (h
                 f h_f_analytic h_f_zero h_finite_zeros h_σ h_σ_spec)
       (hB_ne_zero := by
         intro w hw
-        exact Bf_never_zero R R1 hR1_pos hR1_lt_R hR_lt_1
-          f h_f_analytic h_f_zero h_finite_zeros h_σ h_σ_spec w hw)
+        exact Bf_never_zero R R1 hR1_pos hR1_lt_R f h_finite_zeros h_σ h_σ_spec w hw)
     have hderiv_all : ∀ w ∈ Metric.closedBall (0 : ℂ) r,
         deriv (Classical.choose log_exists) w = deriv B_f w / B_f w :=
       (Classical.choose_spec log_exists).2.2.1
@@ -2758,7 +2708,7 @@ lemma final_sum_bound {R R1 B : ℝ} {f : ℂ → ℂ}
     intro σ
     by_cases hσ : σ ∈ zerosetKfR R1 f
     · -- σ is a zero: use lem_analytic_zero_factor
-      have hex := lem_analytic_zero_factor R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero σ hσ
+      have hex := lem_analytic_zero_factor R R1 hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero σ hσ
       obtain ⟨g, hg_at, hg_ne, h_eq⟩ := hex
       exact ⟨g, hg_at, hg_ne, fun _ => h_eq⟩
     · -- σ is not a zero: use constant function 1

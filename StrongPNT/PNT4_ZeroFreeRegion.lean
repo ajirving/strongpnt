@@ -3599,7 +3599,7 @@ lemma helper_apply_jensen_to_g
       ∃ hσ : ℂ → ℂ, AnalyticAt ℂ hσ σ ∧ hσ σ ≠ 0 ∧
         ∀ᶠ z in nhds σ, g z = (z - σ) ^ (analyticOrderAt g σ).toNat * hσ z := by
     intro σ hσ
-    exact lem_analytic_zero_factor R R1 hR1_pos hR1_lt_R hR_lt_1 g h_g_analytic hg0_ne σ hσ
+    exact lem_analytic_zero_factor R R1 hR1_lt_R hR_lt_1 g h_g_analytic hg0_ne σ hσ
   -- Define a choice of local factors h_σ(σ)
   let h_σ : ℂ → (ℂ → ℂ) :=
     fun σ => dite (σ ∈ zerosetKfR R1 g)

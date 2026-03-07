@@ -3672,13 +3672,13 @@ lemma final_ineq2
     classical
     let h_σ : ℂ → (ℂ → ℂ) := fun σ =>
       if hσ : σ ∈ zerosetKfR R1 g
-      then Classical.choose (lem_analytic_zero_factor R R1 hR1_pos hR1_lt_R hR g h_g_analytic
+      then Classical.choose (lem_analytic_zero_factor R R1 hR1_lt_R hR g h_g_analytic
            (by simp [g]; exact h_nonzero) σ hσ)
       else fun _ => 0
     use h_σ
     intro σ hσ
     simp only [h_σ, dif_pos hσ]
-    exact Classical.choose_spec (lem_analytic_zero_factor R R1 hR1_pos hR1_lt_R hR g h_g_analytic
+    exact Classical.choose_spec (lem_analytic_zero_factor R R1 hR1_lt_R hR g h_g_analytic
            (by simp [g]; exact h_nonzero) σ hσ)
 
   obtain ⟨h_σ, h_σ_spec⟩ := h_σ_exists
