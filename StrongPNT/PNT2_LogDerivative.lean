@@ -1171,7 +1171,6 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
     (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
     (hf0_eq_one : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
@@ -1507,7 +1506,6 @@ lemma log_Bf_le_log_B3
     (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_σ : ℂ → (ℂ → ℂ))
     (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
@@ -1566,7 +1564,7 @@ lemma re_Lf_le_log_B
   · -- Apply log_Bf_le_log_B3 and log_Bf0_ge_0
     -- derive the required bound ‖z‖ ≤ R1 from ‖z‖ ≤ r and r < R1
     have hz_apply_BC_to_Lfle_R1 : ‖z‖ ≤ R1 := by linarith [hz, hr_lt_R1]
-    have h1 := log_Bf_le_log_B3 B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_σ h_σ_spec h_f_bound z hz_apply_BC_to_Lfle_R1
+    have h1 := log_Bf_le_log_B3 B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_finite_zeros h_σ h_σ_spec h_f_bound z hz_apply_BC_to_Lfle_R1
     have h2 := log_Bf0_ge_0 R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_zero h_finite_zeros h_σ
     linarith
   · -- Show z is in the closed ball of radius r
@@ -2715,7 +2713,7 @@ lemma final_sum_bound {R R1 B : ℝ} {f : ℂ → ℂ}
     intro σ hσ
     have spec := Classical.choose_spec (h_exists σ)
     exact ⟨spec.1, spec.2.1, spec.2.2 hσ⟩
-  have h_sum_bound := lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero h_f_zero h_finite_zeros h_σ h_f_bounded_alt h_σ_spec
+  have h_sum_bound := lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_σ h_f_bounded_alt h_σ_spec
 
   -- Step 5: Establish needed positivity properties
   have h_pos : 0 < R^2/R1 - R1 := sq_div_sub_pos R1 R hR1_pos hR1_lt_R

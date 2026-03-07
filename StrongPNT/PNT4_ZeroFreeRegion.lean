@@ -3617,7 +3617,7 @@ lemma helper_apply_jensen_to_g
   -- Apply the Jensen-type bound lemma
   have hbound :=
     lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R hR_lt_1
-      g h_g_analytic hg0_ne hg0_one hfin_g (h_σ := h_σ) hg_le_B h_σ_spec
+      g h_g_analytic hg0_one hfin_g (h_σ := h_σ) hg_le_B h_σ_spec
   -- Rewrite to the desired division form
   simpa [one_div, div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using hbound
 
