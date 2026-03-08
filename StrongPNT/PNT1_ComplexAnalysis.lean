@@ -706,16 +706,6 @@ norm ((r_int * Complex.exp (I * t) * f (r_int * Complex.exp (I * t))) / ((r_int 
   -- Apply lem_integral_modulus_inequality to get the desired inequality
   exact lem_integral_modulus_inequality
 
-lemma lem_modulus_of_integrand_product2 {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ} (t : ℝ)
-    (hf_domain : ∃ U, IsOpen U ∧ Metric.closedBall 0 R_analytic ⊆ U ∧ DifferentiableOn ℂ f U)
-    (h_r_z_pos : 0 < r_z)
-    (h_r_z_lt_r_int : r_z < r_int)
-    (h_r_int_lt_R_analytic : r_int < R_analytic) :
-    norm (f (r_int * Complex.exp (I * t)) * (r_int * Complex.exp (I * t))) =
-norm (f (r_int * Complex.exp (I * t))) * norm (r_int * Complex.exp (I * t)) := by
-  -- Since norm is the norm, use the multiplicative property of norms
-  rw [norm_mul]
-
 lemma lem_modeit (t : ℝ) : norm (Complex.exp (I * t)) = Real.exp (Complex.re (I * t)) := by
   -- This is a direct application of the general theorem
   exact Complex.norm_exp (I * t)
@@ -753,8 +743,7 @@ lemma lem_modulus_of_integrand_product3 {f : ℂ → ℂ} {R_analytic r_z r_int 
     (h_r_z_lt_r_int : r_z < r_int)
     (h_r_int_lt_R_analytic : r_int < R_analytic) :
 norm (f (r_int * Complex.exp (I * t)) * (r_int * Complex.exp (I * t))) = r_int * norm (f (r_int * Complex.exp (I * t))) := by
-  -- Use lem_modulus_of_integrand_product2 to split the absolute value
-  rw [lem_modulus_of_integrand_product2 t hf_domain h_r_z_pos h_r_z_lt_r_int h_r_int_lt_R_analytic]
+  rw [norm_mul]
   -- Use lem_modulus_of_ae_it to simplify norm (r_int * Complex.exp (I * t))
   have h_r_int_pos : 0 < r_int := lt_trans h_r_z_pos h_r_z_lt_r_int
   rw [lem_modulus_of_ae_it h_r_int_pos]
