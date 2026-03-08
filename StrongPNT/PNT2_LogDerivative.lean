@@ -1313,7 +1313,7 @@ noncomputable def Lf : ℂ → ℂ :=
   let B_f := Bf R R1 f h_finite_zeros h_σ
   Classical.choose (log_of_analytic
     (r1 := r) (R' := R1) (R := R)
-    hr_pos hr_lt_R1 hR1_lt_R hR_lt_1
+    hr_pos hr_lt_R1 hR1_lt_R
     (B := B_f)
     (hB := Bf_is_analytic_on_disk R R1 hR_lt_1 f h_f_analytic h_finite_zeros h_σ h_σ_spec)
     (hB_ne_zero := by
@@ -1344,7 +1344,7 @@ lemma Lf_is_analytic
   unfold Lf
   exact (Classical.choose_spec (log_of_analytic
     (r1 := r) (R' := R1) (R := R)
-    hr_pos hr_lt_R1 hR1_lt_R hR_lt_1
+    hr_pos hr_lt_R1 hR1_lt_R
     (B := Bf R R1 f h_finite_zeros h_σ)
     (hB := Bf_is_analytic_on_disk R R1 hR_lt_1 f h_f_analytic h_finite_zeros h_σ h_σ_spec)
     (hB_ne_zero := by
@@ -1372,7 +1372,7 @@ lemma Lf_at_0_is_0
   let B_f := Bf R R1 f h_finite_zeros h_σ
   let log_exists := log_of_analytic
     (r1 := r) (R' := R1) (R := R)
-    hr_pos hr_lt_R1 hR1_lt_R hR_lt_1
+    hr_pos hr_lt_R1 hR1_lt_R
     (B := B_f)
     (hB := Bf_is_analytic_on_disk R R1 hR_lt_1 f h_f_analytic h_finite_zeros h_σ h_σ_spec)
     (hB_ne_zero := by
@@ -1425,7 +1425,7 @@ lemma re_Lf_as_diff_of_log_mods
     exact Bf_never_zero R R1 hR1_pos hR1_lt_R f h_finite_zeros h_σ h_σ_spec w hw
 
   -- Apply lem:log_of_analytic
-  have h_log_exists := log_of_analytic hr_pos hr_lt_R1 hR1_lt_R hR_lt_1 h_Bf_analytic h_Bf_ne_zero
+  have h_log_exists := log_of_analytic hr_pos hr_lt_R1 hR1_lt_R h_Bf_analytic h_Bf_ne_zero
   have h_choose_spec := Classical.choose_spec h_log_exists
 
   -- Use def:Lf: Lf is defined as Classical.choose h_log_exists
@@ -2122,7 +2122,7 @@ lemma Lf_deriv_step1 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (h
       fun w => Bf R R1 f  h_finite_zeros h_σ w
     let log_exists := log_of_analytic
       (r1 := r) (R' := R1) (R := R)
-      hr_pos hr_lt_R1 hR1_lt_R hR_lt_1
+      hr_pos hr_lt_R1 hR1_lt_R
       (B := B_f)
       (hB := Bf_is_analytic_on_disk R R1 hR_lt_1
                 f h_f_analytic h_finite_zeros h_σ h_σ_spec)

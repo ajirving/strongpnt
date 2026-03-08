@@ -7,7 +7,6 @@ defaultTargets = ["StrongPNT"]
 pp.unicode.fun         = true
 autoImplicit           = false
 relaxedAutoImplicit    = false
-#linter.unusedVariables = false
 linter.unusedSimpArgs = false
 
 [[lean_lib]]
