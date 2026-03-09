@@ -3592,30 +3592,9 @@ lemma helper_apply_jensen_to_g
   (hg_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖g z‖ ≤ B) :
   (∑ ρ ∈ hfin_g.toFinset, ((analyticOrderAt g ρ).toNat : ℝ)) ≤ Real.log B / Real.log (R / R1) := by
   classical
-  -- For each zero σ, obtain local factorization data
-  have h_exists : ∀ σ ∈ zerosetKfR R1 g,
-      ∃ hσ : ℂ → ℂ, AnalyticAt ℂ hσ σ ∧ hσ σ ≠ 0 ∧
-        ∀ᶠ z in nhds σ, g z = (z - σ) ^ (analyticOrderAt g σ).toNat * hσ z := by
-    intro σ hσ
-    exact lem_analytic_zero_factor R R1 hR1_lt_R hR_lt_1 g h_g_analytic hg0_ne σ hσ
-  -- Define a choice of local factors h_σ(σ)
-  let h_σ : ℂ → (ℂ → ℂ) :=
-    fun σ => dite (σ ∈ zerosetKfR R1 g)
-      (fun h => Classical.choose (h_exists σ h))
-      (fun _ => fun _ => (1 : ℂ))
-  -- Prove the specification for h_σ on zeros
-  have h_σ_spec : ∀ σ ∈ zerosetKfR R1 g,
-      AnalyticAt ℂ (h_σ σ) σ ∧ (h_σ σ) σ ≠ 0 ∧
-      ∀ᶠ z in nhds σ, g z = (z - σ) ^ (analyticOrderAt g σ).toNat * (h_σ σ) z := by
-    intro σ hσin
-    have hx := h_exists σ hσin
-    dsimp [h_σ]
-    -- Use the chosen witness at σ
-    simpa [hσin] using (Classical.choose_spec hx)
-  -- Apply the Jensen-type bound lemma
   have hbound :=
     lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R hR_lt_1
-      g h_g_analytic hg0_one hfin_g (h_σ := h_σ) hg_le_B h_σ_spec
+      g h_g_analytic hg0_one hfin_g  hg_le_B
   -- Rewrite to the desired division form
   simpa [one_div, div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using hbound
 

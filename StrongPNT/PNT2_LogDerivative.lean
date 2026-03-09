@@ -1095,12 +1095,20 @@ lemma lem_jensen_inequality_form (B R R1 : ℝ) (hB : 1 < B)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (hf0_eq_one : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (h_σ : ℂ → (ℂ → ℂ))
-    (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
-      AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
-      ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
     (R / R1 : ℝ) ^ (∑ ρ ∈ h_finite_zeros.toFinset, (analyticOrderAt f ρ).toNat : ℝ) ≤ B := by
+  have h_exists := fun σ hσ ↦  lem_analytic_zero_factor R R1 hR1_lt_R hR_lt_1 f h_f_analytic (by grind) σ hσ
+  let h_σ : ℂ → (ℂ → ℂ) :=
+    fun σ => dite (σ ∈ zerosetKfR R1 f)
+      (fun h => Classical.choose (h_exists σ h))
+      (fun _ => fun _ => (1 : ℂ))
+  have h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
+      AnalyticAt ℂ (h_σ σ) σ ∧ (h_σ σ) σ ≠ 0 ∧
+      ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * (h_σ σ) z := by
+    intro σ hσin
+    have hx := h_exists σ hσin
+    dsimp [h_σ]
+    simpa [hσin] using (Classical.choose_spec hx)
   -- Derive f 0 ≠ 0 from f 0 = 1
   have hf0_ne0 : f 0 ≠ 0 := by
     rw [hf0_eq_one]; norm_num
@@ -1125,10 +1133,6 @@ lemma lem_jensen_log_form (B R R1 : ℝ) (hB : 1 < B)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (hf0_eq_one : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (h_σ : ℂ → (ℂ → ℂ))
-    (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
-      AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
-      ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
     (∑ ρ ∈ h_finite_zeros.toFinset, ((analyticOrderAt f ρ).toNat : ℝ)) * Real.log (R / R1) ≤ Real.log B := by
   -- Let S denote the sum of the multiplicities
@@ -1136,7 +1140,7 @@ lemma lem_jensen_log_form (B R R1 : ℝ) (hB : 1 < B)
   -- From the Jensen-type inequality
   have hpow_le : (R / R1 : ℝ) ^ S ≤ B := by
     simpa [S] using
-      (lem_jensen_inequality_form B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic hf0_eq_one h_finite_zeros h_σ h_σ_spec hf_le_B)
+      (lem_jensen_inequality_form B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic hf0_eq_one h_finite_zeros hf_le_B)
   -- Base positivity
   have hbase_pos : 1 < (R / R1 : ℝ) := by exact (one_lt_div hR1_pos).mpr hR1_lt_R
   have hbase_pos' : 0 < (R / R1 : ℝ) := by
@@ -1163,14 +1167,10 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (hf0_eq_one : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (h_σ : ℂ → (ℂ → ℂ))
-    (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B)
-    (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
-      AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
-      ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z) :
+    (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
     (∑ ρ ∈ h_finite_zeros.toFinset, ((analyticOrderAt f ρ).toNat : ℝ)) ≤ (1/Real.log (R/R1)) * Real.log B := by
   have h_div_log : (∑ ρ ∈ h_finite_zeros.toFinset, ((analyticOrderAt f ρ).toNat : ℝ)) * Real.log (R/R1) ≤ Real.log B := by
-    apply lem_jensen_log_form B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic hf0_eq_one h_finite_zeros h_σ h_σ_spec hf_le_B
+    apply lem_jensen_log_form B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic hf0_eq_one h_finite_zeros hf_le_B
   have log_pos' : R/R1 > 1 := by exact (one_lt_div hR1_pos).mpr hR1_lt_R
   have log_pos : Real.log (R/R1) > 0 := by exact Real.log_pos log_pos'
   calc
@@ -2669,32 +2669,7 @@ lemma final_sum_bound {R R1 B : ℝ} {f : ℂ → ℂ}
   have h_f_bounded_alt : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B := by
     intro w hw
     exact h_f_bounded w (Metric.mem_closedBall.mpr (by simpa [dist_eq_norm] using hw))
-  -- Build a uniform existence statement for all σ
-  have h_exists : ∀ σ : ℂ, ∃ g : ℂ → ℂ,
-      AnalyticAt ℂ g σ ∧ g σ ≠ 0 ∧
-      (σ ∈ zerosetKfR R1 f →
-        ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * g z) := by
-    intro σ
-    by_cases hσ : σ ∈ zerosetKfR R1 f
-    · -- σ is a zero: use lem_analytic_zero_factor
-      have hex := lem_analytic_zero_factor R R1 hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero σ hσ
-      obtain ⟨g, hg_at, hg_ne, h_eq⟩ := hex
-      exact ⟨g, hg_at, hg_ne, fun _ => h_eq⟩
-    · -- σ is not a zero: use constant function 1
-      refine ⟨fun _ => 1, ?_, ?_, ?_⟩
-      · exact analyticAt_const
-      · norm_num
-      · intro h_contra
-        contradiction
-  -- Use classical choice to extract the function
-  let h_σ : ℂ → (ℂ → ℂ) := fun σ => Classical.choose (h_exists σ)
-  have h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
-      AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
-      ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z := by
-    intro σ hσ
-    have spec := Classical.choose_spec (h_exists σ)
-    exact ⟨spec.1, spec.2.1, spec.2.2 hσ⟩
-  have h_sum_bound := lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_σ h_f_bounded_alt h_σ_spec
+  have h_sum_bound := lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_f_bounded_alt
 
   -- Step 5: Establish needed positivity properties
   have h_pos : 0 < R^2/R1 - R1 := sq_div_sub_pos R1 R hR1_pos hR1_lt_R
