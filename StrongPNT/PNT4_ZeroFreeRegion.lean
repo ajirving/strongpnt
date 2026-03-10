@@ -3586,7 +3586,6 @@ lemma helper_apply_jensen_to_g
   (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
   (g : ℂ → ℂ)
   (h_g_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ g z)
-  (hg0_ne : g 0 ≠ 0)
   (hg0_one : g 0 = 1)
   (hfin_g : (zerosetKfR R1 g).Finite)
   (hg_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖g z‖ ≤ B) :
@@ -3705,14 +3704,13 @@ lemma jensen_sum_bound_strict
   (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
   (g : ℂ → ℂ)
   (h_g_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ g z)
-  (hg0_ne : g 0 ≠ 0)
   (hg0_one : g 0 = 1)
   (hfin_g : (zerosetKfR R1 g).Finite)
   (hg_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖g z‖ ≤ B) :
   (∑ ρ ∈ hfin_g.toFinset, ((analyticOrderAt g ρ).toNat : ℝ)) ≤
     Real.log B / Real.log (R / R1) := by
   exact helper_apply_jensen_to_g B R R1 hB hR1_pos hR1_lt_R hR_lt_1 g
-    h_g_analytic hg0_ne hg0_one hfin_g hg_le_B
+    h_g_analytic hg0_one hfin_g hg_le_B
 
 lemma no_zero_of_bound_one_and_center_one
   (R : ℝ) (hR_lt_1 : R < 1)
@@ -3875,7 +3873,7 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
       jensen_sum_bound_strict (B := B / ‖f c‖) (R := R) (R1 := R1)
         (hB := hBdiv_gt_one)
         (hR1_pos := hR1_pos) (hR1_lt_R := hR1_lt_R) (hR_lt_1 := hR_lt_1)
-        (g := g) (h_g_analytic := h_g_analytic) (hg0_ne := hg0_ne)
+        (g := g) (h_g_analytic := h_g_analytic)
         (hg0_one := hg0_one) (hfin_g := hfin_g) (hg_le_B := hg_le_B)
     -- Replace the indexing finite set using equality of sets S = image set
     have hsum_g_reindex :
