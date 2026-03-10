@@ -2697,11 +2697,6 @@ lemma final_inequality
       ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (h_σ_spec :
-      ∀ σ ∈ zerosetKfR R1 f,
-        AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
-        ∀ᶠ z in nhds σ,
-          f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (h_f_bounded : ∀ z ∈ Metric.closedBall (0 : ℂ) R, ‖f z‖ ≤ B) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) r1 \ zerosetKfR R1 f,
 
@@ -2710,6 +2705,18 @@ lemma final_inequality
       ≤
       16 * r^2 / ((r - r1)^3) * Real.log B
         + 1 / ((R^2 / R1 - R1) * Real.log (R / R1)) * Real.log B := by
+  have h_exists := fun σ hσ ↦  lem_analytic_zero_factor R R1 hR1_lt_R hR_lt_1 f h_f_analytic (by grind) σ hσ
+  let h_σ : ℂ → (ℂ → ℂ) :=
+    fun σ => dite (σ ∈ zerosetKfR R1 f)
+      (fun h => Classical.choose (h_exists σ h))
+      (fun _ => fun _ => (1 : ℂ))
+  have h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
+      AnalyticAt ℂ (h_σ σ) σ ∧ (h_σ σ) σ ≠ 0 ∧
+      ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * (h_σ σ) z := by
+    intro σ hσin
+    have hx := h_exists σ hσin
+    dsimp [h_σ]
+    simpa [hσin] using (Classical.choose_spec hx)
   intro z hz
 
   -- Establish missing positive hypotheses from the parameter constraints
@@ -2775,9 +2782,6 @@ lemma final_ineq1
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
-      AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
-      ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (h_f_bounded : ∀ z ∈ Metric.closedBall (0 : ℂ) R, ‖f z‖ ≤ B) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) r1 \ zerosetKfR R1 f,
     ‖(deriv f z / f z) - ∑ ρ ∈ h_finite_zeros.toFinset,

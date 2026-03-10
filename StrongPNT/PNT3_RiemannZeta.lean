@@ -3664,28 +3664,9 @@ lemma final_ineq2
   have h_g_finite : (zerosetKfR R1 g).Finite := by
     rwa [← h_zeroset_equiv]
 
-  -- Construct the analytic factorization using lem_analytic_zero_factor
-  have h_σ_exists : ∃ h_σ : ℂ → (ℂ → ℂ), ∀ σ ∈ zerosetKfR R1 g,
-      AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
-      ∀ᶠ w in nhds σ, g w = (w - σ) ^ (analyticOrderAt g σ).toNat * h_σ σ w := by
-    -- Use lem_analytic_zero_factor to construct h_σ for each zero
-    classical
-    let h_σ : ℂ → (ℂ → ℂ) := fun σ =>
-      if hσ : σ ∈ zerosetKfR R1 g
-      then Classical.choose (lem_analytic_zero_factor R R1 hR1_lt_R hR g h_g_analytic
-           (by simp [g]; exact h_nonzero) σ hσ)
-      else fun _ => 0
-    use h_σ
-    intro σ hσ
-    simp only [h_σ, dif_pos hσ]
-    exact Classical.choose_spec (lem_analytic_zero_factor R R1 hR1_lt_R hR g h_g_analytic
-           (by simp [g]; exact h_nonzero) σ hσ)
-
-  obtain ⟨h_σ, h_σ_spec⟩ := h_σ_exists
-
   -- Apply final_ineq1 to g
   have := final_ineq1 (B / ‖f c‖) h_B_div_gt_one r1 r R R1 hr1pos hr1_lt_r hr_lt_R1 hR1_lt_R hR
-    g h_g_analytic h_g_zero h_g_finite h_σ_spec h_g_bound z
+    g h_g_analytic h_g_zero h_g_finite h_g_bound z
 
   -- Convert the domain condition
   have hz_domain : z ∈ closedBall (0 : ℂ) r1 \ zerosetKfR R1 g := by
