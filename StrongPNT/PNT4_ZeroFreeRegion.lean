@@ -119,7 +119,7 @@ lemma ZetaZerosNearPoint_finite (t : ℝ) : Set.Finite (ZetaZerosNearPoint t) :=
         exact Metric.ball_subset_ball hRle hz_in
       exact ⟨z, hz_in', hz_ne⟩
     have hfiniteKg : Set.Finite Kg :=
-      (lem_Contra_finiteKR R hRpos (by norm_num : R < 1) g hg_analyticNhd hNonzero)
+      zeroset_finite R (by norm_num : R < 1) g hg_analyticNhd hNonzero
     -- Show the target set is finite by mapping Kg through z ↦ z + c
     have hTarget_eq : {ρ : ℂ | (ρ - c) ∈ Metric.closedBall 0 R ∧ g (ρ - c) = 0} =
           (fun ρ : ℂ => ρ + c) '' Kg := by
@@ -205,7 +205,7 @@ lemma ZetaZerosNearPoint_finite (t : ℝ) : Set.Finite (ZetaZerosNearPoint t) :=
         exact Metric.ball_subset_ball hRle hz_in
       exact ⟨z, hz_in', hz_ne⟩
     have hfiniteKg : Set.Finite Kg :=
-      (lem_Contra_finiteKR R hRpos (by norm_num : R < 1) g hg_analyticNhd hNonzero)
+      zeroset_finite R (by norm_num : R < 1) g hg_analyticNhd hNonzero
     have hTarget_eq : {ρ : ℂ | (ρ - c) ∈ Metric.closedBall 0 R ∧ g (ρ - c) = 0} =
           (fun ρ : ℂ => ρ + c) '' Kg := by
       ext ρ; constructor

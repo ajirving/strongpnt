@@ -9,7 +9,7 @@ def zerosetKfR (R : ℝ) (f : ℂ → ℂ) : Set ℂ :=
 
 open Filter Metric Set Bornology Function
 
-lemma lem_Contra_finiteKR (R : ℝ) (hR : 0 < R) (hR' : R < 1)
+lemma zeroset_finite (R : ℝ) (hR : R < 1)
     (f : ℂ → ℂ) (hf : AnalyticOnNhd ℂ f (Metric.closedBall (0 : ℂ) 1))
     (h_exists_nonzero : ∃ z ∈ Metric.ball (0 : ℂ) 1, f z ≠ 0) :
     Set.Finite (zerosetKfR R f) := by
