@@ -88,13 +88,8 @@ lemma lem_ratioAnalAt (w : ℂ)
     (S : Finset ℂ) (n : ℂ → ℕ)
     (hw : w ∈ Metric.closedBall (0 : ℂ) 1 \ ↑S) :
     AnalyticAt ℂ (fun z => h z / ∏ s ∈ S, (z - s) ^ (n s)) w := by
-  classical
-  -- Denominator is analytic at w and nonzero at w
-  have hden := lem_denomAnalAt (S := S) (n := n)
-      (w := w)
-      (hw := by simpa using hw.2)
-  -- Apply the division rule for analytic functions
-  exact AnalyticAt.div hh hden.1 hden.2
+  have hden := lem_denomAnalAt S n w hw.2
+  exact hh.div hden.1 hden.2
 
 lemma lem_analytic_zero_factor (R R1 : ℝ) (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1)
@@ -122,15 +117,10 @@ lemma lem_Cf_analytic_off_K
     (h_σ : ℂ → (ℂ → ℂ))
     (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R \ zerosetKfR R1  f) :
     AnalyticAt ℂ (Cf R1 f h_finite_zeros h_σ) z := by
-
-  -- Apply lem_ratioAnalAt to get analyticity of the ratio function
   have h_ratio_analytic : AnalyticAt ℂ (fun w => f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ (analyticOrderAt f ρ).toNat) z := by
     apply lem_ratioAnalAt z f
-
-    -- f is analytic at z
     · apply h_f_analytic
       exact Metric.closedBall_subset_closedBall (le_of_lt hR_lt_1) hz.1
-    -- z is in closedBall 0 1 but not in the zero set
     · constructor
       · exact Metric.closedBall_subset_closedBall (le_of_lt hR_lt_1) hz.1
       · -- Show z ∉ ↑h_finite_zeros.toFinset
@@ -296,14 +286,10 @@ lemma lem_h_ratio_anal
     AnalyticAt ℂ
       (fun z => g z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase σ),
         (z - ρ) ^ (analyticOrderAt f ρ).toNat) σ := by
-  -- Use lem_denomAnalAt to show the denominator is analytic and nonzero at σ
-  have hden := lem_denomAnalAt (S := h_finite_zeros.toFinset.erase σ)
-    (n := fun ρ => (analyticOrderAt f ρ).toNat)
-    (w := σ)
+  have hden := lem_denomAnalAt (h_finite_zeros.toFinset.erase σ) (fun ρ => (analyticOrderAt f ρ).toNat) σ
     (hw := by
       simp [Finset.mem_erase])
-  -- Apply the division rule for analytic functions
-  exact AnalyticAt.div hg_analytic hden.1 hden.2
+  exact hg_analytic.div hden.1 hden.2
 
 lemma lem_Cf_analytic_at_K
     {R1 : ℝ}
@@ -414,13 +400,9 @@ lemma lem_Cf_never_zero
       ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R1) :
     Cf R1 f h_finite_zeros h_σ z ≠ 0 := by
-  -- Split into cases: either z is in the zero set or not
   by_cases h : z ∈ zerosetKfR R1 f
-  · -- Case: z ∈ zerosetKfR R1 f
-    apply lem_Cf_nonzero_on_K h_finite_zeros h_σ h_σ_spec z h
-  · -- Case: z ∉ zerosetKfR R1 f
-    have hz_diff : z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f := ⟨hz, h⟩
-    apply lem_Cf_nonzero_off_K h_finite_zeros h_σ z hz_diff
+  ·  apply lem_Cf_nonzero_on_K h_finite_zeros h_σ h_σ_spec z h
+  · apply lem_Cf_nonzero_off_K h_finite_zeros h_σ z ⟨hz, h⟩
 
 noncomputable def Bf
     (R R1 : ℝ)
@@ -437,22 +419,12 @@ theorem lem_rho_in_disk_R1
     (f : ℂ → ℂ)
     (ρ : ℂ) (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 f) :
     norm ρ ≤ R1 := by
-  -- By definition of zerosetKfR, ρ is in the closed ball of radius R1
-  have h_in_ball : ρ ∈ Metric.closedBall (0 : ℂ) R1 := h_rho_in_KfR1.1
-  -- In a closed ball, the distance from center is at most the radius
-  rw [Metric.mem_closedBall, Complex.dist_eq] at h_in_ball
-  simp only [sub_zero] at h_in_ball
-  exact h_in_ball
-
+  simp_all [zerosetKfR]
 
 theorem lem_zero_not_in_Kf (R1 : ℝ)
   (f : ℂ → ℂ) :
     f 0 ≠ 0 → 0 ∉ zerosetKfR R1 f := by
-  intro h_f_zero_ne_zero h_zero_in_KfR1
-  -- From membership in zerosetKfR, we get f 0 = 0
-  have h_f_zero_eq_zero : f 0 = 0 := h_zero_in_KfR1.2
-  -- This contradicts the assumption that f 0 ≠ 0
-  exact h_f_zero_ne_zero h_f_zero_eq_zero
+  simp_all [zerosetKfR]
 
 
 lemma lem_rho_ne_zero (R1 : ℝ)
@@ -460,16 +432,7 @@ lemma lem_rho_ne_zero (R1 : ℝ)
     (h_f_nonzero_at_zero : f 0 ≠ 0) :
     ∀ ρ ∈ zerosetKfR R1 f, ρ ≠ 0 := by
   intro ρ h_ρ_in_zeros h_ρ_eq_zero
-  -- If ρ = 0, then ρ ∈ zerosetKfR implies 0 ∈ zerosetKfR
-  rw [h_ρ_eq_zero] at h_ρ_in_zeros
-  -- But this contradicts lem_zero_not_in_Kf
-  have h_zero_not_in : 0 ∉ zerosetKfR R1 f :=
-    lem_zero_not_in_Kf R1 f h_f_nonzero_at_zero
-  exact h_zero_not_in h_ρ_in_zeros
-
-
-lemma lem_mod_pos_iff_ne_zero (z : ℂ) : z ≠ 0 → norm z > 0 :=
-  lem_abspos z
+  simp_all [zerosetKfR]
 
 theorem lem_mod_rho_pos
     (R1 : ℝ)
@@ -480,8 +443,7 @@ theorem lem_mod_rho_pos
   -- First show that ρ ≠ 0
   have h_ρ_ne_zero : ρ ≠ 0 :=
     lem_rho_ne_zero R1 f h_f_nonzero_at_zero ρ h_ρ_in_zeros
-  -- Now use the lemma that norm is positive for nonzero elements
-  exact lem_mod_pos_iff_ne_zero ρ h_ρ_ne_zero
+  exact norm_pos_iff.mpr h_ρ_ne_zero
 
 
 lemma lem_inv_mono_decr (x y : ℝ) (hx : 0 < x) (hxy : x ≤ y) : 1 / x ≥ 1 / y := by
