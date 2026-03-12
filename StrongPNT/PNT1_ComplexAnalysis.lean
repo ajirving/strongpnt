@@ -108,16 +108,6 @@ lemma lem_postriglogn (n : ℕ) (_hn : n ≥ 1) (t : ℝ) : 0 ≤ 3 + 4 * Real.c
   rw [mul_assoc]
   exact lem_postrig (t * Real.log (n : ℝ))
 
-lemma lem_abspos (z : ℂ) : z ≠ 0 → norm z > 0 := by
-  intro h_ne_zero
-  apply Real.sqrt_pos.mpr
-  exact Complex.normSq_pos.mpr h_ne_zero
-
-lemma lem_wReIm (w : ℂ) : w = w.re + Complex.I * w.im := by
-  apply Complex.ext
-  simp
-  simp
-
 def ballDR (R : ℝ) : Set ℂ := Metric.ball (0 : ℂ) R
 
 -- First, the easy auxiliary lemmas:

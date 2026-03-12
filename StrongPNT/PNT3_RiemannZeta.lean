@@ -357,7 +357,7 @@ lemma condp32 (p : ℙ) (t : ℝ) : 1 - ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) +
 lemma abs_term_inv_bound (p : ℙ) (t : ℝ) : (1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹ ≤ (norm (1 - ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I))))⁻¹ := by
   have h1 := abs_term_bound p t
   have h2 := condp32 p t
-  have h3 := lem_abspos _ h2
+  have h3 := norm_pos_iff.mpr h2
   exact inv_inequality h3 h1
 
 -- Lemma prod_inequality
