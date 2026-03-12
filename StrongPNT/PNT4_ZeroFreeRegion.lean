@@ -290,15 +290,12 @@ lemma zerosetKfRc_eq_ZetaZerosNearPoint (t : ℝ) :
 
 lemma center_eq_comm (t : ℝ) :
   ((3/2 : ℂ) + (Complex.I : ℂ) * (t : ℂ)) = ((3/2 : ℂ) + (t : ℂ) * Complex.I) := by
-  have h : (Complex.I : ℂ) * (t : ℂ) = (t : ℂ) * Complex.I := by
-    simpa using mul_comm (Complex.I : ℂ) (t : ℂ)
-  simp [h]
+  ring
 
 lemma log_abs_le_log_abs_add_two {t : ℝ} (ht : 2 < |t|) :
   Real.log (abs t) ≤ Real.log (abs t + 2) := by
-  have hpos : 0 < |t| := lt_trans (by norm_num) ht
-  have hle : |t| ≤ |t| + 2 := by nlinarith
-  simpa using Real.log_le_log hpos hle
+  gcongr
+  linarith
 
 lemma s_notin_ZetaZerosNearPoint (δ t : ℝ) (hδ_pos : 0 < δ) :
   ((1 : ℂ) + δ + t * Complex.I) ∉ ZetaZerosNearPoint t := by
