@@ -276,14 +276,9 @@ lemma lem_HardMMP (R B : ℝ) (hR : R > 0)
   (h : ℂ → ℂ) (h_analytic : AnalyticOn ℂ h (closure (ballDR R)))
   (h_boundary_bound : ∀ z : ℂ, norm z = R → norm (h z) ≤ B) :
 ∀ w : ℂ, w ∈ closure (ballDR R) → norm (h w) ≤ B := by
-  intro w hw
-  -- Apply lem_MaxModv4 to get a point v with |v| = R where |h(v)| is maximal and |h(v)| ≤ B
-  obtain ⟨v, hv_abs, hv_max, hv_bound⟩ := lem_MaxModv4 R B hR h h_analytic h_boundary_bound
-  -- We have |h(w)| ≤ |h(v)| ≤ B
-  have h1 : norm (h w) ≤ norm (h v) := hv_max w hw
-  have h2 : norm (h v) ≤ B := hv_bound
-  -- Combine the inequalities
-  linarith [h1, h2]
+  apply Complex.norm_le_of_forall_mem_frontier_norm_le Metric.isBounded_ball h_analytic.differentiableOn.diffContOnCl
+  rw [frontier_ball _ (by linarith)]
+  simp_all
 
 lemma lem_BCI (R M : ℝ) (hR : R > 0) (hM : M > 0)
     (f : ℂ → ℂ)
