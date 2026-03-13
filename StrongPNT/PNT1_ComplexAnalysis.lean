@@ -11,20 +11,6 @@ import Mathlib.RingTheory.SimpleRing.Principal
 import Mathlib.Topology.Algebra.Module.ModuleTopology
 import PrimeNumberTheoremAnd.BorelCaratheodory
 
-lemma lem_exprule (n : ℕ) (hn : n ≥ 1) (α β : ℂ) : (n : ℂ) ^ (α + β) = (n : ℂ) ^ α * (n : ℂ) ^ β := by
-  apply Complex.cpow_add
-  -- Need to prove (n : ℂ) ≠ 0
-  rw [Nat.cast_ne_zero]
-  -- Need to prove n ≠ 0
-  rw [← Nat.one_le_iff_ne_zero]
-  exact hn
-
-lemma lem_realbw (b : ℝ) (w : ℂ) : (b * w).re = b * w.re := by
-  exact Complex.re_ofReal_mul b w
-
-lemma lem_Reecos (a : ℝ) : (Complex.exp (a * Complex.I)).re = Real.cos a := by
-  simp
-
 lemma lem_coseveny (n : ℕ) (_hn : n ≥ 1) (y : ℝ) : Real.cos (-y * Real.log (n : ℝ)) = Real.cos (y * Real.log (n : ℝ)) := by
   rw [neg_mul, Real.cos_neg]
 
@@ -50,9 +36,7 @@ lemma lem_eacosalog (n : ℕ) (_hn : n ≥ 1) (y : ℝ) : (Complex.exp (-y * Com
   -- Rewrite the expression to match lem_Reecos
   have h : -y * Complex.I * Real.log (n : ℝ) = a * Complex.I := by
     simp [a, mul_assoc, mul_comm Complex.I]
-  rw [h]
-  -- Apply lem_Reecos
-  exact lem_Reecos a
+  rw [h, Complex.exp_ofReal_mul_I_re]
 
 lemma lem_eacosalog2 (n : ℕ) (hn : n ≥ 1) (y : ℝ) : ((n : ℂ) ^ (-y * Complex.I)).re = Real.cos (-y * Real.log (n : ℝ)) := by
   rw [lem_niyelog n hn y]
@@ -65,9 +49,6 @@ lemma lem_eacosalog3 (n : ℕ) (hn : n ≥ 1) (y : ℝ) : ((n : ℂ) ^ (-y * Com
 lemma lem_cos2cos341 (θ : ℝ) : 2 * (1 + Real.cos θ) ^ 2 = 3 + 4 * Real.cos θ + Real.cos (2 * θ) := by
   rw [Real.cos_two_mul]
   ring
-
-lemma lem_SquarePos (y : ℝ) : 0 ≤ y ^ 2 := by
-  exact sq_nonneg y
 
 lemma lem_postrig (θ : ℝ) : 0 ≤ 3 + 4 * Real.cos θ + Real.cos (2 * θ) := by
   rw [← lem_cos2cos341]
@@ -82,52 +63,18 @@ def ballDR (R : ℝ) : Set ℂ := Metric.ball (0 : ℂ) R
 -- First, the easy auxiliary lemmas:
 
 lemma lem_ballDR (R : ℝ) (hR : R > 0) : closure (ballDR R) = Metric.closedBall (0 : ℂ) R := by
-  unfold ballDR
   exact closure_ball 0 (ne_of_gt hR)
 
-lemma lem_inDR (R : ℝ) (hR : R > 0) (w : ℂ) (hw : w ∈ closure (ballDR R)) : norm w ≤ R := by
-  rw [lem_ballDR R hR] at hw
-  rw [Metric.mem_closedBall] at hw
-  rw [Complex.dist_eq] at hw
-  simp at hw
-  exact hw
-
-lemma lem_notinDR (R : ℝ) (w : ℂ) (hw : w ∉ ballDR R) : norm w ≥ R := by
-  -- Apply definition of ballDR
-  unfold ballDR at hw
-  -- Use characterization of metric ball membership
-  rw [Metric.mem_ball] at hw
-  -- hw : ¬(dist w 0 < R), which is equivalent to dist w 0 ≥ R
-  push_neg at hw
-  -- Use Complex.dist_eq to relate distance to complex absolute value
-  rw [Complex.dist_eq] at hw
-  -- Simplify w - 0 = w
-  simp at hw
-  exact hw
-
 lemma lem_circleDR (R : ℝ) (hR : R > 0) (w : ℂ) (hw1 : w ∈ closure (ballDR R)) (hw2 : w ∉ ballDR R) : norm w = R := by
-  have h1 : norm w ≤ R := lem_inDR R hR w hw1
-  have h2 : norm w ≥ R := lem_notinDR R w hw2
+  simp_all [ballDR, closure_ball (0 : ℂ) hR.ne.symm]
   linarith
-
-lemma lem_Rself (R : ℝ) (hR : R > 0) : |R| = R := by
-  rw [abs_eq_self]
-  linarith
-
-lemma lem_Rself2 (R : ℝ) (hR : R > 0) : |R| ≤ R := by
-  rw [lem_Rself R hR]
 
 lemma lem_Rself3 (R : ℝ) (hR : R > 0) : (R : ℂ) ∈ closure (ballDR R) := by
-  rw [lem_ballDR R hR]
-  rw [Metric.mem_closedBall]
-  simp [Complex.dist_eq]
-  exact lem_Rself2 R hR
+  simp_all [ballDR, closure_ball (0 : ℂ) hR.ne.symm, abs_of_pos hR]
 
 lemma lem_DRcompact (R : ℝ) (hR : R > 0) : IsCompact (closure (ballDR R)) := by
-  rw [lem_ballDR R hR]
-  apply Metric.isCompact_of_isClosed_isBounded
-  · exact Metric.isClosed_closedBall
-  · exact Metric.isBounded_closedBall
+  rw [ballDR, closure_ball _ (by linarith)]
+  exact isCompact_closedBall ..
 
 lemma lem_ExtrValThm {K : Set ℂ} (hK : IsCompact K) (hK_nonempty : K.Nonempty) (g : K → ℂ) (hg : Continuous g) :
 ∃ v : K, ∀ z : K, norm (g z) ≤ norm (g v) := by
@@ -260,7 +207,7 @@ theorem lem_MaxModv2 (R : ℝ) (hR : R > 0) (h : ℂ → ℂ) (h_analytic : Anal
       -- Use the fact that norm of a real number equals the real absolute value
       have : norm (R : ℂ) = abs R := by
         simp [Complex.norm_real]
-      rw [this, lem_Rself R hR]
+      rw [this, abs_of_pos hR]
     · -- Show |h(v)| ≥ |h(z)| for all z using lem_MaxModRR
       intro z
       -- We need to show that u satisfies the hypothesis of lem_MaxModRR

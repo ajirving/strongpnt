@@ -1516,8 +1516,7 @@ lemma lem_nxy (n : ℕ) (hn : n ≥ 1) (x y : ℝ) :
   -- Rewrite -(x + y * I) as (-x) + (-(y * I))
   have h : -(x + y * I) = (-x : ℂ) + (-(y * I)) := by ring
   rw [h]
-  -- Apply lem_exprule with α = (-x : ℂ) and β = -(y * I)
-  exact lem_exprule n hn (-x : ℂ) (-(y * I))
+  exact Complex.cpow_add _ _ (by norm_cast; linarith)
 
 lemma lem_zeta1zetaseriesxy2 (x y : ℝ) (hx : 1 < x) :
     -logDerivZeta (x + y * I) = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℂ) * (Complex.cpow (n : ℂ) ((-x) : ℂ)) * (Complex.cpow (n : ℂ) (-(y * I))) := by
@@ -1656,9 +1655,8 @@ lemma RealLambdaxy (n : ℕ) (x y : ℝ) (hn : n ≥ 1) (_hx : 1 < x) :
     rw [mul_assoc]
 
   rw [h2, h1]
+  simp [b]
 
-  -- Now apply lem_realbw with b (real) and Complex.cpow (n : ℂ) (-(y * I))
-  exact lem_realbw b (Complex.cpow (n : ℂ) (-(y * I)))
 
 lemma ReZseriesRen (x y : ℝ) (hx : 1 < x) :
     (-logDerivZeta (x + y * I)).re = ∑' (n : ℕ), ((ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x)) * (Complex.cpow (n : ℂ) (-(y * I))).re := by
