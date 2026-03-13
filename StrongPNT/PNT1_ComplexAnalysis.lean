@@ -22,24 +22,12 @@ lemma lem_exprule (n : ℕ) (hn : n ≥ 1) (α β : ℂ) : (n : ℂ) ^ (α + β)
 lemma lem_realbw (b : ℝ) (w : ℂ) : (b * w).re = b * w.re := by
   exact Complex.re_ofReal_mul b w
 
-lemma lem_Euler (a : ℝ) : Complex.exp (a * Complex.I) = Real.cos a + Real.sin a * Complex.I := by
-  rw [Complex.exp_mul_I]
-  rw [← Complex.ofReal_cos, ← Complex.ofReal_sin]
-
 lemma lem_Reecos (a : ℝ) : (Complex.exp (a * Complex.I)).re = Real.cos a := by
-  rw [lem_Euler]
-  rw [Complex.add_re]
-  rw [Complex.ofReal_re]
-  rw [Complex.re_ofReal_mul]
-  rw [Complex.I_re]
   simp
 
-lemma lem_coseven (a : ℝ) : Real.cos (-a) = Real.cos a := by
-  exact Real.cos_neg a
-
 lemma lem_coseveny (n : ℕ) (_hn : n ≥ 1) (y : ℝ) : Real.cos (-y * Real.log (n : ℝ)) = Real.cos (y * Real.log (n : ℝ)) := by
-  rw [neg_mul]
-  exact lem_coseven (y * Real.log (n : ℝ))
+  rw [neg_mul, Real.cos_neg]
+
 
 lemma lem_niyelog (n : ℕ) (hn : n ≥ 1) (y : ℝ) : (n : ℂ) ^ (-y * Complex.I) = Complex.exp (-y * Complex.I * Real.log (n : ℝ)) := by
   -- First show that (n : ℂ) ≠ 0
@@ -74,35 +62,16 @@ lemma lem_eacosalog3 (n : ℕ) (hn : n ≥ 1) (y : ℝ) : ((n : ℂ) ^ (-y * Com
   rw [lem_eacosalog2 n hn y]
   exact lem_coseveny n hn y
 
-lemma lem_cos2t (θ : ℝ) : Real.cos (2 * θ) = 2 * Real.cos θ ^ 2 - 1 := by
-  exact Real.cos_two_mul θ
-
-lemma lem_cos2t2 (θ : ℝ) : 2 * Real.cos θ ^ 2 = 1 + Real.cos (2 * θ) := by
-  rw [lem_cos2t]
-  ring
-
-lemma lem_cosSquare (θ : ℝ) : 2 * (1 + Real.cos θ)^2 = 2 + 4 * Real.cos θ + 2 * Real.cos θ^2 := by
-  ring
-
 lemma lem_cos2cos341 (θ : ℝ) : 2 * (1 + Real.cos θ) ^ 2 = 3 + 4 * Real.cos θ + Real.cos (2 * θ) := by
-  rw [lem_cosSquare]
-  rw [lem_cos2t2]
+  rw [Real.cos_two_mul]
   ring
 
 lemma lem_SquarePos (y : ℝ) : 0 ≤ y ^ 2 := by
   exact sq_nonneg y
 
-lemma lem_SquarePos2 (y : ℝ) : 0 ≤ 2 * y ^ 2 := by
-  apply mul_nonneg
-  · norm_num
-  · exact lem_SquarePos y
-
-lemma lem_SquarePoscos (θ : ℝ) : 0 ≤ 2 * (1 + Real.cos θ) ^ 2 := by
-  exact lem_SquarePos2 (1 + Real.cos θ)
-
 lemma lem_postrig (θ : ℝ) : 0 ≤ 3 + 4 * Real.cos θ + Real.cos (2 * θ) := by
   rw [← lem_cos2cos341]
-  exact lem_SquarePoscos θ
+  positivity
 
 lemma lem_postriglogn (n : ℕ) (_hn : n ≥ 1) (t : ℝ) : 0 ≤ 3 + 4 * Real.cos (t * Real.log (n : ℝ)) + Real.cos (2 * t * Real.log (n : ℝ)) := by
   rw [mul_assoc]
