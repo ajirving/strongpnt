@@ -11,35 +11,9 @@ import Mathlib.RingTheory.SimpleRing.Principal
 import Mathlib.Topology.Algebra.Module.ModuleTopology
 import PrimeNumberTheoremAnd.BorelCaratheodory
 
-lemma lem_exprule (n : ℕ) (hn : n ≥ 1) (α β : ℂ) : (n : ℂ) ^ (α + β) = (n : ℂ) ^ α * (n : ℂ) ^ β := by
-  apply Complex.cpow_add
-  -- Need to prove (n : ℂ) ≠ 0
-  rw [Nat.cast_ne_zero]
-  -- Need to prove n ≠ 0
-  rw [← Nat.one_le_iff_ne_zero]
-  exact hn
-
-lemma lem_realbw (b : ℝ) (w : ℂ) : (b * w).re = b * w.re := by
-  exact Complex.re_ofReal_mul b w
-
-lemma lem_Euler (a : ℝ) : Complex.exp (a * Complex.I) = Real.cos a + Real.sin a * Complex.I := by
-  rw [Complex.exp_mul_I]
-  rw [← Complex.ofReal_cos, ← Complex.ofReal_sin]
-
-lemma lem_Reecos (a : ℝ) : (Complex.exp (a * Complex.I)).re = Real.cos a := by
-  rw [lem_Euler]
-  rw [Complex.add_re]
-  rw [Complex.ofReal_re]
-  rw [Complex.re_ofReal_mul]
-  rw [Complex.I_re]
-  simp
-
-lemma lem_coseven (a : ℝ) : Real.cos (-a) = Real.cos a := by
-  exact Real.cos_neg a
-
 lemma lem_coseveny (n : ℕ) (_hn : n ≥ 1) (y : ℝ) : Real.cos (-y * Real.log (n : ℝ)) = Real.cos (y * Real.log (n : ℝ)) := by
-  rw [neg_mul]
-  exact lem_coseven (y * Real.log (n : ℝ))
+  rw [neg_mul, Real.cos_neg]
+
 
 lemma lem_niyelog (n : ℕ) (hn : n ≥ 1) (y : ℝ) : (n : ℂ) ^ (-y * Complex.I) = Complex.exp (-y * Complex.I * Real.log (n : ℝ)) := by
   -- First show that (n : ℂ) ≠ 0
@@ -62,9 +36,7 @@ lemma lem_eacosalog (n : ℕ) (_hn : n ≥ 1) (y : ℝ) : (Complex.exp (-y * Com
   -- Rewrite the expression to match lem_Reecos
   have h : -y * Complex.I * Real.log (n : ℝ) = a * Complex.I := by
     simp [a, mul_assoc, mul_comm Complex.I]
-  rw [h]
-  -- Apply lem_Reecos
-  exact lem_Reecos a
+  rw [h, Complex.exp_ofReal_mul_I_re]
 
 lemma lem_eacosalog2 (n : ℕ) (hn : n ≥ 1) (y : ℝ) : ((n : ℂ) ^ (-y * Complex.I)).re = Real.cos (-y * Real.log (n : ℝ)) := by
   rw [lem_niyelog n hn y]
@@ -74,310 +46,32 @@ lemma lem_eacosalog3 (n : ℕ) (hn : n ≥ 1) (y : ℝ) : ((n : ℂ) ^ (-y * Com
   rw [lem_eacosalog2 n hn y]
   exact lem_coseveny n hn y
 
-lemma lem_cos2t (θ : ℝ) : Real.cos (2 * θ) = 2 * Real.cos θ ^ 2 - 1 := by
-  exact Real.cos_two_mul θ
-
-lemma lem_cos2t2 (θ : ℝ) : 2 * Real.cos θ ^ 2 = 1 + Real.cos (2 * θ) := by
-  rw [lem_cos2t]
-  ring
-
-lemma lem_cosSquare (θ : ℝ) : 2 * (1 + Real.cos θ)^2 = 2 + 4 * Real.cos θ + 2 * Real.cos θ^2 := by
-  ring
-
 lemma lem_cos2cos341 (θ : ℝ) : 2 * (1 + Real.cos θ) ^ 2 = 3 + 4 * Real.cos θ + Real.cos (2 * θ) := by
-  rw [lem_cosSquare]
-  rw [lem_cos2t2]
+  rw [Real.cos_two_mul]
   ring
-
-lemma lem_SquarePos (y : ℝ) : 0 ≤ y ^ 2 := by
-  exact sq_nonneg y
-
-lemma lem_SquarePos2 (y : ℝ) : 0 ≤ 2 * y ^ 2 := by
-  apply mul_nonneg
-  · norm_num
-  · exact lem_SquarePos y
-
-lemma lem_SquarePoscos (θ : ℝ) : 0 ≤ 2 * (1 + Real.cos θ) ^ 2 := by
-  exact lem_SquarePos2 (1 + Real.cos θ)
 
 lemma lem_postrig (θ : ℝ) : 0 ≤ 3 + 4 * Real.cos θ + Real.cos (2 * θ) := by
   rw [← lem_cos2cos341]
-  exact lem_SquarePoscos θ
+  positivity
 
 lemma lem_postriglogn (n : ℕ) (_hn : n ≥ 1) (t : ℝ) : 0 ≤ 3 + 4 * Real.cos (t * Real.log (n : ℝ)) + Real.cos (2 * t * Real.log (n : ℝ)) := by
   rw [mul_assoc]
   exact lem_postrig (t * Real.log (n : ℝ))
-
-lemma lem_abspos (z : ℂ) : z ≠ 0 → norm z > 0 := by
-  intro h_ne_zero
-  apply Real.sqrt_pos.mpr
-  exact Complex.normSq_pos.mpr h_ne_zero
-
-lemma lem_wReIm (w : ℂ) : w = w.re + Complex.I * w.im := by
-  apply Complex.ext
-  simp
-  simp
 
 def ballDR (R : ℝ) : Set ℂ := Metric.ball (0 : ℂ) R
 
 -- First, the easy auxiliary lemmas:
 
 lemma lem_ballDR (R : ℝ) (hR : R > 0) : closure (ballDR R) = Metric.closedBall (0 : ℂ) R := by
-  unfold ballDR
   exact closure_ball 0 (ne_of_gt hR)
-
-lemma lem_inDR (R : ℝ) (hR : R > 0) (w : ℂ) (hw : w ∈ closure (ballDR R)) : norm w ≤ R := by
-  rw [lem_ballDR R hR] at hw
-  rw [Metric.mem_closedBall] at hw
-  rw [Complex.dist_eq] at hw
-  simp at hw
-  exact hw
-
-lemma lem_notinDR (R : ℝ) (w : ℂ) (hw : w ∉ ballDR R) : norm w ≥ R := by
-  -- Apply definition of ballDR
-  unfold ballDR at hw
-  -- Use characterization of metric ball membership
-  rw [Metric.mem_ball] at hw
-  -- hw : ¬(dist w 0 < R), which is equivalent to dist w 0 ≥ R
-  push_neg at hw
-  -- Use Complex.dist_eq to relate distance to complex absolute value
-  rw [Complex.dist_eq] at hw
-  -- Simplify w - 0 = w
-  simp at hw
-  exact hw
-
-lemma lem_circleDR (R : ℝ) (hR : R > 0) (w : ℂ) (hw1 : w ∈ closure (ballDR R)) (hw2 : w ∉ ballDR R) : norm w = R := by
-  have h1 : norm w ≤ R := lem_inDR R hR w hw1
-  have h2 : norm w ≥ R := lem_notinDR R w hw2
-  linarith
-
-lemma lem_Rself (R : ℝ) (hR : R > 0) : |R| = R := by
-  rw [abs_eq_self]
-  linarith
-
-lemma lem_Rself2 (R : ℝ) (hR : R > 0) : |R| ≤ R := by
-  rw [lem_Rself R hR]
-
-lemma lem_Rself3 (R : ℝ) (hR : R > 0) : (R : ℂ) ∈ closure (ballDR R) := by
-  rw [lem_ballDR R hR]
-  rw [Metric.mem_closedBall]
-  simp [Complex.dist_eq]
-  exact lem_Rself2 R hR
-
-lemma lem_DRcompact (R : ℝ) (hR : R > 0) : IsCompact (closure (ballDR R)) := by
-  rw [lem_ballDR R hR]
-  apply Metric.isCompact_of_isClosed_isBounded
-  · exact Metric.isClosed_closedBall
-  · exact Metric.isBounded_closedBall
-
-lemma lem_ExtrValThm {K : Set ℂ} (hK : IsCompact K) (hK_nonempty : K.Nonempty) (g : K → ℂ) (hg : Continuous g) :
-∃ v : K, ∀ z : K, norm (g z) ≤ norm (g v) := by
-  -- The subtype K inherits compactness
-  haveI : CompactSpace K := isCompact_iff_compactSpace.mp hK
-  -- K is nonempty as a type
-  haveI : Nonempty K := hK_nonempty.to_subtype
-  -- Consider the function that maps each point to norm (g z)
-  let f : K → ℝ := fun z => norm (g z)
-  -- This function is continuous
-  have hf_cont : Continuous f := continuous_norm.comp hg
-  -- Apply the extreme value theorem for compact spaces
-  obtain ⟨v, hv_mem, hv_max⟩ := IsCompact.exists_isMaxOn isCompact_univ Set.univ_nonempty hf_cont.continuousOn
-  use v
-  intro z
-  exact hv_max (Set.mem_univ z)
-
-lemma lem_ExtrValThmDR (R : ℝ) (hR : R > 0) (g : closure (ballDR R) → ℂ) (hg : Continuous g) :
-∃ v : closure (ballDR R), ∀ z : closure (ballDR R), norm (g z) ≤ norm (g v) := by
-  -- Apply lem_ExtrValThm with K = closure (ballDR R)
-  have hK_compact : IsCompact (closure (ballDR R)) := lem_DRcompact R hR
-  -- Show that closure (ballDR R) is nonempty
-  have hK_nonempty : (closure (ballDR R)).Nonempty := by
-    rw [lem_ballDR R hR]
-    rw [Metric.nonempty_closedBall]
-    linarith
-  -- Apply the extreme value theorem
-  exact lem_ExtrValThm hK_compact hK_nonempty g hg
-
-lemma lem_AnalCont {R : ℝ} (H : ℂ → ℂ) (h_analytic : AnalyticOn ℂ H (closure (ballDR R))) :
-Continuous (H ∘ (Subtype.val : closure (ballDR R) → ℂ)) := by
-  -- H is continuous on closure (ballDR R) since it's analytic there
-  have h_cont_on : ContinuousOn H (closure (ballDR R)) := AnalyticOn.continuousOn h_analytic
-  -- Subtype.val is continuous
-  have h_val_cont : Continuous (Subtype.val : closure (ballDR R) → ℂ) := continuous_subtype_val
-  -- The composition is continuous since we're composing a continuous function with a continuous function
-  -- and the range of Subtype.val is contained in the domain where H is continuous
-  exact ContinuousOn.comp_continuous h_cont_on h_val_cont (fun _ => Subtype.mem _)
-
-lemma lem_ExtrValThmh {R : ℝ} (hR : R > 0) (h : ℂ → ℂ) (h_analytic : AnalyticOn ℂ h (closure (ballDR R))) :
-∃ u : closure (ballDR R), ∀ z : closure (ballDR R), norm (h u) ≥ norm (h z) := by
-  -- Apply lem_ExtrValThmDR with g = h ∘ Subtype.val
-  have hg_continuous : Continuous (h ∘ Subtype.val : closure (ballDR R) → ℂ) :=
-    lem_AnalCont h h_analytic
-  -- Get the point v where |h(v)| is maximized
-  obtain ⟨v, hv⟩ := lem_ExtrValThmDR R hR (h ∘ Subtype.val) hg_continuous
-  -- Use v as our u
-  use v
-  -- Show that |h(u)| ≥ |h(z)| for all z
-  intro z
-  have : norm ((h ∘ Subtype.val) z) ≤ norm ((h ∘ Subtype.val) v) := hv z
-  -- Simplify the composition
-  simp [Function.comp] at this
-  exact this
-
-lemma lem_MaxModP (R : ℝ) (h : ℂ → ℂ) (h_analytic : AnalyticOn ℂ h (closure (ballDR R))) (w : ℂ) (hw_in_DR : w ∈ ballDR R) (hw_max : ∀ z ∈ ballDR R, norm (h z) ≤ norm (h w)) : ∀ z ∈ closure (ballDR R), norm (h z) = norm (h w) := by
-  -- The ball is preconnected (since metric balls are convex)
-  have h_preconnected : IsPreconnected (ballDR R) := by
-    unfold ballDR
-    apply Convex.isPreconnected
-    exact convex_ball (0 : ℂ) R
-
-  -- The ball is open
-  have h_open : IsOpen (ballDR R) := by
-    unfold ballDR
-    exact Metric.isOpen_ball
-
-  -- h is differentiable on ballDR R and continuous on its closure
-  have h_diff_cont : DiffContOnCl ℂ h (ballDR R) := by
-    constructor
-    · -- h is differentiable on ballDR R
-      apply AnalyticOn.differentiableOn
-      exact h_analytic.mono subset_closure
-    · -- h is continuous on closure (ballDR R)
-      exact AnalyticOn.continuousOn h_analytic
-
-  -- Establish the maximum condition in terms of norm
-  have h_max_on : IsMaxOn (norm ∘ h) (ballDR R) w := by
-    intro z hz
-    simp only [Function.comp_apply]
-    -- Since norm is deprecated in favor of norm, they should be definitionally equal
-    convert hw_max z hz
-
-  -- Apply the main maximum modulus theorem
-  have h_eq := Complex.norm_eqOn_closure_of_isPreconnected_of_isMaxOn h_preconnected h_open h_diff_cont hw_in_DR h_max_on
-
-  -- Convert back to norm for the conclusion
-  intro z hz
-  have norm_eq := h_eq hz
-  simp only [Function.comp_apply, Function.const_apply] at norm_eq
-  -- Since norm is deprecated in favor of norm, they should be definitionally equal
-  convert norm_eq
-
-lemma lem_MaxModR (R : ℝ) (hR : R > 0) (h : ℂ → ℂ) (h_analytic : AnalyticOn ℂ h (closure (ballDR R))) (w : ℂ) (hw_in_DR : w ∈ ballDR R) (hw_max : ∀ z ∈ ballDR R, norm (h z) ≤ norm (h w)) : norm (h R) = norm (h w) := by
-  -- Apply lem_MaxModP to get constant absolute value on closure
-  have h_const : ∀ z ∈ closure (ballDR R), norm (h z) = norm (h w) :=
-    lem_MaxModP R h h_analytic w hw_in_DR hw_max
-  -- Show that R (as complex number) is in the closure
-  have hR_in_closure : (R : ℂ) ∈ closure (ballDR R) := lem_Rself3 R hR
-  -- Apply the constant property at z = R
-  exact h_const (R : ℂ) hR_in_closure
-
-lemma lem_MaxModRR (R : ℝ) (hR : R > 0) (h : ℂ → ℂ) (h_analytic : AnalyticOn ℂ h (closure (ballDR R)))
-  (w : ℂ) (hw_in_DR : w ∈ ballDR R) (hw_max : ∀ z ∈ ballDR R, norm (h z) ≤ norm (h w)) :
-∀ z ∈ closure (ballDR R), norm (h R) ≥ norm (h z) := by
-  intro z hz
-  -- Apply lem_MaxModP to get |h(z)| = |h(w)| for all z ∈ closure (ballDR R)
-  have h1 := lem_MaxModP R h h_analytic w hw_in_DR hw_max z hz
-  -- Apply lem_MaxModR to get |h(R)| = |h(w)|
-  have h2 := lem_MaxModR R hR h h_analytic w hw_in_DR hw_max
-  -- From h1: |h(z)| = |h(w)| and h2: |h(R)| = |h(w)|, we get |h(R)| = |h(z)|
-  rw [h2, h1]
-
-theorem lem_MaxModv2 (R : ℝ) (hR : R > 0) (h : ℂ → ℂ) (h_analytic : AnalyticOn ℂ h (closure (ballDR R))) :
-∃ v : closure (ballDR R), norm (v : ℂ) = R ∧ ∀ z : closure (ballDR R), norm (h (v : ℂ)) ≥ norm (h (z : ℂ)) := by
-  -- Apply lem_ExtrValThmh to get u with maximal |h(u)|
-  obtain ⟨u, hu⟩ := lem_ExtrValThmh hR h h_analytic
-
-  -- Case split on whether u ∈ ballDR R
-  if h_case : (u : ℂ) ∈ ballDR R then
-    -- If u ∈ ballDR R, set v = R
-    have hR_in_closure : (R : ℂ) ∈ closure (ballDR R) := lem_Rself3 R hR
-    let v : closure (ballDR R) := ⟨R, hR_in_closure⟩
-    use v
-    constructor
-    · -- Show |v| = R
-      -- Since v coerces to R as a complex number, and norm (R : ℂ) = |R| = R
-      have v_eq : (v : ℂ) = (R : ℂ) := rfl
-      rw [v_eq]
-      -- Use the fact that norm of a real number equals the real absolute value
-      have : norm (R : ℂ) = abs R := by
-        simp [Complex.norm_real]
-      rw [this, lem_Rself R hR]
-    · -- Show |h(v)| ≥ |h(z)| for all z using lem_MaxModRR
-      intro z
-      -- We need to show that u satisfies the hypothesis of lem_MaxModRR
-      have hw_max : ∀ w ∈ ballDR R, norm (h w) ≤ norm (h (u : ℂ)) := by
-        intro w hw
-        -- w ∈ ballDR R implies w ∈ closure (ballDR R)
-        have hw_closure : w ∈ closure (ballDR R) := subset_closure hw
-        -- Create subtype element and apply hu
-        let w_sub : closure (ballDR R) := ⟨w, hw_closure⟩
-        exact hu w_sub
-      -- Apply lem_MaxModRR to get the result
-      have h_result := lem_MaxModRR R hR h h_analytic (u : ℂ) h_case hw_max
-      -- Since v coerces to R, we have h(v) = h(R)
-      have v_eq : (v : ℂ) = (R : ℂ) := rfl
-      rw [v_eq]
-      -- Apply h_result with the membership condition for z
-      exact h_result (z : ℂ) (Subtype.mem z)
-  else
-    -- If u ∉ ballDR R, set v = u
-    use u
-    constructor
-    · -- Show |u| = R using lem_circleDR
-      exact lem_circleDR R hR (u : ℂ) (Subtype.mem u) h_case
-    · -- Show |h(u)| ≥ |h(z)| for all z, which follows directly from hu
-      exact hu
-
-theorem lem_MaxModv3 (R : ℝ) (hR : R > 0) (h : ℂ → ℂ) (h_analytic : AnalyticOn ℂ h (closure (ballDR R))) :
-∃ v : ℂ, norm v = R ∧ ∀ z : ℂ, z ∈ closure (ballDR R) → norm (h v) ≥ norm (h z) := by
-  -- Apply lem_MaxModv2 to get a point in closure with |v| = R and maximum property
-  obtain ⟨v_sub, hv_abs, hv_max⟩ := lem_MaxModv2 R hR h h_analytic
-  -- Extract the underlying complex number from the subtype
-  let v := (v_sub : ℂ)
-  use v
-  constructor
-  · -- Show |v| = R
-    exact hv_abs
-  · -- Show maximality property
-    intro z hz
-    -- Apply hv_max to the subtype version of z
-    have hz_sub : z ∈ closure (ballDR R) := hz
-    let z_sub : closure (ballDR R) := ⟨z, hz_sub⟩
-    have := hv_max z_sub
-    -- Simplify the coercions
-    simp [v] at this
-    exact this
-
-lemma lem_MaxModv4 (R B : ℝ) (hR : R > 0)
-  (h : ℂ → ℂ) (h_analytic : AnalyticOn ℂ h (closure (ballDR R)))
-  (h_boundary_bound : ∀ z : ℂ, norm z = R → norm (h z) ≤ B) :
-∃ v : ℂ, norm v = R ∧ (∀ w : ℂ, w ∈ closure (ballDR R) → norm (h v) ≥ norm (h w)) ∧ norm (h v) ≤ B := by
-  -- Apply lem_MaxModv3 to get a point v with |v| = R where |h(v)| is maximal
-  obtain ⟨v, hv_abs, hv_max⟩ := lem_MaxModv3 R hR h h_analytic
-  -- Use v as our witness
-  use v
-  constructor
-  · -- |v| = R
-    exact hv_abs
-  constructor
-  · -- |h(v)| ≥ |h(w)| for all w ∈ closure (ballDR R)
-    exact hv_max
-  · -- |h(v)| ≤ B using the boundary bound assumption
-    apply h_boundary_bound
-    exact hv_abs
 
 lemma lem_HardMMP (R B : ℝ) (hR : R > 0)
   (h : ℂ → ℂ) (h_analytic : AnalyticOn ℂ h (closure (ballDR R)))
   (h_boundary_bound : ∀ z : ℂ, norm z = R → norm (h z) ≤ B) :
 ∀ w : ℂ, w ∈ closure (ballDR R) → norm (h w) ≤ B := by
-  intro w hw
-  -- Apply lem_MaxModv4 to get a point v with |v| = R where |h(v)| is maximal and |h(v)| ≤ B
-  obtain ⟨v, hv_abs, hv_max, hv_bound⟩ := lem_MaxModv4 R B hR h h_analytic h_boundary_bound
-  -- We have |h(w)| ≤ |h(v)| ≤ B
-  have h1 : norm (h w) ≤ norm (h v) := hv_max w hw
-  have h2 : norm (h v) ≤ B := hv_bound
-  -- Combine the inequalities
-  linarith [h1, h2]
+  apply Complex.norm_le_of_forall_mem_frontier_norm_le Metric.isBounded_ball h_analytic.differentiableOn.diffContOnCl
+  rw [frontier_ball _ (by linarith)]
+  simp_all
 
 lemma lem_BCI (R M : ℝ) (hR : R > 0) (hM : M > 0)
     (f : ℂ → ℂ)

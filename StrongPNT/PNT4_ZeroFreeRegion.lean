@@ -119,7 +119,7 @@ lemma ZetaZerosNearPoint_finite (t : ℝ) : Set.Finite (ZetaZerosNearPoint t) :=
         exact Metric.ball_subset_ball hRle hz_in
       exact ⟨z, hz_in', hz_ne⟩
     have hfiniteKg : Set.Finite Kg :=
-      (lem_Contra_finiteKR R hRpos (by norm_num : R < 1) g hg_analyticNhd hNonzero)
+      zeroset_finite R (by norm_num : R < 1) g hg_analyticNhd hNonzero
     -- Show the target set is finite by mapping Kg through z ↦ z + c
     have hTarget_eq : {ρ : ℂ | (ρ - c) ∈ Metric.closedBall 0 R ∧ g (ρ - c) = 0} =
           (fun ρ : ℂ => ρ + c) '' Kg := by
@@ -205,7 +205,7 @@ lemma ZetaZerosNearPoint_finite (t : ℝ) : Set.Finite (ZetaZerosNearPoint t) :=
         exact Metric.ball_subset_ball hRle hz_in
       exact ⟨z, hz_in', hz_ne⟩
     have hfiniteKg : Set.Finite Kg :=
-      (lem_Contra_finiteKR R hRpos (by norm_num : R < 1) g hg_analyticNhd hNonzero)
+      zeroset_finite R (by norm_num : R < 1) g hg_analyticNhd hNonzero
     have hTarget_eq : {ρ : ℂ | (ρ - c) ∈ Metric.closedBall 0 R ∧ g (ρ - c) = 0} =
           (fun ρ : ℂ => ρ + c) '' Kg := by
       ext ρ; constructor
@@ -290,15 +290,12 @@ lemma zerosetKfRc_eq_ZetaZerosNearPoint (t : ℝ) :
 
 lemma center_eq_comm (t : ℝ) :
   ((3/2 : ℂ) + (Complex.I : ℂ) * (t : ℂ)) = ((3/2 : ℂ) + (t : ℂ) * Complex.I) := by
-  have h : (Complex.I : ℂ) * (t : ℂ) = (t : ℂ) * Complex.I := by
-    simpa using mul_comm (Complex.I : ℂ) (t : ℂ)
-  simp [h]
+  ring
 
 lemma log_abs_le_log_abs_add_two {t : ℝ} (ht : 2 < |t|) :
   Real.log (abs t) ≤ Real.log (abs t + 2) := by
-  have hpos : 0 < |t| := lt_trans (by norm_num) ht
-  have hle : |t| ≤ |t| + 2 := by nlinarith
-  simpa using Real.log_le_log hpos hle
+  gcongr
+  linarith
 
 lemma s_notin_ZetaZerosNearPoint (δ t : ℝ) (hδ_pos : 0 < δ) :
   ((1 : ℂ) + δ + t * Complex.I) ∉ ZetaZerosNearPoint t := by
@@ -1519,8 +1516,7 @@ lemma lem_nxy (n : ℕ) (hn : n ≥ 1) (x y : ℝ) :
   -- Rewrite -(x + y * I) as (-x) + (-(y * I))
   have h : -(x + y * I) = (-x : ℂ) + (-(y * I)) := by ring
   rw [h]
-  -- Apply lem_exprule with α = (-x : ℂ) and β = -(y * I)
-  exact lem_exprule n hn (-x : ℂ) (-(y * I))
+  exact Complex.cpow_add _ _ (by norm_cast; linarith)
 
 lemma lem_zeta1zetaseriesxy2 (x y : ℝ) (hx : 1 < x) :
     -logDerivZeta (x + y * I) = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℂ) * (Complex.cpow (n : ℂ) ((-x) : ℂ)) * (Complex.cpow (n : ℂ) (-(y * I))) := by
@@ -1659,9 +1655,8 @@ lemma RealLambdaxy (n : ℕ) (x y : ℝ) (hn : n ≥ 1) (_hx : 1 < x) :
     rw [mul_assoc]
 
   rw [h2, h1]
+  simp [b]
 
-  -- Now apply lem_realbw with b (real) and Complex.cpow (n : ℂ) (-(y * I))
-  exact lem_realbw b (Complex.cpow (n : ℂ) (-(y * I)))
 
 lemma ReZseriesRen (x y : ℝ) (hx : 1 < x) :
     (-logDerivZeta (x + y * I)).re = ∑' (n : ℕ), ((ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x)) * (Complex.cpow (n : ℂ) (-(y * I))).re := by
@@ -3586,36 +3581,14 @@ lemma helper_apply_jensen_to_g
   (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
   (g : ℂ → ℂ)
   (h_g_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ g z)
-  (hg0_ne : g 0 ≠ 0)
   (hg0_one : g 0 = 1)
   (hfin_g : (zerosetKfR R1 g).Finite)
   (hg_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖g z‖ ≤ B) :
   (∑ ρ ∈ hfin_g.toFinset, ((analyticOrderAt g ρ).toNat : ℝ)) ≤ Real.log B / Real.log (R / R1) := by
   classical
-  -- For each zero σ, obtain local factorization data
-  have h_exists : ∀ σ ∈ zerosetKfR R1 g,
-      ∃ hσ : ℂ → ℂ, AnalyticAt ℂ hσ σ ∧ hσ σ ≠ 0 ∧
-        ∀ᶠ z in nhds σ, g z = (z - σ) ^ (analyticOrderAt g σ).toNat * hσ z := by
-    intro σ hσ
-    exact lem_analytic_zero_factor R R1 hR1_lt_R hR_lt_1 g h_g_analytic hg0_ne σ hσ
-  -- Define a choice of local factors h_σ(σ)
-  let h_σ : ℂ → (ℂ → ℂ) :=
-    fun σ => dite (σ ∈ zerosetKfR R1 g)
-      (fun h => Classical.choose (h_exists σ h))
-      (fun _ => fun _ => (1 : ℂ))
-  -- Prove the specification for h_σ on zeros
-  have h_σ_spec : ∀ σ ∈ zerosetKfR R1 g,
-      AnalyticAt ℂ (h_σ σ) σ ∧ (h_σ σ) σ ≠ 0 ∧
-      ∀ᶠ z in nhds σ, g z = (z - σ) ^ (analyticOrderAt g σ).toNat * (h_σ σ) z := by
-    intro σ hσin
-    have hx := h_exists σ hσin
-    dsimp [h_σ]
-    -- Use the chosen witness at σ
-    simpa [hσin] using (Classical.choose_spec hx)
-  -- Apply the Jensen-type bound lemma
   have hbound :=
     lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R hR_lt_1
-      g h_g_analytic hg0_one hfin_g (h_σ := h_σ) hg_le_B h_σ_spec
+      g h_g_analytic hg0_one hfin_g  hg_le_B
   -- Rewrite to the desired division form
   simpa [one_div, div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using hbound
 
@@ -3726,14 +3699,13 @@ lemma jensen_sum_bound_strict
   (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
   (g : ℂ → ℂ)
   (h_g_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ g z)
-  (hg0_ne : g 0 ≠ 0)
   (hg0_one : g 0 = 1)
   (hfin_g : (zerosetKfR R1 g).Finite)
   (hg_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖g z‖ ≤ B) :
   (∑ ρ ∈ hfin_g.toFinset, ((analyticOrderAt g ρ).toNat : ℝ)) ≤
     Real.log B / Real.log (R / R1) := by
   exact helper_apply_jensen_to_g B R R1 hB hR1_pos hR1_lt_R hR_lt_1 g
-    h_g_analytic hg0_ne hg0_one hfin_g hg_le_B
+    h_g_analytic hg0_one hfin_g hg_le_B
 
 lemma no_zero_of_bound_one_and_center_one
   (R : ℝ) (hR_lt_1 : R < 1)
@@ -3896,7 +3868,7 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
       jensen_sum_bound_strict (B := B / ‖f c‖) (R := R) (R1 := R1)
         (hB := hBdiv_gt_one)
         (hR1_pos := hR1_pos) (hR1_lt_R := hR1_lt_R) (hR_lt_1 := hR_lt_1)
-        (g := g) (h_g_analytic := h_g_analytic) (hg0_ne := hg0_ne)
+        (g := g) (h_g_analytic := h_g_analytic)
         (hg0_one := hg0_one) (hfin_g := hfin_g) (hg_le_B := hg_le_B)
     -- Replace the indexing finite set using equality of sets S = image set
     have hsum_g_reindex :

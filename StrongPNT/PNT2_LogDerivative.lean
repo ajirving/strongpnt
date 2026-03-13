@@ -9,7 +9,7 @@ def zerosetKfR (R : ℝ) (f : ℂ → ℂ) : Set ℂ :=
 
 open Filter Metric Set Bornology Function
 
-lemma lem_Contra_finiteKR (R : ℝ) (hR : 0 < R) (hR' : R < 1)
+lemma zeroset_finite (R : ℝ) (hR : R < 1)
     (f : ℂ → ℂ) (hf : AnalyticOnNhd ℂ f (Metric.closedBall (0 : ℂ) 1))
     (h_exists_nonzero : ∃ z ∈ Metric.ball (0 : ℂ) 1, f z ≠ 0) :
     Set.Finite (zerosetKfR R f) := by
@@ -88,13 +88,8 @@ lemma lem_ratioAnalAt (w : ℂ)
     (S : Finset ℂ) (n : ℂ → ℕ)
     (hw : w ∈ Metric.closedBall (0 : ℂ) 1 \ ↑S) :
     AnalyticAt ℂ (fun z => h z / ∏ s ∈ S, (z - s) ^ (n s)) w := by
-  classical
-  -- Denominator is analytic at w and nonzero at w
-  have hden := lem_denomAnalAt (S := S) (n := n)
-      (w := w)
-      (hw := by simpa using hw.2)
-  -- Apply the division rule for analytic functions
-  exact AnalyticAt.div hh hden.1 hden.2
+  have hden := lem_denomAnalAt S n w hw.2
+  exact hh.div hden.1 hden.2
 
 lemma lem_analytic_zero_factor (R R1 : ℝ) (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1)
@@ -122,15 +117,10 @@ lemma lem_Cf_analytic_off_K
     (h_σ : ℂ → (ℂ → ℂ))
     (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R \ zerosetKfR R1  f) :
     AnalyticAt ℂ (Cf R1 f h_finite_zeros h_σ) z := by
-
-  -- Apply lem_ratioAnalAt to get analyticity of the ratio function
   have h_ratio_analytic : AnalyticAt ℂ (fun w => f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ (analyticOrderAt f ρ).toNat) z := by
     apply lem_ratioAnalAt z f
-
-    -- f is analytic at z
     · apply h_f_analytic
       exact Metric.closedBall_subset_closedBall (le_of_lt hR_lt_1) hz.1
-    -- z is in closedBall 0 1 but not in the zero set
     · constructor
       · exact Metric.closedBall_subset_closedBall (le_of_lt hR_lt_1) hz.1
       · -- Show z ∉ ↑h_finite_zeros.toFinset
@@ -296,14 +286,10 @@ lemma lem_h_ratio_anal
     AnalyticAt ℂ
       (fun z => g z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase σ),
         (z - ρ) ^ (analyticOrderAt f ρ).toNat) σ := by
-  -- Use lem_denomAnalAt to show the denominator is analytic and nonzero at σ
-  have hden := lem_denomAnalAt (S := h_finite_zeros.toFinset.erase σ)
-    (n := fun ρ => (analyticOrderAt f ρ).toNat)
-    (w := σ)
+  have hden := lem_denomAnalAt (h_finite_zeros.toFinset.erase σ) (fun ρ => (analyticOrderAt f ρ).toNat) σ
     (hw := by
       simp [Finset.mem_erase])
-  -- Apply the division rule for analytic functions
-  exact AnalyticAt.div hg_analytic hden.1 hden.2
+  exact hg_analytic.div hden.1 hden.2
 
 lemma lem_Cf_analytic_at_K
     {R1 : ℝ}
@@ -414,13 +400,9 @@ lemma lem_Cf_never_zero
       ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R1) :
     Cf R1 f h_finite_zeros h_σ z ≠ 0 := by
-  -- Split into cases: either z is in the zero set or not
   by_cases h : z ∈ zerosetKfR R1 f
-  · -- Case: z ∈ zerosetKfR R1 f
-    apply lem_Cf_nonzero_on_K h_finite_zeros h_σ h_σ_spec z h
-  · -- Case: z ∉ zerosetKfR R1 f
-    have hz_diff : z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f := ⟨hz, h⟩
-    apply lem_Cf_nonzero_off_K h_finite_zeros h_σ z hz_diff
+  ·  apply lem_Cf_nonzero_on_K h_finite_zeros h_σ h_σ_spec z h
+  · apply lem_Cf_nonzero_off_K h_finite_zeros h_σ z ⟨hz, h⟩
 
 noncomputable def Bf
     (R R1 : ℝ)
@@ -437,22 +419,12 @@ theorem lem_rho_in_disk_R1
     (f : ℂ → ℂ)
     (ρ : ℂ) (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 f) :
     norm ρ ≤ R1 := by
-  -- By definition of zerosetKfR, ρ is in the closed ball of radius R1
-  have h_in_ball : ρ ∈ Metric.closedBall (0 : ℂ) R1 := h_rho_in_KfR1.1
-  -- In a closed ball, the distance from center is at most the radius
-  rw [Metric.mem_closedBall, Complex.dist_eq] at h_in_ball
-  simp only [sub_zero] at h_in_ball
-  exact h_in_ball
-
+  simp_all [zerosetKfR]
 
 theorem lem_zero_not_in_Kf (R1 : ℝ)
   (f : ℂ → ℂ) :
     f 0 ≠ 0 → 0 ∉ zerosetKfR R1 f := by
-  intro h_f_zero_ne_zero h_zero_in_KfR1
-  -- From membership in zerosetKfR, we get f 0 = 0
-  have h_f_zero_eq_zero : f 0 = 0 := h_zero_in_KfR1.2
-  -- This contradicts the assumption that f 0 ≠ 0
-  exact h_f_zero_ne_zero h_f_zero_eq_zero
+  simp_all [zerosetKfR]
 
 
 lemma lem_rho_ne_zero (R1 : ℝ)
@@ -460,16 +432,7 @@ lemma lem_rho_ne_zero (R1 : ℝ)
     (h_f_nonzero_at_zero : f 0 ≠ 0) :
     ∀ ρ ∈ zerosetKfR R1 f, ρ ≠ 0 := by
   intro ρ h_ρ_in_zeros h_ρ_eq_zero
-  -- If ρ = 0, then ρ ∈ zerosetKfR implies 0 ∈ zerosetKfR
-  rw [h_ρ_eq_zero] at h_ρ_in_zeros
-  -- But this contradicts lem_zero_not_in_Kf
-  have h_zero_not_in : 0 ∉ zerosetKfR R1 f :=
-    lem_zero_not_in_Kf R1 f h_f_nonzero_at_zero
-  exact h_zero_not_in h_ρ_in_zeros
-
-
-lemma lem_mod_pos_iff_ne_zero (z : ℂ) : z ≠ 0 → norm z > 0 :=
-  lem_abspos z
+  simp_all [zerosetKfR]
 
 theorem lem_mod_rho_pos
     (R1 : ℝ)
@@ -480,8 +443,7 @@ theorem lem_mod_rho_pos
   -- First show that ρ ≠ 0
   have h_ρ_ne_zero : ρ ≠ 0 :=
     lem_rho_ne_zero R1 f h_f_nonzero_at_zero ρ h_ρ_in_zeros
-  -- Now use the lemma that norm is positive for nonzero elements
-  exact lem_mod_pos_iff_ne_zero ρ h_ρ_ne_zero
+  exact norm_pos_iff.mpr h_ρ_ne_zero
 
 
 lemma lem_inv_mono_decr (x y : ℝ) (hx : 0 < x) (hxy : x ≤ y) : 1 / x ≥ 1 / y := by
@@ -1095,12 +1057,20 @@ lemma lem_jensen_inequality_form (B R R1 : ℝ) (hB : 1 < B)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (hf0_eq_one : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (h_σ : ℂ → (ℂ → ℂ))
-    (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
-      AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
-      ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
     (R / R1 : ℝ) ^ (∑ ρ ∈ h_finite_zeros.toFinset, (analyticOrderAt f ρ).toNat : ℝ) ≤ B := by
+  have h_exists := fun σ hσ ↦  lem_analytic_zero_factor R R1 hR1_lt_R hR_lt_1 f h_f_analytic (by grind) σ hσ
+  let h_σ : ℂ → (ℂ → ℂ) :=
+    fun σ => dite (σ ∈ zerosetKfR R1 f)
+      (fun h => Classical.choose (h_exists σ h))
+      (fun _ => fun _ => (1 : ℂ))
+  have h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
+      AnalyticAt ℂ (h_σ σ) σ ∧ (h_σ σ) σ ≠ 0 ∧
+      ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * (h_σ σ) z := by
+    intro σ hσin
+    have hx := h_exists σ hσin
+    dsimp [h_σ]
+    simpa [hσin] using (Classical.choose_spec hx)
   -- Derive f 0 ≠ 0 from f 0 = 1
   have hf0_ne0 : f 0 ≠ 0 := by
     rw [hf0_eq_one]; norm_num
@@ -1125,10 +1095,6 @@ lemma lem_jensen_log_form (B R R1 : ℝ) (hB : 1 < B)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (hf0_eq_one : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (h_σ : ℂ → (ℂ → ℂ))
-    (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
-      AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
-      ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
     (∑ ρ ∈ h_finite_zeros.toFinset, ((analyticOrderAt f ρ).toNat : ℝ)) * Real.log (R / R1) ≤ Real.log B := by
   -- Let S denote the sum of the multiplicities
@@ -1136,7 +1102,7 @@ lemma lem_jensen_log_form (B R R1 : ℝ) (hB : 1 < B)
   -- From the Jensen-type inequality
   have hpow_le : (R / R1 : ℝ) ^ S ≤ B := by
     simpa [S] using
-      (lem_jensen_inequality_form B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic hf0_eq_one h_finite_zeros h_σ h_σ_spec hf_le_B)
+      (lem_jensen_inequality_form B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic hf0_eq_one h_finite_zeros hf_le_B)
   -- Base positivity
   have hbase_pos : 1 < (R / R1 : ℝ) := by exact (one_lt_div hR1_pos).mpr hR1_lt_R
   have hbase_pos' : 0 < (R / R1 : ℝ) := by
@@ -1163,14 +1129,10 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (hf0_eq_one : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (h_σ : ℂ → (ℂ → ℂ))
-    (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B)
-    (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
-      AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
-      ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z) :
+    (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
     (∑ ρ ∈ h_finite_zeros.toFinset, ((analyticOrderAt f ρ).toNat : ℝ)) ≤ (1/Real.log (R/R1)) * Real.log B := by
   have h_div_log : (∑ ρ ∈ h_finite_zeros.toFinset, ((analyticOrderAt f ρ).toNat : ℝ)) * Real.log (R/R1) ≤ Real.log B := by
-    apply lem_jensen_log_form B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic hf0_eq_one h_finite_zeros h_σ h_σ_spec hf_le_B
+    apply lem_jensen_log_form B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic hf0_eq_one h_finite_zeros hf_le_B
   have log_pos' : R/R1 > 1 := by exact (one_lt_div hR1_pos).mpr hR1_lt_R
   have log_pos : Real.log (R/R1) > 0 := by exact Real.log_pos log_pos'
   calc
@@ -2669,32 +2631,7 @@ lemma final_sum_bound {R R1 B : ℝ} {f : ℂ → ℂ}
   have h_f_bounded_alt : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B := by
     intro w hw
     exact h_f_bounded w (Metric.mem_closedBall.mpr (by simpa [dist_eq_norm] using hw))
-  -- Build a uniform existence statement for all σ
-  have h_exists : ∀ σ : ℂ, ∃ g : ℂ → ℂ,
-      AnalyticAt ℂ g σ ∧ g σ ≠ 0 ∧
-      (σ ∈ zerosetKfR R1 f →
-        ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * g z) := by
-    intro σ
-    by_cases hσ : σ ∈ zerosetKfR R1 f
-    · -- σ is a zero: use lem_analytic_zero_factor
-      have hex := lem_analytic_zero_factor R R1 hR1_lt_R hR_lt_1 f h_f_analytic h_f_nonzero σ hσ
-      obtain ⟨g, hg_at, hg_ne, h_eq⟩ := hex
-      exact ⟨g, hg_at, hg_ne, fun _ => h_eq⟩
-    · -- σ is not a zero: use constant function 1
-      refine ⟨fun _ => 1, ?_, ?_, ?_⟩
-      · exact analyticAt_const
-      · norm_num
-      · intro h_contra
-        contradiction
-  -- Use classical choice to extract the function
-  let h_σ : ℂ → (ℂ → ℂ) := fun σ => Classical.choose (h_exists σ)
-  have h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
-      AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
-      ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z := by
-    intro σ hσ
-    have spec := Classical.choose_spec (h_exists σ)
-    exact ⟨spec.1, spec.2.1, spec.2.2 hσ⟩
-  have h_sum_bound := lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_σ h_f_bounded_alt h_σ_spec
+  have h_sum_bound := lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_f_bounded_alt
 
   -- Step 5: Establish needed positivity properties
   have h_pos : 0 < R^2/R1 - R1 := sq_div_sub_pos R1 R hR1_pos hR1_lt_R
@@ -2722,11 +2659,6 @@ lemma final_inequality
       ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (h_σ_spec :
-      ∀ σ ∈ zerosetKfR R1 f,
-        AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
-        ∀ᶠ z in nhds σ,
-          f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (h_f_bounded : ∀ z ∈ Metric.closedBall (0 : ℂ) R, ‖f z‖ ≤ B) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) r1 \ zerosetKfR R1 f,
 
@@ -2735,6 +2667,18 @@ lemma final_inequality
       ≤
       16 * r^2 / ((r - r1)^3) * Real.log B
         + 1 / ((R^2 / R1 - R1) * Real.log (R / R1)) * Real.log B := by
+  have h_exists := fun σ hσ ↦  lem_analytic_zero_factor R R1 hR1_lt_R hR_lt_1 f h_f_analytic (by grind) σ hσ
+  let h_σ : ℂ → (ℂ → ℂ) :=
+    fun σ => dite (σ ∈ zerosetKfR R1 f)
+      (fun h => Classical.choose (h_exists σ h))
+      (fun _ => fun _ => (1 : ℂ))
+  have h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
+      AnalyticAt ℂ (h_σ σ) σ ∧ (h_σ σ) σ ≠ 0 ∧
+      ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * (h_σ σ) z := by
+    intro σ hσin
+    have hx := h_exists σ hσin
+    dsimp [h_σ]
+    simpa [hσin] using (Classical.choose_spec hx)
   intro z hz
 
   -- Establish missing positive hypotheses from the parameter constraints
@@ -2800,9 +2744,6 @@ lemma final_ineq1
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
-      AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
-      ∀ᶠ z in nhds σ, f z = (z - σ) ^ (analyticOrderAt f σ).toNat * h_σ σ z)
     (h_f_bounded : ∀ z ∈ Metric.closedBall (0 : ℂ) R, ‖f z‖ ≤ B) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) r1 \ zerosetKfR R1 f,
     ‖(deriv f z / f z) - ∑ ρ ∈ h_finite_zeros.toFinset,
