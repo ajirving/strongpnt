@@ -24,11 +24,9 @@ lemma ZetaZerosNearPoint_finite (t : ℝ) : Set.Finite (ZetaZerosNearPoint t) :=
         filter_upwards [self_mem_nhdsWithin] with t ht
         -- On t ≠ 1, H agrees with (t-1)*ζ t; prove differentiableAt via congr
         have hdiff : DifferentiableAt ℂ (fun u : ℂ => (u - 1) * riemannZeta u) t := by
-          have h1 : DifferentiableAt ℂ (fun u : ℂ => u - 1) t :=
-            (differentiableAt_id.sub_const 1)
           have h2 : DifferentiableAt ℂ riemannZeta t :=
             (differentiableAt_riemannZeta ht)
-          exact h1.mul h2
+          fun_prop (disch := assumption)
         apply DifferentiableAt.congr_of_eventuallyEq hdiff
         filter_upwards [eventually_ne_nhds ht] with u hu using by
           simp [H, Function.update_of_ne hu]
@@ -36,11 +34,9 @@ lemma ZetaZerosNearPoint_finite (t : ℝ) : Set.Finite (ZetaZerosNearPoint t) :=
         simpa [H, continuousAt_update_same] using riemannZeta_residue_one
     · -- s ≠ 1: H agrees with (s-1)ζ(s), hence differentiable
       have hdiff : DifferentiableAt ℂ (fun u : ℂ => (u - 1) * riemannZeta u) s := by
-        have h1 : DifferentiableAt ℂ (fun u : ℂ => u - 1) s :=
-          (differentiableAt_id.sub_const 1)
         have h2 : DifferentiableAt ℂ riemannZeta s :=
           (differentiableAt_riemannZeta hs)
-        exact h1.mul h2
+        fun_prop (disch := assumption)
       apply DifferentiableAt.congr_of_eventuallyEq hdiff
       filter_upwards [eventually_ne_nhds hs] with u hu using by
         simp [H, Function.update_of_ne hu]
