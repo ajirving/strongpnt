@@ -56,21 +56,6 @@ lemma ZetaZerosNearPoint_finite (t : ℝ) : Set.Finite (ZetaZerosNearPoint t) :=
     have :=  (this 1 (Set.mem_univ _)).analyticOrderAt_eq_zero.mpr (by simp [H])
     simp [this]
 
-lemma lem_Re1zge0 (z : ℂ) : z.re > 0 → (1 / z).re > 0 := by
-  intro h
-  -- First show that z ≠ 0
-  have hz_ne_zero : z ≠ 0 := by
-    intro hz_eq_zero
-    rw [hz_eq_zero] at h
-    simp at h
-  -- Use the fact that 1/z = z⁻¹
-  rw [one_div]
-  -- Apply the formula for real part of inverse
-  rw [Complex.inv_re]
-  -- Now we have z.re / normSq z, which is positive since both numerator and denominator are positive
-  apply div_pos h
-  -- normSq z > 0 since z ≠ 0
-  rwa [Complex.normSq_pos]
 
 lemma lem_sigmage1 (sigma t : ℝ) (hsigma : sigma > 1) : riemannZeta (sigma + t * Complex.I) ≠ 0 := by
   apply riemannZeta_ne_zero_of_one_le_re
@@ -534,11 +519,9 @@ lemma lem_Re1deltatneq0 (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ
 
 lemma lem_Re1deltatge0 (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
 (1 / ((1 : ℂ) + delta + t * Complex.I - rho1)).re ≥ 0 := by
-  -- Apply lem_Re1zge0 with z = (1 : ℂ) + delta + t * Complex.I - rho1
-  apply le_of_lt
-  apply lem_Re1zge0
-  -- Apply lem_Re1deltatneq0 to get the positive real part
-  exact lem_Re1deltatneq0 delta hdelta t rho1 h_rho1_in_Zt
+  simp
+  apply div_nonneg _ <| Complex.normSq_nonneg _
+  simpa using   lem_Re1deltatneq0 delta hdelta t rho1 h_rho1_in_Zt |>.le
 
 lemma lem_Re1deltatge0m (delta : ℝ) (hdelta : delta > 0) (t : ℝ)
   (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
