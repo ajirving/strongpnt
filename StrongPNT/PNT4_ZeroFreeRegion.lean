@@ -471,57 +471,11 @@ lemma lem_sumrho2 (t : ℝ) (delta : ℝ) :
     (fun rho1 : ℂ => (((analyticOrderAt riemannZeta rho1).toNat : ℂ) / (((1 : ℂ) + delta + (2 * t) * Complex.I) - rho1)).re) := by
   rw [Complex.re_sum]
 
-lemma lem_1deltatrho1 (delta : ℝ) (_hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (_h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :    ((1 : ℂ) + delta + t * Complex.I - rho1) = ((1 : ℝ) + delta - rho1.re) + (t - rho1.im) * Complex.I := by
-  -- First, let's use the standard form of a complex number
-  conv_lhs => rw [← Complex.re_add_im rho1]
-  -- Now we have (1 : ℂ) + delta + t * Complex.I - (rho1.re + rho1.im * Complex.I)
-  -- Let's expand this step by step
-  simp only [sub_add_eq_sub_sub]
-  -- Rearrange terms to group real and imaginary parts
-  ring_nf
-  -- Now we need to show the result matches the right-hand side
-  simp only [Complex.ofReal_add, Complex.ofReal_sub, Complex.ofReal_one]
-  ring
-
-lemma lem_Re1deltatrho1 (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
-((1 : ℂ) + delta + t * Complex.I - rho1).re = (1 : ℝ) + delta - rho1.re := by
-  -- Apply lem_1deltatrho1 to rewrite the left side
-  rw [lem_1deltatrho1 delta hdelta t rho1 h_rho1_in_Zt]
-  -- Now we have ((1 : ℝ) + delta - rho1.re + (t - rho1.im) * Complex.I).re
-  -- Take the real part
-  rw [Complex.add_re]
-  -- The real part of (a + b * I) is a
-  rw [Complex.mul_I_re]
-  -- Simplify
-  simp
-
-lemma lem_Re1delta1 (delta : ℝ) (_hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
-(1 : ℝ) + delta - rho1.re ≥ delta := by
-  -- Apply lem_sigmale1Zt to get rho1.re ≤ 1
-  have h_rho1_re_le_1 : rho1.re ≤ 1 := lem_sigmale1Zt t rho1 h_rho1_in_Zt
-  -- This means 1 - rho1.re ≥ 0
-  have h_nonneg : 1 - rho1.re ≥ 0 := by linarith
-  -- Therefore 1 + delta - rho1.re = (1 - rho1.re) + delta ≥ 0 + delta = delta
-  linarith
-
-lemma lem_Re1deltatge (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :    ((1 : ℂ) + delta + t * Complex.I - rho1).re ≥ delta := by
-  -- Apply lem_Re1deltatrho1 to rewrite the left side
-  rw [lem_Re1deltatrho1 delta hdelta t rho1 h_rho1_in_Zt]
-  -- Apply lem_Re1delta1 to get the desired inequality
-  exact lem_Re1delta1 delta hdelta t rho1 h_rho1_in_Zt
-
-lemma lem_Re1deltatneq0 (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
-((1 : ℂ) + delta + t * Complex.I - rho1).re > 0 := by
-  -- Apply lem_Re1deltatge to get that the real part is ≥ delta
-  have h_ge_delta : ((1 : ℂ) + delta + t * Complex.I - rho1).re ≥ delta := lem_Re1deltatge delta hdelta t rho1 h_rho1_in_Zt
-  -- Since delta > 0 and the real part ≥ delta, we have the real part > 0
-  linarith [hdelta]
-
 lemma lem_Re1deltatge0 (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
 (1 / ((1 : ℂ) + delta + t * Complex.I - rho1)).re ≥ 0 := by
   simp
   apply div_nonneg _ <| Complex.normSq_nonneg _
-  simpa using   lem_Re1deltatneq0 delta hdelta t rho1 h_rho1_in_Zt |>.le
+  linarith [lem_sigmale1Zt t rho1 h_rho1_in_Zt]
 
 lemma lem_Re1deltatge0m (delta : ℝ) (hdelta : delta > 0) (t : ℝ)
   (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
