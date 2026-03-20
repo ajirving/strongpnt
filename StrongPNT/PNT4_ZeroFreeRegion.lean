@@ -40,30 +40,21 @@ lemma ZetaZerosNearPoint_finite (t : ℝ) : Set.Finite (ZetaZerosNearPoint t) :=
       apply DifferentiableAt.congr_of_eventuallyEq hdiff
       filter_upwards [eventually_ne_nhds hs] with u hu using by
         simp [H, Function.update_of_ne hu]
-  apply Set.Finite.subset (s := {s | H s = 0 ∧ ‖s - (3 / 2 + ↑t * Complex.I)‖ ≤ 5 / 6})
-  swap
-  · intro z hz
-    simp_all [ZetaZerosNearPoint, zeroZ, H]
+  apply (MeromorphicOn.divisor H (Metric.closedBall c R)).finiteSupport (isCompact_closedBall ..)|>.subset
+  intro z hz
+  have := Complex.analyticOnNhd_univ_iff_differentiable.mpr hH_diff
+  simp_all [ZetaZerosNearPoint]
+  rw [MeromorphicOn.divisor_apply (this.mono (Set.subset_univ _)).meromorphicOn (by simp_all [c, R, dist_eq_norm_sub]),
+    (this z (Set.mem_univ _)).meromorphicOrderAt_eq]
+  simp_all [analyticOrderAt_ne_zero, this z]
+  constructor
+  · simp_all [ZetaZerosNearPoint, zeroZ, H]
     by_cases! h : z = 1
     · simp [h, riemannZeta_one_ne_zero] at hz
     · simp_all
-  convert (MeromorphicOn.divisor H (Metric.closedBall c R)).finiteSupport (isCompact_closedBall ..)
-  ext z
-  have := Complex.analyticOnNhd_univ_iff_differentiable.mpr hH_diff
-  constructor <;> intro h
-  · simp
-    rw [MeromorphicOn.divisor_apply]
-    · rw [AnalyticAt.meromorphicOrderAt_eq (this z (Set.mem_univ _))]
-      simp_all [analyticOrderAt_ne_zero, this z (Set.mem_univ ..)]
-      apply this.analyticOrderAt_ne_top_of_isPreconnected isPreconnected_univ (x := 1) (Set.mem_univ _) (Set.mem_univ _)
-      have :=  (this 1 (Set.mem_univ _)).analyticOrderAt_eq_zero.mpr (by simp [H])
-      simp [this]
-    · exact (this.mono (Set.subset_univ _)).meromorphicOn
-    · simp_all [dist_eq_norm_sub, c, R]
-  · simp_all [MeromorphicOn.divisor_def, dist_eq_norm_sub, c, R]
-    rw [AnalyticAt.meromorphicOrderAt_eq (this z (Set.mem_univ _))] at h
-    simp at h
-    exact (this z (Set.mem_univ _)).analyticOrderAt_ne_zero.mp h.2.2.1
+  · apply this.analyticOrderAt_ne_top_of_isPreconnected isPreconnected_univ (x := 1) (Set.mem_univ _) (Set.mem_univ _)
+    have :=  (this 1 (Set.mem_univ _)).analyticOrderAt_eq_zero.mpr (by simp [H])
+    simp [this]
 
 lemma lem_Re1zge0 (z : ℂ) : z.re > 0 → (1 / z).re > 0 := by
   intro h
