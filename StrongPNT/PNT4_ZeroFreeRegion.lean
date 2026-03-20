@@ -122,11 +122,6 @@ lemma s_notin_ZetaZerosNearPoint (δ t : ℝ) (hδ_pos : 0 < δ) :
   have hnonzero := lem_sigmage1 (1 + δ) t hpos
   exact hnonzero (by simpa using hz0)
 
-lemma norm_sub_comm' (x y : ℂ) : ‖x - y‖ = ‖y - x‖ := by
-  calc
-    ‖x - y‖ = ‖-(x - y)‖ := by simpa using (norm_neg (x - y)).symm
-    _ = ‖y - x‖ := by simp [neg_sub]
-
 lemma s_in_closedBall_12 (δ t : ℝ) (hδ_pos : 0 < δ) (hδ_lt : δ < 1) :
   ((1 : ℂ) + (δ : ℝ) + (t : ℝ) * Complex.I) ∈
     Metric.closedBall ((3 / 2 : ℂ) + (t : ℝ) * Complex.I) (1 / 2) := by
@@ -269,7 +264,7 @@ lemma lem_explicit1deltat :
               (fun ρ : ℂ => ((analyticOrderAt riemannZeta ρ).toNat : ℂ) / (s - ρ))‖
         ≤ F * Real.log (b * |t| / ‖riemannZeta c_std‖) := by
       simpa [F] using hineq2
-    simpa [norm_sub_comm', hFinset_eq]
+    simpa [norm_sub_rev, hFinset_eq]
       using this
   -- Control the logarithmic factor
   have hc_ne : riemannZeta c_std ≠ 0 := by simpa [c_std] using zetacnot0 t
@@ -450,9 +445,6 @@ lemma lem_explicit2Real :
   simp only [Complex.ofReal_mul] at h_bound
   exact h_bound
 
-lemma lem_Realsum {α : Type*} (s : Finset α) (f : α → ℂ) : (Finset.sum s f).re = Finset.sum s (fun i => (f i).re) := by
-  exact Complex.re_sum s f
-
 lemma lem_sumrho1 (t : ℝ) (δ : ℝ) :
     (Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t))
         (fun rho1 : ℂ =>
@@ -462,7 +454,7 @@ lemma lem_sumrho1 (t : ℝ) (δ : ℝ) :
     (fun rho1 : ℂ =>
                     (((analyticOrderAt riemannZeta rho1).toNat : ℂ) /
                       (((1 : ℂ) + δ + t * Complex.I) - rho1)).re) := by
-  exact lem_Realsum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t)) _
+  exact Complex.re_sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t)) _
 
 lemma lem_sumrho2 (t : ℝ) (delta : ℝ) :
     (Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t)))
