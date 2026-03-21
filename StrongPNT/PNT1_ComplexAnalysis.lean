@@ -198,8 +198,8 @@ lemma lem_CIF_deriv_param {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ}
     (h_r_z_lt_r_int : r_z < r_int)
     (h_r_int_lt_R_analytic : r_int < R_analytic)
     {z : ℂ} (hz : z ∈ Metric.closedBall 0 r_z) :
-    deriv f z = (1 / (2 * Real.pi * I)) * (∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi),
-(I * r_int * Complex.exp (I * t) * ((r_int * Complex.exp (I * t)) - z)⁻¹ ^ 2) * f (r_int * Complex.exp (I * t))) := by
+    deriv f z = 1 / (2 * Real.pi * I) * ∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi),
+I * (r_int * Complex.exp (I * t) * ((r_int * Complex.exp (I * t)) - z)⁻¹ ^ 2 * f (r_int * Complex.exp (I * t))) := by
   rw [cauchy_formula_deriv hf_domain h_r_z_lt_r_int h_r_int_lt_R_analytic hz,
     circleIntegral_def_Icc, smul_eq_mul]
   simp only [circleMap_zero_eq_exp, deriv_circleMap_zero]
@@ -207,17 +207,6 @@ lemma lem_CIF_deriv_param {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ}
   ext t
   simp only [smul_eq_mul]
   ring
-
-lemma complex_coeff_I_cancel : (1 : ℂ) / (2 * Real.pi * I) * I = 1 / (2 * Real.pi) := by
-  field [Complex.I_ne_zero, Real.pi_pos.ne', I]
-
-lemma factor_I_from_integrand (f : ℂ → ℂ) (r_int : ℝ) (z : ℂ) :
-  ∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi), I * ↑r_int * Complex.exp (I * ↑t) * (↑r_int * Complex.exp (I * ↑t) - z)⁻¹ ^ 2 * f (↑r_int * Complex.exp (I * ↑t)) =
-  I * ∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi), ↑r_int * Complex.exp (I * ↑t) * (↑r_int * Complex.exp (I * ↑t) - z)⁻¹ ^ 2 * f (↑r_int * Complex.exp (I * ↑t)) := by
-  have h : ∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi), I * ↑r_int * Complex.exp (I * ↑t) * (↑r_int * Complex.exp (I * ↑t) - z)⁻¹ ^ 2 * f (↑r_int * Complex.exp (I * ↑t)) =
-           ∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi), I * (↑r_int * Complex.exp (I * ↑t) * (↑r_int * Complex.exp (I * ↑t) - z)⁻¹ ^ 2 * f (↑r_int * Complex.exp (I * ↑t))) := by
-    ring_nf
-  rw [h, MeasureTheory.integral_const_mul]
 
 lemma lem_modulus_of_f_prime0 {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ}
     (hf_domain : ∃ U, IsOpen U ∧ Metric.closedBall 0 R_analytic ⊆ U ∧ DifferentiableOn ℂ f U)
@@ -228,14 +217,9 @@ lemma lem_modulus_of_f_prime0 {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ}
 (r_int * Complex.exp (I * t) * f (r_int * Complex.exp (I * t))) / ((r_int * Complex.exp (I * t)) - z) ^ 2)) := by
   congr 1
   -- Apply lem_CIF_deriv_param
-  rw [lem_CIF_deriv_param hf_domain h_r_z_lt_r_int h_r_int_lt_R_analytic hz]
-  -- Factor out I from the integrand using linearity
-  rw [factor_I_from_integrand f r_int z]
-  -- Rearrange to cancel I factors: (1 / (2 * Real.pi * I)) * I = 1 / (2 * Real.pi)
-  rw [← mul_assoc, complex_coeff_I_cancel]
-  congr 2
-  funext t
-  field
+  rw [lem_CIF_deriv_param hf_domain h_r_z_lt_r_int h_r_int_lt_R_analytic hz,
+    MeasureTheory.integral_const_mul]
+  field_simp [I]
 
 lemma lem_integral_modulus_inequality {r_int : ℝ} {z : ℂ} {f : ℂ → ℂ} :
 norm ((1 / (2 * Real.pi)) * (∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi), (r_int * Complex.exp (I * t) * f (r_int * Complex.exp (I * t))) / ((r_int * Complex.exp (I * t)) - z) ^ 2)) ≤ (1 / (2 * Real.pi)) * (∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi), norm ((r_int * Complex.exp (I * t) * f (r_int * Complex.exp (I * t))) / ((r_int * Complex.exp (I * t)) - z) ^ 2)) := by
@@ -279,15 +263,6 @@ norm (f (r_int * Complex.exp (I * t)) * (r_int * Complex.exp (I * t))) = r_int *
   -- Now we have norm (f (...)) * r_int = r_int * norm (f (...))
   ring
 
-lemma lem_modulus_wz (w z : ℂ) : norm ((w - z) ^ 2) = (norm (w - z)) ^ 2 := by
-  -- Apply Complex.abs_pow with n = 2
-  exact Complex.norm_pow (w - z) 2
-
-lemma lem_reverse_triangle (w z : ℂ) : norm w - norm z ≤ norm (w - z) := by
-  -- Since norm is essentially the norm, use the reverse triangle inequality for norms
-  -- Apply the reverse triangle inequality for norms
-  exact norm_sub_norm_le w z
-
 lemma lem_reverse_triangle3 {r_z r_int : ℝ} {t : ℝ} {z : ℂ}
     (h_r_z_pos : 0 < r_z)
     (h_r_z_lt_r_int : r_z < r_int) :
@@ -296,8 +271,7 @@ r_int - norm z ≤ norm (r_int * Complex.exp (I * t) - z) := by
   have h_mod : norm (r_int * Complex.exp (I * t)) = r_int := by
     have h_r_int_pos : 0 < r_int := lt_trans h_r_z_pos h_r_z_lt_r_int
     exact lem_modulus_of_ae_it h_r_int_pos
-  -- Apply the reverse triangle inequality from lem_reverse_triangle
-  have h_triangle := lem_reverse_triangle (r_int * Complex.exp (I * t)) z
+  have h_triangle := norm_sub_norm_le (r_int * Complex.exp (I * t)) z
   -- Substitute h_mod into h_triangle
   rw [h_mod] at h_triangle
   exact h_triangle
@@ -412,9 +386,7 @@ norm (f (r_int * Complex.exp (I * t)) * (r_int * Complex.exp (I * t))) / norm ((
   have h_sq_neq_zero : (r_int * Complex.exp (I * t) - z) ^ 2 ≠ 0 := by
     rw [pow_two]
     exact mul_self_ne_zero.mpr h_neq_zero
-  rw [norm_div]
-  -- Use lem_modulus_wz to handle the square of absolute value
-  rw [lem_modulus_wz]
+  rw [norm_div, Complex.norm_pow]
 
 lemma lem_modulus_of_product {f : ℂ → ℂ} {r_z r_int : ℝ} (t : ℝ)
     (h_r_z_pos : 0 < r_z)
