@@ -1,5 +1,6 @@
 import StrongPNT.PNT3_RiemannZeta
 import StrongPNT.Z0
+import Mathlib.Analysis.Meromorphic.Divisor
 
 def zeroZ : Set ℂ := {s : ℂ | riemannZeta s = 0}
 
@@ -23,11 +24,9 @@ lemma ZetaZerosNearPoint_finite (t : ℝ) : Set.Finite (ZetaZerosNearPoint t) :=
         filter_upwards [self_mem_nhdsWithin] with t ht
         -- On t ≠ 1, H agrees with (t-1)*ζ t; prove differentiableAt via congr
         have hdiff : DifferentiableAt ℂ (fun u : ℂ => (u - 1) * riemannZeta u) t := by
-          have h1 : DifferentiableAt ℂ (fun u : ℂ => u - 1) t :=
-            (differentiableAt_id.sub_const 1)
           have h2 : DifferentiableAt ℂ riemannZeta t :=
             (differentiableAt_riemannZeta ht)
-          exact h1.mul h2
+          fun_prop (disch := assumption)
         apply DifferentiableAt.congr_of_eventuallyEq hdiff
         filter_upwards [eventually_ne_nhds ht] with u hu using by
           simp [H, Function.update_of_ne hu]
@@ -35,211 +34,28 @@ lemma ZetaZerosNearPoint_finite (t : ℝ) : Set.Finite (ZetaZerosNearPoint t) :=
         simpa [H, continuousAt_update_same] using riemannZeta_residue_one
     · -- s ≠ 1: H agrees with (s-1)ζ(s), hence differentiable
       have hdiff : DifferentiableAt ℂ (fun u : ℂ => (u - 1) * riemannZeta u) s := by
-        have h1 : DifferentiableAt ℂ (fun u : ℂ => u - 1) s :=
-          (differentiableAt_id.sub_const 1)
         have h2 : DifferentiableAt ℂ riemannZeta s :=
           (differentiableAt_riemannZeta hs)
-        exact h1.mul h2
+        fun_prop (disch := assumption)
       apply DifferentiableAt.congr_of_eventuallyEq hdiff
       filter_upwards [eventually_ne_nhds hs] with u hu using by
         simp [H, Function.update_of_ne hu]
+  apply (MeromorphicOn.divisor H (Metric.closedBall c R)).finiteSupport (isCompact_closedBall ..)|>.subset
+  intro z hz
+  have := Complex.analyticOnNhd_univ_iff_differentiable.mpr hH_diff
+  simp_all [ZetaZerosNearPoint]
+  rw [MeromorphicOn.divisor_apply (this.mono (Set.subset_univ _)).meromorphicOn (by simp_all [c, R, dist_eq_norm_sub]),
+    (this z (Set.mem_univ _)).meromorphicOrderAt_eq]
+  simp_all [analyticOrderAt_ne_zero, this z]
+  constructor
+  · simp_all [ZetaZerosNearPoint, zeroZ, H]
+    by_cases! h : z = 1
+    · simp [h, riemannZeta_one_ne_zero] at hz
+    · simp_all
+  · apply this.analyticOrderAt_ne_top_of_isPreconnected isPreconnected_univ (x := 1) (Set.mem_univ _) (Set.mem_univ _)
+    have :=  (this 1 (Set.mem_univ _)).analyticOrderAt_eq_zero.mpr (by simp [H])
+    simp [this]
 
-  -- Define a translated function g so that zeros of ζ in the closed ball around c
-  -- correspond to zeros of g in the closed ball around 0. If the pole at 1 lies
-  -- in the ball, multiply by (z + c - 1) to remove it.
-  by_cases hPoleIn : ‖1 - c‖ ≤ R
-  · -- Pole at 1 is inside: use g z = (z + c - 1) * ζ(z + c)
-    let g : ℂ → ℂ := fun z => H (z + c)
-    -- Witness that g is not identically zero: evaluate at z = 0. Here c.re = 3/2 > 1, so ζ(c) ≠ 0.
-    have hzeta_c_ne : riemannZeta c ≠ 0 := by
-      -- Use non-vanishing for Re > 1
-      have : c.re = (3/2 : ℝ) := by
-        simp [c, Complex.add_re, Complex.mul_re, Complex.I_re]
-      have hgt : c.re > 1 := by simpa [this] using (by norm_num : (3:ℝ)/2 > 1)
-      -- riemannZeta ≠ 0 for Re ≥ 1, in particular for Re > 1
-      exact riemannZeta_ne_zero_of_one_le_re (by
-        -- show 1 ≤ c.re
-        have : (1 : ℝ) < c.re := hgt
-        exact le_of_lt this)
-    have hg_nonzero : ∃ z ∈ Metric.ball (0 : ℂ) R, g z ≠ 0 := by
-      -- choose z = 0; need 0 ∈ Metric.ball 0 R and g 0 ≠ 0
-      have h0in : (0 : ℂ) ∈ Metric.ball (0 : ℂ) R := by
-        simpa [Metric.mem_ball, Complex.dist_eq] using hRpos
-      refine ⟨0, h0in, ?_⟩
-      -- g 0 = H c = (c - 1) * ζ(c) ≠ 0 as ζ(c) ≠ 0 and c ≠ 1
-      have hcne1 : c ≠ (1 : ℂ) := by
-        intro hc; have hcreq : c.re = 1 := by simp [hc, Complex.one_re]
-        have : (3 : ℝ) / 2 = (1 : ℝ) := by
-          simpa [c, Complex.add_re, Complex.mul_re, Complex.I_re] using hcreq
-        norm_num at this
-      have hHc : g 0 = H c := by simp [g]
-      have : g 0 = (c - 1) * riemannZeta c := by
-        simpa [H, Function.update_of_ne hcne1] using hHc
-      simpa [this] using mul_ne_zero (sub_ne_zero.mpr (by
-        -- c ≠ 1 since c.re = 3/2
-        exact hcne1)) hzeta_c_ne
-    -- Define the zero set of g in closedBall(0,R)
-    let Kg : Set ℂ := {ρ : ℂ | ρ ∈ Metric.closedBall (0 : ℂ) R ∧ g ρ = 0}
-    -- Zeta zeros in the original disk map into zeros of g via ρ ↦ ρ - c
-    have h_subset : ZetaZerosNearPoint t ⊆ {ρ : ℂ | (ρ - c) ∈ Metric.closedBall 0 R ∧ g (ρ - c) = 0} := by
-      intro ρ hρ
-      rcases hρ with ⟨hzero, hdist⟩
-      -- membership in closedBall around 0
-      have hball : ρ - c ∈ Metric.closedBall 0 R := by
-        simpa [Metric.mem_closedBall, Complex.dist_eq, c, sub_eq_add_neg] using hdist
-      -- g (ρ - c) = (ρ - 1) * ζ(ρ) = 0 since ζ(ρ) = 0
-      have hρne1 : (ρ : ℂ) ≠ 1 := by
-        intro hρ1
-        -- zeta 1 ≠ 0, contradicting hzero
-        have hz1_ne : riemannZeta (1 : ℂ) ≠ 0 := riemannZeta_ne_zero_of_one_le_re (by simp)
-        exact hz1_ne (by simpa [hρ1] using hzero)
-      have hsum : (ρ - c) + c = ρ := by simp [sub_add_cancel]
-      have hxne : (ρ - c) + c ≠ (1 : ℂ) := by simpa [hsum] using hρne1
-      have hform : g (ρ - c) = (ρ - 1) * riemannZeta ρ := by
-        simp [g, H, hsum, Function.update_of_ne hxne]
-      have hzeroζ : riemannZeta ρ = 0 := hzero
-      have hzero' : g (ρ - c) = 0 := by simp [hform, hzeroζ]
-      exact ⟨hball, hzero'⟩
-    -- g is entire: composition of entire H with translation. Hence analytic on any neighborhood.
-    have hg_diff : Differentiable ℂ g := by
-      intro z
-      have hH := hH_diff (z + c)
-      have h_addc : DifferentiableAt ℂ (fun z : ℂ => z + c) z :=
-        (differentiableAt_id.add_const c)
-      simpa [g] using hH.comp z h_addc
-    have hg_analyticNhd_univ : AnalyticOnNhd ℂ g Set.univ :=
-      (Complex.analyticOnNhd_univ_iff_differentiable).2 hg_diff
-    have hg_analyticNhd : AnalyticOnNhd ℂ g (Metric.closedBall (0 : ℂ) 1) :=
-      AnalyticOnNhd.mono hg_analyticNhd_univ (by intro z hz; simp)
-    have hNonzero : ∃ z ∈ Metric.ball (0 : ℂ) 1, g z ≠ 0 := by
-      rcases hg_nonzero with ⟨z, hz_in, hz_ne⟩
-      -- ball 0 R ⊆ ball 0 1 since R < 1
-      have hz_in' : z ∈ Metric.ball (0 : ℂ) 1 := by
-        have hRle : (R : ℝ) ≤ 1 := by norm_num
-        exact Metric.ball_subset_ball hRle hz_in
-      exact ⟨z, hz_in', hz_ne⟩
-    have hfiniteKg : Set.Finite Kg :=
-      zeroset_finite R (by norm_num : R < 1) g hg_analyticNhd hNonzero
-    -- Show the target set is finite by mapping Kg through z ↦ z + c
-    have hTarget_eq : {ρ : ℂ | (ρ - c) ∈ Metric.closedBall 0 R ∧ g (ρ - c) = 0} =
-          (fun ρ : ℂ => ρ + c) '' Kg := by
-      ext ρ; constructor
-      · intro h
-        rcases h with ⟨hball, hzero⟩
-        refine ⟨ρ - c, ⟨?_, ?_⟩, ?_⟩
-        · exact hball
-        · exact hzero
-        · simp [sub_add_cancel]
-      · intro h
-        rcases h with ⟨z, ⟨hzball, hz0⟩, rfl⟩
-        constructor
-        · simpa [sub_add_cancel] using hzball
-        · simpa [sub_add_cancel] using hz0
-    -- images of finite sets are finite, hence target set finite; conclude by subset
-    have hTarget_fin : Set.Finite {ρ : ℂ | (ρ - c) ∈ Metric.closedBall 0 R ∧ g (ρ - c) = 0} := by
-      have himg : Set.Finite ((fun ρ : ℂ => ρ + c) '' Kg) := hfiniteKg.image _
-      -- rewrite the target set using hTarget_eq
-      exact hTarget_eq ▸ himg
-    exact Set.Finite.subset hTarget_fin h_subset
-  · -- Pole at 1 is outside: use g z = H (z + c)
-    let g : ℂ → ℂ := fun z => H (z + c)
-    -- Nontriviality at z=0 since ζ(c) ≠ 0
-    have hzeta_c_ne : riemannZeta c ≠ 0 := by
-      have : c.re = (3/2 : ℝ) := by
-        simp [c, Complex.add_re, Complex.mul_re, Complex.I_re]
-      have hgt : c.re > 1 := by simpa [this] using (by norm_num : (3:ℝ)/2 > 1)
-      exact riemannZeta_ne_zero_of_one_le_re (le_of_lt hgt)
-    have hg_nonzero : ∃ z ∈ Metric.ball (0 : ℂ) R, g z ≠ 0 := by
-      have h0in : (0 : ℂ) ∈ Metric.ball (0 : ℂ) R := by
-        simpa [Metric.mem_ball, Complex.dist_eq] using hRpos
-      refine ⟨0, h0in, ?_⟩
-      have hcne1 : c ≠ (1 : ℂ) := by
-        intro hc; have hcreq : c.re = 1 := by simp [hc, Complex.one_re]
-        have : (3 : ℝ) / 2 = (1 : ℝ) := by
-          simpa [c, Complex.add_re, Complex.mul_re, Complex.I_re] using hcreq
-        norm_num at this
-      -- g 0 = H c = (c - 1) * ζ c ≠ 0
-      have hHc : g 0 = H c := by simp [g]
-      have : g 0 = (c - 1) * riemannZeta c := by
-        simpa [H, Function.update_of_ne hcne1] using hHc
-      simpa [this] using mul_ne_zero (sub_ne_zero.mpr hcne1) hzeta_c_ne
-    -- Define zero set of g in closed ball
-    let Kg : Set ℂ := {ρ : ℂ | ρ ∈ Metric.closedBall (0 : ℂ) R ∧ g ρ = 0}
-    -- Subset mapping
-    have h_subset : ZetaZerosNearPoint t ⊆ {ρ : ℂ | (ρ - c) ∈ Metric.closedBall 0 R ∧ g (ρ - c) = 0} := by
-      intro ρ hρ
-      rcases hρ with ⟨hzero, hdist⟩
-      have hball : ρ - c ∈ Metric.closedBall 0 R := by
-        simpa [Metric.mem_closedBall, Complex.dist_eq, c, sub_eq_add_neg] using hdist
-      have hρne1 : (ρ : ℂ) ≠ 1 := by
-        intro hρ1
-        have hz1_ne : riemannZeta (1 : ℂ) ≠ 0 := riemannZeta_ne_zero_of_one_le_re (by simp)
-        exact hz1_ne (by simpa [hρ1] using hzero)
-      have hsum : (ρ - c) + c = ρ := by simp [sub_add_cancel]
-      have hxne : (ρ - c) + c ≠ (1 : ℂ) := by simpa [hsum] using hρne1
-      have hform : g (ρ - c) = (ρ - 1) * riemannZeta ρ := by
-        simp [g, H, hsum, Function.update_of_ne hxne]
-      -- turn membership into the explicit equation
-      have hzeroζ : riemannZeta ρ = 0 := hzero
-      have hzero' : g (ρ - c) = 0 := by
-        calc
-          g (ρ - c) = (ρ - 1) * riemannZeta ρ := hform
-          _ = (ρ - 1) * 0 := by simp [hzeroζ]
-          _ = 0 := by simp
-      exact ⟨hball, hzero'⟩
-    -- g is entire as before
-    have hg_diff : Differentiable ℂ g := by
-      intro z
-      have hH := hH_diff (z + c)
-      have h_addc : DifferentiableAt ℂ (fun z : ℂ => z + c) z :=
-        (differentiableAt_id.add_const c)
-      simpa [g] using hH.comp z h_addc
-    have hg_analyticNhd_univ : AnalyticOnNhd ℂ g Set.univ :=
-      (Complex.analyticOnNhd_univ_iff_differentiable).2 hg_diff
-    have hg_analyticNhd : AnalyticOnNhd ℂ g (Metric.closedBall (0 : ℂ) 1) :=
-      AnalyticOnNhd.mono hg_analyticNhd_univ (by intro z hz; simp)
-    have hNonzero : ∃ z ∈ Metric.ball (0 : ℂ) 1, g z ≠ 0 := by
-      rcases hg_nonzero with ⟨z, hz_in, hz_ne⟩
-      have hz_in' : z ∈ Metric.ball (0 : ℂ) 1 := by
-        have hRle : (R : ℝ) ≤ 1 := by norm_num
-        exact Metric.ball_subset_ball hRle hz_in
-      exact ⟨z, hz_in', hz_ne⟩
-    have hfiniteKg : Set.Finite Kg :=
-      zeroset_finite R (by norm_num : R < 1) g hg_analyticNhd hNonzero
-    have hTarget_eq : {ρ : ℂ | (ρ - c) ∈ Metric.closedBall 0 R ∧ g (ρ - c) = 0} =
-          (fun ρ : ℂ => ρ + c) '' Kg := by
-      ext ρ; constructor
-      · intro h
-        rcases h with ⟨hball, hzero⟩
-        refine ⟨ρ - c, ⟨?_, ?_⟩, ?_⟩
-        · exact hball
-        · exact hzero
-        · simp [sub_add_cancel]
-      · intro h
-        rcases h with ⟨z, ⟨hzball, hz0⟩, rfl⟩
-        constructor
-        · simpa [sub_add_cancel] using hzball
-        · simpa [sub_add_cancel] using hz0
-    have hTarget_fin : Set.Finite {ρ : ℂ | (ρ - c) ∈ Metric.closedBall 0 R ∧ g (ρ - c) = 0} := by
-      have himg : Set.Finite ((fun ρ : ℂ => ρ + c) '' Kg) := hfiniteKg.image _
-      exact hTarget_eq ▸ himg
-    exact Set.Finite.subset hTarget_fin h_subset
-
-lemma lem_Re1zge0 (z : ℂ) : z.re > 0 → (1 / z).re > 0 := by
-  intro h
-  -- First show that z ≠ 0
-  have hz_ne_zero : z ≠ 0 := by
-    intro hz_eq_zero
-    rw [hz_eq_zero] at h
-    simp at h
-  -- Use the fact that 1/z = z⁻¹
-  rw [one_div]
-  -- Apply the formula for real part of inverse
-  rw [Complex.inv_re]
-  -- Now we have z.re / normSq z, which is positive since both numerator and denominator are positive
-  apply div_pos h
-  -- normSq z > 0 since z ≠ 0
-  rwa [Complex.normSq_pos]
 
 lemma lem_sigmage1 (sigma t : ℝ) (hsigma : sigma > 1) : riemannZeta (sigma + t * Complex.I) ≠ 0 := by
   apply riemannZeta_ne_zero_of_one_le_re
@@ -276,17 +92,7 @@ lemma complex_abs_real_cast (r : ℝ) : ‖(r : ℂ)‖ = abs r := Complex.norm_
 
 lemma zerosetKfRc_eq_ZetaZerosNearPoint (t : ℝ) :
   zerosetKfRc (5/6 : ℝ) ((3/2 : ℂ) + t * Complex.I) riemannZeta = ZetaZerosNearPoint t := by
-  ext ρ; constructor
-  · intro h
-    rcases h with ⟨hball, hzero⟩
-    refine ⟨?hz, ?hnorm⟩
-    · simpa [zeroZ] using hzero
-    · simpa [Metric.mem_closedBall, Complex.dist_eq, sub_eq_add_neg] using hball
-  · intro h
-    rcases h with ⟨hz, hnorm⟩
-    refine ⟨?hball, ?hzero⟩
-    · simpa [Metric.mem_closedBall, Complex.dist_eq, sub_eq_add_neg] using hnorm
-    · simpa [zeroZ] using hz
+  ext ρ; constructor <;>   simp +contextual [zerosetKfRc, ZetaZerosNearPoint, zeroZ, dist_eq_norm_sub]
 
 lemma center_eq_comm (t : ℝ) :
   ((3/2 : ℂ) + (Complex.I : ℂ) * (t : ℂ)) = ((3/2 : ℂ) + (t : ℂ) * Complex.I) := by
@@ -305,11 +111,6 @@ lemma s_notin_ZetaZerosNearPoint (δ t : ℝ) (hδ_pos : 0 < δ) :
   have hpos : (1 : ℝ) < 1 + δ := by linarith
   have hnonzero := lem_sigmage1 (1 + δ) t hpos
   exact hnonzero (by simpa using hz0)
-
-lemma norm_sub_comm' (x y : ℂ) : ‖x - y‖ = ‖y - x‖ := by
-  calc
-    ‖x - y‖ = ‖-(x - y)‖ := by simpa using (norm_neg (x - y)).symm
-    _ = ‖y - x‖ := by simp [neg_sub]
 
 lemma s_in_closedBall_12 (δ t : ℝ) (hδ_pos : 0 < δ) (hδ_lt : δ < 1) :
   ((1 : ℂ) + (δ : ℝ) + (t : ℝ) * Complex.I) ∈
@@ -453,7 +254,7 @@ lemma lem_explicit1deltat :
               (fun ρ : ℂ => ((analyticOrderAt riemannZeta ρ).toNat : ℂ) / (s - ρ))‖
         ≤ F * Real.log (b * |t| / ‖riemannZeta c_std‖) := by
       simpa [F] using hineq2
-    simpa [norm_sub_comm', hFinset_eq]
+    simpa [norm_sub_rev, hFinset_eq]
       using this
   -- Control the logarithmic factor
   have hc_ne : riemannZeta c_std ≠ 0 := by simpa [c_std] using zetacnot0 t
@@ -634,9 +435,6 @@ lemma lem_explicit2Real :
   simp only [Complex.ofReal_mul] at h_bound
   exact h_bound
 
-lemma lem_Realsum {α : Type*} (s : Finset α) (f : α → ℂ) : (Finset.sum s f).re = Finset.sum s (fun i => (f i).re) := by
-  exact Complex.re_sum s f
-
 lemma lem_sumrho1 (t : ℝ) (δ : ℝ) :
     (Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t))
         (fun rho1 : ℂ =>
@@ -646,7 +444,7 @@ lemma lem_sumrho1 (t : ℝ) (δ : ℝ) :
     (fun rho1 : ℂ =>
                     (((analyticOrderAt riemannZeta rho1).toNat : ℂ) /
                       (((1 : ℂ) + δ + t * Complex.I) - rho1)).re) := by
-  exact lem_Realsum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t)) _
+  exact Complex.re_sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t)) _
 
 lemma lem_sumrho2 (t : ℝ) (delta : ℝ) :
     (Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t)))
@@ -655,59 +453,11 @@ lemma lem_sumrho2 (t : ℝ) (delta : ℝ) :
     (fun rho1 : ℂ => (((analyticOrderAt riemannZeta rho1).toNat : ℂ) / (((1 : ℂ) + delta + (2 * t) * Complex.I) - rho1)).re) := by
   rw [Complex.re_sum]
 
-lemma lem_1deltatrho1 (delta : ℝ) (_hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (_h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :    ((1 : ℂ) + delta + t * Complex.I - rho1) = ((1 : ℝ) + delta - rho1.re) + (t - rho1.im) * Complex.I := by
-  -- First, let's use the standard form of a complex number
-  conv_lhs => rw [← Complex.re_add_im rho1]
-  -- Now we have (1 : ℂ) + delta + t * Complex.I - (rho1.re + rho1.im * Complex.I)
-  -- Let's expand this step by step
-  simp only [sub_add_eq_sub_sub]
-  -- Rearrange terms to group real and imaginary parts
-  ring_nf
-  -- Now we need to show the result matches the right-hand side
-  simp only [Complex.ofReal_add, Complex.ofReal_sub, Complex.ofReal_one]
-  ring
-
-lemma lem_Re1deltatrho1 (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
-((1 : ℂ) + delta + t * Complex.I - rho1).re = (1 : ℝ) + delta - rho1.re := by
-  -- Apply lem_1deltatrho1 to rewrite the left side
-  rw [lem_1deltatrho1 delta hdelta t rho1 h_rho1_in_Zt]
-  -- Now we have ((1 : ℝ) + delta - rho1.re + (t - rho1.im) * Complex.I).re
-  -- Take the real part
-  rw [Complex.add_re]
-  -- The real part of (a + b * I) is a
-  rw [Complex.mul_I_re]
-  -- Simplify
-  simp
-
-lemma lem_Re1delta1 (delta : ℝ) (_hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
-(1 : ℝ) + delta - rho1.re ≥ delta := by
-  -- Apply lem_sigmale1Zt to get rho1.re ≤ 1
-  have h_rho1_re_le_1 : rho1.re ≤ 1 := lem_sigmale1Zt t rho1 h_rho1_in_Zt
-  -- This means 1 - rho1.re ≥ 0
-  have h_nonneg : 1 - rho1.re ≥ 0 := by linarith
-  -- Therefore 1 + delta - rho1.re = (1 - rho1.re) + delta ≥ 0 + delta = delta
-  linarith
-
-lemma lem_Re1deltatge (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :    ((1 : ℂ) + delta + t * Complex.I - rho1).re ≥ delta := by
-  -- Apply lem_Re1deltatrho1 to rewrite the left side
-  rw [lem_Re1deltatrho1 delta hdelta t rho1 h_rho1_in_Zt]
-  -- Apply lem_Re1delta1 to get the desired inequality
-  exact lem_Re1delta1 delta hdelta t rho1 h_rho1_in_Zt
-
-lemma lem_Re1deltatneq0 (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
-((1 : ℂ) + delta + t * Complex.I - rho1).re > 0 := by
-  -- Apply lem_Re1deltatge to get that the real part is ≥ delta
-  have h_ge_delta : ((1 : ℂ) + delta + t * Complex.I - rho1).re ≥ delta := lem_Re1deltatge delta hdelta t rho1 h_rho1_in_Zt
-  -- Since delta > 0 and the real part ≥ delta, we have the real part > 0
-  linarith [hdelta]
-
 lemma lem_Re1deltatge0 (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
 (1 / ((1 : ℂ) + delta + t * Complex.I - rho1)).re ≥ 0 := by
-  -- Apply lem_Re1zge0 with z = (1 : ℂ) + delta + t * Complex.I - rho1
-  apply le_of_lt
-  apply lem_Re1zge0
-  -- Apply lem_Re1deltatneq0 to get the positive real part
-  exact lem_Re1deltatneq0 delta hdelta t rho1 h_rho1_in_Zt
+  simp
+  apply div_nonneg _ <| Complex.normSq_nonneg _
+  linarith [lem_sigmale1Zt t rho1 h_rho1_in_Zt]
 
 lemma lem_Re1deltatge0m (delta : ℝ) (hdelta : delta > 0) (t : ℝ)
   (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :

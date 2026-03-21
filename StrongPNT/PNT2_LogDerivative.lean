@@ -8,31 +8,6 @@ def zerosetKfR (R : ℝ) (f : ℂ → ℂ) : Set ℂ :=
   {ρ : ℂ | ρ ∈ Metric.closedBall (0 : ℂ) R ∧ f ρ = 0}
 
 open Filter Metric Set Bornology Function
-
-lemma zeroset_finite (R : ℝ) (hR : R < 1)
-    (f : ℂ → ℂ) (hf : AnalyticOnNhd ℂ f (Metric.closedBall (0 : ℂ) 1))
-    (h_exists_nonzero : ∃ z ∈ Metric.ball (0 : ℂ) 1, f z ≠ 0) :
-    Set.Finite (zerosetKfR R f) := by
-  apply Set.Finite.subset (s := (zerosetKfR 1 f))
-  swap
-  · unfold zerosetKfR
-    intro z hz
-    simp_all
-    grind
-  rcases h_exists_nonzero with ⟨z, hz1, hz2⟩
-  have := hf.preimage_zero_mem_codiscreteWithin hz2 (mem_of_mem_of_subset hz1 ball_subset_closedBall) (isConnected_closedBall (by linarith))
-  have disc := isDiscrete_of_codiscreteWithin this
-  have : zerosetKfR 1 f = (f ⁻¹' {0}) ∩ closedBall 0 1 := by
-    unfold zerosetKfR
-    ext
-    simp
-    grind
-  rw [this]
-  refine IsCompact.finite ?_ disc
-  refine IsCompact.of_isClosed_subset (isCompact_closedBall 0 1) ?_ inter_subset_right
-  rw [inter_comm]
-  exact hf.continuousOn.preimage_isClosed_of_isClosed  isClosed_closedBall (by simp)
-
 open Classical
 
 lemma lem_m_rho_is_nat (R R1 : ℝ) (hR1_lt_R : R1 < R) (f : ℂ → ℂ)
