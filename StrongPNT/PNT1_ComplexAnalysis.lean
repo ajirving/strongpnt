@@ -200,77 +200,24 @@ lemma lem_CIF_deriv_param {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ}
     {z : ℂ} (hz : z ∈ Metric.closedBall 0 r_z) :
     deriv f z = (1 / (2 * Real.pi * I)) * (∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi),
 (I * r_int * Complex.exp (I * t) * ((r_int * Complex.exp (I * t)) - z)⁻¹ ^ 2) * f (r_int * Complex.exp (I * t))) := by
-  -- Apply cauchy_formula_deriv to get the circle integral form
-  rw [cauchy_formula_deriv hf_domain h_r_z_lt_r_int h_r_int_lt_R_analytic hz]
-
-  -- Convert circle integral to parametric integral using circleIntegral_def_Icc
-  rw [circleIntegral_def_Icc]
-
-  -- Convert scalar multiplication to regular multiplication
-  rw [smul_eq_mul]
-
-  -- Substitute circleMap and its derivative
+  rw [cauchy_formula_deriv hf_domain h_r_z_lt_r_int h_r_int_lt_R_analytic hz,
+    circleIntegral_def_Icc, smul_eq_mul]
   simp only [circleMap_zero_eq_exp, deriv_circleMap_zero]
-
-  -- Now we need to match the form: the integrand should be
-  -- (I * r_int * Complex.exp (I * t)) • ((r_int * Complex.exp (I * t) - z)⁻¹ ^ 2 • f (r_int * Complex.exp (I * t)))
-  -- which equals our target form
   congr 2
   ext t
   simp only [smul_eq_mul]
   ring
 
 lemma complex_coeff_I_cancel : (1 : ℂ) / (2 * Real.pi * I) * I = 1 / (2 * Real.pi) := by
-  field_simp [Complex.I_ne_zero, Real.pi_pos.ne']
-  exact div_self Complex.I_ne_zero
+  field [Complex.I_ne_zero, Real.pi_pos.ne', I]
 
 lemma factor_I_from_integrand (f : ℂ → ℂ) (r_int : ℝ) (z : ℂ) :
   ∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi), I * ↑r_int * Complex.exp (I * ↑t) * (↑r_int * Complex.exp (I * ↑t) - z)⁻¹ ^ 2 * f (↑r_int * Complex.exp (I * ↑t)) =
   I * ∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi), ↑r_int * Complex.exp (I * ↑t) * (↑r_int * Complex.exp (I * ↑t) - z)⁻¹ ^ 2 * f (↑r_int * Complex.exp (I * ↑t)) := by
-  -- Rewrite the left-hand side to separate I from the rest of the integrand
-  -- The key insight is that I * (expression) = I • (expression) in ℂ
   have h : ∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi), I * ↑r_int * Complex.exp (I * ↑t) * (↑r_int * Complex.exp (I * ↑t) - z)⁻¹ ^ 2 * f (↑r_int * Complex.exp (I * ↑t)) =
-           ∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi), I • (↑r_int * Complex.exp (I * ↑t) * (↑r_int * Complex.exp (I * ↑t) - z)⁻¹ ^ 2 * f (↑r_int * Complex.exp (I * ↑t))) := by
-    congr 1
-    ext t
-    rw [smul_eq_mul]
-    ring
-  rw [h]
-  -- Apply linearity of integration to factor out the scalar I
-  rw [MeasureTheory.integral_smul]
-  -- Convert scalar multiplication back to regular multiplication
-  rw [smul_eq_mul]
-
-lemma integrand_transform_div (f : ℂ → ℂ) (r_int : ℝ) (z : ℂ) (t : ℝ) :
-  ↑r_int * Complex.exp (I * ↑t) * (↑r_int * Complex.exp (I * ↑t) - z)⁻¹ ^ 2 * f (↑r_int * Complex.exp (I * ↑t)) =
-  ↑r_int * Complex.exp (I * ↑t) * f (↑r_int * Complex.exp (I * ↑t)) / (↑r_int * Complex.exp (I * ↑t) - z) ^ 2 := by
-  -- Use inv_pow to transform (w - z)⁻¹ ^ 2 to ((w - z) ^ 2)⁻¹
-  rw [inv_pow]
-  -- Use div_eq_mul_inv in reverse to transform multiplication by inverse to division
-  rw [← div_eq_mul_inv]
-  -- Now we need to rearrange the multiplication
-  ring
-
-lemma lem_CIF_deriv_simplified {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ}
-    (hf_domain : ∃ U, IsOpen U ∧ Metric.closedBall 0 R_analytic ⊆ U ∧ DifferentiableOn ℂ f U)
-    (h_r_z_lt_r_int : r_z < r_int)
-    (h_r_int_lt_R_analytic : r_int < R_analytic)
-    {z : ℂ} (hz : z ∈ Metric.closedBall 0 r_z) :
-    deriv f z = (1 / (2 * Real.pi)) * (∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi),
-(r_int * Complex.exp (I * t) * f (r_int * Complex.exp (I * t))) / ((r_int * Complex.exp (I * t)) - z) ^ 2) := by
-  -- Apply lem_CIF_deriv_param
-  rw [lem_CIF_deriv_param hf_domain h_r_z_lt_r_int h_r_int_lt_R_analytic hz]
-
-  -- Factor out I from the integrand using linearity
-  rw [factor_I_from_integrand f r_int z]
-
-  -- Rearrange to cancel I factors: (1 / (2 * Real.pi * I)) * I = 1 / (2 * Real.pi)
-  rw [← mul_assoc, complex_coeff_I_cancel]
-
-  -- Transform the integrand from multiplicative inverse to division form
-  congr 2
-  funext t
-  rw [integrand_transform_div f r_int z t]
+           ∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi), I * (↑r_int * Complex.exp (I * ↑t) * (↑r_int * Complex.exp (I * ↑t) - z)⁻¹ ^ 2 * f (↑r_int * Complex.exp (I * ↑t))) := by
+    ring_nf
+  rw [h, MeasureTheory.integral_const_mul]
 
 lemma lem_modulus_of_f_prime0 {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ}
     (hf_domain : ∃ U, IsOpen U ∧ Metric.closedBall 0 R_analytic ⊆ U ∧ DifferentiableOn ℂ f U)
@@ -279,76 +226,26 @@ lemma lem_modulus_of_f_prime0 {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ}
     {z : ℂ} (hz : z ∈ Metric.closedBall 0 r_z) :
     norm (deriv f z) = norm ((1 / (2 * Real.pi)) * (∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi),
 (r_int * Complex.exp (I * t) * f (r_int * Complex.exp (I * t))) / ((r_int * Complex.exp (I * t)) - z) ^ 2)) := by
-  -- Apply the simplified Cauchy integral formula for derivatives
-  rw [lem_CIF_deriv_simplified hf_domain h_r_z_lt_r_int h_r_int_lt_R_analytic hz]
-
-lemma one_div_two_pi_pos : (1 : ℝ) / (2 * Real.pi) > 0 := by
-  -- Use the fact that π > 0
-  have h_pi_pos : Real.pi > 0 := Real.pi_pos
-  -- Show that 2 * π > 0
-  have h_2pi_pos : 2 * Real.pi > 0 := by
-    apply mul_pos
-    · norm_num
-    · exact h_pi_pos
-  -- Show that 1 / (2 * π) > 0
-  apply div_pos
-  · norm_num
-  · exact h_2pi_pos
-
-lemma abs_integral_le_integral_abs {a b : ℝ} {g : ℝ → ℂ}  : norm (∫ (t : ℝ) in Set.Icc a b, g t) ≤ ∫ (t : ℝ) in Set.Icc a b, norm (g t) := by
-  -- Apply the general triangle inequality for integrals from measure theory
-  -- Since norm is the norm on ℂ, this follows directly
-  exact MeasureTheory.norm_integral_le_integral_norm g
-
-lemma complex_abs_mul (a b : ℂ) : norm (a * b) = norm a * norm b :=
-  Complex.norm_mul a b
-
-lemma complex_abs_ofReal_nonneg (r : ℝ) (hr : r ≥ 0) : norm (↑r : ℂ) = r := by
-  -- Use abs_ofReal_mul_complex with z = 1
-  have h1 : norm (↑r * 1) = r * norm (1 : ℂ) := by simp; assumption
-  -- Simplify: ↑r * 1 = ↑r and norm 1 = 1
-  simp only [mul_one] at h1
-  have h2 : norm (1 : ℂ) = 1 := by simp
-  rw [h2] at h1
-  simp only [mul_one] at h1
-  simp
-  assumption
-
-lemma abs_one_div_two_pi_complex : norm (1 / (2 * ↑Real.pi : ℂ)) = 1 / (2 * Real.pi) := by
-  -- First rewrite the complex expression as a coercion of the real expression
-  have h_eq : (1 / (2 * ↑Real.pi) : ℂ) = ↑(1 / (2 * Real.pi) : ℝ) := by
-    simp only [Complex.ofReal_div, Complex.ofReal_one, Complex.ofReal_mul, Complex.ofReal_ofNat]
-
-  rw [h_eq]
-
-  -- Now show that 1 / (2 * Real.pi) ≥ 0
-  have h_nonneg : (1 / (2 * Real.pi) : ℝ) ≥ 0 := by
-    apply div_nonneg
-    · norm_num
-    · apply mul_nonneg
-      · norm_num
-      · exact le_of_lt Real.pi_pos
-
-  -- Apply the existing lemma
-  exact complex_abs_ofReal_nonneg (1 / (2 * Real.pi)) h_nonneg
+  congr 1
+  -- Apply lem_CIF_deriv_param
+  rw [lem_CIF_deriv_param hf_domain h_r_z_lt_r_int h_r_int_lt_R_analytic hz]
+  -- Factor out I from the integrand using linearity
+  rw [factor_I_from_integrand f r_int z]
+  -- Rearrange to cancel I factors: (1 / (2 * Real.pi * I)) * I = 1 / (2 * Real.pi)
+  rw [← mul_assoc, complex_coeff_I_cancel]
+  congr 2
+  funext t
+  field
 
 lemma lem_integral_modulus_inequality {r_int : ℝ} {z : ℂ} {f : ℂ → ℂ} :
 norm ((1 / (2 * Real.pi)) * (∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi), (r_int * Complex.exp (I * t) * f (r_int * Complex.exp (I * t))) / ((r_int * Complex.exp (I * t)) - z) ^ 2)) ≤ (1 / (2 * Real.pi)) * (∫ (t : ℝ) in Set.Icc 0 (2 * Real.pi), norm ((r_int * Complex.exp (I * t) * f (r_int * Complex.exp (I * t))) / ((r_int * Complex.exp (I * t)) - z) ^ 2)) := by
   -- Use the multiplicative property |a * b| = |a| * |b|
-  rw [complex_abs_mul]
-
-  -- Use the fact that |1 / (2 * π)| = 1 / (2 * π) since it's positive real
-  rw [abs_one_div_two_pi_complex]
-
-  -- Apply the triangle inequality |∫g| ≤ ∫|g| with correct hypothesis
-  apply mul_le_mul_of_nonneg_left
-  · -- Need to prove 0 ≤ 2 * Real.pi for abs_integral_le_integral_abs
-    have h_2pi_nonneg : (0 : ℝ) ≤ 2 * Real.pi := by
-      apply mul_nonneg
-      · norm_num
-      · exact le_of_lt Real.pi_pos
-    exact abs_integral_le_integral_abs
-  · exact le_of_lt one_div_two_pi_pos
+  rw [norm_mul]
+  gcongr
+  · apply le_of_eq
+    simp
+    positivity
+  · exact MeasureTheory.norm_integral_le_integral_norm _
 
 lemma lem_modulus_of_f_prime {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ}
     (hf_domain : ∃ U, IsOpen U ∧ Metric.closedBall 0 R_analytic ⊆ U ∧ DifferentiableOn ℂ f U)
@@ -362,31 +259,9 @@ norm ((r_int * Complex.exp (I * t) * f (r_int * Complex.exp (I * t))) / ((r_int 
   -- Apply lem_integral_modulus_inequality to get the desired inequality
   exact lem_integral_modulus_inequality
 
-lemma lem_modeit (t : ℝ) : norm (Complex.exp (I * t)) = Real.exp (Complex.re (I * t)) := by
-  -- This is a direct application of the general theorem
-  exact Complex.norm_exp (I * t)
-
-lemma lem_Reit0 (t : ℝ) : Complex.re (I * t) = 0 := by
-  -- Unfold the definition I = Complex.I
-  unfold I
-  -- Use the formula for real part of multiplication
-  rw [Complex.mul_re]
-  -- We have Complex.I.re * (↑t).re - Complex.I.im * (↑t).im
-  -- Complex.I.re = 0, Complex.I.im = 1, (↑t).re = t, (↑t).im = 0
-  rw [Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
-  -- Now we have 0 * t - 1 * 0 = 0
-  ring
-
-lemma lem_e01 : Real.exp 0 = 1 := by
-  exact Real.exp_zero
-
 lemma lem_modulus_of_e_it_is_one (t : ℝ) : norm (Complex.exp (I * t)) = 1 := by
-  -- Apply lem_modeit to rewrite norm (Complex.exp (I * t)) as Real.exp (Complex.re (I * t))
-  rw [lem_modeit]
-  -- Apply lem_Reit0 to show Complex.re (I * t) = 0
-  rw [lem_Reit0]
-  -- Apply lem_e01 to show Real.exp 0 = 1
-  rw [lem_e01]
+  rw [Complex.norm_exp]
+  simp [I]
 
 lemma lem_modulus_of_ae_it {a t : ℝ} (ha : 0 < a) : norm (a * Complex.exp (I * t)) = a := by
   -- avoid fragile `change` on coerced terms; rewrite directly
