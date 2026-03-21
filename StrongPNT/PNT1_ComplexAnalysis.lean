@@ -9,6 +9,7 @@ import Mathlib.GroupTheory.MonoidLocalization.Basic
 import Mathlib.Order.CompletePartialOrder
 import Mathlib.RingTheory.SimpleRing.Principal
 import Mathlib.Topology.Algebra.Module.ModuleTopology
+import PrimeNumberTheoremAnd.Auxiliary
 import PrimeNumberTheoremAnd.BorelCaratheodory
 
 lemma lem_coseveny (n : ℕ) (_hn : n ≥ 1) (y : ℝ) : Real.cos (-y * Real.log (n : ℝ)) = Real.cos (y * Real.log (n : ℝ)) := by
@@ -184,52 +185,13 @@ lemma circleMap_zero_eq_exp (r : ℝ) (t : ℝ) : circleMap 0 r t = r * Complex.
   -- Since I = Complex.I by definition
   rfl
 
-lemma deriv_ofReal_eq_one (t : ℝ) : deriv Complex.ofReal t = 1 := by
-  -- Complex.ofReal is a continuous linear map, so use the general theorem
-  -- The derivative of a continuous linear map e at any point x is e(1)
-  have h : deriv Complex.ofReal t = Complex.ofReal 1 := by
-    -- Apply the theorem for continuous linear maps
-    -- Complex.ofReal can be viewed as ⇑Complex.ofRealCLM
-    rw [show Complex.ofReal = ⇑Complex.ofRealCLM from rfl]
-    exact ContinuousLinearMap.deriv Complex.ofRealCLM
-  -- Now simplify: Complex.ofReal 1 = 1
-  rw [h]
-  simp only [Complex.ofReal_one]
-
-lemma differentiableAt_ofReal (t : ℝ) : DifferentiableAt ℝ Complex.ofReal t := by
-  -- Complex.ofReal is definitionally equal to the coercion of Complex.ofRealCLM
-  rw [show Complex.ofReal = ⇑Complex.ofRealCLM from rfl]
-  -- Apply the theorem that continuous linear maps are differentiable at every point
-  apply ContinuousLinearMap.differentiableAt
-
-lemma lem_dw_dt_real {r_int : ℝ} (t : ℝ) :
-deriv (fun (t' : ℝ) => r_int * Complex.exp (I * t')) t = I * r_int * Complex.exp (I * t) := by
-  -- Apply constant multiplication rule
-  rw [deriv_const_mul]
-  -- Apply chain rule for complex exponential
-  rw [deriv_cexp]
-  -- Apply constant multiplication rule for I * t'
-  rw [deriv_const_mul]
-  -- Use the existing lemma for derivative of Complex.ofReal
-  rw [deriv_ofReal_eq_one]
-  -- Simplify: r_int * (Complex.exp (I * t) * (I * 1)) = I * r_int * Complex.exp (I * t)
-  ring
-  -- Prove differentiability conditions (in reverse order as they appear)
-  · exact differentiableAt_ofReal t
-  · exact (differentiableAt_const I).mul (differentiableAt_ofReal t)
-  · exact DifferentiableAt.cexp ((differentiableAt_const I).mul (differentiableAt_ofReal t))
-
 lemma deriv_circleMap_zero (r : ℝ) (t : ℝ) : deriv (circleMap 0 r) t = I * r * Complex.exp (I * t) := by
-  -- Show that circleMap 0 r equals the exponential function
-  have h : circleMap 0 r = fun (t' : ℝ) => r * Complex.exp (I * t') := by
-    ext t'
-    exact circleMap_zero_eq_exp r t'
-
-  -- Rewrite the derivative using this equality
-  rw [h]
-
-  -- Apply lem_dw_dt_real with r_int = r
-  exact lem_dw_dt_real t
+  unfold circleMap
+  simp only [zero_add, differentiableAt_const, deriv_const_mul_field', I]
+  have :=  Complex.differentiableAt_ofReal t
+  rw [deriv_cexp, deriv_mul_const, Complex.deriv_ofReal]
+  · ring_nf
+  all_goals fun_prop (disch := assumption)
 
 lemma lem_CIF_deriv_param {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ}
     (hf_domain : ∃ U, IsOpen U ∧ Metric.closedBall 0 R_analytic ⊆ U ∧ DifferentiableOn ℂ f U)
