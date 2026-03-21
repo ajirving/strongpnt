@@ -92,17 +92,7 @@ lemma complex_abs_real_cast (r : ℝ) : ‖(r : ℂ)‖ = abs r := Complex.norm_
 
 lemma zerosetKfRc_eq_ZetaZerosNearPoint (t : ℝ) :
   zerosetKfRc (5/6 : ℝ) ((3/2 : ℂ) + t * Complex.I) riemannZeta = ZetaZerosNearPoint t := by
-  ext ρ; constructor
-  · intro h
-    rcases h with ⟨hball, hzero⟩
-    refine ⟨?hz, ?hnorm⟩
-    · simpa [zeroZ] using hzero
-    · simpa [Metric.mem_closedBall, Complex.dist_eq, sub_eq_add_neg] using hball
-  · intro h
-    rcases h with ⟨hz, hnorm⟩
-    refine ⟨?hball, ?hzero⟩
-    · simpa [Metric.mem_closedBall, Complex.dist_eq, sub_eq_add_neg] using hnorm
-    · simpa [zeroZ] using hz
+  ext ρ; constructor <;>   simp +contextual [zerosetKfRc, ZetaZerosNearPoint, zeroZ, dist_eq_norm_sub]
 
 lemma center_eq_comm (t : ℝ) :
   ((3/2 : ℂ) + (Complex.I : ℂ) * (t : ℂ)) = ((3/2 : ℂ) + (t : ℂ) * Complex.I) := by
