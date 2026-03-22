@@ -1320,20 +1320,6 @@ lemma Lf_at_0_is_0
     )
   exact (Classical.choose_spec log_exists).2.1
 
-
-lemma lem_BCII {L : ℂ → ℂ} {r M r₁ : ℝ}
-    (hr_pos : 0 < r)
-    (hM_pos : 0 < M)
-    (hr₁_pos : 0 < r₁)
-    (hr₁_lt_r : r₁  < r)
-    (hL_domain : ∃ U, IsOpen U ∧ Metric.closedBall 0 r ⊆ U ∧ DifferentiableOn ℂ L U)
-    (hL0 : L 0 = 0)
-    (hre_L_le_M : ∀ w ∈ Metric.closedBall 0 r, (L w).re ≤ M)
-    {z : ℂ} (hz : z ∈ Metric.closedBall 0 r₁) :
-norm (deriv L z) ≤ (16 * M * r ^ 2) / ((r - r₁) ^ 3) := by
-  apply borel_caratheodory_II hr_pos hM_pos hr₁_pos hr₁_lt_r hL_domain hL0 hre_L_le_M hz
-
-
 lemma re_Lf_as_diff_of_log_mods
     (r R R1 : ℝ)
     (hr_pos : 0 < r)
@@ -1522,31 +1508,6 @@ lemma apply_BC_to_Lf
   have h_analytic_nhd :=
     Lf_is_analytic r R R1 hr_pos hr_lt_R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_finite_zeros h_σ h_σ_spec
   -- Build an open set U containing the closed ball where L is differentiable
-  let U : Set ℂ :=
-    { y | ∃ x ∈ Metric.closedBall (0 : ℂ) r, ∃ s : ℝ, 0 < s ∧ y ∈ Metric.ball x s ∧
-        AnalyticOnNhd ℂ L (Metric.ball x s) }
-  have hU_open : IsOpen U := by
-    refine isOpen_iff_mem_nhds.mpr ?_
-    intro y hy
-    rcases hy with ⟨x, hxCB, s, hs_pos, hyin, hAnaBall⟩
-    have hnhds : Metric.ball x s ∈ nhds y := (Metric.isOpen_ball.mem_nhds hyin)
-    exact Filter.mem_of_superset hnhds (by intro z hz; exact ⟨x, hxCB, s, hs_pos, hz, hAnaBall⟩)
-  have hCB_subset : Metric.closedBall (0 : ℂ) r ⊆ U := by
-    intro x hx
-    have hAt : AnalyticAt ℂ L x := h_analytic_nhd x hx
-    rcases AnalyticAt.exists_ball_analyticOnNhd hAt with ⟨s, hs_pos, hAnaBall⟩
-    have hx_in_ball : x ∈ Metric.ball x s := by
-      simpa [Metric.mem_ball, dist_self] using hs_pos
-    exact ⟨x, hx, s, hs_pos, hx_in_ball, hAnaBall⟩
-  have hDiffU : DifferentiableOn ℂ L U := by
-    intro y hy
-    rcases hy with ⟨x, hxCB, s, hs_pos, hy_in, hAnaBall⟩
-    -- From AnalyticOnNhd on the ball, get AnalyticAt at y
-    have hAt : AnalyticAt ℂ L y := hAnaBall y hy_in
-    exact (AnalyticAt.differentiableAt hAt).differentiableWithinAt
-  -- Package domain data
-  have hL_domain : ∃ U, IsOpen U ∧ Metric.closedBall 0 r ⊆ U ∧ DifferentiableOn ℂ L U :=
-    ⟨U, hU_open, hCB_subset, hDiffU⟩
   -- L(0) = 0
   have hL0 : L 0 = 0 := by
     simpa [L] using (Lf_at_0_is_0 r R R1 hr_pos hr_lt_R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_finite_zeros h_σ h_σ_spec)
@@ -1561,7 +1522,7 @@ lemma apply_BC_to_Lf
     simpa [Metric.mem_closedBall, dist_zero_right] using hz
   -- Apply Borel–Carathéodory II
   have hBC :=
-    lem_BCII hr_pos (Real.log_pos hB) hr1_pos hr1_lt_r hL_domain hL0 hre_L_le_M hz'
+    borel_caratheodory_II hr_pos (Real.log_pos hB) hr1_pos hr1_lt_r h_analytic_nhd.analyticOn hL0 hre_L_le_M hz'
   -- conclude
   simpa [L] using hBC
 
