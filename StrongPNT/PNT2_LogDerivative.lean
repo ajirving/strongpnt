@@ -1320,20 +1320,6 @@ lemma Lf_at_0_is_0
     )
   exact (Classical.choose_spec log_exists).2.1
 
-
-lemma lem_BCII {L : ℂ → ℂ} {r M r₁ : ℝ}
-    (hr_pos : 0 < r)
-    (hM_pos : 0 < M)
-    (hr₁_pos : 0 < r₁)
-    (hr₁_lt_r : r₁  < r)
-    (analytic : AnalyticOn ℂ L (Metric.closedBall 0 r))
-    (hL0 : L 0 = 0)
-    (hre_L_le_M : ∀ w ∈ Metric.closedBall 0 r, (L w).re ≤ M)
-    {z : ℂ} (hz : z ∈ Metric.closedBall 0 r₁) :
-norm (deriv L z) ≤ (16 * M * r ^ 2) / ((r - r₁) ^ 3) := by
-  apply borel_caratheodory_II hr_pos hM_pos hr₁_pos hr₁_lt_r analytic hL0 hre_L_le_M hz
-
-
 lemma re_Lf_as_diff_of_log_mods
     (r R R1 : ℝ)
     (hr_pos : 0 < r)
@@ -1536,7 +1522,7 @@ lemma apply_BC_to_Lf
     simpa [Metric.mem_closedBall, dist_zero_right] using hz
   -- Apply Borel–Carathéodory II
   have hBC :=
-    lem_BCII hr_pos (Real.log_pos hB) hr1_pos hr1_lt_r h_analytic_nhd.analyticOn hL0 hre_L_le_M hz'
+    borel_caratheodory_II hr_pos (Real.log_pos hB) hr1_pos hr1_lt_r h_analytic_nhd.analyticOn hL0 hre_L_le_M hz'
   -- conclude
   simpa [L] using hBC
 
