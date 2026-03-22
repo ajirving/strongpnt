@@ -9,7 +9,6 @@ import Mathlib.GroupTheory.MonoidLocalization.Basic
 import Mathlib.Order.CompletePartialOrder
 import Mathlib.RingTheory.SimpleRing.Principal
 import Mathlib.Topology.Algebra.Module.ModuleTopology
-import PrimeNumberTheoremAnd.Auxiliary
 import PrimeNumberTheoremAnd.BorelCaratheodory
 
 lemma lem_coseveny (n : ℕ) (_hn : n ≥ 1) (y : ℝ) : Real.cos (-y * Real.log (n : ℝ)) = Real.cos (y * Real.log (n : ℝ)) := by
