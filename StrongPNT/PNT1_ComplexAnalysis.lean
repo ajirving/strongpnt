@@ -800,8 +800,28 @@ lemma lem_f_prime_bound {f : ℂ → ℂ} {M R_analytic r_z r_int : ℝ}
     (hRe_f_le_M : ∀ w ∈ Metric.closedBall 0 R_analytic, (f w).re ≤ M)
     {z : ℂ} (hz : z ∈ Metric.closedBall 0 r_z) :
 norm (deriv f z) ≤ (2 * r_int ^ 2 * M) / ((R_analytic - r_int) * (r_int - r_z) ^ 2) := by
-  -- Use the lemma that has the same statement
-  exact lem_f_prime_bound_by_integral_of_constant hM_pos hR_analytic_pos h_r_z_pos h_r_z_lt_r_int h_r_int_lt_R_analytic hf_domain hf0 hRe_f_le_M hz
+  rw [cauchy_formula_deriv hf_domain h_r_z_lt_r_int h_r_int_lt_R_analytic hz, one_div, I]
+  grw [circleIntegral.norm_two_pi_i_inv_smul_integral_le_of_norm_le_const (by linarith) (C := 2 * M * r_int / ((R_analytic - r_int) * (r_int - r_z) ^ 2))]
+  · exact le_of_eq (by ring)
+  · intro z' hz'
+    rw [smul_eq_mul, norm_mul]
+    obtain ⟨U', hU'_open, h_subset, hf_diff_U'⟩ := hf_domain
+    have := (hf_diff_U'.analyticOn hU'_open).mono h_subset
+    grw[borelCaratheodory_closedBall (by grind) this hf0 hM_pos hRe_f_le_M h_r_int_lt_R_analytic
+      (Metric.sphere_subset_closedBall hz')]
+    suffices ‖(z' - z)⁻¹ ^ 2‖ ≤ 1 / (r_int - r_z) ^ 2 by
+      grw [this]
+      · exact le_of_eq (by field)
+      · refine mul_nonneg (mul_nonneg ?_ ?_) (inv_nonneg.mpr ?_) <;> linarith
+    rw [norm_pow, norm_inv, one_div, inv_pow]
+    gcongr
+    · exact pow_pos (by linarith) _
+    · linarith
+    · simp only [mem_sphere_iff_norm, sub_zero, Metric.mem_closedBall,
+      dist_zero_right] at hz' hz
+      rw [← hz']
+      exact le_trans (by linarith) (norm_sub_norm_le z' z)
+x
 
 lemma lem_r_prime_is_intermediate {r R : ℝ}
     (h_r_lt_R : r < R) :
