@@ -389,19 +389,6 @@ noncomputable def Bf
   ∏ ρ ∈ h_finite_zeros.toFinset,
     ((R : ℂ) - star ρ * z / (R : ℂ)) ^ (analyticOrderAt f ρ).toNat
 
-theorem lem_rho_in_disk_R1
-    (R1 : ℝ)
-    (f : ℂ → ℂ)
-    (ρ : ℂ) (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 f) :
-    norm ρ ≤ R1 := by
-  simp_all [zerosetKfR]
-
-theorem lem_zero_not_in_Kf (R1 : ℝ)
-  (f : ℂ → ℂ) :
-    f 0 ≠ 0 → 0 ∉ zerosetKfR R1 f := by
-  simp_all [zerosetKfR]
-
-
 lemma lem_rho_ne_zero (R1 : ℝ)
     (f : ℂ → ℂ)
     (h_f_nonzero_at_zero : f 0 ≠ 0) :
@@ -434,8 +421,8 @@ lemma lem_inv_mod_rho_ge_inv_R1 (R1 : ℝ) (hR1_pos : 0 < R1)
     (ρ : ℂ) (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 f) :
     1 / norm ρ ≥ 1 / R1 := by
   -- From membership in zerosetKfR, we know |ρ| ≤ R1
-  have h_abs_ρ_le_R1 : norm ρ ≤ R1 :=
-    lem_rho_in_disk_R1 R1 f ρ h_rho_in_KfR1
+  have h_abs_ρ_le_R1 : norm ρ ≤ R1 := by
+    simp_all [zerosetKfR]
   -- We need |ρ| > 0 to apply the inverse monotonicity lemma
   have h_abs_ρ_pos : norm ρ > 0 :=
     lem_mod_rho_pos R1 f h_f_nonzero_at_zero ρ h_rho_in_KfR1
@@ -549,9 +536,9 @@ lemma lem_mod_Bf_at_0 (R R1 : ℝ)
     ‖Bf R R1 f h_finite_zeros h_σ 0‖ =
     ‖f 0‖ * ∏ ρ ∈ h_finite_zeros.toFinset,
       ‖((R : ℂ) / (-ρ))‖ ^ (analyticOrderAt f ρ).toNat := by
-  -- Apply the general result at z = 0 (0 is not in the zero set by lem_zero_not_in_Kf)
-  have hz0 : 0 ∉ zerosetKfR R1 f :=
-    lem_zero_not_in_Kf R1 f h_f_nonzero_at_zero
+
+  have hz0 : 0 ∉ zerosetKfR R1 f := by
+    simp_all [zerosetKfR]
   rw [lem_mod_Bf_prod_mod R R1 f h_finite_zeros h_σ 0 hz0]
   -- Now simplify: when z = 0, we have ((R - 0 * star ρ / R) / (0 - ρ)) = R / (-ρ)
   congr 2
