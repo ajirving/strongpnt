@@ -79,50 +79,11 @@ lemma cauchy_formula_deriv {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ}
     (h_r_int_lt_R_analytic : r_int < R_analytic)
     {z : ℂ} (hz : z ∈ Metric.closedBall 0 r_z) :
 deriv f z = (1 / (2 * Real.pi * I)) • ∮ w in C(0, r_int), (w - z)⁻¹ ^ 2 • f w := by
-  -- Extract the witness from hf_domain
   obtain ⟨U', hU'_open, h_subset, hf_diff_U'⟩ := hf_domain
-
-  -- Show z is in the ball of radius r_int
-  have hz_in_ball : z ∈ Metric.ball (0 : ℂ) r_int := by
-    apply Metric.mem_ball.mpr
-    have h1 : ‖z - 0‖ ≤ r_z := Metric.mem_closedBall.mp hz
-    simp only [sub_zero] at h1
-    have h2 : ‖z‖ < r_int := lt_of_le_of_lt h1 h_r_z_lt_r_int
-    rwa [dist_eq_norm, sub_zero]
-
-  -- Use U = ball 0 R_analytic as our open set
-  set U := Metric.ball (0 : ℂ) R_analytic
-
-  -- Show closedBall 0 r_int ⊆ U
-  have hc_subset : Metric.closedBall (0 : ℂ) r_int ⊆ U := by
-    apply Metric.closedBall_subset_ball
-    exact h_r_int_lt_R_analytic
-
-  -- Show f is differentiable on U
-  have hf_on_U : DifferentiableOn ℂ f U := by
-    -- Since Metric.ball 0 R_analytic ⊆ Metric.closedBall 0 R_analytic ⊆ U'
-    -- and f is differentiable on U', it's also differentiable on the smaller set U
-    apply DifferentiableOn.mono hf_diff_U'
-    calc U = Metric.ball 0 R_analytic := rfl
-         _ ⊆ Metric.closedBall 0 R_analytic := Metric.ball_subset_closedBall
-         _ ⊆ U' := h_subset
-
-  -- Apply the Cauchy integral formula for derivatives
-  have cauchy_eq := Complex.two_pi_I_inv_smul_circleIntegral_sub_sq_inv_smul_of_differentiable
-    Metric.isOpen_ball hc_subset hf_on_U hz_in_ball
-
-  -- Convert to our desired form
-  rw [← cauchy_eq]
-
-  -- The coefficients are equal and the integrands are equal
-  congr 2
-  · -- (2 * π * I)⁻¹ = 1 / (2 * Real.pi * I)
-    simp only [one_div]
-    -- Complex.I = I by definition
-    rfl
-  · -- ((w - z) ^ 2)⁻¹ • f w = (w - z)⁻¹ ^ 2 • f w
-    ext w
-    rw [← inv_pow]
+  rw [← Complex.two_pi_I_inv_smul_circleIntegral_sub_sq_inv_smul_of_differentiable hU'_open
+    ((Metric.closedBall_subset_closedBall h_r_int_lt_R_analytic.le).trans h_subset) hf_diff_U'
+    (Metric.closedBall_subset_ball h_r_z_lt_r_int hz)]
+  simp [I]
 
 lemma lem_f_prime_bound {f : ℂ → ℂ} {M R_analytic r_z r_int : ℝ}
     (hM_pos : 0 < M)
@@ -157,185 +118,6 @@ norm (deriv f z) ≤ (2 * r_int ^ 2 * M) / ((R_analytic - r_int) * (r_int - r_z)
       rw [← hz']
       exact le_trans (by linarith) (norm_sub_norm_le z' z)
 
-
-lemma lem_r_prime_is_intermediate {r R : ℝ}
-    (h_r_lt_R : r < R) :
-r < (r + R) / 2 ∧ (r + R) / 2 < R := by
-  constructor <;> linarith
-
-lemma lem_calc_R_minus_r_prime {r R : ℝ} :
-R - ((r + R) / 2) = (R - r) / 2 := by
-  field_simp
-  ring
-
-lemma lem_calc_denominator_specific {r R : ℝ} :
-(R - ((r + R) / 2)) * (((r + R) / 2) - r) ^ 2 = ((R - r) ^ 3) / 8 := by
-  -- Use lem_calc_R_minus_r_prime to rewrite the first term
-  rw [lem_calc_R_minus_r_prime]
-  -- Show that ((r + R) / 2) - r = (R - r) / 2
-  have h_calc : ((r + R) / 2) - r = (R - r) / 2 := by
-    field_simp
-    ring
-  -- Rewrite using this identity
-  rw [h_calc]
-  -- Now we have (R - r) / 2 * ((R - r) / 2) ^ 2 = ((R - r) ^ 3) / 8
-  -- Simplify: (R - r) / 2 * (R - r)^2 / 4 = (R - r)^3 / 8
-  ring
-
-lemma lem_calc_numerator_specific {M r R : ℝ} :
-2 * (((r + R) / 2) ^ 2) * M = ((R + r) ^ 2 * M) / 2 := by
-  -- Use ring to handle the algebraic manipulation
-  ring
-
-lemma lem_frac_simplify {M r R : ℝ} :
-    let r_prime := (r + R) / 2
-(2 * (r_prime ^ 2) * M) / ((R - r_prime) * (r_prime - r) ^ 2) = (((R + r) ^ 2 * M) / 2) / (((R - r) ^ 3) / 8) := by
-  -- Unfold the definition of r_prime
-  simp only [show (r + R) / 2 = (r + R) / 2 from rfl]
-  -- Apply the numerator lemma
-  have h_num := lem_calc_numerator_specific (r := r) (R := R) (M := M)
-  -- Apply the denominator lemma
-  have h_denom := lem_calc_denominator_specific (r := r) (R := R)
-  -- Rewrite using both lemmas
-  rw [← h_num, ← h_denom]
-
-lemma lem_frac_simplify2 {M r R : ℝ}
-    (hM_pos : 0 < M)
-    (hr_lt_R : r < R) :
-((R + r) ^ 2 * M / 2) / ((R - r) ^ 3 / 8) = (4 * (R + r) ^ 2 * M) / ((R - r) ^ 3) := by
-  -- This is a division of fractions: (a/b) / (c/d) = (a/b) * (d/c) = ad/bc
-  -- We have ((R + r)^2 * M / 2) / ((R - r)^3 / 8) = ((R + r)^2 * M / 2) * (8 / (R - r)^3)
-  -- = (8 * (R + r)^2 * M) / (2 * (R - r)^3) = (4 * (R + r)^2 * M) / ((R - r)^3)
-
-  -- First, we need to show that the denominators are nonzero
-  have h_two_ne_zero : (2 : ℝ) ≠ 0 := by norm_num
-  have h_eight_ne_zero : (8 : ℝ) ≠ 0 := by norm_num
-  have h_R_minus_r_ne_zero : R - r ≠ 0 := by linarith [hr_lt_R]
-  have h_R_minus_r_pow_ne_zero : (R - r) ^ 3 ≠ 0 := by
-    apply pow_ne_zero
-    exact h_R_minus_r_ne_zero
-
-  -- Use field_simp to clear denominators and then ring to simplify
-  field_simp [h_two_ne_zero, h_eight_ne_zero, h_R_minus_r_pow_ne_zero]
-  ring
-
-lemma lem_frac_simplify3 {M r R : ℝ}
-    (hM_pos : 0 < M)
-    (hr_lt_R : r < R) :
-    let r_prime := (r + R) / 2
-(2 * (r_prime ^ 2) * M) / ((R - r_prime) * (r_prime - r) ^ 2) = (4 * (R + r) ^ 2 * M) / ((R - r) ^ 3) := by
-  -- Unfold the let definition
-  simp only [show (r + R) / 2 = (r + R) / 2 from rfl]
-  -- Apply lem_frac_simplify to get the intermediate form
-  have h1 := lem_frac_simplify (r := r) (R := R) (M := M)
-  -- Apply lem_frac_simplify2 to complete the transformation
-  have h2 := lem_frac_simplify2 hM_pos hr_lt_R
-  -- Combine the two steps
-  rw [h1, h2]
-
-lemma lem_ineq_R_plus_r_lt_2R {r R : ℝ} (h_r_lt_R : r < R) :
-R + r < 2 * R := by
-  -- Rewrite 2 * R as R + R
-  rw [two_mul]
-  -- Now we want to show R + r < R + R, which follows from r < R
-  linarith [h_r_lt_R]
-
-lemma lem_R_plus_r_is_positive {r R : ℝ}
-    (hr_pos : 0 < r)
-    (hr_lt_R : r < R) :
-0 < R + r := by
-  -- Since r < R and r > 0, we have R > 0
-  have hR_pos : 0 < R := lt_trans hr_pos hr_lt_R
-  -- Both R > 0 and r > 0, so R + r > 0
-  exact add_pos hR_pos hr_pos
-
-lemma lem_square_inequality_strict {a b : ℝ}
-    (h_a_pos : 0 < a)
-    (h_a_lt_b : a < b) :
-a ^ 2 < b ^ 2 := by
-  -- From 0 < a, we get 0 ≤ a
-  have h_a_nonneg : 0 ≤ a := le_of_lt h_a_pos
-  -- From 0 < a and a < b, we get 0 < b, hence 0 ≤ b
-  have h_b_pos : 0 < b := lt_trans h_a_pos h_a_lt_b
-  have h_b_nonneg : 0 ≤ b := le_of_lt h_b_pos
-  -- Apply mul_self_lt_mul_self_iff
-  have h_squares := mul_self_lt_mul_self_iff h_a_nonneg h_b_nonneg
-  -- Use the forward direction: a < b → a * a < b * b
-  have h_mult : a * a < b * b := h_squares.mp h_a_lt_b
-  -- Convert from a * a to a ^ 2 and b * b to b ^ 2
-  rw [← pow_two, ← pow_two] at h_mult
-  exact h_mult
-
-lemma lem_2R_sq_is_4R_sq {R : ℝ}  : (2 * R) ^ 2 = 4 * R ^ 2 := by
-  ring
-
-lemma lem_ineq_R_plus_r_sq {r R : ℝ}
-    (hr_pos : 0 < r)
-    (hr_lt_R : r < R) :
-(R + r) ^ 2 < 4 * R ^ 2 := by
-  -- Get R + r < 2 * R
-  have h1 := lem_ineq_R_plus_r_lt_2R hr_lt_R
-  -- Get 0 < R + r
-  have h2 := lem_R_plus_r_is_positive hr_pos hr_lt_R
-  -- Apply lem_square_inequality_strict to get (R + r)^2 < (2 * R)^2
-  have h3 := lem_square_inequality_strict h2 h1
-  -- Use lem_2R_sq_is_4R_sq to rewrite (2 * R)^2 = 4 * R^2
-  have hR_pos : 0 < R := lt_trans hr_pos hr_lt_R
-  have h4 := lem_2R_sq_is_4R_sq (R := R)
-  rw [h4] at h3
-  exact h3
-
-lemma lem_ineq_R_plus_r_sqM {M r R : ℝ}
-    (hM_pos : 0 < M)
-    (hr_pos : 0 < r)
-    (hr_lt_R : r < R) :
-4 * (R + r) ^ 2 * M < 16 * R ^ 2 * M := by
-  -- Apply lem_ineq_R_plus_r_sq to get (R + r) ^ 2 < 4 * R ^ 2
-  have h_ineq := lem_ineq_R_plus_r_sq hr_pos hr_lt_R
-  -- Show that 4 * M > 0
-  have h_4M_pos : 0 < 4 * M := by
-    apply mul_pos
-    · norm_num
-    · exact hM_pos
-  -- Multiply both sides by 4 * M
-  have h_mult := mul_lt_mul_of_pos_right h_ineq h_4M_pos
-  -- Rearrange to get the desired form
-  convert h_mult using 1
-  · ring
-  · ring
-
-lemma lem_simplify_final_bound {M r R : ℝ}
-    (hM_pos : 0 < M)
-    (hr_pos : 0 < r)
-    (hr_lt_R : r < R) :
-(4 * (R + r) ^ 2 * M) / ((R - r) ^ 3) < (16 * R ^ 2 * M) / ((R - r) ^ 3) := by
-  -- Apply lem_ineq_R_plus_r_sqM to get the numerator inequality
-  have h_num_ineq := lem_ineq_R_plus_r_sqM hM_pos hr_pos hr_lt_R
-  -- Show that (R - r)^3 > 0
-  have h_denom_pos : 0 < (R - r) ^ 3 := by
-    apply pow_pos
-    linarith [hr_lt_R]
-  -- Apply division monotonicity
-  exact div_lt_div_of_pos_right h_num_ineq h_denom_pos
-
-lemma lem_bound_after_substitution {M r R : ℝ}
-    (hM_pos : 0 < M)
-    (hr_pos : 0 < r)
-    (hr_lt_R : r < R) :
-    let r_prime := (r + R) / 2
-(2 * (r_prime ^ 2) * M) / ((R - r_prime) * (r_prime - r) ^ 2) ≤ (16 * R ^ 2 * M) / ((R - r) ^ 3) := by
-  -- Unfold the let binding
-  simp only [show (r + R) / 2 = (r + R) / 2 from rfl]
-  -- Apply lem_frac_simplify3 to rewrite the left side
-  have h1 := lem_frac_simplify3 hM_pos hr_lt_R
-  -- Unfold the let in h1 as well
-  simp only [show (r + R) / 2 = (r + R) / 2 from rfl] at h1
-  rw [h1]
-  -- Apply lem_simplify_final_bound to get strict inequality
-  have h2 := lem_simplify_final_bound hM_pos hr_pos hr_lt_R
-  -- Since < implies ≤, we're done
-  exact le_of_lt h2
-
 theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ}
     (hR_pos : 0 < R)
     (hM_pos : 0 < M)
@@ -346,27 +128,16 @@ theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ}
     (hRe_f_le_M : ∀ w ∈ Metric.closedBall 0 R, (f w).re ≤ M)
     {z : ℂ} (hz : z ∈ Metric.closedBall 0 r) :
 norm (deriv f z) ≤ (16 * M * R ^ 2) / ((R - r) ^ 3) := by
-  -- Set r' = (r + R) / 2 as suggested in the informal proof
-  set r_prime := (r + R) / 2
-
-  -- Show that r < r' < R using lem_r_prime_is_intermediate
-  have h_intermediate := lem_r_prime_is_intermediate hr_lt_R
-  have h_r_lt_r_prime := h_intermediate.1
-  have h_r_prime_lt_R := h_intermediate.2
-
-  -- Apply lem_f_prime_bound with r_int = r_prime
-  have h_bound := lem_f_prime_bound hM_pos hR_pos hr_pos h_r_lt_r_prime h_r_prime_lt_R hf_domain hf0 hRe_f_le_M hz
-
-  -- Apply lem_bound_after_substitution to get the final bound
-  have h_final := lem_bound_after_substitution hM_pos hr_pos hr_lt_R
-
-  -- Combine the bounds using transitivity
-  have h_combined : norm (deriv f z) ≤ (16 * R ^ 2 * M) / ((R - r) ^ 3) := by
-    exact le_trans h_bound h_final
-
-  -- Rearrange to match the target form: (16 * M * R ^ 2) / ((R - r) ^ 3)
-  convert h_combined using 1
-  ring
+  grw [lem_f_prime_bound (r_int := (r + R) / 2) hM_pos hR_pos hr_pos (by linarith)
+    (by linarith) hf_domain hf0 hRe_f_le_M hz]
+  calc
+  _ = (4 * (R + r) ^ 2 * M) / ((R - r) ^ 3) := by field
+  _ ≤ _ := by
+    gcongr 1
+    · exact pow_nonneg (by linarith) _
+    · grw [(by linarith : R + r ≤ 2 * R)]
+      field_simp
+      norm_num
 
 #print axioms borel_caratheodory_II
 
