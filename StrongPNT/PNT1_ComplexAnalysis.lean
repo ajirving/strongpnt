@@ -74,14 +74,13 @@ lemma lem_HardMMP (R B : ℝ) (hR : R > 0)
 def I := Complex.I
 
 lemma cauchy_formula_deriv {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ}
-    (hf_domain : ∃ U, IsOpen U ∧ Metric.closedBall 0 R_analytic ⊆ U ∧ DifferentiableOn ℂ f U)
+    (hfdiff: DifferentiableOn ℂ f (Metric.ball 0 R_analytic))
     (h_r_z_lt_r_int : r_z < r_int)
     (h_r_int_lt_R_analytic : r_int < R_analytic)
     {z : ℂ} (hz : z ∈ Metric.closedBall 0 r_z) :
 deriv f z = (1 / (2 * Real.pi * I)) • ∮ w in C(0, r_int), (w - z)⁻¹ ^ 2 • f w := by
-  obtain ⟨U', hU'_open, h_subset, hf_diff_U'⟩ := hf_domain
-  rw [← Complex.two_pi_I_inv_smul_circleIntegral_sub_sq_inv_smul_of_differentiable hU'_open
-    ((Metric.closedBall_subset_closedBall h_r_int_lt_R_analytic.le).trans h_subset) hf_diff_U'
+  rw [← Complex.two_pi_I_inv_smul_circleIntegral_sub_sq_inv_smul_of_differentiable Metric.isOpen_ball
+    (Metric.closedBall_subset_ball h_r_int_lt_R_analytic) hfdiff
     (Metric.closedBall_subset_ball h_r_z_lt_r_int hz)]
   simp [I]
 
@@ -91,19 +90,17 @@ lemma lem_f_prime_bound {f : ℂ → ℂ} {M R_analytic r_z r_int : ℝ}
     (h_r_z_pos : 0 < r_z)
     (h_r_z_lt_r_int : r_z < r_int)
     (h_r_int_lt_R_analytic : r_int < R_analytic)
-    (hf_domain : ∃ U, IsOpen U ∧ Metric.closedBall 0 R_analytic ⊆ U ∧ DifferentiableOn ℂ f U)
+    (analytic : AnalyticOn ℂ f (Metric.closedBall 0 R_analytic))
     (hf0 : f 0 = 0)
     (hRe_f_le_M : ∀ w ∈ Metric.closedBall 0 R_analytic, (f w).re ≤ M)
     {z : ℂ} (hz : z ∈ Metric.closedBall 0 r_z) :
 norm (deriv f z) ≤ (2 * r_int ^ 2 * M) / ((R_analytic - r_int) * (r_int - r_z) ^ 2) := by
-  rw [cauchy_formula_deriv hf_domain h_r_z_lt_r_int h_r_int_lt_R_analytic hz, one_div, I]
+  rw [cauchy_formula_deriv (analytic.differentiableOn.mono Metric.ball_subset_closedBall) h_r_z_lt_r_int h_r_int_lt_R_analytic hz, one_div, I]
   grw [circleIntegral.norm_two_pi_i_inv_smul_integral_le_of_norm_le_const (by linarith) (C := 2 * M * r_int / ((R_analytic - r_int) * (r_int - r_z) ^ 2))]
   · exact le_of_eq (by ring)
   · intro z' hz'
     rw [smul_eq_mul, norm_mul]
-    obtain ⟨U', hU'_open, h_subset, hf_diff_U'⟩ := hf_domain
-    have := (hf_diff_U'.analyticOn hU'_open).mono h_subset
-    grw[borelCaratheodory_closedBall (by grind) this hf0 hM_pos hRe_f_le_M h_r_int_lt_R_analytic
+    grw[borelCaratheodory_closedBall (by grind) analytic hf0 hM_pos hRe_f_le_M h_r_int_lt_R_analytic
       (Metric.sphere_subset_closedBall hz')]
     suffices ‖(z' - z)⁻¹ ^ 2‖ ≤ 1 / (r_int - r_z) ^ 2 by
       grw [this]
@@ -123,13 +120,13 @@ theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ}
     (hM_pos : 0 < M)
     (hr_pos : 0 < r)
     (hr_lt_R : r < R)
-    (hf_domain : ∃ U, IsOpen U ∧ Metric.closedBall 0 R ⊆ U ∧ DifferentiableOn ℂ f U)
+    (analytic : AnalyticOn ℂ f (Metric.closedBall 0 R))
     (hf0 : f 0 = 0)
     (hRe_f_le_M : ∀ w ∈ Metric.closedBall 0 R, (f w).re ≤ M)
     {z : ℂ} (hz : z ∈ Metric.closedBall 0 r) :
 norm (deriv f z) ≤ (16 * M * R ^ 2) / ((R - r) ^ 3) := by
   grw [lem_f_prime_bound (r_int := (r + R) / 2) hM_pos hR_pos hr_pos (by linarith)
-    (by linarith) hf_domain hf0 hRe_f_le_M hz]
+    (by linarith) analytic hf0 hRe_f_le_M hz]
   calc
   _ = (4 * (R + r) ^ 2 * M) / ((R - r) ^ 3) := by field
   _ ≤ _ := by
