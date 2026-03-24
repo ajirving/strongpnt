@@ -156,7 +156,7 @@ lemma lem_explicit1deltat :
         ∀ δ : ℝ, 0 < δ ∧ δ < 1 →
           ‖Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t))
                   (fun rho1 : ℂ =>
-                    ((analyticOrderAt riemannZeta rho1).toNat : ℂ) /
+                    (analyticOrderNatAt riemannZeta rho1 : ℂ) /
                       (((1 : ℂ) + δ + t * Complex.I) - rho1))
                 - logDerivZeta ((1 : ℂ) + (δ : ℝ) + (t : ℝ) * Complex.I)‖
           ≤ C * Real.log (abs t + 2) := by
@@ -245,13 +245,13 @@ lemma lem_explicit1deltat :
       simpa [Set.mem_toFinset] using this
   have hLHS_le :
       ‖Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t))
-            (fun rho1 : ℂ => ((analyticOrderAt riemannZeta rho1).toNat : ℂ) / (s - rho1))
+            (fun rho1 : ℂ => (analyticOrderNatAt riemannZeta rho1 : ℂ) / (s - rho1))
           - logDerivZeta s‖
       ≤ F * Real.log (b * |t| / ‖riemannZeta c_std‖) := by
     have :
         ‖logDerivZeta s -
             Finset.sum (hfin_std.toFinset)
-              (fun ρ : ℂ => ((analyticOrderAt riemannZeta ρ).toNat : ℂ) / (s - ρ))‖
+              (fun ρ : ℂ => (analyticOrderNatAt riemannZeta ρ : ℂ) / (s - ρ))‖
         ≤ F * Real.log (b * |t| / ‖riemannZeta c_std‖) := by
       simpa [F] using hineq2
     simpa [norm_sub_rev, hFinset_eq]
@@ -354,7 +354,7 @@ lemma lem_explicit1deltat :
     exact le_of_lt (Real.log_pos hgt1)
   have hfinal1 :
       ‖Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t))
-            (fun rho1 : ℂ => ((analyticOrderAt riemannZeta rho1).toNat : ℂ) / (s - rho1))
+            (fun rho1 : ℂ => (analyticOrderNatAt riemannZeta rho1 : ℂ) / (s - rho1))
           - logDerivZeta s‖
       ≤ F * (K * Real.log (|t| + 2)) :=
     le_trans hLHS_le (by exact mul_le_mul_of_nonneg_left hlog_bound_final hF_nonneg)
@@ -373,7 +373,7 @@ lemma lem_explicit1RealReal :
           abs ((logDerivZeta ((1 : ℂ) + (δ : ℝ) + (t : ℝ) * Complex.I)).re
             - (Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t))
                 (fun rho1 : ℂ =>
-                  (((analyticOrderAt riemannZeta rho1).toNat : ℂ) /
+                  ((analyticOrderNatAt riemannZeta rho1 : ℂ) /
                     (((1 : ℂ) + δ + t * Complex.I) - rho1)).re)))
           ≤ C * Real.log (|t| + 2) := by
   rcases lem_explicit1deltat with ⟨C, hCpos, hE⟩
@@ -383,7 +383,7 @@ lemma lem_explicit1RealReal :
   let s : ℂ := (1 : ℂ) + (δ : ℝ) + (t : ℝ) * Complex.I
   let S : Finset ℂ := Set.Finite.toFinset (ZetaZerosNearPoint_finite t)
   let g : ℂ → ℂ := fun rho1 : ℂ =>
-    ((analyticOrderAt riemannZeta rho1).toNat : ℂ) / (s - rho1)
+    (analyticOrderNatAt riemannZeta rho1 : ℂ) / (s - rho1)
   -- Complex bound from lem_explicit1deltat
   have ht' : ‖logDerivZeta s - ∑ rho1 ∈ S, g rho1‖
       ≤ C * Real.log (abs t + 2) := by
@@ -419,7 +419,7 @@ lemma lem_explicit2Real :
             (logDerivZeta ((1 : ℂ) + (δ : ℝ) + (2 * (t : ℝ)) * Complex.I)).re
             - (Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t)))
                 (fun rho1 : ℂ =>
-                  (((analyticOrderAt riemannZeta rho1).toNat : ℂ) /
+                  ((analyticOrderNatAt riemannZeta rho1 : ℂ) /
                     (((1 : ℂ) + δ + (2 * t) * Complex.I) - rho1)).re))
           )
           ≤ C * Real.log (abs (2 * t) + 2) := by
@@ -438,19 +438,19 @@ lemma lem_explicit2Real :
 lemma lem_sumrho1 (t : ℝ) (δ : ℝ) :
     (Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t))
         (fun rho1 : ℂ =>
-                    ((analyticOrderAt riemannZeta rho1).toNat : ℂ) /
+                    (analyticOrderNatAt riemannZeta rho1 : ℂ) /
                       (((1 : ℂ) + δ + t * Complex.I) - rho1))).re =
     Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t))
     (fun rho1 : ℂ =>
-                    (((analyticOrderAt riemannZeta rho1).toNat : ℂ) /
+                    ((analyticOrderNatAt riemannZeta rho1 : ℂ) /
                       (((1 : ℂ) + δ + t * Complex.I) - rho1)).re) := by
   exact Complex.re_sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t)) _
 
 lemma lem_sumrho2 (t : ℝ) (delta : ℝ) :
     (Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t)))
-        (fun rho1 : ℂ => ((analyticOrderAt riemannZeta rho1).toNat : ℂ) / (((1 : ℂ) + delta + (2 * t) * Complex.I) - rho1))).re =
+        (fun rho1 : ℂ => (analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + (2 * t) * Complex.I) - rho1))).re =
     Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t)))
-    (fun rho1 : ℂ => (((analyticOrderAt riemannZeta rho1).toNat : ℂ) / (((1 : ℂ) + delta + (2 * t) * Complex.I) - rho1)).re) := by
+    (fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + (2 * t) * Complex.I) - rho1)).re) := by
   rw [Complex.re_sum]
 
 lemma lem_Re1deltatge0 (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
@@ -461,10 +461,10 @@ lemma lem_Re1deltatge0 (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ)
 
 lemma lem_Re1deltatge0m (delta : ℝ) (hdelta : delta > 0) (t : ℝ)
   (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
-  (((analyticOrderAt riemannZeta rho1).toNat : ℂ) /
+  ((analyticOrderNatAt riemannZeta rho1 : ℂ) /
     (((1 : ℂ) + delta + t * Complex.I) - rho1)).re ≥ 0 := by
-  -- Set n = (analyticOrderAt riemannZeta rho1).toNat
-  let n := (analyticOrderAt riemannZeta rho1).toNat
+  -- Set n = analyticOrderNatAt riemannZeta rho1
+  let n := analyticOrderNatAt riemannZeta rho1
   let z := ((1 : ℂ) + delta + t * Complex.I) - rho1
 
   -- The key insight: (n : ℂ) / z = n • (1/z)
@@ -481,13 +481,13 @@ lemma lem_Re1deltatge0m (delta : ℝ) (hdelta : delta > 0) (t : ℝ)
   exact lem_Re1deltatge0 delta hdelta t rho1 h_rho1_in_Zt
 
 lemma lem_Re1delta2tge0 (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint (2 * t)) :
-(((analyticOrderAt riemannZeta rho1).toNat : ℂ) / ((1 : ℂ) + delta + (2 * t) * Complex.I - rho1)).re ≥ 0 := by
+((analyticOrderNatAt riemannZeta rho1 : ℂ) / ((1 : ℂ) + delta + (2 * t) * Complex.I - rho1)).re ≥ 0 := by
   -- Apply lem_Re1deltatge0 with (2 * t) in place of t
   convert lem_Re1deltatge0m delta hdelta (2 * t) rho1 h_rho1_in_Zt
   simp
 
 lemma lem_sumrho2ge (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
-Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t))) (fun rho1 : ℂ => (((analyticOrderAt riemannZeta rho1).toNat : ℂ) / ((1 : ℂ) + delta + (2 * t) * Complex.I - rho1)).re) ≥ 0 := by
+Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t))) (fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / ((1 : ℂ) + delta + (2 * t) * Complex.I - rho1)).re) ≥ 0 := by
   apply Finset.sum_nonneg
   intro rho1 h_rho1_in_finset
   -- Convert membership in finite set to membership in original set
@@ -498,7 +498,7 @@ Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t))) (fun rho1 :
 
 lemma lem_sumrho2ge02 (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
     (Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t)))
-(fun rho1 : ℂ => ((analyticOrderAt riemannZeta rho1).toNat : ℂ) / (((1 : ℂ) + delta + (2 * t) * Complex.I) - rho1))).re ≥ 0 := by
+(fun rho1 : ℂ => (analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + (2 * t) * Complex.I) - rho1))).re ≥ 0 := by
   -- Apply lem_sumrho2 to rewrite the real part of the sum as the sum of real parts
   rw [lem_sumrho2 t delta]
   -- Apply lem_sumrho2ge to show the sum of real parts is ≥ 0
@@ -519,7 +519,7 @@ lemma lem_explicit2Real2 :
   set Sre : ℝ :=
     Finset.sum S
       (fun rho1 : ℂ =>
-        (((analyticOrderAt riemannZeta rho1).toNat : ℂ) /
+        ((analyticOrderNatAt riemannZeta rho1 : ℂ) /
           (s - rho1)).re)
   -- From lem_explicit2Real: bound on the difference of real parts
   have h_bound :
@@ -621,13 +621,13 @@ lemma lem_Z1split (delta : ℝ) (_hdelta : delta > 0) (rho : ℂ)
   (_h_rho_in_zeroZ : rho ∈ zeroZ)
   (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint rho.im) :
     Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im))
-      (fun rho1 : ℂ => (((analyticOrderAt riemannZeta rho1).toNat : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re) =
-    (((analyticOrderAt riemannZeta rho).toNat : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho)).re +
+      (fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re) =
+    ((analyticOrderNatAt riemannZeta rho : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho)).re +
     Finset.sum ((Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im)).erase rho)
-      (fun rho1 : ℂ => (((analyticOrderAt riemannZeta rho1).toNat : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re) := by
+      (fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re) := by
   classical
   set s := Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im)
-  set f := fun rho1 : ℂ => (((analyticOrderAt riemannZeta rho1).toNat : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re
+  set f := fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re
   have hmem : rho ∈ s := by
     simpa [s, Set.Finite.mem_toFinset (ZetaZerosNearPoint_finite rho.im)] using h_rho_in_Zt
   -- Use the decomposition theorem for sums over finite sets
@@ -725,7 +725,7 @@ lemma riemannZeta_not_eventually_zero_of_ne_one {s : ℂ} (hs : s ≠ 1) :
 lemma analyticOrderAt_pos_toNat_of_zero_of_analytic_not_eventually_zero {f : ℂ → ℂ} {z0 : ℂ}
   (hf : AnalyticAt ℂ f z0) (hzero : f z0 = 0)
   (hnot : ¬ (∀ᶠ z in nhds z0, f z = 0)) :
-  1 ≤ (analyticOrderAt f z0).toNat := by
+  1 ≤ analyticOrderNatAt f z0 := by
   classical
   -- The analytic order is nonzero since f z0 = 0
   have hne0 : analyticOrderAt f z0 ≠ 0 := by
@@ -748,11 +748,11 @@ lemma analyticOrderAt_pos_toNat_of_zero_of_analytic_not_eventually_zero {f : ℂ
   -- Therefore 1 ≤ n
   have hposn : 1 ≤ n := Nat.succ_le_of_lt (Nat.pos_of_ne_zero hn_ne_zero)
   -- Conclude for toNat; rewrite using hn
-  simpa [hn.symm] using hposn
+  simpa [analyticOrderNatAt, hn.symm] using hposn
 
 lemma lem_Z1splitge (delta : ℝ) (hdelta_pos : delta > 0) (rho : ℂ)
   (h_rho_in_zeroZ : rho ∈ zeroZ) (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint rho.im) :
-    Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im)) (fun rho1 : ℂ => (((analyticOrderAt riemannZeta rho1).toNat : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re) ≥
+    Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im)) (fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re) ≥
 (1 / (((1 : ℂ) + delta + rho.im * Complex.I) - rho)).re := by
   classical
   -- Split off the rho term
@@ -768,26 +768,26 @@ lemma lem_Z1splitge (delta : ℝ) (hdelta_pos : delta > 0) (rho : ℂ)
   have hAnal : AnalyticAt ℂ riemannZeta rho := analyticAt_riemannZeta_of_ne_one h_rho_ne_one
   have hNotEv : ¬ (∀ᶠ z in nhds rho, riemannZeta z = 0) :=
     riemannZeta_not_eventually_zero_of_ne_one h_rho_ne_one
-  have horder_nat : 1 ≤ (analyticOrderAt riemannZeta rho).toNat :=
+  have horder_nat : 1 ≤ analyticOrderNatAt riemannZeta rho :=
     analyticOrderAt_pos_toNat_of_zero_of_analytic_not_eventually_zero
       hAnal (by simpa using h_rho_in_zeroZ) hNotEv
-  have ha_real : (1 : ℝ) ≤ ((analyticOrderAt riemannZeta rho).toNat : ℝ) := by exact_mod_cast horder_nat
+  have ha_real : (1 : ℝ) ≤ (analyticOrderNatAt riemannZeta rho : ℝ) := by exact_mod_cast horder_nat
   have hz_nonneg : 0 ≤ (1 / (((1 : ℂ) + delta + rho.im * Complex.I) - rho)).re :=
     lem_Re1deltatge0 delta hdelta_pos rho.im rho h_rho_in_Zt
   have hfirst :
       (1 / (((1 : ℂ) + delta + rho.im * Complex.I) - rho)).re
-        ≤ (((((analyticOrderAt riemannZeta rho).toNat : ℝ) : ℂ) /
+        ≤ ((((analyticOrderNatAt riemannZeta rho : ℝ) : ℂ) /
             (((1 : ℂ) + delta + rho.im * Complex.I) - rho))).re := by
     -- use re_ofReal_div_ge_one
     simpa [ge_iff_le] using
-      (re_ofReal_div_ge_one ((analyticOrderAt riemannZeta rho).toNat : ℝ)
+      (re_ofReal_div_ge_one (analyticOrderNatAt riemannZeta rho : ℝ)
         ((((1 : ℂ) + delta + rho.im * Complex.I) - rho)) ha_real hz_nonneg)
   -- Next, show the remaining sum is ≥ 0
   have hsum_nonneg :
       0 ≤ Finset.sum
         ((Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im)).erase rho)
         (fun rho1 : ℂ =>
-          (((analyticOrderAt riemannZeta rho1).toNat : ℂ) /
+          ((analyticOrderNatAt riemannZeta rho1 : ℂ) /
             (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re) := by
     apply Finset.sum_nonneg
     intro rho1 hmem
@@ -806,19 +806,19 @@ lemma lem_Z1splitge (delta : ℝ) (hdelta_pos : delta > 0) (rho : ℂ)
     have hNotEv1 : ¬ (∀ᶠ z in nhds rho1, riemannZeta z = 0) :=
       riemannZeta_not_eventually_zero_of_ne_one hne1
     have hzero1 : riemannZeta rho1 = 0 := hZt.1
-    have horder1 : 1 ≤ (analyticOrderAt riemannZeta rho1).toNat :=
+    have horder1 : 1 ≤ analyticOrderNatAt riemannZeta rho1 :=
       analyticOrderAt_pos_toNat_of_zero_of_analytic_not_eventually_zero hAnal1 hzero1 hNotEv1
-    have ha1_real : (1 : ℝ) ≤ ((analyticOrderAt riemannZeta rho1).toNat : ℝ) := by exact_mod_cast horder1
+    have ha1_real : (1 : ℝ) ≤ (analyticOrderNatAt riemannZeta rho1 : ℝ) := by exact_mod_cast horder1
     -- (1/(...)).re ≥ 0
     have hz1_nonneg : 0 ≤ (1 / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re :=
       lem_Re1deltatge0 delta hdelta_pos rho.im rho1 hZt
     -- Lower bound: (1/z).re ≤ ((a:ℂ)/z).re
     have hge :
         (1 / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re ≤
-          (((((analyticOrderAt riemannZeta rho1).toNat : ℝ) : ℂ) /
+          ((((analyticOrderNatAt riemannZeta rho1 : ℝ) : ℂ) /
             (((1 : ℂ) + delta + rho.im * Complex.I) - rho1))).re := by
       simpa [ge_iff_le] using
-        (re_ofReal_div_ge_one ((analyticOrderAt riemannZeta rho1).toNat : ℝ)
+        (re_ofReal_div_ge_one (analyticOrderNatAt riemannZeta rho1 : ℝ)
           ((((1 : ℂ) + delta + rho.im * Complex.I) - rho1)) ha1_real hz1_nonneg)
     -- Thus the target real part is ≥ 0 by transitivity
     exact le_trans hz1_nonneg hge
@@ -865,7 +865,7 @@ lemma lem_re_inv_one_plus_delta_minus_rho_real (delta : ℝ) (hdelta : delta > 0
 lemma lem_Z1splitge2 (delta : ℝ) (hdelta : delta > 0) (rho : ℂ)
   (h_rho_in_zeroZ : rho ∈ zeroZ) (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint rho.im) :
     Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im))
-      (fun rho1 : ℂ => (((analyticOrderAt riemannZeta rho1).toNat : ℂ) / ((1 : ℂ) + delta + rho.im * Complex.I - rho1)).re) ≥
+      (fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / ((1 : ℂ) + delta + rho.im * Complex.I - rho1)).re) ≥
 1 / ((1 : ℝ) + delta - rho.re) := by
   -- Apply lem_Z1splitge to get the first inequality
   have h1 := lem_Z1splitge delta hdelta rho h_rho_in_zeroZ h_rho_in_Zt
@@ -878,7 +878,7 @@ lemma lem_Z1splitge2 (delta : ℝ) (hdelta : delta > 0) (rho : ℂ)
 lemma lem_Z1splitge3 (delta : ℝ) (hdelta : delta > 0) (sigma t : ℝ) (rho : ℂ)
   (h_rho_eq : rho = sigma + t * Complex.I) (h_rho_in_zeroZ : rho ∈ zeroZ)
   (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint t) :
-(Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t)) (fun rho1 : ℂ => ((analyticOrderAt riemannZeta rho1).toNat : ℂ) / (((1 : ℂ) + delta + t * Complex.I) - rho1)) ).re ≥ 1 / ((1 : ℝ) + delta - sigma) := by
+(Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t)) (fun rho1 : ℂ => (analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + t * Complex.I) - rho1)) ).re ≥ 1 / ((1 : ℝ) + delta - sigma) := by
   -- Apply lem_sumrho1 to convert the real part of the sum to the sum of real parts
   rw [lem_sumrho1 t delta]
 
@@ -929,7 +929,7 @@ lemma Z1bound :
   set Sre : ℝ :=
     Finset.sum S
       (fun rho1 : ℂ =>
-        (((analyticOrderAt riemannZeta rho1).toNat : ℂ) / (sp - rho1)).re)
+        ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (sp - rho1)).re)
   -- From explicit bound: |(logDerivZeta sp).re - Sre| ≤ C0 * log(|t|+2)
   have h_bound : abs ((logDerivZeta sp).re - Sre)
         ≤ C0 * Real.log (abs t + 2) := by
@@ -2884,7 +2884,7 @@ lemma lem_Zeta_Expansion_ZFR :
       ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
       ∀ z : ℂ, 1 - deltaz_t t ≤ Complex.re z ∧ Complex.re z ≤ 3/2 ∧ Complex.im z = t →
         ‖(deriv riemannZeta z / riemannZeta z) -
-          (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt riemannZeta ρ).toNat : ℂ) / (z - ρ))‖
+          (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ))‖
         ≤ C_1 * Real.log |t| := by
   obtain ⟨C, hC_gt_one, hC_expansion⟩ :=
     Zeta1_Zeta_Expansion (2/3) (3/4)
@@ -3187,8 +3187,8 @@ lemma lem_triangle_ZFR (t : ℝ) (z : ℂ) :
     let c := (3/2 : ℂ) + I * t
     ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
     1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
-    ‖(∑ ρ ∈ hfin.toFinset, ((analyticOrderAt riemannZeta ρ).toNat : ℂ) / (z - ρ))‖ ≤
-    (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt riemannZeta ρ).toNat : ℝ) / ‖z - ρ‖) := by
+    ‖(∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ))‖ ≤
+    (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖) := by
   -- Introduce variables correctly: c (center), hfin (finiteness proof), hz_cond (conditions on z)
   intros c hfin hz_cond
 
@@ -3213,13 +3213,13 @@ lemma lem_Zeta_Triangle_ZFR :
       ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
       ∀ z : ℂ, 1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
         ‖deriv riemannZeta z / riemannZeta z‖ ≤
-        ‖(∑ ρ ∈ hfin.toFinset, ((analyticOrderAt riemannZeta ρ).toNat : ℂ) / (z - ρ))‖ +
+        ‖(∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ))‖ +
         C_1 * Real.log |t| := by
   obtain ⟨C1, hC1, hbound⟩ := lem_Zeta_Expansion_ZFR
   refine ⟨C1, hC1, ?_⟩
   intro t ht c hfin z hz
   -- Let S denote the finite sum over zeros
-  let S := (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt riemannZeta ρ).toNat : ℂ) / (z - ρ))
+  let S := (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ))
   have hbound1 := hbound t ht hfin z hz
   have htri : ‖deriv riemannZeta z / riemannZeta z‖ ≤ ‖(deriv riemannZeta z / riemannZeta z) - S‖ + ‖S‖ := by
     have hn := norm_add_le ((deriv riemannZeta z / riemannZeta z) - S) S
@@ -3235,27 +3235,27 @@ lemma lem_sumK1abs (t : ℝ) (ht : |t| > 3) (z : ℂ) :
     let c := (3/2 : ℂ) + I * t
     ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
     1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
-    (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt riemannZeta ρ).toNat : ℝ) / ‖z - ρ‖) ≤
-    (1 / (2 * deltaz_t t)) * (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt riemannZeta ρ).toNat : ℝ)) := by
+    (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖) ≤
+    (1 / (2 * deltaz_t t)) * (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ)) := by
   intro c hfin hzcond
   -- Pointwise bound using lem_1abszrho
   have hptwise : ∀ ρ ∈ hfin.toFinset,
-      ((analyticOrderAt riemannZeta ρ).toNat : ℝ) / ‖z - ρ‖ ≤
-      (1 / (2 * deltaz_t t)) * ((analyticOrderAt riemannZeta ρ).toNat : ℝ) := by
+      (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖ ≤
+      (1 / (2 * deltaz_t t)) * (analyticOrderNatAt riemannZeta ρ : ℝ) := by
     intro ρ hρmem
     have hρ_in : ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta) :=
       (Set.Finite.mem_toFinset (hs := hfin)).1 hρmem
     have hbase : 1 / ‖z - ρ‖ ≤ 1 / (2 * deltaz_t t) :=
       lem_1abszrho t ht z ρ hρ_in hzcond
-    have hnonneg : 0 ≤ ((analyticOrderAt riemannZeta ρ).toNat : ℝ) := by
-      exact_mod_cast (Nat.zero_le ((analyticOrderAt riemannZeta ρ).toNat))
+    have hnonneg : 0 ≤ (analyticOrderNatAt riemannZeta ρ : ℝ) := by
+      exact_mod_cast (Nat.zero_le (analyticOrderNatAt riemannZeta ρ))
     have := mul_le_mul_of_nonneg_left hbase hnonneg
     simpa [div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using this
   have hsum := Finset.sum_le_sum hptwise
   -- Rewrite the right-hand side sum as a constant times the sum
   have hrw :=
     (Finset.mul_sum (s := hfin.toFinset)
-      (f := fun ρ => ((analyticOrderAt riemannZeta ρ).toNat : ℝ))
+      (f := fun ρ => (analyticOrderNatAt riemannZeta ρ : ℝ))
       (a := (1 / (2 * deltaz_t t))))
   have hsum2 := hsum
   -- Use the rewriting equality in the desired direction
@@ -3334,7 +3334,7 @@ lemma helper_apply_jensen_to_g
   (hg0_one : g 0 = 1)
   (hfin_g : (zerosetKfR R1 g).Finite)
   (hg_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖g z‖ ≤ B) :
-  (∑ ρ ∈ hfin_g.toFinset, ((analyticOrderAt g ρ).toNat : ℝ)) ≤ Real.log B / Real.log (R / R1) := by
+  (∑ ρ ∈ hfin_g.toFinset, (analyticOrderNatAt g ρ : ℝ)) ≤ Real.log B / Real.log (R / R1) := by
   classical
   have hbound :=
     lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R hR_lt_1
@@ -3345,10 +3345,10 @@ lemma helper_apply_jensen_to_g
 lemma helper_sum_f_equals_sum_g
   (r : ℝ) (c : ℂ) (f : ℂ → ℂ) (hc : f c ≠ 0)
   (hfin : (zerosetKfRc r c f).Finite) :
-  (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt f ρ).toNat : ℝ))
+  (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt f ρ : ℝ))
   =
   (∑ ρ' ∈ ((hfin.image (fun ρ => ρ - c)).toFinset),
-      ((analyticOrderAt (fun z => f (z + c) / f c) ρ').toNat : ℝ)) :=
+      ((analyticOrderNatAt (fun z => f (z + c) / f c) ρ') : ℝ)) :=
 by
   classical
   -- Notation
@@ -3364,8 +3364,8 @@ by
 
   -- First, change the summand using equality of analytic orders at corresponding points
   have h_orders_match :
-      (∑ ρ ∈ S, ((analyticOrderAt f ρ).toNat : ℝ)) =
-      (∑ ρ ∈ S, ((analyticOrderAt g' (φ ρ)).toNat : ℝ)) := by
+      (∑ ρ ∈ S, (analyticOrderNatAt f ρ : ℝ)) =
+      (∑ ρ ∈ S, ((analyticOrderNatAt g' (φ ρ)) : ℝ)) := by
     apply Finset.sum_congr rfl
     intro ρ hρS
     -- ρ is in the zero set of f within the ball centered at c of radius r
@@ -3390,11 +3390,7 @@ by
     -- (φ ρ) + c = ρ
     have h_m_eq' : analyticOrderAt g' (φ ρ) = analyticOrderAt f ρ := by
       simpa [g', φ, sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using h_m_eq
-    -- Pass to toNat and cast to ℝ
-    have h_toNat : (analyticOrderAt g' (φ ρ)).toNat = (analyticOrderAt f ρ).toNat := by
-      simpa using congrArg ENat.toNat h_m_eq'
-    simp [h_toNat]
-
+    rw [analyticOrderNatAt, analyticOrderNatAt, h_m_eq']
   -- Next, rewrite the sum over the image using Finset.sum_image
   have h_inj : Function.Injective φ := by
     intro x y hxy
@@ -3403,8 +3399,8 @@ by
     simpa [φ, sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using this
 
   have h_sum_image :
-      (∑ ρ' ∈ S.image φ, ((analyticOrderAt g' ρ').toNat : ℝ)) =
-      (∑ ρ ∈ S, ((analyticOrderAt g' (φ ρ)).toNat : ℝ)) := by
+      (∑ ρ' ∈ S.image φ, ((analyticOrderNatAt g' ρ') : ℝ)) =
+      (∑ ρ ∈ S, (analyticOrderNatAt g' (φ ρ) : ℝ)) := by
     refine Finset.sum_image ?h
     intro x hx y hy hxy
     -- need x = y from φ x = φ y
@@ -3412,12 +3408,12 @@ by
 
   -- Put everything together
   calc
-    (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt f ρ).toNat : ℝ))
-        = (∑ ρ ∈ S, ((analyticOrderAt f ρ).toNat : ℝ)) := by rfl
-    _ = (∑ ρ ∈ S, ((analyticOrderAt g' (φ ρ)).toNat : ℝ)) := h_orders_match
-    _ = (∑ ρ' ∈ S.image φ, ((analyticOrderAt g' ρ').toNat : ℝ)) := h_sum_image.symm
+    (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt f ρ : ℝ))
+        = (∑ ρ ∈ S, (analyticOrderNatAt f ρ : ℝ)) := by rfl
+    _ = (∑ ρ ∈ S, (analyticOrderNatAt g' (φ ρ) : ℝ)) := h_orders_match
+    _ = (∑ ρ' ∈ S.image φ, ((analyticOrderNatAt g' ρ') : ℝ)) := h_sum_image.symm
     _ = (∑ ρ' ∈ ((hfin.image (fun ρ => ρ - c)).toFinset),
-            ((analyticOrderAt (fun z => f (z + c) / f c) ρ').toNat : ℝ)) := by
+            ((analyticOrderNatAt (fun z => f (z + c) / f c) ρ') : ℝ)) := by
           -- rewrite the index and the function names
           simp [S, φ, g', h_img_toFinset]
 
@@ -3452,7 +3448,7 @@ lemma jensen_sum_bound_strict
   (hg0_one : g 0 = 1)
   (hfin_g : (zerosetKfR R1 g).Finite)
   (hg_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖g z‖ ≤ B) :
-  (∑ ρ ∈ hfin_g.toFinset, ((analyticOrderAt g ρ).toNat : ℝ)) ≤
+  (∑ ρ ∈ hfin_g.toFinset, (analyticOrderNatAt g ρ : ℝ)) ≤
     Real.log B / Real.log (R / R1) := by
   exact helper_apply_jensen_to_g B R R1 hB hR1_pos hR1_lt_R hR_lt_1 g
     h_g_analytic hg0_one hfin_g hg_le_B
@@ -3516,8 +3512,8 @@ lemma no_zero_of_bound_one_and_center_one
 lemma helper_sum_over_equal_finite_sets_orders
   {S T : Set ℂ} (g : ℂ → ℂ)
   (hS : S.Finite) (hT : T.Finite) (hST : S = T) :
-  (∑ x ∈ hS.toFinset, ((analyticOrderAt g x).toNat : ℝ))
-  = (∑ x ∈ hT.toFinset, ((analyticOrderAt g x).toNat : ℝ)) := by
+  (∑ x ∈ hS.toFinset, (analyticOrderNatAt g x : ℝ))
+  = (∑ x ∈ hT.toFinset, (analyticOrderNatAt g x : ℝ)) := by
   classical
   have hF : hS.toFinset = hT.toFinset := by
     ext x
@@ -3549,7 +3545,7 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
   (h_f_nonzero_at_zero : f c ≠ 0)
   (hf_le_B : ∀ z ∈ Metric.closedBall c R, ‖f z‖ ≤ B)
   (hfin : (zerosetKfRc R1 c f).Finite) :
-      ∑ ρ ∈ hfin.toFinset, ((analyticOrderAt f ρ).toNat : ℝ) ≤ Real.log (B / ‖f c‖) / Real.log (R / R1) := by
+      ∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt f ρ : ℝ) ≤ Real.log (B / ‖f c‖) / Real.log (R / R1) := by
   classical
   -- Define the shifted function g(z) = f(z+c)/f(c)
   let g : ℂ → ℂ := fun z => f (z + c) / f c
@@ -3595,9 +3591,9 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
 
   -- Equality between sums over zeros of f and zeros of g (shifted)
   have hsum_fg_eq :
-      (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt f ρ).toNat : ℝ))
+      (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt f ρ : ℝ))
         = (∑ ρ' ∈ ((hfin.image (fun ρ => ρ - c)).toFinset),
-            ((analyticOrderAt g ρ').toNat : ℝ)) :=
+            ((analyticOrderNatAt g ρ') : ℝ)) :=
     helper_sum_f_equals_sum_g (r := R1) (c := c)
       (f := f) (hc := h_f_nonzero_at_zero) (hfin := hfin)
 
@@ -3622,15 +3618,15 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
         (hg0_one := hg0_one) (hfin_g := hfin_g) (hg_le_B := hg_le_B)
     -- Replace the indexing finite set using equality of sets S = image set
     have hsum_g_reindex :
-        (∑ ρ ∈ hfin_g.toFinset, ((analyticOrderAt g ρ).toNat : ℝ))
-          = (∑ ρ ∈ (hfin.image (fun ρ => ρ - c)).toFinset, ((analyticOrderAt g ρ).toNat : ℝ)) :=
+        (∑ ρ ∈ hfin_g.toFinset, (analyticOrderNatAt g ρ : ℝ))
+          = (∑ ρ ∈ (hfin.image (fun ρ => ρ - c)).toFinset, (analyticOrderNatAt g ρ : ℝ)) :=
       helper_sum_over_equal_finite_sets_orders (g := g)
         (S := zerosetKfR R1 g)
         (T := (fun ρ => ρ - c) '' (zerosetKfRc R1 c f))
         (hS := hfin_g) (hT := hfin.image (fun ρ => ρ - c)) (hST := hST_g_img)
     -- Combine bounds and equalities to obtain the desired inequality
     have :
-        (∑ ρ ∈ (hfin.image (fun ρ => ρ - c)).toFinset, ((analyticOrderAt g ρ).toNat : ℝ))
+        (∑ ρ ∈ (hfin.image (fun ρ => ρ - c)).toFinset, (analyticOrderNatAt g ρ : ℝ))
           ≤ Real.log (B / ‖f c‖) / Real.log (R / R1) := by
       simpa [hsum_g_reindex] using hsum_g_bound
     -- Replace g-sum by f-sum using hsum_fg_eq
@@ -3657,7 +3653,7 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
       · intro hzfalse
         cases hzfalse
     have hsum_g_zero :
-        (∑ ρ ∈ hfin_g.toFinset, ((analyticOrderAt g ρ).toNat : ℝ)) = 0 := by
+        (∑ ρ ∈ hfin_g.toFinset, (analyticOrderNatAt g ρ : ℝ)) = 0 := by
       have h :=
         helper_sum_over_equal_finite_sets_orders (g := g)
           (S := zerosetKfR R1 g) (T := (∅ : Set ℂ))
@@ -3670,22 +3666,22 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
         (T := (fun ρ => ρ - c) '' (zerosetKfRc R1 c f))
         (hS := hfin_g) (hT := hfin.image (fun ρ => ρ - c)) (hST := hST_g_img)
     have hsum_img_eq :
-        (∑ ρ ∈ (hfin.image (fun ρ => ρ - c)).toFinset, ((analyticOrderAt g ρ).toNat : ℝ))
-          = (∑ ρ ∈ hfin_g.toFinset, ((analyticOrderAt g ρ).toNat : ℝ)) := by
+        (∑ ρ ∈ (hfin.image (fun ρ => ρ - c)).toFinset, (analyticOrderNatAt g ρ : ℝ))
+          = (∑ ρ ∈ hfin_g.toFinset, (analyticOrderNatAt g ρ : ℝ)) := by
       simpa using hsum_reindex.symm
     have hsum_img_zero :
-        (∑ ρ ∈ (hfin.image (fun ρ => ρ - c)).toFinset, ((analyticOrderAt g ρ).toNat : ℝ)) = 0 := by
+        (∑ ρ ∈ (hfin.image (fun ρ => ρ - c)).toFinset, (analyticOrderNatAt g ρ : ℝ)) = 0 := by
       simp [hsum_img_eq, hsum_g_zero]
     -- Hence the sum over f is zero via hsum_fg_eq
     have hsum_f_zero :
-        (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt f ρ).toNat : ℝ)) = 0 := by
+        (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt f ρ : ℝ)) = 0 := by
       simpa [hsum_img_zero] using hsum_fg_eq
     -- Right-hand side equals zero since log(1) = 0
     have hRHS_zero : Real.log (B / ‖f c‖) / Real.log (R / R1) = 0 := by
       simp [hBdiv_eq_one']
     -- Conclude the desired inequality
     have :
-        (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt f ρ).toNat : ℝ))
+        (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt f ρ : ℝ))
           ≤ Real.log (B / ‖f c‖) / Real.log (R / R1) := by
       simp [hsum_f_zero, hRHS_zero]
     exact this
@@ -3694,7 +3690,7 @@ lemma lem_sum_m_rho_zeta :
     ∃ C_2 > 1, ∀ (t : ℝ) (_ : |t| > 3),
     let c := (3/2 : ℂ) + I * t;
     ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
-      ∑ ρ ∈ hfin.toFinset, ((analyticOrderAt riemannZeta ρ).toNat : ℝ) ≤ C_2 * Real.log |t| := by
+      ∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) ≤ C_2 * Real.log |t| := by
   classical
   -- Constants from auxiliary bounds
   obtain ⟨b, hb_gt1, hb_bound⟩ := zeta32upper
@@ -3826,7 +3822,7 @@ lemma lem_sum_m_rho_zeta :
     have := div_le_div_of_nonneg_right hadd_le (le_of_lt hlogRatio_pos)
     simpa [div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using this
   have hfinal :
-      (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt riemannZeta ρ).toNat : ℝ))
+      (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ))
         ≤ ((1 + |u|) / logRatio) * Real.log |t| := by
     have := le_trans h_sum_bound hRHS1
     exact le_trans this hRHS2
@@ -3843,7 +3839,7 @@ lemma lem_sumKdeltatlogt :
   let c := (3/2 : ℂ) + I * t;
   ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
     ∀ z : ℂ, 1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
-      (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt riemannZeta ρ).toNat : ℝ) / ‖z - ρ‖) ≤
+      (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖) ≤
       (C_3 / (deltaz_t t)) * Real.log |t| := by
   -- Extract C_2 from lem_sum_m_rho_zeta
   obtain ⟨C_2, hC_2_pos, hC_2_bound⟩ := lem_sum_m_rho_zeta
@@ -3873,8 +3869,8 @@ lemma lem_sumKdeltatlogt :
 
     -- Combine the bounds
     calc
-      (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt riemannZeta ρ).toNat : ℝ) / ‖z - ρ‖)
-        ≤ (1 / (2 * deltaz_t t)) * (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt riemannZeta ρ).toNat : ℝ)) := h1
+      (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖)
+        ≤ (1 / (2 * deltaz_t t)) * (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ)) := h1
       _ ≤ (1 / (2 * deltaz_t t)) * (C_2 * Real.log |t|) := by
           apply mul_le_mul_of_nonneg_left h2
           apply div_nonneg (by norm_num)
@@ -3896,7 +3892,7 @@ lemma lem_sumKlogt2 :
   let c := (3/2 : ℂ) + I * t
   ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
     ∀ z : ℂ, 1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
-      (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt riemannZeta ρ).toNat : ℝ) / ‖z - ρ‖) ≤
+      (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖) ≤
       C_4 * Real.log |t|^2 := by
   -- Apply lem_sumKdeltatlogt to get C_3
   obtain ⟨C_3, hC_3_gt, hC_3⟩ := lem_sumKdeltatlogt
@@ -3954,7 +3950,7 @@ lemma lem_sumKlogt2 :
       _ = 40 * C_3 / zerofree_constant * (Real.log |t|)^2 := by simp [pow_two]; ring
 
     -- Final bound using C_4 definition
-    calc (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt riemannZeta ρ).toNat : ℝ) / ‖z - ρ‖)
+    calc (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖)
         ≤ C_3 / deltaz_t t * Real.log |t| := h_bound
     _ ≤ 40 * C_3 / zerofree_constant * (Real.log |t|)^2 := h_main_bound
     _ ≤ max (100 * C_3 / zerofree_constant) 2 * (Real.log |t|)^2 := by
@@ -4019,8 +4015,8 @@ lemma lem_logDerivZetalogt0 :
 
     -- Combine the bounds
     calc ‖deriv riemannZeta s / riemannZeta s‖
-        ≤ ‖(∑ ρ ∈ hfin.toFinset, ((analyticOrderAt riemannZeta ρ).toNat : ℂ) / (s - ρ))‖ + C_1 * Real.log |t| := h_triangle
-      _ ≤ (∑ ρ ∈ hfin.toFinset, ((analyticOrderAt riemannZeta ρ).toNat : ℝ) / ‖s - ρ‖) + C_1 * Real.log |t| := by
+        ≤ ‖(∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℂ) / (s - ρ))‖ + C_1 * Real.log |t| := h_triangle
+      _ ≤ (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖s - ρ‖) + C_1 * Real.log |t| := by
           gcongr
       _ ≤ C_4 * Real.log |t|^2 + C_1 * Real.log |t| := by
           gcongr

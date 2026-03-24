@@ -3565,8 +3565,8 @@ lemma shifted_zeros_correspondence (R1 : ℝ) (c z : ℂ)
     (f : ℂ → ℂ) (h_nonzero : f c ≠ 0)
     (hfin_orig : (zerosetKfRc R1 c f).Finite)
     (hfin_shift : (zerosetKfRc R1 (0 : ℂ) (fun u => f (u + c) / f c)).Finite) :
-    ∑ ρ ∈ hfin_orig.toFinset, ((analyticOrderAt f ρ).toNat : ℂ) / (z - ρ) =
-    ∑ ρ' ∈ hfin_shift.toFinset, ((analyticOrderAt (fun u => f (u + c) / f c) ρ').toNat : ℂ) / ((z - c) - ρ') := by
+    ∑ ρ ∈ hfin_orig.toFinset, (analyticOrderNatAt f ρ : ℂ) / (z - ρ) =
+    ∑ ρ' ∈ hfin_shift.toFinset, ((analyticOrderNatAt (fun u => f (u + c) / f c) ρ') : ℂ) / ((z - c) - ρ') := by
   -- Use fc_zeros to establish the bijection between zero sets
   have h_bij : (zerosetKfRc R1 (0 : ℂ) (fun u => f (u + c) / f c)) = (fun ρ => ρ - c) '' (zerosetKfRc R1 c f) :=
     fc_zeros R1 c f h_nonzero
@@ -3608,8 +3608,9 @@ lemma shifted_zeros_correspondence (R1 : ℝ) (c z : ℂ)
     -- Since (ρ - c) + c = ρ
     have h_add : (ρ - c) + c = ρ := by ring
     rw [h_add] at h_order
-    rw [← h_order]
+    rw [analyticOrderNatAt, ← h_order]
     -- The coordinate transformation: (z - c) - (ρ - c) = z - ρ
+    unfold analyticOrderNatAt
     ring
 
 -- Lemma: final_ineq2 (shifted version of final_ineq1)
@@ -3621,7 +3622,7 @@ lemma final_ineq2
     (hfin : (zerosetKfRc R1 (0 : ℂ) (fun z => f (z + c) / f c)).Finite) :
     ∀ z ∈ closedBall (0 : ℂ) r1 \ zerosetKfRc R1 (0 : ℂ) (fun z => f (z + c) / f c),
     ‖(deriv (fun z => f (z + c) / f c) z / (f (z + c) / f c)) - ∑ ρ ∈ hfin.toFinset,
-      ((analyticOrderAt (fun w => f (w + c) / f c) ρ).toNat : ℂ) / (z - ρ)‖ ≤ (16 * r^2 / ((r - r1)^3) +
+      ((analyticOrderNatAt (fun w => f (w + c) / f c) ρ) : ℂ) / (z - ρ)‖ ≤ (16 * r^2 / ((r - r1)^3) +
     1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log (B / ‖f c‖) := by
   intro z hz
 
@@ -3685,7 +3686,7 @@ lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
     ∀ (hfin : (zerosetKfRc R1 c riemannZeta).Finite),
     ∀ z ∈ closedBall c r1 \ zerosetKfRc R1 c riemannZeta,
     ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
-      ((analyticOrderAt riemannZeta ρ).toNat : ℂ) / (z - ρ)‖ ≤ (16 * r^2 / ((r - r1)^3) +
+      ((analyticOrderNatAt riemannZeta ρ) : ℂ) / (z - ρ)‖ ≤ (16 * r^2 / ((r - r1)^3) +
     1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log (B / ‖riemannZeta c‖) := by
   intro c B hB h_bound hfin z hzmem
   -- From |t| > 3, deduce |t| > 1
@@ -3733,7 +3734,7 @@ lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
   -- Rewrite the inequality's first term using the cancellation identity
   have hineq1 : ‖(deriv riemannZeta z / riemannZeta z)
         - ∑ ρ ∈ hfin_shift.toFinset,
-            ((analyticOrderAt (fun u => riemannZeta (u + c) / riemannZeta c) ρ).toNat : ℂ)
+            ((analyticOrderNatAt (fun u => riemannZeta (u + c) / riemannZeta c) ρ) : ℂ)
               / ((z - c) - ρ)‖
         ≤ (16 * r^2 / ((r - r1)^3) + 1 / ((R^2 / R1 - R1) * Real.log (R / R1))) *
             Real.log (B / ‖riemannZeta c‖) := by
@@ -3743,7 +3744,7 @@ lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
   -- Replace the sum over shifted zeros with the sum over original zeros
   have hineq2 : ‖(deriv riemannZeta z / riemannZeta z)
         - ∑ ρ ∈ hfin.toFinset,
-            ((analyticOrderAt riemannZeta ρ).toNat : ℂ) / (z - ρ)‖
+            ((analyticOrderNatAt riemannZeta ρ) : ℂ) / (z - ρ)‖
         ≤ (16 * r^2 / ((r - r1)^3) + 1 / ((R^2 / R1 - R1) * Real.log (R / R1))) *
             Real.log (B / ‖riemannZeta c‖) := by
     simpa [hsum_eq] using hineq1
@@ -3852,7 +3853,7 @@ lemma Zeta1_Zeta_Expand :
     ∀ (hfin : (zerosetKfRc R1 c riemannZeta).Finite),
     ∀ z ∈ closedBall c r1 \ zerosetKfRc R1 c riemannZeta,
     ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
-      ((analyticOrderAt riemannZeta ρ).toNat : ℂ) / (z - ρ)‖ ≤
+      ((analyticOrderNatAt riemannZeta ρ) : ℂ) / (z - ρ)‖ ≤
       (16 * r^2 / ((r - r1)^3) +
     1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * (Real.log |t| + Real.log b + A) := by
   -- Apply the three lemmas mentioned in the informal proof
@@ -3946,7 +3947,7 @@ lemma Zeta1_Zeta_Expand :
 
   -- Final calculation combining all bounds
   calc ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
-      ((analyticOrderAt riemannZeta ρ).toNat : ℂ) / (z - ρ)‖
+      ((analyticOrderNatAt riemannZeta ρ) : ℂ) / (z - ρ)‖
       ≤ (16 * r^2 / ((r - r1)^3) +
           1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log (b * |t| / ‖riemannZeta (3/2 + I * t)‖) := hexp
     _ ≤ (16 * r^2 / ((r - r1)^3) +
@@ -3964,7 +3965,7 @@ lemma Zeta1_Zeta_Expansion
     ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
     ∀ z ∈ closedBall c r1 \ zerosetKfRc (5 / (6 : ℝ)) c riemannZeta,
     ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
-      ((analyticOrderAt riemannZeta ρ).toNat : ℂ) / (z - ρ)‖ ≤
+      (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ)‖ ≤
       C * (1 / (r - r1)^3 + 1) * Real.log |t| := by
   -- Introduce the universal constants from Zeta1_Zeta_Expand
   obtain ⟨A, hAgt1, b, hbgt1, hmain⟩ := Zeta1_Zeta_Expand
@@ -4037,7 +4038,7 @@ lemma Zeta1_Zeta_Expansion
   have hLS_eq : Real.log |t| + Real.log b + A = Real.log |t| + S := by
     simp [S, add_comm, add_left_comm, add_assoc]
   have hineq2 : ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
-        ((analyticOrderAt riemannZeta ρ).toNat : ℂ) / (z - ρ)‖
+        (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ)‖
         ≤ K * (Real.log |t| + S) := by
     rw [← hK_eq, ← hLS_eq]
     exact hineq1
@@ -4070,7 +4071,7 @@ lemma Zeta1_Zeta_Expansion
     exact hstep
   -- Chain: ≤ K*(1 + S/log 3) * log|t|
   have hineq3 : ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
-        ((analyticOrderAt riemannZeta ρ).toNat : ℂ) / (z - ρ)‖
+        (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ)‖
         ≤ K * ((1 + S / Real.log 3) * Real.log |t|) :=
     le_trans hineq2 (mul_le_mul_of_nonneg_left hsum_bound (by
       have hr2_nonneg : 0 ≤ r^2 := by
