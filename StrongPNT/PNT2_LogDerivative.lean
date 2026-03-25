@@ -48,6 +48,15 @@ lemma trailingCoeff_ne_zero {f : ℂ → ℂ} {z : ℂ} (h1 : AnalyticAt ℂ f z
   obtain ⟨_, _, _, hg3, _⟩ := trailingCoeff_def h1 h2
   rwa [hg3]
 
+lemma order_ne_top {f : ℂ → ℂ} {r : ℝ} {z : ℂ} (hf : AnalyticOnNhd ℂ f (closedBall 0 r)) (hr : 0 ≤ r)
+    (ne : ¬ EqOn f 0 (closedBall 0 r)) (hz : z ∈ closedBall 0 r) :
+    analyticOrderAt f z ≠ ⊤ := by
+  unfold EqOn at ne
+  push_neg at ne
+  rcases ne with ⟨z', hz'⟩
+  refine hf.analyticOrderAt_ne_top_of_isPreconnected (isConnected_closedBall hr).isPreconnected hz'.1 hz ?_
+  simp [AnalyticAt.analyticOrderAt_eq_zero (hf z' hz'.1)|>.mpr hz'.2]
+
 /-- The “deflated” quotient: divide `f` by the product of `(z-ρ)^{m_ρ}`, and at a zero `z=σ`
     use the local factor function `h_σ σ` in the numerator (so the expression extends analytically). -/
 noncomputable def Cf
