@@ -25,6 +25,29 @@ lemma lem_m_rho_is_nat (R R1 : ℝ) (hR1_lt_R : R1 < R) (f : ℂ → ℂ)
 
 /-! ### The quotient `Cf` (no core wrapper) -/
 
+noncomputable def trailingCoeff (f : ℂ → ℂ) (z : ℂ) : ℂ :=
+    if h1 : AnalyticAt ℂ f z then
+    if h2 : analyticOrderAt f z ≠ ⊤ then
+      (h1.analyticOrderAt_ne_top.mp h2).choose z
+    else
+      0
+  else
+    0
+
+lemma trailingCoeff_def {f : ℂ → ℂ} {z : ℂ} (h1 : AnalyticAt ℂ f z)
+    (h2 : analyticOrderAt f z ≠ ⊤) :
+    ∃ g : ℂ → ℂ, AnalyticAt ℂ g z ∧ g z ≠ 0 ∧ trailingCoeff f z = g z
+    ∧ f =ᶠ[nhds z] fun z_1 ↦ (z_1 - z) ^ analyticOrderNatAt f z * g z_1 := by
+  obtain ⟨hg1, hg2, hg3⟩ := (h1.analyticOrderAt_ne_top.mp h2).choose_spec
+  set g := (h1.analyticOrderAt_ne_top.mp h2).choose
+  refine ⟨g, hg1, hg2, ?_, (by simpa)⟩
+  simp [trailingCoeff, h1, h2, g]
+
+lemma trailingCoeff_ne_zero {f : ℂ → ℂ} {z : ℂ} (h1 : AnalyticAt ℂ f z)
+    (h2 : analyticOrderAt f z ≠ ⊤) : trailingCoeff f z ≠ 0 := by
+  obtain ⟨_, _, _, hg3, _⟩ := trailingCoeff_def h1 h2
+  rwa [hg3]
+
 /-- The “deflated” quotient: divide `f` by the product of `(z-ρ)^{m_ρ}`, and at a zero `z=σ`
     use the local factor function `h_σ σ` in the numerator (so the expression extends analytically). -/
 noncomputable def Cf
