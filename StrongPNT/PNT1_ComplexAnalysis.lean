@@ -157,23 +157,17 @@ theorem AnalyticOnNhd.mono_closedBall {B : ℂ → ℂ} {R : ℝ} (R' : ℝ)
 
 /-- Lemma: There exists J analyticOnNhd with J(0) = 0 and J'(z) = B'(z)/B(z). -/
 lemma I_is_antiderivative
-    {r1 R' R : ℝ}
-    (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
+    {r1 R' : ℝ}
+    (hr1_lt_R' : r1 < R')
     {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R))
+    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R'))
     (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0) :
     ∃ J : ℂ → ℂ, AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1) ∧
       J 0 = 0 ∧
       ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z := by
-  classical
-  -- L := B'/B is analytic on closedBall R'
-  have hB_on_R' : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R') :=
-    AnalyticOnNhd.mono_closedBall R' hB hR'_lt_R
-  have hderiv_on_R' : AnalyticOnNhd ℂ (deriv B) (Metric.closedBall (0 : ℂ) R') :=
-    AnalyticOnNhd.deriv hB_on_R'
   let L : ℂ → ℂ := fun z => deriv B z / B z
   have hL_on_R' : AnalyticOnNhd ℂ L (Metric.closedBall (0 : ℂ) R') := by
-    simpa [L] using AnalyticOnNhd.div hderiv_on_R' hB_on_R' hB_ne_zero
+    simpa [L] using  hB.deriv.div hB hB_ne_zero
   obtain ⟨J, hJ⟩ := DifferentiableOn.isExactOn_ball <| hL_on_R'.mono Metric.ball_subset_closedBall|>.differentiableOn
   refine ⟨(fun z ↦ J z - J 0), ?_, (by simp), ?_⟩
   · apply AnalyticOnNhd.sub _ analyticOnNhd_const
@@ -693,7 +687,7 @@ theorem log_of_analytic
         Real.log (norm (B z)) - Real.log (norm (B 0)) = Complex.re (J_B z)) := by
   have hB_ne_zero_R' : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0 := hB_ne_zero
   obtain ⟨J_B, hJ, hJ0, hJderiv⟩ :=
-    I_is_antiderivative hr1_lt_R' hR'_lt_R hB hB_ne_zero_R'
+    I_is_antiderivative hr1_lt_R' (hB.mono (Metric.closedBall_subset_closedBall hR'_lt_R.le)) hB_ne_zero_R'
   refine ⟨J_B, hJ, hJ0, hJderiv, ?_⟩
   intro z hz
   simpa using
