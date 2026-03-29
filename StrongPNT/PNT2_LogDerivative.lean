@@ -47,12 +47,14 @@ lemma order_ne_top {f : ℂ → ℂ} {r : ℝ} {z : ℂ} (hf : AnalyticOnNhd ℂ
 noncomputable def Cf
     (R1 : ℝ)
     (f : ℂ → ℂ)
-    (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (z : ℂ) : ℂ :=
-  if _ : z ∈ zerosetKfR R1 f then
-    trailingCoeff f z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase z), (z - ρ) ^ analyticOrderNatAt f ρ
+if h_finite_zeros : (zerosetKfR R1 f).Finite then
+    if _ : z ∈ zerosetKfR R1 f then
+      trailingCoeff f z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase z), (z - ρ) ^ analyticOrderNatAt f ρ
+    else
+      f z / ∏ ρ ∈ h_finite_zeros.toFinset, (z - ρ) ^ analyticOrderNatAt f ρ
   else
-    f z / ∏ ρ ∈ h_finite_zeros.toFinset, (z - ρ) ^ analyticOrderNatAt f ρ
+    1
 
 /-! ### Helper lemmas used by the Cf proofs (statements only) -/
 
@@ -90,7 +92,7 @@ lemma lem_Cf_analytic_off_K
     {h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z}
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R \ zerosetKfR R1  f) :
-    AnalyticAt ℂ (Cf R1 f h_finite_zeros) z := by
+    AnalyticAt ℂ (Cf R1 f) z := by
   have h_ratio_analytic : AnalyticAt ℂ (fun w => f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ analyticOrderNatAt f ρ) z := by
     apply lem_ratioAnalAt z f
     · apply h_f_analytic
@@ -104,7 +106,7 @@ lemma lem_Cf_analytic_off_K
 
   -- Show that the ratio function equals Cf in a neighborhood of z
   have h_eventually_eq : (fun w => f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ analyticOrderNatAt f ρ) =ᶠ[nhds z]
-    (fun w => Cf R1 f h_finite_zeros w) := by
+    (fun w => Cf R1 f w) := by
     -- Since the zero set is finite, its complement is open
     have hz_not_in : z ∉ zerosetKfR R1 f := hz.2
     have h_open : IsOpen (Set.compl (zerosetKfR R1 f)) := h_finite_zeros.isClosed.isOpen_compl
@@ -114,9 +116,9 @@ lemma lem_Cf_analytic_off_K
     have hw_not_in_zeros : w ∉ zerosetKfR R1 f := hw_not_in_compl
     -- Since w ∉ zerosetKfR R1, Cf w uses the else branch
     show f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ analyticOrderNatAt f ρ =
-         Cf R1 f h_finite_zeros w
+         Cf R1 f w
     -- Apply the definition of Cf using dif_neg for dependent if-then-else
-    rw [Cf, dif_neg hw_not_in_zeros]
+    simp [Cf, h_finite_zeros, hw_not_in_zeros]
 
   -- Transfer analyticity
   exact h_ratio_analytic.congr h_eventually_eq
@@ -144,7 +146,7 @@ lemma lem_Cf_at_sigma
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 f) (hfσ : AnalyticAt ℂ  f σ) :
     ∃ g : ℂ → ℂ, AnalyticAt ℂ g σ ∧ ∀ᶠ z in nhds σ,
-      Cf R1 f h_finite_zeros z =
+      Cf R1 f z =
       g z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase σ), (z - ρ) ^ analyticOrderNatAt f ρ := by
   by_cases top : analyticOrderAt f σ = ⊤
   · refine ⟨0, analyticAt_const, ?_⟩
@@ -153,18 +155,18 @@ lemma lem_Cf_at_sigma
       filter_upwards [eventually_eventually_nhds.mpr f_eq_zero] with z eq_zero
       simp [trailingCoeff, analyticOrderAt_eq_top.mpr eq_zero]
     filter_upwards [f_eq_zero, trailing_eq_zero] with z f_eq_zero trailing_eq_zero
-    simp [Cf, trailing_eq_zero, f_eq_zero]
+    simp [Cf, trailing_eq_zero, f_eq_zero, h_finite_zeros]
   obtain ⟨g, hg1, hg2, hg3, hg4⟩ := trailingCoeff_def hfσ top
   refine ⟨g, hg1, ?_⟩
   filter_upwards [hg1.continuousAt.eventually_ne hg2, hg4] with z ne_zero f_eq
   by_cases! h : z = σ
-  · simp [Cf, hσ, h, hg3]
+  · simp [Cf, hσ, h, hg3, h_finite_zeros]
   · have : f z ≠ 0 := by
       rw [f_eq]
       apply mul_ne_zero (pow_ne_zero _ (by grind)) ne_zero
     have : z ∉ zerosetKfR R1 f := by
       simp [zerosetKfR, this]
-    simp [Cf, this, f_eq]
+    simp [Cf, this, f_eq, h_finite_zeros]
     rw [lem_prod_no_sigma1 h_finite_zeros σ hσ, mul_div_mul_left]
     grind
 
@@ -187,7 +189,7 @@ lemma lem_Cf_analytic_at_K
     {f : ℂ → ℂ}
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 f) (hfσ : AnalyticAt ℂ f σ) :
-    AnalyticAt ℂ (Cf R1 f h_finite_zeros) σ := by
+    AnalyticAt ℂ (Cf R1 f)  σ := by
   obtain ⟨g, hg1, hg2⟩ := lem_Cf_at_sigma h_finite_zeros σ hσ hfσ
   apply analyticAt_congr hg2|>.mpr
   apply lem_h_ratio_anal
@@ -205,15 +207,14 @@ lemma lem_Cf_nonzero_off_K
     {f : ℂ → ℂ}
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f) :
-    Cf R1 f h_finite_zeros z ≠ 0 := by
+    Cf R1 f z ≠ 0 := by
   -- Since z ∉ zerosetKfR R1, Cf uses the else branch
   have hz_not_in : z ∉ zerosetKfR R1 f := hz.2
 
   -- Unfold Cf definition using the else branch
-  have h_cf_eq : Cf R1 f h_finite_zeros z =
+  have h_cf_eq : Cf R1 f z =
     f z / ∏ ρ ∈ h_finite_zeros.toFinset, (z - ρ) ^ analyticOrderNatAt f ρ := by
-    unfold Cf
-    simp [hz_not_in]
+    simp [Cf, hz_not_in, h_finite_zeros]
 
   rw [h_cf_eq]
 
@@ -243,7 +244,7 @@ lemma lem_Cf_nonzero_on_K
     {f : ℂ → ℂ}
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 f) (hfσ : AnalyticAt ℂ f σ) (ne_top : analyticOrderAt f σ ≠ ⊤) :
-    Cf R1 f h_finite_zeros σ ≠ 0 := by
+    Cf R1 f σ ≠ 0 := by
   have hden :
       (∏ ρ ∈ (h_finite_zeros.toFinset.erase σ),
         (σ - ρ) ^ analyticOrderNatAt f ρ) ≠ 0 := by
@@ -252,7 +253,7 @@ lemma lem_Cf_nonzero_on_K
     have hρ_ne_σ : ρ ≠ σ := (Finset.mem_erase.mp hρmem).1
     have hσ_ne_ρ : σ ≠ ρ := hρ_ne_σ.symm
     exact pow_ne_zero _ (sub_ne_zero.mpr hσ_ne_ρ)
-  simp [Cf, hσ, hden]
+  simp [Cf, hσ, hden, h_finite_zeros]
   exact trailingCoeff_ne_zero hfσ ne_top
 
 lemma lem_Cf_never_zero
@@ -262,7 +263,7 @@ lemma lem_Cf_never_zero
     (ne_top : ∀ z ∈ closedBall 0 R1, analyticOrderAt f z ≠ ⊤)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R1) :
-    Cf R1 f h_finite_zeros z ≠ 0 := by
+    Cf R1 f z ≠ 0 := by
   by_cases h : z ∈ zerosetKfR R1 f
   ·  apply lem_Cf_nonzero_on_K h_finite_zeros z h (hf z (by simp_all)) (ne_top z (by simp_all))
   · apply lem_Cf_nonzero_off_K h_finite_zeros z ⟨hz, h⟩
@@ -272,7 +273,7 @@ noncomputable def Bf
     (f : ℂ → ℂ)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (z : ℂ) : ℂ :=
-  Cf R1 f h_finite_zeros z *
+  Cf R1 f z *
   ∏ ρ ∈ h_finite_zeros.toFinset,
     ((R : ℂ) - star ρ * z / (R : ℂ)) ^ analyticOrderNatAt f ρ
 
@@ -371,10 +372,9 @@ lemma lem_mod_Bf_is_prod_mod (R R1 : ℝ)
   -- Use lem_mod_of_prod2 to distribute norm over the product as suggested in informal proof
   rw [lem_mod_of_prod2]
   -- When z ∉ zerosetKfR R1, we have Cf z = f z / ∏ ρ, (z - ρ)^{m_ρ} by definition
-  have hCf : Cf R1 f h_finite_zeros z =
+  have hCf : Cf R1 f z =
     f z / ∏ ρ ∈ h_finite_zeros.toFinset, (z - ρ) ^ analyticOrderNatAt f ρ := by
-    unfold Cf
-    simp only [hz, ↓reduceDIte]
+    simp [Cf, hz, h_finite_zeros]
   rw [hCf, norm_div]
   -- Apply lem_mod_of_prod2 to the denominator
   rw [lem_mod_of_prod2]
@@ -985,7 +985,7 @@ lemma lem_Bf_eq_prod_Cf
     ∀ z, Bf R R1 f h_finite_zeros z =
       (∏ ρ ∈ h_finite_zeros.toFinset,
         ((R : ℂ) - star ρ * z / (R : ℂ)) ^ analyticOrderNatAt f ρ) *
-      (Cf R1 f h_finite_zeros z) := by
+      (Cf R1 f z) := by
   intro z
   rw [Bf]
   ring
@@ -1734,12 +1734,12 @@ lemma logDeriv_Bf_is_sum (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1) (hR1_pos : 0 < R1
     -- Rewrite Bf and Cf at points away from the zero set
     have hBf_w :
         Bf R R1 f h_finite_zeros w
-          = Cf R1 f  h_finite_zeros w * BN w := by
+          = Cf R1 f  w * BN w := by
       simp [Bf, BN, K]
     have hCf_w :
-        Cf R1 f h_finite_zeros w
+        Cf R1 f w
           = f w / A w := by
-      simp [Cf, S, A, K, hw_notin]
+      simp [Cf, S, A, K, hw_notin, h_finite_zeros]
     -- Use functional identities to simplify to f * RatProd
     have h_eq1 := div_mul_eq_mul_mul_inv_fun (f := f) (A := A) (B := BN)
     have h_eq1_w : (f w / A w) * BN w = f w * (BN w * (A w)⁻¹) := by
