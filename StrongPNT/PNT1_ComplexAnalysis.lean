@@ -194,72 +194,43 @@ lemma H_at_zero
 
 /-- Lemma: J'(z)B(z) = B'(z). -/
 lemma log_deriv_id
-    {r1 R' : ℝ}
-    (hr1_lt_R' : r1 < R')
+    {r1 : ℝ}
     {B : ℂ → ℂ}
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0)
+    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
     {J : ℂ → ℂ}
     (hJ_deriv : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z * B z = deriv B z := by
   intro z hz
-  -- z ∈ closedBall 0 r1 implies z ∈ closedBall 0 R
-  have hzR : z ∈ Metric.closedBall (0 : ℂ) R' := by
-    have hzR' : dist z (0 : ℂ) ≤ r1 := hz
-    have hR'_le : r1 ≤ R' := le_of_lt (hr1_lt_R')
-    have hzR'' : dist z (0 : ℂ) ≤ R' := le_trans hzR' hR'_le
-    simpa using hzR''
-  have hBnz : B z ≠ 0 := hB_ne_zero z hzR
-  have hJd := hJ_deriv z hz
-  have hmult := congrArg (fun t => t * B z) hJd
-  have hR2 : (deriv B z / B z) * B z = deriv B z * B z / B z := by
-    simpa using (div_mul_eq_mul_div (deriv B z) (B z) (B z))
-  have hmult' : deriv J z * B z = deriv B z * B z / B z := by
-    simpa [hR2] using hmult
-  have hdiv' : deriv B z * B z / B z = deriv B z := by
-    field_simp [hBnz]
-  calc
-    deriv J z * B z = deriv B z * B z / B z := hmult'
-    _ = deriv B z := by simpa using hdiv'
+  rw [hJ_deriv z hz]
+  field [hB_ne_zero z hz]
 
 /-- Lemma: J'(z)B(z) - B'(z) = 0. -/
 lemma log_deriv_identity
-    {r1 R' : ℝ}
-    (hr1_lt_R' : r1 < R')
+    {r1 : ℝ}
     {B : ℂ → ℂ}
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0)
+    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
     {J : ℂ → ℂ}
     (hJ_deriv : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z * B z - deriv B z = 0 := by
   intro z hz
-  have h_eq := log_deriv_id hr1_lt_R' hB_ne_zero hJ_deriv z hz
+  have h_eq := log_deriv_id hB_ne_zero hJ_deriv z hz
   rw [h_eq]
   simp
 
 /-- Lemma: Derivative of H(z) using quotient rule. -/
 lemma H_derivative_quotient_rule
-    {r1 R' R : ℝ}
-    (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
+    {r1 : ℝ}
     {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0)
+    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
+    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
     {J : ℂ → ℂ}
     (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1)) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) r1,
       deriv (H_auxiliary B J) z =
       (deriv (fun w => Complex.exp (J w)) z * B z - deriv B z * Complex.exp (J z)) / (B z)^2 := by
   intro z hz
-  -- z belongs to the larger closed ball
-  have hzR : z ∈ Metric.closedBall (0 : ℂ) R' := by
-    have hzR' : dist z (0 : ℂ) ≤ r1 := hz
-    have hR_le : r1 ≤ R' := le_of_lt (hr1_lt_R')
-    have hzR'' : dist z (0 : ℂ) ≤ R' := le_trans hzR' hR_le
-    simpa using hzR''
-  -- differentiability and nonvanishing of denominator
-  have hB_nz : B z ≠ 0 := hB_ne_zero z hzR
-  have hB' : AnalyticOnNhd ℂ B (Metric.closedBall 0 R') := by
-    apply AnalyticOnNhd.mono_closedBall R' hB
-    assumption
-  have hB_diff : DifferentiableAt ℂ B z := (hB' z hzR).differentiableAt
+  have hB_nz : B z ≠ 0 := hB_ne_zero z hz
+  have hB_diff : DifferentiableAt ℂ B z := (hB z hz).differentiableAt
   have hJ_diff : DifferentiableAt ℂ J z := (hJ z hz).differentiableAt
   have hF_diff : DifferentiableAt ℂ (fun w => Complex.exp (J w)) z := hJ_diff.cexp
   -- apply the quotient rule for derivatives
@@ -280,11 +251,10 @@ lemma exp_I_derivative_chain_rule
   simpa [mul_comm] using hcomp.deriv
 
 lemma H_derivative_calc
-    {r1 R' R : ℝ}
-    (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
+    {r1 : ℝ}
     {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0)
+    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
+    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
     {J : ℂ → ℂ}
     (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1)) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) r1,
@@ -292,7 +262,7 @@ lemma H_derivative_calc
       (deriv J z * B z - deriv B z) * Complex.exp (J z) / (B z)^2 := by
   intro z hz
   -- Get the quotient rule result
-  have hquot := H_derivative_quotient_rule hr1_lt_R' hR'_lt_R hB hB_ne_zero hJ z hz
+  have hquot := H_derivative_quotient_rule hB hB_ne_zero hJ z hz
   -- Get the chain rule result for exp(J(z))
   have hchain := exp_I_derivative_chain_rule hJ z hz
   -- Substitute chain rule into quotient rule
@@ -307,11 +277,10 @@ lemma H_derivative_calc
   ring
 
 lemma H_derivative_is_zero
-    {r1 R' R : ℝ}
-    (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
+    {r1: ℝ}
     {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0)
+    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
+    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
     {J : ℂ → ℂ}
     (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
     (hJ_deriv : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z) :
@@ -319,52 +288,42 @@ lemma H_derivative_is_zero
       deriv (H_auxiliary B J) z = 0 := by
   intro z hz
   have hcalc :=
-    H_derivative_calc hr1_lt_R' hR'_lt_R hB hB_ne_zero hJ z hz
+    H_derivative_calc hB hB_ne_zero hJ z hz
   have hident :=
-    log_deriv_identity hr1_lt_R' hB_ne_zero hJ_deriv z hz
+    log_deriv_identity hB_ne_zero hJ_deriv z hz
   simpa [hident] using hcalc
 
 lemma zero_mem_closedBall_zero_radius {r1 : ℝ} (hr1 : 0 ≤ r1) : (0 : ℂ) ∈ Metric.closedBall (0 : ℂ) r1 := by
   simpa [Metric.mem_closedBall, dist_eq_norm] using hr1
 
 lemma H_deriv_zero_on_closedBall
-    {r1 R' R : ℝ}
-    (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
+    {r1: ℝ}
     {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0)
+    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
+    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
     {J : ℂ → ℂ}
     (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
     (hJ_deriv : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) r1,
       deriv (H_auxiliary B J) z = 0 := by
   simpa using
-    (H_derivative_is_zero hr1_lt_R' hR'_lt_R hB hB_ne_zero hJ hJ_deriv)
+    (H_derivative_is_zero hB hB_ne_zero hJ hJ_deriv)
 
 lemma H_auxiliary_differentiableOn_closedBall
-    {r1 R' R : ℝ}
-    (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
+    {r1: ℝ}
     {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0)
+    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
+    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
     {J : ℂ → ℂ}
     (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1)) :
     DifferentiableOn ℂ (H_auxiliary B J)
       (Metric.closedBall (0 : ℂ) r1) :=
 by
-  -- closedBall r1 is a subset of closedBall R
-  have hsubset : Metric.closedBall (0 : ℂ) r1 ⊆ Metric.closedBall (0 : ℂ) R := by
-    intro z hz
-    have hz' : dist z (0 : ℂ) ≤ r1 := by
-      simpa [Metric.mem_closedBall] using hz
-    have hle : r1 ≤ R := le_of_lt (lt_trans hr1_lt_R' hR'_lt_R)
-    have : dist z (0 : ℂ) ≤ R := le_trans hz' hle
-    simpa [Metric.mem_closedBall] using this
   -- differentiability of J and B on the closed ball
   have hJ_diff : DifferentiableOn ℂ J (Metric.closedBall (0 : ℂ) r1) :=
     hJ.differentiableOn
   have hB_diff_r1 : DifferentiableOn ℂ B (Metric.closedBall (0 : ℂ) r1) :=
-    (hB.differentiableOn).mono hsubset
+    (hB.differentiableOn)
   -- differentiability of exp on ℂ and composition with J
   have hExp_diff : DifferentiableOn ℂ Complex.exp (Set.univ : Set ℂ) :=
     (Complex.differentiable_exp.differentiableOn)
@@ -373,12 +332,7 @@ by
     intro x hx; simp
   -- B is nonvanishing on the smaller closed ball
   have hB_ne_zero_r1 : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0 := by
-    intro z hz; exact hB_ne_zero z (by
-    have x : Metric.closedBall 0 r1 ⊆ Metric.closedBall 0 R' := Metric.closedBall_subset_closedBall (le_of_lt hr1_lt_R')
-    simp [x]
-    simp at hz
-    linarith
-    )
+    exact hB_ne_zero
   -- quotient rule for differentiability on sets
   have hdiv : DifferentiableOn ℂ (fun z => Complex.exp (J z) / B z)
       (Metric.closedBall (0 : ℂ) r1) :=
@@ -387,11 +341,10 @@ by
   simpa [H_auxiliary] using hdiv
 
 lemma hasDerivAt_H_auxiliary_zero_on_closedBall
-    {r1 R' R : ℝ}
-    (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
+    {r1: ℝ}
     {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0)
+    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
+    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
     {J : ℂ → ℂ}
     (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
     (hJ_deriv : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z) :
@@ -399,13 +352,7 @@ lemma hasDerivAt_H_auxiliary_zero_on_closedBall
       HasDerivAt (H_auxiliary B J) 0 z := by
   intro z hz
   -- z ∈ closedBall r1 implies z ∈ closedBall R
-  have hzR : z ∈ Metric.closedBall (0 : ℂ) R' := by
-    have hzR' : dist z (0 : ℂ) ≤ r1 := by
-      simpa [Metric.mem_closedBall] using hz
-    have hR_le : r1 ≤ R' := le_of_lt (hr1_lt_R')
-    have hzR'' : dist z (0 : ℂ) ≤ R' := le_trans hzR' hR_le
-    simpa [Metric.mem_closedBall] using hzR''
-  have hBnz : B z ≠ 0 := hB_ne_zero z (hzR)
+  have hBnz : B z ≠ 0 := hB_ne_zero z hz
   -- Differentiability at z of exp ∘ J and of B
   have hJ_anal : AnalyticAt ℂ J z := hJ z hz
   have hExp_diff_at_Jz : DifferentiableAt ℂ Complex.exp (J z) :=
@@ -413,10 +360,7 @@ lemma hasDerivAt_H_auxiliary_zero_on_closedBall
   have hc_diff : DifferentiableAt ℂ (fun w => Complex.exp (J w)) z :=
     hExp_diff_at_Jz.comp z hJ_anal.differentiableAt
 
-  have hB' : AnalyticOnNhd ℂ B (Metric.closedBall 0 R') := by
-    apply AnalyticOnNhd.mono_closedBall R' hB
-    assumption
-  have hd_diff : DifferentiableAt ℂ B z := (hB' z hzR).differentiableAt
+  have hd_diff : DifferentiableAt ℂ B z := (hB z hz).differentiableAt
   -- DifferentiableAt for H and then HasDerivAt with deriv coefficient
   have hH_diff : DifferentiableAt ℂ (H_auxiliary B J) z := by
     simpa [H_auxiliary] using hc_diff.div hd_diff hBnz
@@ -424,7 +368,7 @@ lemma hasDerivAt_H_auxiliary_zero_on_closedBall
       (deriv (H_auxiliary B J) z) z :=
     hH_diff.hasDerivAt
   have hderiv0 : deriv (H_auxiliary B J) z = 0 :=
-    H_deriv_zero_on_closedBall hr1_lt_R' hR'_lt_R hB hB_ne_zero hJ hJ_deriv z hz
+    H_deriv_zero_on_closedBall hB hB_ne_zero hJ hJ_deriv z hz
   simpa [hderiv0] using hH_has
 
 lemma fderivWithin_eq_zero_of_derivWithin_eq_zero {s : Set ℂ} {f : ℂ → ℂ} {x : ℂ}
@@ -447,11 +391,10 @@ lemma hasDerivWithinAt_of_hasDerivAt {f : ℂ → ℂ} {s : Set ℂ} {x : ℂ}
   simpa using h.hasDerivWithinAt
 
 lemma H_auxiliary_fderivWithin_zero_on_closedBall
-    {r1 R' R : ℝ}
-    (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
+    {r1 : ℝ}
     {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0)
+    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
+    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
     {J : ℂ → ℂ}
     (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
     (hJ_deriv : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z) :
@@ -462,7 +405,7 @@ by
   intro z hz
   -- classical derivative at z is zero, hence within derivative exists with value 0
   have hHasAt :=
-    hasDerivAt_H_auxiliary_zero_on_closedBall hr1_lt_R' hR'_lt_R hB hB_ne_zero
+    hasDerivAt_H_auxiliary_zero_on_closedBall hB hB_ne_zero
       hJ hJ_deriv z hz
   have hHasWithin :
       HasDerivWithinAt (H_auxiliary B J) 0
@@ -490,11 +433,11 @@ by
 
 /-- Lemma: H is constant on the closed ball. -/
 lemma H_is_constant
-    {r1 R' R : ℝ}
-    (hr1_pos : 0 < r1) (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
+    {r1: ℝ}
+    (hr1_pos : 0 < r1)
     {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0)
+    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
+    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
     {J : ℂ → ℂ}
     (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
     (hJ_deriv : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z) :
@@ -508,12 +451,12 @@ lemma H_is_constant
   -- Differentiability of H on the closed ball
   have hdiff : DifferentiableOn ℂ (H_auxiliary B J)
       (Metric.closedBall (0 : ℂ) r1) :=
-    H_auxiliary_differentiableOn_closedBall hr1_lt_R' hR'_lt_R hB hB_ne_zero hJ
+    H_auxiliary_differentiableOn_closedBall hB hB_ne_zero hJ
   -- fderivWithin is zero on the closed ball
   have hfderiv0 : ∀ x ∈ Metric.closedBall (0 : ℂ) r1,
       fderivWithin ℂ (H_auxiliary B J)
         (Metric.closedBall (0 : ℂ) r1) x = 0 :=
-    H_auxiliary_fderivWithin_zero_on_closedBall hr1_lt_R' hR'_lt_R hB hB_ne_zero hJ hJ_deriv
+    H_auxiliary_fderivWithin_zero_on_closedBall hB hB_ne_zero hJ hJ_deriv
   -- 0 belongs to the closed ball
   have h0mem : (0 : ℂ) ∈ Metric.closedBall (0 : ℂ) r1 :=
     zero_mem_closedBall_zero_radius (le_of_lt hr1_pos)
@@ -537,11 +480,11 @@ lemma H_is_constant
   simpa [sub_eq_add_neg] using sub_eq_zero.mp hzero
 
 lemma H_is_one
-    {r1 R' R : ℝ}
-    (hr1_pos : 0 < r1) (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
+    {r1 : ℝ}
+    (hr1_pos : 0 < r1)
     {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0)
+    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
+    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
     {J : ℂ → ℂ}
     (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
     (hJ_zero : J 0 = 0)
@@ -549,7 +492,7 @@ lemma H_is_one
     ∀ z ∈ Metric.closedBall (0 : ℂ) r1,
       H_auxiliary B J z = 1 / B 0 := by
   intro z hz
-  have hconst := H_is_constant hr1_pos hr1_lt_R' hR'_lt_R hB hB_ne_zero hJ hJ_deriv z hz
+  have hconst := H_is_constant hr1_pos hB hB_ne_zero hJ hJ_deriv z hz
   have h0 := H_at_zero hJ_zero (B := B)
   simpa [h0] using hconst
 
@@ -558,8 +501,8 @@ lemma analytic_log_exists
     {r1 R' R : ℝ}
     (hr1_pos : 0 < r1) (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
     {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0)
+    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
+    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
     {J : ℂ → ℂ}
     (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
     (hJ_zero : J 0 = 0)
@@ -567,15 +510,11 @@ lemma analytic_log_exists
     ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z = B 0 * Complex.exp (J z) := by
   intro z hz
   -- Use H_is_one to get that H(z) = 1 / B(0)
-  have hH_const := H_is_one hr1_pos hr1_lt_R' hR'_lt_R hB hB_ne_zero hJ hJ_zero hJ_deriv z hz
+  have hH_const := H_is_one hr1_pos hB hB_ne_zero hJ hJ_zero hJ_deriv z hz
   -- Unfold the definition of H_auxiliary
   unfold H_auxiliary at hH_const
   -- Now we have: exp(J z) / B z = 1 / B 0
-  have hzR : z ∈ Metric.closedBall (0 : ℂ) R' := by
-    have hzR' : dist z (0 : ℂ) ≤ r1 := hz
-    have hR_le : r1 ≤ R := le_of_lt (lt_trans hr1_lt_R' hR'_lt_R)
-    exact le_trans hzR' (by linarith)
-  have hBnz : B z ≠ 0 := hB_ne_zero z hzR
+  have hBnz : B z ≠ 0 := hB_ne_zero z hz
   have hR_pos : 0 < R := lt_trans (lt_trans hr1_pos hr1_lt_R') hR'_lt_R
   have hB0nz : B 0 ≠ 0 := hB_ne_zero 0 (by
     simp [Metric.closedBall, dist_zero_right]
@@ -592,8 +531,8 @@ lemma modulus_of_B_product_form
     {r1 R' R : ℝ}
     (hr1_pos : 0 < r1) (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
     {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0)
+    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
+    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
     {J : ℂ → ℂ}
     (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
     (hJ_zero : J 0 = 0)
@@ -610,8 +549,8 @@ lemma modulus_of_exp_log
     {r1 R' R : ℝ}
     (hr1_pos : 0 < r1) (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
     {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0)
+    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
+    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
     {J : ℂ → ℂ}
     (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
     (hJ_zero : J 0 = 0)
@@ -627,8 +566,8 @@ lemma log_modulus_as_sum
     {r1 R' R : ℝ}
     (hr1_pos : 0 < r1) (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
     {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0)
+    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
+    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
     {J : ℂ → ℂ}
     (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
     (hJ_zero : J 0 = 0)
@@ -656,8 +595,8 @@ lemma real_log_of_modulus_difference
     {r1 R' R : ℝ}
     (hr1_pos : 0 < r1) (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
     {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0)
+    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
+    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
     {J : ℂ → ℂ}
     (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
     (hJ_zero : J 0 = 0)
@@ -691,4 +630,4 @@ theorem log_of_analytic
   refine ⟨J_B, hJ, hJ0, hJderiv, ?_⟩
   intro z hz
   simpa using
-    (real_log_of_modulus_difference hr1_pos hr1_lt_R' hR'_lt_R hB hB_ne_zero hJ hJ0 hJderiv z hz)
+    (real_log_of_modulus_difference hr1_pos hr1_lt_R' hR'_lt_R (hB.mono (Metric.closedBall_subset_closedBall (by linarith))) (fun z hz ↦ hB_ne_zero _ (Metric.closedBall_subset_closedBall hr1_lt_R'.le hz)) hJ hJ0 hJderiv z hz)
