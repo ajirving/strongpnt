@@ -36,10 +36,8 @@ lemma trailingCoeff_ne_zero {f : ℂ → ℂ} {z : ℂ} (h1 : AnalyticAt ℂ f z
   rwa [hg3]
 
 lemma order_ne_top {f : ℂ → ℂ} {r : ℝ} {z : ℂ} (hf : AnalyticOnNhd ℂ f (closedBall 0 r)) (hr : 0 ≤ r)
-    (ne : ¬ EqOn f 0 (closedBall 0 r)) (hz : z ∈ closedBall 0 r) :
+    (ne : ∃ z' ∈ closedBall (0 : ℂ) r, f z' ≠ 0) (hz : z ∈ closedBall 0 r) :
     analyticOrderAt f z ≠ ⊤ := by
-  unfold EqOn at ne
-  push_neg at ne
   rcases ne with ⟨z', hz'⟩
   refine hf.analyticOrderAt_ne_top_of_isPreconnected (isConnected_closedBall hr).isPreconnected hz'.1 hz ?_
   simp [AnalyticAt.analyticOrderAt_eq_zero (hf z' hz'.1)|>.mpr hz'.2]
@@ -1087,11 +1085,7 @@ noncomputable def Lf : ℂ → ℂ :=
         Bf_never_zero R R1 hR1_pos hR1_lt_R f (fun z hz ↦ h_f_analytic z (closedBall_subset_closedBall (by linarith) hz)) 
           (fun z hz ↦ order_ne_top h_f_analytic (by norm_num) ?_ (closedBall_subset_closedBall (by linarith) hz)) h_finite_zeros z hz
       · assumption
-      · intro h
-        have : (0 : ℂ) ∈ closedBall 0 1 := by simp
-        have := h this
-        simp at this
-        grind
+      · exact ⟨0, (by simp), (by simp_all)⟩
     )
 )
 
@@ -1120,10 +1114,7 @@ lemma Lf_is_analytic
       refine Bf_never_zero R R1 hR1_pos hR1_lt_R f (fun z hz ↦ h_f_analytic z ?_) (fun z hz ↦ ?_) h_finite_zeros z hz
       · exact closedBall_subset_closedBall (by linarith) hz
       · refine order_ne_top h_f_analytic (by norm_num) ?_ (closedBall_subset_closedBall (by linarith) hz)
-        intro h
-        have : (0 : ℂ) ∈ closedBall 0 1 := by simp
-        specialize h this
-        simp_all
+        exact ⟨0, (by simp), (by simp_all)⟩
     )
   )).1
 
@@ -1153,8 +1144,6 @@ lemma Lf_at_0_is_0
       · assumption
       · exact h_f_analytic z <| closedBall_subset_closedBall (by linarith) hz
       · refine order_ne_top h_f_analytic (by norm_num) ?_ (closedBall_subset_closedBall (by linarith) hz)
-        unfold EqOn
-        push_neg
         exact ⟨0, (by simp), (by simp_all)⟩
     )
   exact (Classical.choose_spec log_exists).2.1
@@ -1184,10 +1173,7 @@ lemma re_Lf_as_diff_of_log_mods
     refine Bf_never_zero R R1 hR1_pos hR1_lt_R f (fun z hz ↦ ?_) (fun z hz ↦ ?_) h_finite_zeros w hw
     · exact h_f_analytic z <| closedBall_subset_closedBall (by linarith) hz
     · refine order_ne_top h_f_analytic (by norm_num) ?_ (closedBall_subset_closedBall (by linarith) hz)
-      unfold EqOn
-      push_neg
       exact ⟨0, (by simp), (by simp_all)⟩
-
   -- Apply lem:log_of_analytic
   have h_log_exists := log_of_analytic hr_pos hr_lt_R1 hR1_lt_R h_Bf_analytic h_Bf_ne_zero
   have h_choose_spec := Classical.choose_spec h_log_exists
@@ -1241,8 +1227,6 @@ lemma log_Bf_le_log_B2
     exact norm_pos_iff.mpr hBf_ne_zero
     · exact h_f_analytic z <| closedBall_subset_closedBall (by linarith) hz
     · refine order_ne_top h_f_analytic (by norm_num) ?_ (closedBall_subset_closedBall (by linarith) hz)
-      unfold EqOn
-      push_neg
       exact ⟨0, (by simp), (by simp_all)⟩
   · -- Prove h_Bf_bound: ∀ z, ‖z‖ ≤ R1 → ‖Bf ... z‖ ≤ B
     intro z hz
@@ -2167,9 +2151,7 @@ lemma Lf_deriv_step3 (h_f_zero : f 0 = 1) :
   exact logDeriv_Blaschke_is_diff_frac hR1_pos hR1_lt_R hR_lt_1 h_f_zero h_finite_zeros ρ hρ z (in_r_minus_kf hr_pos hr_lt_R1 _ hz)
   intro z hz
   apply order_ne_top h_f_analytic (by norm_num) _ (closedBall_subset_closedBall (by linarith) hz)
-  unfold EqOn
-  push_neg
-  refine ⟨0, (by simp), (by simp_all)⟩
+  exact ⟨0, (by simp), (by simp_all)⟩
 
 -- Lemma 36: sum_rearranged
 lemma sum_rearranged {R R1 : ℝ} {f : ℂ → ℂ}
