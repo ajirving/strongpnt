@@ -452,33 +452,8 @@ lemma H_is_constant
   have hdiff : DifferentiableOn ℂ (H_auxiliary B J)
       (Metric.closedBall (0 : ℂ) r1) :=
     H_auxiliary_differentiableOn_closedBall hB hB_ne_zero hJ
-  -- fderivWithin is zero on the closed ball
-  have hfderiv0 : ∀ x ∈ Metric.closedBall (0 : ℂ) r1,
-      fderivWithin ℂ (H_auxiliary B J)
-        (Metric.closedBall (0 : ℂ) r1) x = 0 :=
-    H_auxiliary_fderivWithin_zero_on_closedBall hB hB_ne_zero hJ hJ_deriv
-  -- 0 belongs to the closed ball
-  have h0mem : (0 : ℂ) ∈ Metric.closedBall (0 : ℂ) r1 :=
-    zero_mem_closedBall_zero_radius (le_of_lt hr1_pos)
-  -- Apply mean value inequality with C = 0
-  have hbound : ∀ x ∈ Metric.closedBall (0 : ℂ) r1,
-      ‖fderivWithin ℂ (H_auxiliary B J)
-          (Metric.closedBall (0 : ℂ) r1) x‖ ≤ 0 := by
-    intro x hx
-    simp [hfderiv0 x hx]
-  have hineq :=
-    Convex.norm_image_sub_le_of_norm_fderivWithin_le (𝕜 := ℂ)
-      (f := H_auxiliary B J)
-      (s := Metric.closedBall (0 : ℂ) r1) (x := (0 : ℂ)) (y := z)
-      hdiff hbound hs h0mem hz
-  have hzero : H_auxiliary B J z -
-      H_auxiliary B J 0 = 0 := by
-    have : ‖H_auxiliary B J z -
-        H_auxiliary B J 0‖ ≤ 0 := by
-      simpa using hineq
-    simpa [norm_le_zero_iff] using this
-  simpa [sub_eq_add_neg] using sub_eq_zero.mp hzero
-
+  refine hs.is_const_of_fderivWithin_eq_zero hdiff ?_ hz (by simp; linarith)
+  exact H_auxiliary_fderivWithin_zero_on_closedBall hB hB_ne_zero hJ hJ_deriv
 lemma H_is_one
     {r1 : ℝ}
     (hr1_pos : 0 < r1)
@@ -624,10 +599,7 @@ theorem log_of_analytic
       (∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J_B z = deriv B z / B z) ∧
       (∀ z ∈ Metric.closedBall (0 : ℂ) r1,
         Real.log (norm (B z)) - Real.log (norm (B 0)) = Complex.re (J_B z)) := by
-  have hB_ne_zero_R' : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0 := hB_ne_zero
   obtain ⟨J_B, hJ, hJ0, hJderiv⟩ :=
-    I_is_antiderivative hr1_lt_R' (hB.mono (Metric.closedBall_subset_closedBall hR'_lt_R.le)) hB_ne_zero_R'
-  refine ⟨J_B, hJ, hJ0, hJderiv, ?_⟩
-  intro z hz
-  simpa using
-    (real_log_of_modulus_difference hr1_pos hr1_lt_R' hR'_lt_R (hB.mono (Metric.closedBall_subset_closedBall (by linarith))) (fun z hz ↦ hB_ne_zero _ (Metric.closedBall_subset_closedBall hr1_lt_R'.le hz)) hJ hJ0 hJderiv z hz)
+    I_is_antiderivative hr1_lt_R' (hB.mono (Metric.closedBall_subset_closedBall hR'_lt_R.le)) hB_ne_zero
+  refine ⟨J_B, hJ, hJ0, hJderiv, fun z hz ↦ ?_⟩
+  exact real_log_of_modulus_difference hr1_pos hr1_lt_R' hR'_lt_R (hB.mono (Metric.closedBall_subset_closedBall (by linarith))) (fun z hz ↦ hB_ne_zero _ (Metric.closedBall_subset_closedBall hr1_lt_R'.le hz)) hJ hJ0 hJderiv z hz
