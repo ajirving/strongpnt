@@ -10,19 +10,6 @@ def zerosetKfR (R : ℝ) (f : ℂ → ℂ) : Set ℂ :=
 open Filter Metric Set Bornology Function
 open Classical
 
-lemma lem_m_rho_is_nat (R R1 : ℝ) (hR1_lt_R : R1 < R) (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
-    (hR_lt_1 : R < 1) :
-    ∀ (ρ : ℂ) (_ : ρ ∈ zerosetKfR R1 f),
-    analyticOrderAt f ρ ≠ ⊤ := by
-  intro ρ h_rho_in_KfR1
-  have := h_f_analytic 0 (by simp)|>.analyticOrderAt_eq_zero.mpr h_f_nonzero_at_zero
-  have : analyticOrderAt f 0 ≠ ⊤ := by simp [this]
-  have hf : AnalyticOnNhd ℂ f (closedBall 0 1) := fun z hz ↦ h_f_analytic z hz
-  apply hf.analyticOrderAt_ne_top_of_isPreconnected (isConnected_closedBall (by norm_num)).isPreconnected (by simp) _ this
-  exact mem_of_mem_of_subset h_rho_in_KfR1.1 (closedBall_subset_closedBall (by linarith))
-
 /-! ### The quotient `Cf` (no core wrapper) -/
 
 noncomputable def trailingCoeff (f : ℂ → ℂ) (z : ℂ) : ℂ :=
@@ -96,22 +83,6 @@ lemma lem_ratioAnalAt (w : ℂ)
     AnalyticAt ℂ (fun z => h z / ∏ s ∈ S, (z - s) ^ (n s)) w := by
   have hden := lem_denomAnalAt S n w hw.2
   exact hh.div hden.1 hden.2
-
-lemma lem_analytic_zero_factor (R R1 : ℝ) (hR1_lt_R : R1 < R)
-    (hR_lt_1 : R < 1)
-    (f : ℂ → ℂ) (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
-    (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 f) :
-    ∃ h_σ : ℂ → ℂ, AnalyticAt ℂ h_σ σ ∧ h_σ σ ≠ 0 ∧
-    ∀ᶠ z in nhds σ, f z = (z - σ) ^ analyticOrderNatAt f σ * h_σ z := by
-  have hσ_closed1 : σ ∈ Metric.closedBall (0 : ℂ) 1 :=
-    (Metric.closedBall_subset_closedBall (by linarith)) hσ.1
-  have hfσ : AnalyticAt ℂ f σ := h_f_analytic σ hσ_closed1
-  have h_order_finite : analyticOrderAt f σ ≠ ⊤ :=
-    lem_m_rho_is_nat R R1 hR1_lt_R f h_f_analytic h_f_nonzero_at_zero hR_lt_1 σ hσ
-  rcases (hfσ.analyticOrderAt_ne_top).mp h_order_finite with ⟨g, hgσ, hgσ_ne, h_eq⟩
-  simp_rw [smul_eq_mul, analyticOrderNatAt] at h_eq
-  exact ⟨g, hgσ, hgσ_ne, h_eq⟩
 
 /-! ### Cf lemmas (renamed to use `Cf` directly) -/
 
@@ -914,18 +885,6 @@ lemma lem_jensen_inequality_form (B R R1 : ℝ) (hB : 1 < B)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
     (R / R1 : ℝ) ^ (∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ : ℝ) ≤ B := by
-  have h_exists := fun σ hσ ↦  lem_analytic_zero_factor R R1 hR1_lt_R hR_lt_1 f h_f_analytic (by grind) σ hσ
-  let h_σ : ℂ → (ℂ → ℂ) :=
-    fun σ => dite (σ ∈ zerosetKfR R1 f)
-      (fun h => Classical.choose (h_exists σ h))
-      (fun _ => fun _ => (1 : ℂ))
-  have h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
-      AnalyticAt ℂ (h_σ σ) σ ∧ (h_σ σ) σ ≠ 0 ∧
-      ∀ᶠ z in nhds σ, f z = (z - σ) ^ analyticOrderNatAt f σ * (h_σ σ) z := by
-    intro σ hσin
-    have hx := h_exists σ hσin
-    dsimp [h_σ]
-    simpa [hσin] using (Classical.choose_spec hx)
   -- Derive f 0 ≠ 0 from f 0 = 1
   have hf0_ne0 : f 0 ≠ 0 := by
     rw [hf0_eq_one]; norm_num
@@ -999,15 +958,12 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
       rw [mul_comm]
       exact h_div_log
 
-variable {R R1 r B : ℝ} {f : ℂ → ℂ} {h_σ : ℂ → (ℂ → ℂ)}
+variable {R R1 r B : ℝ} {f : ℂ → ℂ}
 variable (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
 variable (hR1_pos : 0 < R1)
 variable (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
 variable (h_f_zero : f 0 = 1)
 variable (h_finite_zeros : (zerosetKfR R1 f).Finite)
-variable (h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
-      AnalyticAt ℂ (h_σ σ) σ ∧ h_σ σ σ ≠ 0 ∧
-      ∀ᶠ z in nhds σ, f z = (z - σ) ^ analyticOrderNatAt f σ * h_σ σ z)
 
 -- Helper to get f 0 ≠ 0 from f 0 = 1
 lemma f_zero_ne_zero (h_f_zero : f 0 = 1) : f 0 ≠ 0 := by
@@ -2483,18 +2439,6 @@ lemma final_inequality
       ≤
       16 * r^2 / ((r - r1)^3) * Real.log B
         + 1 / ((R^2 / R1 - R1) * Real.log (R / R1)) * Real.log B := by
-  have h_exists := fun σ hσ ↦  lem_analytic_zero_factor R R1 hR1_lt_R hR_lt_1 f h_f_analytic (by grind) σ hσ
-  let h_σ : ℂ → (ℂ → ℂ) :=
-    fun σ => dite (σ ∈ zerosetKfR R1 f)
-      (fun h => Classical.choose (h_exists σ h))
-      (fun _ => fun _ => (1 : ℂ))
-  have h_σ_spec : ∀ σ ∈ zerosetKfR R1 f,
-      AnalyticAt ℂ (h_σ σ) σ ∧ (h_σ σ) σ ≠ 0 ∧
-      ∀ᶠ z in nhds σ, f z = (z - σ) ^ analyticOrderNatAt f σ * (h_σ σ) z := by
-    intro σ hσin
-    have hx := h_exists σ hσin
-    dsimp [h_σ]
-    simpa [hσin] using (Classical.choose_spec hx)
   intro z hz
 
   -- Establish missing positive hypotheses from the parameter constraints
