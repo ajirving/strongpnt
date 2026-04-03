@@ -3,6 +3,7 @@ import Mathlib.Analysis.CStarAlgebra.Classes
 import Mathlib.Analysis.Complex.AbsMax
 import Mathlib.Analysis.Complex.HasPrimitives
 import Mathlib.Analysis.Complex.RemovableSingularity
+import Mathlib.Analysis.Normed.Module.Connected
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.Data.Real.StarOrdered
 import Mathlib.GroupTheory.MonoidLocalization.Basic
@@ -148,309 +149,49 @@ open Classical
 
 open scoped Topology
 
-theorem AnalyticOnNhd.mono_closedBall {B : ℂ → ℂ} {R : ℝ} (R' : ℝ)
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall 0 R)) (hR' : R' < R) :
-    AnalyticOnNhd ℂ B (Metric.closedBall 0 R') := by
-  -- The proof follows by applying `AnalyticOnNhd.mono` to the fact that the
-  -- smaller ball is a subset of the larger one.
-  exact hB.mono (Metric.closedBall_subset_closedBall (le_of_lt hR'))
-
-/-- Lemma: There exists J analyticOnNhd with J(0) = 0 and J'(z) = B'(z)/B(z). -/
-lemma I_is_antiderivative
-    {r1 R' : ℝ}
-    (hr1_lt_R' : r1 < R')
-    {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R'))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0) :
-    ∃ J : ℂ → ℂ, AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1) ∧
-      J 0 = 0 ∧
-      ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z := by
-  let L : ℂ → ℂ := fun z => deriv B z / B z
-  have hL_on_R' : AnalyticOnNhd ℂ L (Metric.closedBall (0 : ℂ) R') := by
-    simpa [L] using  hB.deriv.div hB hB_ne_zero
-  obtain ⟨J, hJ⟩ := DifferentiableOn.isExactOn_ball <| hL_on_R'.mono Metric.ball_subset_closedBall|>.differentiableOn
-  refine ⟨(fun z ↦ J z - J 0), ?_, (by simp), ?_⟩
+theorem log_of_analytic_open
+    {r : ℝ} {B : ℂ → ℂ} (rpos : 0 < r)
+    (hB : AnalyticOnNhd ℂ B (Metric.ball (0 : ℂ) r))
+    (hB_ne_zero : ∀ z ∈ Metric.ball (0 : ℂ) r, B z ≠ 0) :
+    ∃ J_B : ℂ → ℂ,
+      AnalyticOnNhd ℂ J_B (Metric.ball (0 : ℂ) r) ∧
+      J_B 0 = 0 ∧
+      (∀ z ∈ Metric.ball (0 : ℂ) r, deriv J_B z = deriv B z / B z) ∧
+      (∀ z ∈ Metric.ball (0 : ℂ) r,
+        Real.log (norm (B z)) - Real.log (norm (B 0)) = Complex.re (J_B z)) := by
+  obtain ⟨J, hJ⟩ := hB.deriv.div hB hB_ne_zero|>.differentiableOn.isExactOn_ball
+  refine ⟨fun z ↦ J z - J 0, ?_, (by simp), ?_, ?_⟩
   · apply AnalyticOnNhd.sub _ analyticOnNhd_const
-    refine AnalyticOnNhd.mono ?_ <| Metric.closedBall_subset_ball hr1_lt_R'
-    exact DifferentiableOn.analyticOnNhd (fun z hz ↦ DifferentiableAt.differentiableWithinAt (hJ z hz |>.differentiableAt)) Metric.isOpen_ball
+    exact DifferentiableOn.analyticOnNhd (fun z hz ↦ DifferentiableAt.differentiableWithinAt (hJ z hz).differentiableAt) (Metric.isOpen_ball)
   · intro z hz
-    rw [deriv_sub_const]
-    refine hJ z ?_|>.deriv
-    exact Set.mem_of_subset_of_mem (Metric.closedBall_subset_ball hr1_lt_R') hz
-
-/-- Definition: H(z) := exp(J(z))/B(z) where J is from I_is_antiderivative. -/
-noncomputable def H_auxiliary
-    (B : ℂ → ℂ)
-    (J : ℂ → ℂ) : ℂ → ℂ :=
-  fun z => Complex.exp (J z) / B z
-
-/-- Lemma: Derivative of H(z) using quotient rule. -/
-lemma H_derivative_quotient_rule
-    {r1 : ℝ}
-    {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
-    {J : ℂ → ℂ}
-    (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1)) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r1,
-      deriv (H_auxiliary B J) z =
-      (deriv (fun w => Complex.exp (J w)) z * B z - deriv B z * Complex.exp (J z)) / (B z)^2 := by
-  intro z hz
-  convert deriv_div (hJ z hz).differentiableAt.cexp
-    (hB z hz).differentiableAt (hB_ne_zero z hz) using 1
-  ring
-
-
-lemma exp_I_derivative_chain_rule
-    {r1 : ℝ}
-    {J : ℂ → ℂ}
-    (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1)) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r1,
-      deriv (fun w => Complex.exp (J w)) z = deriv J z * Complex.exp (J z) := by
-  intro z hz
-  have hJ_diff : DifferentiableAt ℂ J z := (hJ z hz).differentiableAt
-  have hJ_has : HasDerivAt J (deriv J z) z := hJ_diff.hasDerivAt
-  have hcomp := (Complex.hasDerivAt_exp (J z)).comp z hJ_has
-  -- extract the derivative
-  simpa [mul_comm] using hcomp.deriv
-
-lemma H_derivative_calc
-    {r1 : ℝ}
-    {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
-    {J : ℂ → ℂ}
-    (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1)) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r1,
-      deriv (H_auxiliary B J) z =
-      (deriv J z * B z - deriv B z) * Complex.exp (J z) / (B z)^2 := by
-  intro z hz
-  rw [H_derivative_quotient_rule hB hB_ne_zero hJ z hz, exp_I_derivative_chain_rule hJ z hz]
-  ring
-
-lemma H_derivative_is_zero
-    {r1: ℝ}
-    {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
-    {J : ℂ → ℂ}
-    (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
-    (hJ_deriv : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r1,
-      deriv (H_auxiliary B J) z = 0 := by
-  intro z hz
-  rw [H_derivative_calc hB hB_ne_zero hJ z hz, hJ_deriv z hz]
-  field [hB_ne_zero z hz]
-
-lemma H_auxiliary_differentiableOn_closedBall
-    {r1: ℝ}
-    {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
-    {J : ℂ → ℂ}
-    (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1)) :
-    DifferentiableOn ℂ (H_auxiliary B J)
-      (Metric.closedBall (0 : ℂ) r1) := by
-  unfold H_auxiliary
-  -- differentiability of J and B on the closed ball
-  have hJ_diff : DifferentiableOn ℂ J (Metric.closedBall (0 : ℂ) r1) :=
-    hJ.differentiableOn
-  have hB_diff_r1 : DifferentiableOn ℂ B (Metric.closedBall (0 : ℂ) r1) :=
-    (hB.differentiableOn)
-  fun_prop (disch := assumption)
-
-lemma hasDerivAt_H_auxiliary_zero_on_closedBall
-    {r1: ℝ}
-    {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
-    {J : ℂ → ℂ}
-    (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
-    (hJ_deriv : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r1,
-      HasDerivAt (H_auxiliary B J) 0 z := by
-  intro z hz
-  -- z ∈ closedBall r1 implies z ∈ closedBall R
-  have hBnz : B z ≠ 0 := hB_ne_zero z hz
-  -- Differentiability at z of exp ∘ J and of B
-  have hJ_anal : AnalyticAt ℂ J z := hJ z hz
-  have hExp_diff_at_Jz : DifferentiableAt ℂ Complex.exp (J z) :=
-    Complex.differentiableAt_exp
-  have hc_diff : DifferentiableAt ℂ (fun w => Complex.exp (J w)) z :=
-    hExp_diff_at_Jz.comp z hJ_anal.differentiableAt
-
-  have hd_diff : DifferentiableAt ℂ B z := (hB z hz).differentiableAt
-  -- DifferentiableAt for H and then HasDerivAt with deriv coefficient
-  have hH_diff : DifferentiableAt ℂ (H_auxiliary B J) z := by
-    simpa [H_auxiliary] using hc_diff.div hd_diff hBnz
-  have hH_has : HasDerivAt (H_auxiliary B J)
-      (deriv (H_auxiliary B J) z) z :=
-    hH_diff.hasDerivAt
-  have hderiv0 : deriv (H_auxiliary B J) z = 0 :=
-    H_derivative_is_zero hB hB_ne_zero hJ hJ_deriv z hz
-  simpa [hderiv0] using hH_has
-
-lemma fderivWithin_eq_zero_of_derivWithin_eq_zero {s : Set ℂ} {f : ℂ → ℂ} {x : ℂ}
-    (hderiv : derivWithin f s x = 0) :
-    fderivWithin ℂ f s x = 0 := by
-  exact Eq.symm (ContinuousLinearMap.ext_ring (id (Eq.symm hderiv)))
-
-lemma H_auxiliary_fderivWithin_zero_on_closedBall
-    {r1 : ℝ}
-    {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
-    {J : ℂ → ℂ}
-    (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
-    (hJ_deriv : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r1,
-      fderivWithin ℂ (H_auxiliary B J)
-        (Metric.closedBall (0 : ℂ) r1) z = 0 :=
-by
-  intro z hz
-  -- classical derivative at z is zero, hence within derivative exists with value 0
-  have hHasAt :=
-    hasDerivAt_H_auxiliary_zero_on_closedBall hB hB_ne_zero
-      hJ hJ_deriv z hz
-  have hHasWithin :
-      HasDerivWithinAt (H_auxiliary B J) 0
-        (Metric.closedBall (0 : ℂ) r1) z :=
-    hHasAt.hasDerivWithinAt
-  -- obtain differentiability within at z
-  have hdiff : DifferentiableWithinAt ℂ
-      (H_auxiliary B J)
-      (Metric.closedBall (0 : ℂ) r1) z :=
-    hHasWithin.differentiableWithinAt
-  -- compute the scalar derivative within equals 0 (with/without uniqueness)
-  classical
-  have hderivWithin0 :
-      derivWithin (H_auxiliary B J)
-        (Metric.closedBall (0 : ℂ) r1) z = 0 := by
-    by_cases hUDc : UniqueDiffWithinAt ℂ (Metric.closedBall (0 : ℂ) r1) z
-    · simpa using hHasWithin.derivWithin hUDc
-    · simpa using
-        (derivWithin_zero_of_not_uniqueDiffWithinAt
-          (𝕜 := ℂ)
-          (f := H_auxiliary B J)
-          (s := Metric.closedBall (0 : ℂ) r1) (x := z) hUDc)
-  -- conclude on the Fréchet derivative within
-  exact fderivWithin_eq_zero_of_derivWithin_eq_zero hderivWithin0
-
-/-- Lemma: H is constant on the closed ball. -/
-lemma H_is_constant
-    {r1: ℝ}
-    (hr1_pos : 0 < r1)
-    {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
-    {J : ℂ → ℂ}
-    (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
-    (hJ_deriv : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r1,
-      H_auxiliary B J z =
-      H_auxiliary B J 0 := by
-  intro z hz
-  -- The closed ball is convex
-  have hs : Convex ℝ (Metric.closedBall (0 : ℂ) r1) := by
-    simpa using (convex_closedBall (0 : ℂ) r1)
-  -- Differentiability of H on the closed ball
-  have hdiff : DifferentiableOn ℂ (H_auxiliary B J)
-      (Metric.closedBall (0 : ℂ) r1) :=
-    H_auxiliary_differentiableOn_closedBall hB hB_ne_zero hJ
-  refine hs.is_const_of_fderivWithin_eq_zero hdiff ?_ hz (by simp; linarith)
-  exact H_auxiliary_fderivWithin_zero_on_closedBall hB hB_ne_zero hJ hJ_deriv
-lemma H_is_one
-    {r1 : ℝ}
-    (hr1_pos : 0 < r1)
-    {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
-    {J : ℂ → ℂ}
-    (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
-    (hJ_zero : J 0 = 0)
-    (hJ_deriv : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r1,
-      H_auxiliary B J z = 1 / B 0 := by
-  intro z hz
-  have hconst := H_is_constant hr1_pos hB hB_ne_zero hJ hJ_deriv z hz
-  have h0: H_auxiliary B J 0 = 1 / B 0 := by
-    simp [H_auxiliary, hJ_zero]
-  simpa [h0] using hconst
-
-/-- Lemma: B(z) = B(0) * exp(J(z)). -/
-lemma analytic_log_exists
-    {r1 R' R : ℝ}
-    (hr1_pos : 0 < r1) (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
-    {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
-    {J : ℂ → ℂ}
-    (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
-    (hJ_zero : J 0 = 0)
-    (hJ_deriv : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z = B 0 * Complex.exp (J z) := by
-  intro z hz
-  -- Use H_is_one to get that H(z) = 1 / B(0)
-  have hH_const := H_is_one hr1_pos hB hB_ne_zero hJ hJ_zero hJ_deriv z hz
-  -- Unfold the definition of H_auxiliary
-  unfold H_auxiliary at hH_const
-  -- Now we have: exp(J z) / B z = 1 / B 0
-  have hBnz : B z ≠ 0 := hB_ne_zero z hz
-  have hR_pos : 0 < R := lt_trans (lt_trans hr1_pos hr1_lt_R') hR'_lt_R
-  have hB0nz : B 0 ≠ 0 := hB_ne_zero 0 (by
-    simp [Metric.closedBall, dist_zero_right]
-    exact le_of_lt (by linarith))
-  -- From exp(J z) / B z = 1 / B 0, cross multiply
-  have heq : Complex.exp (J z) * B 0 = B z := by
-    field_simp [hBnz, hB0nz] at hH_const
-    exact hH_const
-  -- Use commutativity to get the desired form
-  rw [← heq, mul_comm]
-
-
-/-- Lemma: log|B(z)| = log|B(0)| + log(exp(Re(J(z)))). -/
-lemma log_modulus_as_sum
-    {r1 R' R : ℝ}
-    (hr1_pos : 0 < r1) (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
-    {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
-    {J : ℂ → ℂ}
-    (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
-    (hJ_zero : J 0 = 0)
-    (hJ_deriv : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r1,
-      Real.log (norm (B z)) =
-      Real.log (norm (B 0)) + Real.log (Real.exp (Complex.re (J z))) := by
-  intro z hz
-  rw [analytic_log_exists hr1_pos hr1_lt_R' hR'_lt_R hB hB_ne_zero hJ hJ_zero hJ_deriv z hz,
-    norm_mul, Complex.norm_exp, Real.log_mul]
-  · -- Show norm (B 0) ≠ 0
-    -- Since norm z = ‖z‖, we need ‖B 0‖ ≠ 0, which is equivalent to B 0 ≠ 0
-    simp [norm_ne_zero_iff]
-    apply hB_ne_zero
-    -- Show 0 ∈ Metric.closedBall (0 : ℂ) R
-    rw [Metric.mem_closedBall, dist_self]
-    linarith
-  · -- Show Real.exp (Complex.re (J z)) ≠ 0
-    exact Real.exp_ne_zero _
-
-/-- Lemma: log|B(z)| - log|B(0)| = Re(J(z)). -/
-lemma real_log_of_modulus_difference
-    {r1 R' R : ℝ}
-    (hr1_pos : 0 < r1) (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
-    {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) r1))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, B z ≠ 0)
-    {J : ℂ → ℂ}
-    (hJ : AnalyticOnNhd ℂ J (Metric.closedBall (0 : ℂ) r1))
-    (hJ_zero : J 0 = 0)
-    (hJ_deriv : ∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J z = deriv B z / B z) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r1,
-      Real.log (norm (B z)) - Real.log (norm (B 0)) = Complex.re (J z) := by
-  intro z hz
-  rw [log_modulus_as_sum hr1_pos hr1_lt_R' hR'_lt_R hB hB_ne_zero hJ hJ_zero hJ_deriv z hz, Real.log_exp]
-  ring
+    rw [deriv_sub_const, (hJ z hz).deriv]
+  · intro z hz
+    suffices B z = B 0 * Complex.exp (J z - J 0) by
+      rw [this, norm_mul, Real.log_mul, Complex.norm_exp, Real.log_exp]
+      · simp
+      · exact norm_ne_zero_iff.mpr (hB_ne_zero 0 (by simpa))
+      · exact norm_ne_zero_iff.mpr <| Complex.exp_ne_zero _
+    let f := (fun z ↦ (J z).exp / B z)
+    suffices f z = f 0 by
+      unfold f at this
+      rw [Complex.exp_sub]
+      field_simp [hB_ne_zero z hz, hB_ne_zero 0 (by simpa)] at this ⊢
+      rw [← this]
+    refine IsOpen.is_const_of_deriv_eq_zero (s := Metric.ball 0 r) Metric.isOpen_ball Metric.isPreconnected_ball ?_ ?_ hz (by simpa)
+    · unfold f
+      refine fun z hz ↦ DifferentiableAt.differentiableWithinAt ?_
+      have :=hJ z hz|>.differentiableAt
+      have := hB.differentiableOn z hz|>.differentiableAt (IsOpen.mem_nhds Metric.isOpen_ball hz)
+      have := hB_ne_zero z hz
+      fun_prop (disch := assumption)
+    · intro z hz
+      have : HasDerivAt (fun z ↦ cexp (J z)) ((J z).exp * deriv J z) z := by
+        refine (Complex.hasDerivAt_exp (J z)).comp z (hJ z hz|>.differentiableAt|>.hasDerivAt)
+      unfold f
+      rw [deriv_fun_div this.differentiableAt
+        ((hB.differentiableOn z hz).differentiableAt (IsOpen.mem_nhds Metric.isOpen_ball hz)) (hB_ne_zero z hz), this.deriv, (hJ z hz).deriv]
+      simp only [Pi.zero_apply]
+      field [hB_ne_zero z hz]
 
 theorem log_of_analytic
     {r1 R' R : ℝ}
@@ -464,7 +205,9 @@ theorem log_of_analytic
       (∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J_B z = deriv B z / B z) ∧
       (∀ z ∈ Metric.closedBall (0 : ℂ) r1,
         Real.log (norm (B z)) - Real.log (norm (B 0)) = Complex.re (J_B z)) := by
-  obtain ⟨J_B, hJ, hJ0, hJderiv⟩ :=
-    I_is_antiderivative hr1_lt_R' (hB.mono (Metric.closedBall_subset_closedBall hR'_lt_R.le)) hB_ne_zero
-  refine ⟨J_B, hJ, hJ0, hJderiv, fun z hz ↦ ?_⟩
-  exact real_log_of_modulus_difference hr1_pos hr1_lt_R' hR'_lt_R (hB.mono (Metric.closedBall_subset_closedBall (by linarith))) (fun z hz ↦ hB_ne_zero _ (Metric.closedBall_subset_closedBall hr1_lt_R'.le hz)) hJ hJ0 hJderiv z hz
+  obtain ⟨J, hJ1, hJ2, hJ3, hJ4⟩ := log_of_analytic_open (by linarith)
+    (hB.mono (subset_trans (Metric.ball_subset_ball hR'_lt_R.le) Metric.ball_subset_closedBall))
+    (fun z hz ↦ hB_ne_zero z (Metric.ball_subset_closedBall hz))
+  refine ⟨J, hJ1.mono (Metric.closedBall_subset_ball hr1_lt_R'), hJ2, fun z hz ↦ hJ3 z ?_,
+    fun z hz ↦ hJ4 z ?_⟩
+  all_goals exact Metric.closedBall_subset_ball hr1_lt_R' hz
