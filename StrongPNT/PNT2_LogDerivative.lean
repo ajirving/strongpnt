@@ -1198,50 +1198,6 @@ lemma re_Lf_as_diff_of_log_mods
   rw [h_Lf_def]
   exact (h_choose_spec.2.2.2 z hz).symm
 
-lemma log_Bf_le_log_B
-    (B R R1 : ℝ)
-    (f : ℂ → ℂ)
-    (h_Bf_pos : ∀ z, norm z ≤ R1 →
-                0 < norm (Bf R R1 f z))
-    (h_Bf_bound : ∀ z, norm z ≤ R1 →
-                  norm (Bf R R1 f z) ≤ B) :
-    ∀ z, norm z ≤ R1 →
-      Real.log (norm (Bf R R1 f z)) ≤ Real.log B := by
-  intro z hz
-  apply Real.log_le_log
-  · exact h_Bf_pos z hz
-  · exact h_Bf_bound z hz
-
-
-lemma log_Bf_le_log_B2
-    (B R R1 : ℝ)
-    (hR1_pos : 0 < R1)
-    (hR1_lt_R : R1 < R)
-    (hR_lt_one : R < 1)
-    (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ closedBall 0 1, AnalyticAt ℂ f z)
-    (h_f_zero : f 0 = 1)
-    (h_Bf_bound : ∀ z, ‖z‖ ≤ R →
-                  ‖Bf R R1 f z‖ ≤ B) :
-    ∀ z, ‖z‖ ≤ R1 →
-      Real.log (‖Bf R R1 f z‖) ≤ Real.log B := by
-  -- Use log_Bf_le_log_B directly
-  apply log_Bf_le_log_B B R R1 f
-  · -- Prove h_Bf_pos: ∀ z, ‖z‖ ≤ R1 → 0 < ‖Bf ... z‖
-    intro z hz
-    have hz_mem : z ∈ Metric.closedBall (0 : ℂ) R1 := by
-      rw [Metric.mem_closedBall, dist_zero_right]
-      exact hz
-    have hBf_ne_zero := Bf_never_zero R R1 hR1_pos hR1_lt_R f (fun z hz ↦ ?_) (fun z hz ↦ ?_) z hz_mem
-    exact norm_pos_iff.mpr hBf_ne_zero
-    · exact h_f_analytic z <| closedBall_subset_closedBall (by linarith) hz
-    · refine order_ne_top h_f_analytic (by norm_num) ?_ (closedBall_subset_closedBall (by linarith) hz)
-      exact ⟨0, (by simp), (by simp_all)⟩
-  · -- Prove h_Bf_bound: ∀ z, ‖z‖ ≤ R1 → ‖Bf ... z‖ ≤ B
-    intro z hz
-    have hz_le_R : ‖z‖ ≤ R := by linarith [hz, hR1_lt_R]
-    exact h_Bf_bound z hz_le_R
-
 lemma log_Bf_le_log_B3
     (B R R1 : ℝ)
     (hB : 1 < B)
@@ -1255,12 +1211,15 @@ lemma log_Bf_le_log_B3
     (h_f_bound : ∀ z, norm z ≤ R → norm (f z) ≤ B) :
     ∀ z, norm z ≤ R1 →
       Real.log (norm (Bf R R1 f z)) ≤ Real.log B := by
-  -- Apply log_Bf_le_log_B2, which needs a bound on Bf on the disk of radius R
-  apply log_Bf_le_log_B2 B R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero
-  -- Get this bound using lem_Bf_bounded_in_disk_from_f
-  apply lem_Bf_bounded_in_disk_from_f B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_finite_zeros
-  -- Apply the hypothesis h_f_bound (norm = ‖·‖ definitionally)
-  exact h_f_bound
+  intro z hz
+  gcongr
+  · refine norm_pos_iff.mpr <| ?_
+    apply Bf_never_zero R R1 hR1_pos hR1_lt_R f
+    · exact fun z hz ↦ h_f_analytic z (closedBall_subset_closedBall (by linarith) hz)
+    · exact fun z hz ↦ order_ne_top h_f_analytic (by norm_num) ⟨0, (by simp), (by simp_all)⟩
+        (closedBall_subset_closedBall (by linarith) hz)
+    · simpa
+  · exact lem_Bf_bounded_in_disk_from_f B R R1 hB hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_finite_zeros h_f_bound z (by linarith)
 
 lemma log_Bf0_ge_0
     (R R1 : ℝ)
@@ -1271,13 +1230,7 @@ lemma log_Bf0_ge_0
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     0 ≤ Real.log (‖Bf R R1 f 0‖) := by
-  -- Apply log monotonicity with x = 1 and y = |Bf(...,0)|
-  have h_pos : 0 < (1 : ℝ) := by norm_num
-  have h_Bf_ge_1 : 1 ≤ ‖Bf R R1 f  0‖ :=
-    lem_mod_Bf_at_0_ge_1 R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_zero h_finite_zeros
-  have h_log_mono := lem_log_mono_inc h_pos h_Bf_ge_1
-  rw [Real.log_one] at h_log_mono
-  exact h_log_mono
+  exact Real.log_nonneg <| lem_mod_Bf_at_0_ge_1 R R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_zero h_finite_zeros
 
 lemma re_Lf_le_log_B
     (B r R R1 : ℝ)
