@@ -2251,7 +2251,7 @@ lemma final_sum_bound {R R1 B : ℝ} {f : ℂ → ℂ}
     _ = 1/((R^2/R1 - R1) * Real.log (R/R1)) * Real.log B := by
       field_simp [ne_of_gt h_pos, ne_of_gt h_log_pos]
 
-lemma Lf_exists  (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1) (hR1_pos : 0 < R1)
+lemma Lf_exists (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1) (hR1_pos : 0 < R1)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (h_f_zero : f 0 = 1) :
     ∃ Lf : ℂ → ℂ, isLf Lf f r R R1 := by
@@ -2265,8 +2265,11 @@ lemma Lf_exists  (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt
     · refine order_ne_top h_f_analytic (by norm_num) ?_ (closedBall_subset_closedBall (by linarith) hz)
       exact ⟨0, (by simp), (by simp_all)⟩
   -- Apply lem:log_of_analytic
-  obtain ⟨J, hJ1, hJ2, hJ3, hJ4⟩ := log_of_analytic hr_pos hr_lt_R1 hR1_lt_R h_Bf_analytic h_Bf_ne_zero
-  refine ⟨J, hJ1, hJ2, hJ3, fun z hz ↦ (hJ4 z hz).symm⟩
+  obtain ⟨J, hJ1, hJ2, hJ3, hJ4⟩ := log_of_analytic_open hR1_pos
+    (h_Bf_analytic.mono (fun z hz ↦ (by simp_all; linarith)))
+    (fun z hz ↦ h_Bf_ne_zero z (by simp_all; linarith))
+  have bs := closedBall_subset_ball (x := (0 : ℂ)) hr_lt_R1
+  refine ⟨J, hJ1.mono bs, hJ2, fun z hz ↦ hJ3 z (bs hz), fun z hz ↦ (hJ4 z (bs hz)).symm⟩
 
 -- Now, we can fix the `final_inequality` lemma.
 lemma final_inequality
@@ -2287,7 +2290,7 @@ lemma final_inequality
         + 1 / ((R^2 / R1 - R1) * Real.log (R / R1)) * Real.log B := by
   have hr_pos : 0 < r := by linarith [hr1pos, hr1_lt_r]
   have hR1_pos : 0 < R1 := by linarith [hr_pos, hr_lt_R1]
-  obtain ⟨Lf, h_Lf⟩ := Lf_exists hr_pos hr_lt_R1 hR1_lt_R hR_lt_1 hR1_pos h_f_analytic h_f_zero
+  obtain ⟨Lf, h_Lf⟩ := Lf_exists hr_lt_R1 hR1_lt_R hR_lt_1 hR1_pos h_f_analytic h_f_zero
   intro z hz
   -- Lift z from r1-ball to r-ball (needed for target_inequality_setup)
   have hz_in_r : z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f := by
