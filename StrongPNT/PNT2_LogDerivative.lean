@@ -971,16 +971,7 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
       exact h_div_log
 
 variable {R R1 r B : ℝ} {f : ℂ → ℂ}
-variable (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
-variable (hR1_pos : 0 < R1)
-variable (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
-variable (h_f_zero : f 0 = 1)
 variable (h_finite_zeros : (zerosetKfR R1 f).Finite)
-
--- Helper to get f 0 ≠ 0 from f 0 = 1
-lemma f_zero_ne_zero (h_f_zero : f 0 = 1) : f 0 ≠ 0 := by
-  rw [h_f_zero]; simp
-
 
 lemma Bf_is_analytic_on_disk
     (R R1 : ℝ)
@@ -1128,7 +1119,6 @@ def isLf (Lf : ℂ → ℂ) (f : ℂ → ℂ) (r R R1 : ℝ) : Prop :=
 lemma re_Lf_le_log_B
     (B r R R1 : ℝ)
     (hB : 1 < B)
-    (hr_pos : 0 < r)
     (hr_lt_R1 : r < R1)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
@@ -1190,7 +1180,7 @@ lemma apply_BC_to_Lf
     intro w hw
     have hw' : norm w ≤ r := by
       simpa [Metric.mem_closedBall, dist_zero_right] using hw
-    exact re_Lf_le_log_B B r R R1 hB hr_pos hr_lt_R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_f_bound Lf hLf w hw'
+    exact re_Lf_le_log_B B r R R1 hB hr_lt_R1 hR1_pos hR1_lt_R hR_lt_1 f h_f_analytic h_f_zero h_finite_zeros h_f_bound Lf hLf w hw'
   -- z ∈ closedBall 0 r1
   have hz' : z ∈ Metric.closedBall 0 r1 := by
     simpa [Metric.mem_closedBall, dist_zero_right] using hz
