@@ -1191,12 +1191,6 @@ lemma apply_BC_to_Lf
   simpa [L] using hBC
 
 
--- Lemma 4: logDerivconst
-lemma logDerivconst {a : ℂ} {g : ℂ → ℂ} (ha : a ≠ 0) :
-    ∀ z, logDeriv (fun w ↦ a * g w) z = logDeriv g z := by
-  intro z
-  exact logDeriv_const_mul z a ha
-
 -- Lemma 6: Lf_deriv_is_logBf_deriv
 lemma Lf_deriv_is_logBf_deriv (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
     (h_f_analytic : ∀ z ∈ closedBall 0 R1, AnalyticAt ℂ f z)
@@ -1223,41 +1217,9 @@ lemma Lf_deriv_is_logBf_deriv (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
   -- Show that the inverse is non-zero
   have h_inv_ne_zero : (Bf R R1 f 0)⁻¹ ≠ 0 :=
     inv_ne_zero h_Bf0_ne_zero
-  -- Apply logDerivconst
-  exact logDerivconst h_inv_ne_zero z
+  exact logDeriv_const_mul z _ h_inv_ne_zero
 
 -- Lemma 7: Lfderiv_is_logderivBf
-
-lemma deriv_over_fun_is_logDeriv {g : ℂ → ℂ} : ∀ z, deriv g z / g z = logDeriv g z := by
-  intro z
-  rfl
-
--- Lemma 8: logDerivmul
-lemma logDerivmul {f g : ℂ → ℂ} {z : ℂ}
-    (hf : DifferentiableAt ℂ f z) (hg : DifferentiableAt ℂ g z)
-    (hf_ne : f z ≠ 0) (hg_ne : g z ≠ 0) :
-    logDeriv (fun w ↦ f w * g w) z = logDeriv f z + logDeriv g z := by
-  exact logDeriv_mul z hf_ne hg_ne hf hg
-
--- Lemma 9: logDerivprod
-lemma logDerivprod {K : Finset ℂ} {g : ℂ → ℂ → ℂ} {z : ℂ}
-    (hg_diff : ∀ ρ ∈ K, DifferentiableAt ℂ (g ρ) z)
-    (hg_ne : ∀ ρ ∈ K, g ρ z ≠ 0) :
-    logDeriv (fun w ↦ ∏ ρ ∈ K, g ρ w) z = ∑ ρ ∈ K, logDeriv (g ρ) z := by
-  exact logDeriv_prod hg_ne hg_diff
-
--- Lemma 10: logDerivdiv
-lemma logDerivdiv {h g : ℂ → ℂ} {z : ℂ}
-    (hh : DifferentiableAt ℂ h z) (hg : DifferentiableAt ℂ g z)
-    (hh_ne : h z ≠ 0) (hg_ne : g z ≠ 0) :
-    logDeriv (fun w ↦ h w / g w) z = logDeriv h z - logDeriv g z := by
-  exact logDeriv_div z hh_ne hg_ne hh hg
-
--- Lemma 11: logDerivfunpow
-lemma logDerivfunpow {g : ℂ → ℂ} {z : ℂ} {m : ℕ}
-    (hg : DifferentiableAt ℂ g z) :
-    logDeriv (fun w ↦ (g w) ^ m) z = m * logDeriv g z := by
-  exact logDeriv_fun_pow hg m
 
 -- Continuing with the remaining lemmas...
 
@@ -1491,10 +1453,7 @@ lemma logDeriv_fprod_is_sum {R R1 : ℝ} {f : ℂ → ℂ}
   rcases hf' with ⟨hf_ne, hf_diff⟩
   have hg' := blaschke_prod_diff_nonzero (R:=R) (R1:=R1) (f:=f) hR1_pos hR1_lt_R hR_lt_1 h_finite_zeros z hz
   rcases hg' with ⟨hg_ne, hg_diff⟩
-  simpa using
-    (logDerivmul (f:=f) (g:=fun w ↦ ∏ ρ ∈ h_finite_zeros.toFinset,
-        ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) (z:=z)
-      hf_diff hg_diff hf_ne hg_ne)
+  rw [logDeriv_mul _ hf_ne hg_ne hf_diff hg_diff]
 
 -- Lemma 20: logDeriv_Bf_is_sum
 
@@ -1535,14 +1494,9 @@ lemma prod_num_mul_inv_den_eq_prod_ratio_fun_mem
 
 lemma logDeriv_congr_of_eventuallyEq {f g : ℂ → ℂ} {z : ℂ}
   (hfg : f =ᶠ[nhds z] g) : logDeriv f z = logDeriv g z := by
-  -- Values agree at z and so do derivatives, since both are local with respect to nhds z
-  have hval : f z = g z := Filter.EventuallyEq.eq_of_nhds hfg
-  have hderiv_eq_ev : deriv f =ᶠ[nhds z] deriv g := hfg.deriv
-  have hderiv : deriv f z = deriv g z := Filter.EventuallyEq.eq_of_nhds hderiv_eq_ev
-  -- Rewrite logDeriv in terms of deriv and evaluation
-  have hf := deriv_over_fun_is_logDeriv (g := f) z
-  have hg := deriv_over_fun_is_logDeriv (g := g) z
-  simp [hf.symm, hg.symm, hval, hderiv]
+  unfold logDeriv
+  simp
+  rw [hfg.deriv_eq, hfg.eq_of_nhds]
 
 lemma logDeriv_Bf_is_sum (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1) (hR1_pos : 0 < R1)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
@@ -1722,10 +1676,7 @@ lemma logDeriv_prod_is_sum {R R1 : ℝ} {f : ℂ → ℂ}
       (h_finite_zeros.mem_toFinset).mp hρ
     have h := blaschke_pow_diff_nonzero (R:=R) (R1:=R1) (f:=f) hR1_pos hR1_lt_R hR_lt_1 ρ hρmem z hz
     exact h.1
-  simpa using
-    (logDerivprod (K := h_finite_zeros.toFinset)
-      (g := fun ρ w ↦ ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ)
-      (z := z) hdiff hne)
+  rw [logDeriv_prod hne hdiff]
 
 -- Lemma 24: logDeriv_power_is_mul
 lemma logDeriv_power_is_mul {R R1 : ℝ} {f : ℂ → ℂ}
@@ -1742,9 +1693,7 @@ lemma logDeriv_power_is_mul {R R1 : ℝ} {f : ℂ → ℂ}
     blaschke_frac_diff_nonzero (R := R) (R1 := R1) (f := f) hR1_pos hR1_lt_R hR_lt_1
       ρ hρmem z hz
   rcases hfrac with ⟨_hneq, hdiff⟩
-  simpa using
-    (logDerivfunpow (g := fun w ↦ (R - (star ρ) * w / R) / (w - ρ)) (z := z)
-      (m := analyticOrderNatAt f ρ) hdiff)
+  rw [logDeriv_fun_pow hdiff]
 
 -- Lemma 25: logDeriv_prod_is_sum_mul
 lemma logDeriv_prod_is_sum_mul {R R1 : ℝ} {f : ℂ → ℂ}
@@ -1814,8 +1763,7 @@ lemma logDeriv_Blaschke_is_diff {R R1 : ℝ} {f : ℂ → ℂ}
   have hnum := blaschke_num_diff_nonzero hR1_pos hR1_lt_R
       ρ hρ_set z hz_inR
   rcases hnum with ⟨hnum_nz, hnum_diff⟩
-  simpa using
-    (logDerivdiv (hh := hnum_diff) (hg := hden_diff) (hh_ne := hnum_nz) (hg_ne := hden_nz))
+  rw [logDeriv_div z hnum_nz hden_nz hnum_diff hden_diff]
 
 -- Lemma 28: logDeriv_linear
 lemma logDeriv_linear {a b : ℂ} {z : ℂ} :
