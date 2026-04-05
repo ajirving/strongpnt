@@ -1289,16 +1289,7 @@ lemma blaschke_num_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
     have hlt : R1 * R < R * R := by
       gcongr
     exact (lt_irrefl _ (lt_of_le_of_lt hle' hlt))
-  · -- Differentiability: linear function
-    have h_const : DifferentiableAt ℂ (fun _ : ℂ => (R : ℂ)) z := by
-      simp
-    have h_id : DifferentiableAt ℂ (fun w : ℂ => w) z := by
-      simp
-    have h_mul : DifferentiableAt ℂ (fun w : ℂ => (star ρ) * w) z := by
-      simpa using h_id.const_mul (star ρ)
-    have h_div : DifferentiableAt ℂ (fun w : ℂ => (star ρ) * w / (R : ℂ)) z := by
-      simpa [div_eq_mul_inv] using h_mul.mul_const ((R : ℂ)⁻¹)
-    simpa using h_const.sub h_div
+  · fun_prop
 
 -- Lemma 14: blaschke_frac_diff_nonzero
 lemma blaschke_frac_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
