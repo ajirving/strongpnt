@@ -292,42 +292,14 @@ lemma lem_rho_ne_zero (R1 : ℝ)
   intro ρ h_ρ_in_zeros h_ρ_eq_zero
   simp_all [zerosetKfR]
 
-theorem lem_mod_rho_pos
-    (R1 : ℝ)
-    (f : ℂ → ℂ)
-    (h_f_nonzero_at_zero : f 0 ≠ 0) :
-    ∀ (ρ : ℂ), ρ ∈ zerosetKfR R1 f → norm ρ > 0 := by
-  intro ρ h_ρ_in_zeros
-  -- First show that ρ ≠ 0
-  have h_ρ_ne_zero : ρ ≠ 0 :=
-    lem_rho_ne_zero R1 f h_f_nonzero_at_zero ρ h_ρ_in_zeros
-  exact norm_pos_iff.mpr h_ρ_ne_zero
-
-
-lemma lem_inv_mono_decr (x y : ℝ) (hx : 0 < x) (hxy : x ≤ y) : 1 / x ≥ 1 / y := by
-  -- Since 0 < x ≤ y, we have 0 < y
-  have hy : 0 < y := lt_of_lt_of_le hx hxy
-  -- Use one_div_le_one_div_of_le for the correct order
-  exact one_div_le_one_div_of_le hx hxy
-
-
-lemma lem_inv_mod_rho_ge_inv_R1 (R1 : ℝ) (hR1_pos : 0 < R1)
+lemma lem_inv_mod_rho_ge_inv_R1 (R1 : ℝ)
     (f : ℂ → ℂ)
     (h_f_nonzero_at_zero : f 0 ≠ 0)
     (ρ : ℂ) (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 f) :
     1 / norm ρ ≥ 1 / R1 := by
-  -- From membership in zerosetKfR, we know |ρ| ≤ R1
-  have h_abs_ρ_le_R1 : norm ρ ≤ R1 := by
-    simp_all [zerosetKfR]
-  -- We need |ρ| > 0 to apply the inverse monotonicity lemma
-  have h_abs_ρ_pos : norm ρ > 0 :=
-    lem_mod_rho_pos R1 f h_f_nonzero_at_zero ρ h_rho_in_KfR1
-  -- We need R1 > 0
-  have h_R1_pos : R1 > 0 := by
-    linarith
-  -- Apply inverse monotonicity: if 0 < |ρ| ≤ R1, then 1/R1 ≤ 1/|ρ|
-  exact lem_inv_mono_decr (norm ρ) R1 h_abs_ρ_pos h_abs_ρ_le_R1
-
+  gcongr
+  · exact norm_pos_iff.mpr <| lem_rho_ne_zero R1 f h_f_nonzero_at_zero ρ h_rho_in_KfR1
+  · simp_all [zerosetKfR]
 
 theorem lem_R_div_mod_rho_ge_R_div_R1 (R R1 : ℝ) (hR1_pos : 0 < R1)
 (hR1_lt_R : R1 < R) (f : ℂ → ℂ)
@@ -336,7 +308,7 @@ theorem lem_R_div_mod_rho_ge_R_div_R1 (R R1 : ℝ) (hR1_pos : 0 < R1)
     R / norm ρ ≥ R / R1 := by
   -- Get the inverse inequality: 1/|ρ| ≥ 1/R1
   have h_inv_ineq : 1 / norm ρ ≥ 1 / R1 :=
-    lem_inv_mod_rho_ge_inv_R1 R1 hR1_pos f h_f_nonzero_at_zero ρ h_rho_in_KfR1
+    lem_inv_mod_rho_ge_inv_R1 R1 f h_f_nonzero_at_zero ρ h_rho_in_KfR1
   -- Since multiplication by R > 0 preserves inequality direction
   -- R * (1/|ρ|) ≥ R * (1/R1) becomes R/|ρ| ≥ R/R1
   have h_R_div_abs_ρ_eq : R * (1 / norm ρ) = R / norm ρ := by ring
@@ -355,17 +327,6 @@ theorem lem_R_div_mod_rho_ge_R_over_R1 (R R1 : ℝ) (hR1_pos : 0 < R1)
   -- Then show R / R1 = 3/2
   linarith
 
-
-theorem lem_mod_of_prod2 {ι : Type*} (K : Finset ι) (w : ι → ℂ) :
-    ‖∏ ρ ∈ K, w ρ‖ = ∏ ρ ∈ K, ‖w ρ‖ := by
-  classical
-  refine Finset.induction_on K ?h0 ?hstep
-  · simp
-  · intro a s ha ih
-    -- ‖∏‖ distributes over product for complex numbers
-    simp [Finset.prod_insert ha, norm_mul, ih]
-
-
 lemma lem_mod_Bf_is_prod_mod (R R1 : ℝ)
     (f : ℂ → ℂ)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
@@ -376,16 +337,12 @@ lemma lem_mod_Bf_is_prod_mod (R R1 : ℝ)
       ‖(((R : ℂ) - z * star ρ / (R : ℂ)) / (z - ρ)) ^ analyticOrderNatAt f ρ‖ := by
   -- Use definition of Bf: Bf z = Cf z * ∏ ρ, ((R - star ρ * z / R)^{m_ρ})
   simp only [Bf, h_finite_zeros, ↓reduceDIte]
-  rw [norm_mul]
-  -- Use lem_mod_of_prod2 to distribute norm over the product as suggested in informal proof
-  rw [lem_mod_of_prod2]
+  rw [norm_mul, norm_prod]
   -- When z ∉ zerosetKfR R1, we have Cf z = f z / ∏ ρ, (z - ρ)^{m_ρ} by definition
   have hCf : Cf R1 f z =
     f z / ∏ ρ ∈ h_finite_zeros.toFinset, (z - ρ) ^ analyticOrderNatAt f ρ := by
     simp [Cf, hz, h_finite_zeros]
-  rw [hCf, norm_div]
-  -- Apply lem_mod_of_prod2 to the denominator
-  rw [lem_mod_of_prod2]
+  rw [hCf, norm_div, norm_prod]
   -- Rearrange: (‖f z‖ / ∏‖(z-ρ)^{m_ρ}‖) * ∏‖(R - star ρ * z / R)^{m_ρ}‖
   rw [div_mul_eq_mul_div]
   -- Use properties of products to combine: ‖f z‖ * (∏‖(R - star ρ * z / R)^{m_ρ}‖ / ∏‖(z-ρ)^{m_ρ}‖)
@@ -563,29 +520,6 @@ theorem lem_mod_Bf_at_0_ge_1 (R R1 : ℝ) (hR1_pos : 0 < R1)
   -- Combine: 1 ≤ (3/2)^n product ≤ (R/‖ρ‖)^n product
   exact le_trans h_3_2_prod_ge_1 h_prod_ge
 
-lemma lem_finset_prod_analyticAt {α : Type*} {S : Finset α} {g : α → ℂ → ℂ} (w : ℂ) :
-  (∀ a ∈ S, AnalyticAt ℂ (g a) w) → AnalyticAt ℂ (fun z => ∏ a ∈ S, g a z) w := by
-  intro h
-  classical
-  induction S using Finset.induction with
-  | empty =>
-    -- Base case: empty finset, product is 1 (constant function)
-    simp only [Finset.prod_empty]
-    exact analyticAt_const
-  | insert a s ha ih =>
-    -- Inductive step: insert element a into finset s
-    simp only [Finset.prod_insert ha]
-    -- Product becomes g a z * (∏ b ∈ s, g b z)
-    apply AnalyticAt.fun_mul
-    · -- g a is analytic at w
-      apply h
-      exact Finset.mem_insert_self a s
-    · -- Product over s is analytic at w by inductive hypothesis
-      apply ih
-      intro b hb
-      apply h
-      exact Finset.mem_insert_of_mem hb
-
 theorem lem_Bf_is_analytic (R R1 : ℝ)
     (f : ℂ → ℂ)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R)) :
@@ -616,8 +550,7 @@ theorem lem_Bf_is_analytic (R R1 : ℝ)
 
   have h_product : AnalyticAt ℂ (fun w => ∏ ρ ∈ h_finite_zeros.toFinset,
       ((R : ℂ) - star ρ * w / (R : ℂ)) ^ analyticOrderNatAt f ρ) z := by
-    -- use the reusable lemma for finset products of analytic functions
-    apply lem_finset_prod_analyticAt z
+    apply Finset.analyticAt_fun_prod
     intro ρ hρ
     apply h_powers
     exact hρ
@@ -1947,9 +1880,6 @@ lemma target_inequality_setup  (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : 
 
 -- Additional bound lemmas
 
-lemma norm_div_eq (a b : ℂ) : ‖a / b‖ = ‖a‖ / ‖b‖ := by
-  simp
-
 lemma norm_Rsq_div_conj (R : ℝ) (ρ : ℂ) (hρ : ρ ≠ 0) : ‖((R^2 : ℂ) / (star ρ))‖ = (R^2 : ℝ) / ‖ρ‖ := by
   have hb : star ρ ≠ 0 := by
     intro h
@@ -1962,7 +1892,7 @@ lemma norm_Rsq_div_conj (R : ℝ) (ρ : ℂ) (hρ : ρ ≠ 0) : ‖((R^2 : ℂ) 
     simp [abs_of_nonneg (sq_nonneg R)]
   calc
     ‖((R^2 : ℂ) / (star ρ))‖
-        = ‖(R^2 : ℂ)‖ / ‖star ρ‖ := norm_div_eq _ _
+        = ‖(R^2 : ℂ)‖ / ‖star ρ‖ := norm_div _ _
     _ = (R^2 : ℝ) / ‖ρ‖ := by
       simp [hnormR]
 
