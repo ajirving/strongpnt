@@ -89,7 +89,7 @@ lemma lem_ratioAnalAt (w : ℂ)
 lemma lem_Cf_analytic_off_K
     {R R1 : ℝ} {hR_lt_1 : R < 1}
     {f : ℂ → ℂ}
-    {h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z}
+    {h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1)}
     (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R \ zerosetKfR R1  f) :
     AnalyticAt ℂ (Cf R1 f) z := by
   by_cases h_finite_zeros : (zerosetKfR R1 f).Finite
@@ -592,7 +592,7 @@ lemma lem_finset_prod_analyticAt {α : Type*} {S : Finset α} {g : α → ℂ �
 
 theorem lem_Bf_is_analytic (R R1 : ℝ)
     (hR_lt_1 : R < 1) (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z) :
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1)) :
     AnalyticOnNhd ℂ (Bf R R1 f)  (Metric.closedBall (0 : ℂ) R) := by
   -- By definition of AnalyticOnNhd
   intro z hz
@@ -773,7 +773,7 @@ lemma lem_Bf_bounded_in_disk_from_boundary (B R R1 : ℝ)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1) (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (h_bd_boundary : ∀ z : ℂ, ‖z‖ = R →
       ‖Bf R R1 f z‖ ≤ B) :
     ∀ z : ℂ, ‖z‖ ≤ R →
@@ -788,7 +788,7 @@ lemma lem_Bf_bounded_in_disk_from_f (B R R1 : ℝ)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1) (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
     ∀ z : ℂ, ‖z‖ ≤ R →
@@ -805,7 +805,7 @@ lemma lem_Bf_at_0_le_M (B R R1 : ℝ) (hB : 1 < B)
     (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
   ‖Bf R R1 f 0‖ ≤ B := by
@@ -892,7 +892,7 @@ lemma lem_jensen_inequality_form (B R R1 : ℝ) (hB : 1 < B)
     (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (hf0_eq_one : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
@@ -918,7 +918,7 @@ lemma lem_jensen_log_form (B R R1 : ℝ) (hB : 1 < B)
     (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (hf0_eq_one : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
@@ -952,7 +952,7 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
     (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (hf0_eq_one : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
@@ -977,7 +977,7 @@ lemma Bf_is_analytic_on_disk
     (R R1 : ℝ)
     (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z) :
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1)) :
     AnalyticOnNhd ℂ (Bf R R1 f ) (Metric.closedBall (0 : ℂ) R) :=
     lem_Bf_is_analytic R R1 hR_lt_1 f h_f_analytic
 
@@ -1084,7 +1084,7 @@ lemma log_Bf_le_log_B3
     (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_f_bound : ∀ z, norm z ≤ R → norm (f z) ≤ B) :
@@ -1124,7 +1124,7 @@ lemma re_Lf_le_log_B
     (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_f_bound : ∀ z, norm z ≤ R → norm (f z) ≤ B) 
@@ -1153,7 +1153,7 @@ lemma apply_BC_to_Lf
     (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_f_bound : ∀ z, norm z ≤ R → norm (f z) ≤ B)
@@ -1411,7 +1411,7 @@ lemma blaschke_prod_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
 lemma f_diff_nonzero_outside_Kf {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z) :
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1)) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     f z ≠ 0 ∧ DifferentiableAt ℂ f z := by
   intro z hz
@@ -1441,7 +1441,7 @@ lemma f_diff_nonzero_outside_Kf {R R1 : ℝ} {f : ℂ → ℂ}
 lemma logDeriv_fprod_is_sum {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     logDeriv (fun w ↦ f w * ∏ ρ ∈ h_finite_zeros.toFinset,
@@ -1499,7 +1499,7 @@ lemma logDeriv_congr_of_eventuallyEq {f g : ℂ → ℂ} {z : ℂ}
   rw [hfg.deriv_eq, hfg.eq_of_nhds]
 
 lemma logDeriv_Bf_is_sum (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1) (hR1_pos : 0 < R1)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
 :
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \
           zerosetKfR R1 f,
@@ -1591,7 +1591,7 @@ theorem in_r_minus_kf {R1 r : ℝ} {f : ℂ → ℂ}
   constructor <;> assumption
 
 -- Lemma 22: Lf_deriv_step1
-lemma Lf_deriv_step1 (hR1_pos : 0 < R1) (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z) (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1) (h_f_zero : f 0 = 1)
+lemma Lf_deriv_step1 (hR1_pos : 0 < R1) (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1)) (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1) (h_f_zero : f 0 = 1)
     (Lf : ℂ → ℂ)
     (h_Lf : isLf Lf f r R R1) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f,
@@ -1717,7 +1717,7 @@ lemma logDeriv_prod_is_sum_mul {R R1 : ℝ} {f : ℂ → ℂ}
 -- Lemma 26: Lf_deriv_step2
 lemma Lf_deriv_step2  (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
     (hR1_pos : 0 < R1)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (h_f_zero : f 0 = 1)
     (Lf : ℂ → ℂ)
     (h_Lf : isLf Lf f r R R1) :
@@ -1879,7 +1879,7 @@ lemma logDeriv_Blaschke_is_diff_frac {R R1 : ℝ} {f : ℂ → ℂ}
 -- Lemma 34: Lf_deriv_step3
 lemma Lf_deriv_step3   (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
     (hR1_pos : 0 < R1)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (h_f_zero : f 0 = 1)
     (Lf : ℂ → ℂ)
     (h_Lf : isLf Lf f r R R1) :
@@ -1912,7 +1912,7 @@ lemma sum_rearranged {R R1 : ℝ} {f : ℂ → ℂ}
 -- Lemma 37: Lf_deriv_final_formula
 lemma Lf_deriv_final_formula (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
     (hR1_pos : 0 < R1)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (h_f_zero : f 0 = 1)
     (Lf : ℂ → ℂ)
     (h_Lf : isLf Lf f r R R1) :
@@ -1931,7 +1931,7 @@ lemma Lf_deriv_final_formula (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1
 -- Lemma 38: rearrange_Lf_deriv
 lemma rearrange_Lf_deriv (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
     (hR1_pos : 0 < R1)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (h_f_zero : f 0 = 1)
     (Lf : ℂ → ℂ)
     (h_Lf : isLf Lf f r R R1) :
@@ -1948,7 +1948,7 @@ lemma rearrange_Lf_deriv (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R
 -- Lemma 40: target_inequality_setup
 lemma target_inequality_setup  (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
     (hR1_pos : 0 < R1)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (h_f_zero : f 0 = 1)
     (Lf : ℂ → ℂ)
     (h_Lf : isLf Lf f r R R1) :
@@ -2116,7 +2116,7 @@ lemma final_sum_bound {R R1 B : ℝ} {f : ℂ → ℂ}
     (hR1_lt_R : R1 < R)
     (hR_lt_1 : R < 1)
     (hB : 1 < B)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_f_bounded : ∀ z ∈ Metric.closedBall (0 : ℂ) R, ‖f z‖ ≤ B) :
@@ -2162,7 +2162,7 @@ lemma final_sum_bound {R R1 B : ℝ} {f : ℂ → ℂ}
       field_simp [ne_of_gt h_pos, ne_of_gt h_log_pos]
 
 lemma Lf_exists (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1) (hR1_pos : 0 < R1)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (h_f_zero : f 0 = 1) :
     ∃ Lf : ℂ → ℂ, isLf Lf f r R R1 := by
   let B_f := Bf R R1 f
@@ -2187,7 +2187,7 @@ lemma final_inequality
     (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
     (f : ℂ → ℂ)
     (h_f_analytic :
-      ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+      AnalyticOnNhd ℂ f (closedBall 0 1))
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_f_bounded : ∀ z ∈ Metric.closedBall (0 : ℂ) R, ‖f z‖ ≤ B) :
@@ -2258,7 +2258,7 @@ lemma final_ineq1
     (B : ℝ) (hB : 1 < B) (r1 r R R1 : ℝ) (hr1pos : 0 < r1) (hr1_lt_r : r1 < r) (hr_lt_R1 : r < R1)
     (hR1_lt_R : R1 < R) (hR : R < 1)
     (f : ℂ → ℂ)
-    (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 1))
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_f_bounded : ∀ z ∈ Metric.closedBall (0 : ℂ) R, ‖f z‖ ≤ B) :
