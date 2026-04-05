@@ -1816,47 +1816,9 @@ lemma star_ne_zero_of_ne_zero {ρ : ℂ} (hρ : ρ ≠ 0) : star ρ ≠ 0 := by
 
 lemma field_identity_general {K : Type*} [Field K] {a b c : K} (ha : a ≠ 0) (hb : b ≠ 0) : (-(b/a)) / (a - c*b/a) = (1 : K) / (c - a^2/b) := by
   -- Multiply numerator and denominator by -a/b
-  have hmul : (-(a / b) : K) ≠ 0 := by
-    have hdiv_ne : a / b ≠ 0 := div_ne_zero ha hb
-    exact neg_ne_zero.mpr hdiv_ne
-  have hnum : (-(b/a) * (-(a/b))) = (1 : K) := by
-    calc
-      (-(b/a) * (-(a/b))) = (b/a) * (a/b) := by simp [neg_mul_neg]
-      _ = (b * a⁻¹) * (a * b⁻¹) := by simp [div_eq_mul_inv]
-      _ = b * (a⁻¹ * (a * b⁻¹)) := by simp [mul_assoc]
-      _ = b * ((a⁻¹ * a) * b⁻¹) := by simp [mul_assoc]
-      _ = b * (1 * b⁻¹) := by simp [ha]
-      _ = b * b⁻¹ := by simp
-      _ = 1 := by simp [hb]
-  have hOne : (b/a) * (a/b) = (1 : K) := by
-    calc
-      (b/a) * (a/b) = (b * a⁻¹) * (a * b⁻¹) := by simp [div_eq_mul_inv]
-      _ = b * (a⁻¹ * (a * b⁻¹)) := by simp [mul_assoc]
-      _ = b * ((a⁻¹ * a) * b⁻¹) := by simp [mul_assoc]
-      _ = b * (1 * b⁻¹) := by simp [ha]
-      _ = b * b⁻¹ := by simp
-      _ = 1 := by simp [hb]
-  have haab : a * (a / b) = a^2 / b := by
-    simp [div_eq_mul_inv, pow_two, mul_comm, mul_left_comm, mul_assoc]
-  have hcbab : (c * b / a) * (a / b) = c := by
-    calc
-      (c * b / a) * (a / b) = (c * (b / a)) * (a / b) := by simp [div_eq_mul_inv, mul_assoc]
-      _ = c * ((b / a) * (a / b)) := by simp [mul_assoc]
-      _ = c * 1 := by simp [hOne]
-      _ = c := by simp
-  have hdenom : ((a - c*b/a) * (-(a/b))) = c - a^2 / b := by
-    calc
-      ((a - c*b/a) * (-(a/b))) = -((a - c*b/a) * (a / b)) := by simp [mul_neg]
-      _ = -(a * (a / b) - (c * b / a) * (a / b)) := by simp [sub_mul]
-      _ = (c * b / a) * (a / b) - a * (a / b) := by simp [neg_sub]
-      _ = c - a^2 / b := by simp [hcbab, haab]
-  calc
-    (-(b/a)) / (a - c*b/a)
-        = (-(b/a) * (-(a/b))) / ((a - c*b/a) * (-(a/b))) := by
-          simpa using
-            (mul_div_mul_right (a := (-(b / a))) (b := (a - c * b / a)) (c := (-(a / b))) hmul).symm
-    _ = 1 / ((a - c*b/a) * (-(a/b))) := by simp [hnum]
-    _ = 1 / (c - a^2/b) := by simp [hdenom]
+  field_simp
+  rw [← div_neg]
+  ring
 
 lemma complex_identity_from_field {R : ℝ} {ρ z : ℂ} (hR : R ≠ 0) (hρ : ρ ≠ 0) (hden : (R:ℂ) - (star ρ) * z / R ≠ 0) : (-(star ρ) / (R:ℂ)) / ((R:ℂ) - (star ρ) * z / R) = (1 : ℂ) / (z - (R:ℂ)^2 / (star ρ)) := by
   have ha : (R : ℂ) ≠ 0 := by simpa using (Complex.ofReal_ne_zero.mpr hR)
