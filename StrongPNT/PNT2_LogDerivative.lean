@@ -1,4 +1,5 @@
 import Mathlib.Algebra.Lie.OfAssociative
+import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
 import Mathlib.Analysis.Normed.Module.Connected
 import Mathlib.Analysis.Complex.ExponentialBounds
 import StrongPNT.PNT1_ComplexAnalysis
@@ -391,29 +392,13 @@ theorem lem_mod_Bf_at_0_as_ratio  (R R1 : ℝ)
       (R / ‖ρ‖) ^ analyticOrderNatAt f ρ := by
   exact lem_mod_Bf_at_0_eval R R1 hR1_pos hR1_lt_R f h_f_nonzero_at_zero h_finite_zeros
 
-lemma lem_prod_ineq {ι : Type*} (K : Finset ι) (a b : ι → ℝ)
-    (h_nonneg : ∀ ρ ∈ K, 0 ≤ a ρ) (h_le : ∀ ρ ∈ K, a ρ ≤ b ρ) :
-    ∏ ρ ∈ K, a ρ ≤ ∏ ρ ∈ K, b ρ := by
-  exact Finset.prod_le_prod h_nonneg h_le
-
-
 lemma lem_mod_lower_bound_1 (R R1 : ℝ) (hR1_pos : 0 < R1)
 (hR1_lt_R : R1 < R) (f : ℂ → ℂ)
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     ∏ ρ ∈ h_finite_zeros.toFinset,
       (R/R1 : ℝ) ^ analyticOrderNatAt f ρ ≥ 1 := by
-  classical
-  set K := h_finite_zeros.toFinset
-
-  have h_base_ge_1 : (1 : ℝ) < (R/R1 : ℝ) := by exact (one_lt_div hR1_pos).mpr hR1_lt_R
-  have h :=
-    lem_prod_ineq K (fun _ : ℂ => (1 : ℝ))
-      (fun ρ : ℂ => (R/R1 : ℝ) ^ analyticOrderNatAt f ρ)
-      (by intro ρ hρ; norm_num)
-      (by
-        intro ρ hρ
-        simpa using (one_le_pow₀ (by linarith [h_base_ge_1])))
-  simpa [K] using h
+  refine Finset.one_le_prod _ fun z ↦ one_le_pow₀ ?_
+  exact one_le_div hR1_pos|>.mpr hR1_lt_R.le
 
 theorem lem_mod_Bf_at_0_ge_1 (R R1 : ℝ) (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
@@ -716,10 +701,7 @@ lemma lem_combine_bounds_on_Bf0 (B R R1 : ℝ)
   have h_prod_le :
       ∏ ρ ∈ K, (R/R1 : ℝ) ^ analyticOrderNatAt f ρ
         ≤ ∏ ρ ∈ K, (R / ‖ρ‖) ^ analyticOrderNatAt f ρ := by
-    refine lem_prod_ineq K
-      (fun ρ => (R/R1 : ℝ) ^ analyticOrderNatAt f ρ)
-      (fun ρ => (R / ‖ρ‖) ^ analyticOrderNatAt f ρ)
-      ?h_nonneg ?h_le
+    refine Finset.prod_le_prod       ?h_nonneg ?h_le
     · intro ρ hρK; exact pow_nonneg (R_over_R1_nonneg) _
     · intro ρ hρK
       exact pow_le_pow_left₀ (by linarith : (0 : ℝ) ≤ R / R1) (h_base_ge ρ hρK) _
