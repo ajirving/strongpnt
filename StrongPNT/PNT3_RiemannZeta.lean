@@ -41,21 +41,6 @@ lemma zetaEulerprod (s : ℂ) (hs : 1 < s.re) : Multipliable (fun p : ℙ => (1 
   · exact hprod.multipliable
   · simpa using (hprod.tprod_eq.symm)
 
--- Lemma abs_of_tprod
-lemma abs_of_tprod {P : Type*} (w : P → ℂ) (hw : Multipliable w) : norm (∏' p : P, w p) = ∏' p : P, norm (w p) := by exact Multipliable.norm_tprod hw
-
--- Lemma abs_P_prod
-lemma abs_P_prod (s : ℂ) (hs : 1 < s.re) : norm (∏' p : ℙ, (1 - ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹) = ∏' p : ℙ, norm ((1 - ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹) := by
-  have hw : Multipliable (fun p : ℙ => (1 - ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹) := (zetaEulerprod s hs).1
-  simpa using abs_of_tprod (fun p : ℙ => (1 - ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹) hw
-
--- Lemma abs_zeta_prod
-lemma abs_zeta_prod (s : ℂ) (hs : 1 < s.re) : norm (riemannZeta s) = ∏' p : ℙ, norm ((1 - ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹) := by
-  rw [zetaEulerprod s hs |>.2, abs_P_prod s hs]
-
--- Lemma abs_of_inv
-lemma abs_of_inv (z : ℂ) : norm (z⁻¹) = (norm z)⁻¹ := norm_inv z
-
 -- Lemma one_minus_p_s_neq_0
 lemma one_minus_p_s_neq_0 (p : ℙ) (s : ℂ) (hs : 1 < s.re) : 1 - ((p : ℕ) : ℂ) ^ (-s : ℂ) ≠ 0 := by
   intro h
@@ -68,24 +53,14 @@ lemma one_minus_p_s_neq_0 (p : ℙ) (s : ℂ) (hs : 1 < s.re) : 1 - ((p : ℕ) :
 -- Lemma abs_zeta_prod_prime
 lemma abs_zeta_prod_prime (s : ℂ) (hs : 1 < s.re) :
   norm (riemannZeta s) = ∏' p : ℙ, (norm (1 - ((p : ℕ) : ℂ) ^ (-s : ℂ)))⁻¹ := by
-  rw [abs_zeta_prod s hs]
-  congr 1
-  ext p
-  rw [abs_of_inv (1 - ((p : ℕ) : ℂ) ^ (-s : ℂ))]
-
--- Lemma Re2s
-lemma Re2s (s : ℂ) : (2 * s).re = 2 * s.re := by simp
-
--- Lemma Re2sge1
-lemma Re2sge1 (s : ℂ) (hs : 1 < s.re) : 1 < (2 * s).re := by
-  rw [Re2s]
-  linarith
+  rw [← riemannZeta_eulerProduct_tprod hs, (riemannZeta_eulerProduct_hasProd hs).multipliable.norm_tprod]
+  simp_rw [norm_inv]
 
 -- Lemma zeta_ratio_prod
 lemma zeta_ratio_prod (s : ℂ) (hs : 1 < s.re) : riemannZeta (2 * s) / riemannZeta s = (∏' p : ℙ, (1 - ((p : ℕ) : ℂ) ^ (-(2 * s) : ℂ))⁻¹) / (∏' p : ℙ, (1 - ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹) := by
-  have h2 := (zetaEulerprod (2 * s) (Re2sge1 s hs)).2
-  have h1 := (zetaEulerprod s hs).2
-  simp [h2, h1]
+  rw [riemannZeta_eulerProduct_tprod hs, riemannZeta_eulerProduct_tprod]
+  simp
+  linarith
 
 local notation "ι" => fun (z : ℂˣ) ↦ (z : ℂ)
 
@@ -199,7 +174,7 @@ lemma simplify_prod_ratio (s : ℂ) (hs : 1 < s.re) : (∏' p : ℙ, (1 - (p : �
   let b := fun p : ℙ => (1 - (p : ℂ) ^ (-s : ℂ))⁻¹
 
   -- Get multipliability from zetaEulerprod
-  have ha : Multipliable a := (zetaEulerprod (2 * s) (Re2sge1 s hs)).1
+  have ha : Multipliable a := (zetaEulerprod (2 * s) (by simp; linarith)).1
   have hb : Multipliable b := (zetaEulerprod s hs).1
 
   -- Show that b p ≠ 0 for all p
@@ -589,7 +564,7 @@ lemma abs_zeta_ratio_eval : norm (riemannZeta 3 / riemannZeta ((3 : ℝ) / 2)) =
     simpa [hw_eq] using hmap
   -- Take absolute values inside the product
   have h_abs_tprod : norm (∏' p : ℙ, w p) = ∏' p : ℙ, norm (w p) :=
-    abs_of_tprod w hw_mult
+    hw_mult.norm_tprod
   -- For each factor, the absolute value equals the real factor
   have h_abs_eq_fun : (fun p : ℙ => norm (w p)) = u := by
     funext p
