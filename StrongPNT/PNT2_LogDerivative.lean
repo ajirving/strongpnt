@@ -285,47 +285,17 @@ noncomputable def Bf
   else
     1
 
-lemma lem_rho_ne_zero (R1 : ℝ)
-    (f : ℂ → ℂ)
-    (h_f_nonzero_at_zero : f 0 ≠ 0) :
-    ∀ ρ ∈ zerosetKfR R1 f, ρ ≠ 0 := by
-  intro ρ h_ρ_in_zeros h_ρ_eq_zero
-  simp_all [zerosetKfR]
-
-lemma lem_inv_mod_rho_ge_inv_R1 (R1 : ℝ)
-    (f : ℂ → ℂ)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
-    (ρ : ℂ) (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 f) :
-    1 / norm ρ ≥ 1 / R1 := by
-  gcongr
-  · exact norm_pos_iff.mpr <| lem_rho_ne_zero R1 f h_f_nonzero_at_zero ρ h_rho_in_KfR1
-  · simp_all [zerosetKfR]
-
-theorem lem_R_div_mod_rho_ge_R_div_R1 (R R1 : ℝ) (hR1_pos : 0 < R1)
-(hR1_lt_R : R1 < R) (f : ℂ → ℂ)
-    (h_f_nonzero_at_zero : f 0 ≠ 0) (ρ : ℂ)
-    (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 f) :
-    R / norm ρ ≥ R / R1 := by
-  -- Get the inverse inequality: 1/|ρ| ≥ 1/R1
-  have h_inv_ineq : 1 / norm ρ ≥ 1 / R1 :=
-    lem_inv_mod_rho_ge_inv_R1 R1 f h_f_nonzero_at_zero ρ h_rho_in_KfR1
-  -- Since multiplication by R > 0 preserves inequality direction
-  -- R * (1/|ρ|) ≥ R * (1/R1) becomes R/|ρ| ≥ R/R1
-  have h_R_div_abs_ρ_eq : R * (1 / norm ρ) = R / norm ρ := by ring
-  have h_R_div_R1_eq : R * (1 / R1) = R / R1 := by ring
-  rw [← h_R_div_abs_ρ_eq, ← h_R_div_R1_eq]
-  exact mul_le_mul_of_nonneg_left h_inv_ineq (by linarith)
-
 theorem lem_R_div_mod_rho_ge_R_over_R1 (R R1 : ℝ) (hR1_pos : 0 < R1)
 (hR1_lt_R : R1 < R) (f : ℂ → ℂ)
     (h_f_nonzero_at_zero : f 0 ≠ 0) (ρ : ℂ)
     (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 f) :
     R / norm ρ ≥ (R/R1 : ℝ) := by
-  -- First show R / |ρ| ≥ R / R1
-  have h_ineq1 : R / norm ρ ≥ R / R1 :=
-    lem_R_div_mod_rho_ge_R_div_R1 R R1 hR1_pos hR1_lt_R f h_f_nonzero_at_zero ρ h_rho_in_KfR1
-  -- Then show R / R1 = 3/2
-  linarith
+  gcongr
+  · linarith
+  · apply norm_pos_iff.mpr
+    intro h
+    simp_all [zerosetKfR]
+  · simp_all [zerosetKfR]
 
 lemma lem_mod_Bf_is_prod_mod (R R1 : ℝ)
     (f : ℂ → ℂ)
@@ -358,10 +328,6 @@ lemma lem_mod_Bf_is_prod_mod (R R1 : ℝ)
   ring
 
 
-lemma lem_abs_pow (w : ℂ) (n : ℕ) : ‖w ^ n‖ = ‖w‖ ^ n := by
-  simp
-
-
 lemma lem_mod_Bf_prod_mod (R R1 : ℝ)
     (f : ℂ → ℂ)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
@@ -376,7 +342,7 @@ lemma lem_mod_Bf_prod_mod (R R1 : ℝ)
   -- Now use lem_abs_pow to transform each term in the product
   congr 2
   ext ρ
-  rw [lem_abs_pow]
+  rw [norm_pow]
 
 lemma lem_mod_Bf_at_0 (R R1 : ℝ)
     (f : ℂ → ℂ)
@@ -395,23 +361,6 @@ lemma lem_mod_Bf_at_0 (R R1 : ℝ)
   congr 1
   simp only [zero_mul, zero_div, sub_zero, zero_sub]
 
-lemma lem_mod_div_ (w1 w2 : ℂ) : ‖w1 / w2‖ = ‖w1‖ / ‖w2‖ := by
-  simp
-
-
-lemma lem_mod_div_and_neg (R : ℝ) (hR_pos : 0 < R) (ρ : ℂ) (h_rho_ne_zero : ρ ≠ 0) :
-  ‖(R : ℂ) / (-ρ)‖ = R / ‖ρ‖ := by
-  -- Use division formula for abs, abs of real, and abs of neg
-  have hden : (-ρ) ≠ 0 := by simpa using neg_ne_zero.mpr h_rho_ne_zero
-  have hdiv := lem_mod_div_ (R : ℂ) (-ρ)
-  have hnorm_real : ‖(R : ℂ)‖ = |R| := by simp
-  calc
-    ‖(R : ℂ) / (-ρ)‖ = ‖(R : ℂ)‖ / ‖-ρ‖ := hdiv
-    _ = ‖(R : ℂ)‖ / ‖ρ‖ := by simp [norm_neg]
-    _ = |R| / ‖ρ‖ := by simp [hnorm_real]
-    _ = R / ‖ρ‖ := by simp [abs_of_pos hR_pos]
-
-
 theorem lem_mod_Bf_at_0_eval  (R R1 : ℝ)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
@@ -428,16 +377,8 @@ theorem lem_mod_Bf_at_0_eval  (R R1 : ℝ)
   -- Use Finset.prod_congr to show the products are equal
   apply Finset.prod_congr rfl
   intro ρ hρ
-  -- We need to show ‖((R : ℂ) / (-ρ))‖ ^ analyticOrderNatAt f ρ = (R / ‖ρ‖) ^ analyticOrderNatAt f ρ
-  -- This follows from lem_mod_div_and_neg if ρ ≠ 0
-  have h_ρ_ne_zero : ρ ≠ 0 := by
-    -- ρ is in h_finite_zeros.toFinset, so it's in zerosetKfR
-    have h_ρ_in_zeros : ρ ∈ zerosetKfR R1 f := by
-      exact (Set.Finite.mem_toFinset h_finite_zeros).mp hρ
-    exact lem_rho_ne_zero R1 f h_f_nonzero_at_zero ρ h_ρ_in_zeros
-  -- Apply lem_mod_div_and_neg to rewrite the norm
-  rw [lem_mod_div_and_neg R (by linarith) ρ h_ρ_ne_zero]
-
+  simp
+  rw [abs_of_nonneg (by linarith)]
 
 theorem lem_mod_Bf_at_0_as_ratio  (R R1 : ℝ)
     (hR1_pos : 0 < R1)
