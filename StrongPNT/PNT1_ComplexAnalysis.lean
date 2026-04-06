@@ -192,22 +192,3 @@ theorem log_of_analytic_open
         ((hB.differentiableOn z hz).differentiableAt (IsOpen.mem_nhds Metric.isOpen_ball hz)) (hB_ne_zero z hz), this.deriv, (hJ z hz).deriv]
       simp only [Pi.zero_apply]
       field [hB_ne_zero z hz]
-
-theorem log_of_analytic
-    {r1 R' R : ℝ}
-    (hr1_pos : 0 < r1) (hr1_lt_R' : r1 < R') (hR'_lt_R : R' < R)
-    {B : ℂ → ℂ}
-    (hB : AnalyticOnNhd ℂ B (Metric.closedBall (0 : ℂ) R))
-    (hB_ne_zero : ∀ z ∈ Metric.closedBall (0 : ℂ) R', B z ≠ 0) :
-    ∃ J_B : ℂ → ℂ,
-      AnalyticOnNhd ℂ J_B (Metric.closedBall (0 : ℂ) r1) ∧
-      J_B 0 = 0 ∧
-      (∀ z ∈ Metric.closedBall (0 : ℂ) r1, deriv J_B z = deriv B z / B z) ∧
-      (∀ z ∈ Metric.closedBall (0 : ℂ) r1,
-        Real.log (norm (B z)) - Real.log (norm (B 0)) = Complex.re (J_B z)) := by
-  obtain ⟨J, hJ1, hJ2, hJ3, hJ4⟩ := log_of_analytic_open (by linarith)
-    (hB.mono (subset_trans (Metric.ball_subset_ball hR'_lt_R.le) Metric.ball_subset_closedBall))
-    (fun z hz ↦ hB_ne_zero z (Metric.ball_subset_closedBall hz))
-  refine ⟨J, hJ1.mono (Metric.closedBall_subset_ball hr1_lt_R'), hJ2, fun z hz ↦ hJ3 z ?_,
-    fun z hz ↦ hJ4 z ?_⟩
-  all_goals exact Metric.closedBall_subset_ball hr1_lt_R' hz

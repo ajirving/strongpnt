@@ -3330,15 +3330,14 @@ lemma helper_apply_jensen_to_g
   (B R R1 : ℝ) (hB : 1 < B)
   (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
   (g : ℂ → ℂ)
-  (h_g_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ g z)
+  (h_g_analytic : AnalyticOnNhd ℂ g (Metric.closedBall 0 1))
   (hg0_one : g 0 = 1)
   (hfin_g : (zerosetKfR R1 g).Finite)
   (hg_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖g z‖ ≤ B) :
   (∑ ρ ∈ hfin_g.toFinset, (analyticOrderNatAt g ρ : ℝ)) ≤ Real.log B / Real.log (R / R1) := by
   classical
   have hbound :=
-    lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R hR_lt_1
-      g h_g_analytic hg0_one hfin_g  hg_le_B
+    lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R       g (h_g_analytic.mono (Metric.closedBall_subset_closedBall hR_lt_1.le)) hg0_one hfin_g  hg_le_B
   -- Rewrite to the desired division form
   simpa [one_div, div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using hbound
 
