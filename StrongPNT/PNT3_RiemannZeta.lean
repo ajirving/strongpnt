@@ -62,110 +62,26 @@ lemma zeta_ratio_prod (s : ℂ) (hs : 1 < s.re) : riemannZeta (2 * s) / riemannZ
   simp
   linarith
 
-local notation "ι" => fun (z : ℂˣ) ↦ (z : ℂ)
+theorem HasProd.inv₀ {α β : Type*} {f : α → β} {a : β} [CommGroupWithZero β] [TopologicalSpace β]
+    [ContinuousInv₀ β] (h : HasProd f a) (ha : a ≠ 0) :
+    HasProd (fun x ↦ (f x )⁻¹) a⁻¹ := by
+  unfold HasProd
+  convert Filter.Tendsto.inv₀ h ha
+  rw [Finset.prod_inv_distrib]
 
-theorem tprod_commutes_with_inclusion_infinite {α : Type*} (f : α → ℂˣ) (h : Multipliable f) :
-    ι (tprod f) = tprod (fun i ↦ ι (f i)) :=
-by
-  change ((tprod f : ℂˣ) : ℂ) = tprod (fun i ↦ ((f i : ℂˣ) : ℂ))
-  have hcont : Continuous (Units.coeHom ℂ) := by
-    simpa using (Units.continuous_val : Continuous (fun u : ℂˣ => ((u : ℂˣ) : ℂ)))
-  simpa [Units.coeHom] using
-    (Multipliable.map_tprod (f := f) (γ := ℂ) h (g := Units.coeHom ℂ) hcont)
-
-theorem inclusion_commutes_with_division (a b : ℂˣ) :
-    ι (a / b) = ι a / ι b := by
-  exact Units.val_div_eq_div_val a b
-
-lemma lift_multipliable_of_nonzero {P : Type*} (a : P → ℂ) (ha : Multipliable a) (h_a_nonzero : ∀ p, a p ≠ 0) (hA_nonzero' : ∀ A, HasProd a A → A ≠ 0):
-  Multipliable (fun p ↦ Units.mk0 (a p) (h_a_nonzero p)) := by
-  -- can case on whether the limit A is zero. if the limit A is zero, then the product is 1
-  -- From the hypothesis `ha : Multipliable a`, we know the infinite product exists.
-  obtain ⟨A, hA⟩ := ha
-  have hA_nonzero := hA_nonzero' A hA
-  refine ⟨Units.mk0 A hA_nonzero, ?_⟩
-  simp [HasProd, tendsto_nhds] at hA ⊢
-  intro sU h_sU_open hA_mem
-  have hA_im_mem : ι (Units.mk0 A hA_nonzero) ∈ ι '' sU := Set.mem_image_of_mem ι hA_mem
-  have sU_im_open : IsOpen (ι '' sU) := by
-    apply (Topology.IsOpenEmbedding.isOpen_iff_image_isOpen ?_).mp
-    assumption
-    exact Units.isOpenEmbedding_val
-  have := hA (ι '' sU) sU_im_open hA_im_mem
-  obtain ⟨a1, ha⟩ := this
-  use a1
-  intro b ha1
-  obtain ⟨x', x'_spec_mem, x'_spec_eq⟩ := ha b ha1
-  suffices x' = ∏ b ∈ b, Units.mk0 (a b) (by simp [*]) by
-    rwa [← this]
-  have : Units.mk0 (ι x') (Units.ne_zero x') = x' :=
-    Units.mk0_val x' (Units.ne_zero x')
-  have this2 : (Units.mk0 (∏ b ∈ b, a b)
-    (Finset.prod_ne_zero_iff.mpr fun a a_1 => h_a_nonzero a)) = x' :=
-      Units.val_inj.mp (id (Eq.symm x'_spec_eq))
-  rw [Units.mk0_prod] at this2
-  rw [←this2]
-  conv =>
-    rhs
-    rw [← Finset.prod_attach]
-
-
-lemma prod_of_ratios_simplified {P : Type*} (a b : P → ℂ)
-(ha : Multipliable a) (hb : Multipliable b)
-    (h_a_nonzero : ∀ p, a p ≠ 0) (h_b_nonzero : ∀ p, b p ≠ 0) (hA_nonzero' : ∀ A, HasProd a A → A ≠ 0) (hB_nonzero' : ∀ A, HasProd b A → A ≠ 0):
-  (∏' p : P, a p) / (∏' p : P, b p) = ∏' p : P, (a p / b p) := by
-  -- Step 1: Define the lifts of `a` and `b` to the group of units ℂˣ.
-  let a' : P → ℂˣ := fun p ↦ Units.mk0 (a p) (h_a_nonzero p)
-  let b' : P → ℂˣ := fun p ↦ Units.mk0 (b p) (h_b_nonzero p)
-
-  have h_multipliable_a' : Multipliable a' := lift_multipliable_of_nonzero a ha h_a_nonzero hA_nonzero'
-  have h_multipliable_b' : Multipliable b' := lift_multipliable_of_nonzero b hb h_b_nonzero hB_nonzero'
-  have h_multipliable_a'_div_b' : Multipliable (fun p ↦ a' p / b' p) := Multipliable.div h_multipliable_a' h_multipliable_b'
-  -- Note that by definition, `ι ∘ a' = a` and `ι ∘ b' = b`.
-  -- We will now transform the Left-Hand Side (LHS) to the Right-Hand Side (RHS)
-  -- by moving the entire calculation into ℂˣ.
-  calc
-    (∏' p, a p) / (∏' p, b p)
-    -- Rewrite a and b in terms of their lifts a' and b'.
-    _ = (∏' p, ι (a' p)) / (∏' p, ι (b' p)) := by simp [a', b']
-    -- Use the fact that ι commutes with tprod (Theorem 1) for both products.
-    _ = ι (∏' p, a' p) / ι (∏' p, b' p) := by simp [tprod_commutes_with_inclusion_infinite, tprod_commutes_with_inclusion_infinite, *]
-    -- Use the fact that ι commutes with division (Theorem 2).
-    _ = ι ((∏' p, a' p) / (∏' p, b' p)) := by rw [← inclusion_commutes_with_division]
-    -- Inside ℂˣ, tprod commutes with division. This is a core property of tprod in a topological group.
-    _ = ι (∏' p, a' p / b' p) := by simp [Multipliable.tprod_div, *]
-    -- Use the fact that ι commutes with tprod again, this time in reverse.
-    _ = ∏' p, ι (a' p / b' p) := by simp [tprod_commutes_with_inclusion_infinite, *]
-    -- Use the fact that ι commutes with division for each term inside the product.
-    _ = ∏' p, (ι (a' p) / ι (b' p)) := by simp [inclusion_commutes_with_division]
-    -- Finally, rewrite the lifts back to the original functions a and b.
-    _ = ∏' p, a p / b p := by simp [a', b']
+theorem HasProd.div₀ {α :  Type*} {f g : α → ℂ} {a b : ℂ}
+    (hf : HasProd f a) (hg : HasProd g b) (hb : b ≠ 0) :
+    HasProd (fun x ↦ f x / g x) (a / b) := by
+  simp only [div_eq_mul_inv]
+  exact hf.mul <| hg.inv₀ hb
 
 
 -- Lemma prod_of_ratios
 lemma prod_of_ratios {P : Type*} (a b : P → ℂ) (ha : Multipliable a) (hb : Multipliable b) (h_b_nonzero : ∀ p, b p ≠ 0) (hA_nonzero' : ∀ A, HasProd a A → A ≠ 0) (hB_nonzero' : ∀ B, HasProd b B → B ≠ 0):
   (∏' p : P, a p) / (∏' p : P, b p) = ∏' p : P, (a p / b p) := by
-  -- Case analysis on whether a ever takes the value zero
-  by_cases h_a_zero : ∃ p, a p = 0
-  case pos =>
-    -- Case 1: There exists p₀ such that a(p₀) = 0
-    -- Both sides equal 0
-    have lhs_zero : ∏' p : P, a p = 0 := by
-      -- Use tprod_of_exists_eq_zero since there exists p with a p = 0
-      exact tprod_of_exists_eq_zero h_a_zero
-    have rhs_zero : ∏' p : P, (a p / b p) = 0 := by
-      -- Since ∃ p₀, a p₀ = 0, we have (a p₀ / b p₀) = 0
-      obtain ⟨p₀, hp₀⟩ := h_a_zero
-      have h_div_zero : ∃ p, (a p / b p) = 0 := by
-        use p₀
-        simp [hp₀]
-      exact tprod_of_exists_eq_zero h_div_zero
-    simp [lhs_zero, rhs_zero]
-  case neg =>
-    -- Case 2: For all p, a(p) ≠ 0
-    push_neg at h_a_zero
-    -- Use prod_of_ratios_simplified which is already available in context
-    exact prod_of_ratios_simplified a b ha hb h_a_zero h_b_nonzero hA_nonzero' hB_nonzero'
+  have ha := ha.hasProd
+  have hb := hb.hasProd
+  exact ha.div₀ hb (hB_nonzero' _ hb) |>.tprod_eq.symm
 
 -- Lemma simplify_prod_ratio
 lemma simplify_prod_ratio (s : ℂ) (hs : 1 < s.re) : (∏' p : ℙ, (1 - (p : ℂ) ^ (-(2 * s) : ℂ))⁻¹) / (∏' p : ℙ, (1 - (p : ℂ) ^ (-s : ℂ))⁻¹) = ∏' p : ℙ, ((1 - (p : ℂ) ^ (-(2 * s) : ℂ))⁻¹ / (1 - (p : ℂ) ^ (-s : ℂ))⁻¹) := by
