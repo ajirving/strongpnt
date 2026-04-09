@@ -74,16 +74,10 @@ lemma diff_of_squares (z : ℂ) : 1 - z^2 = (1 - z) * (1 + z) := by ring
 
 lemma one_sub_ne_zero_of_abs_lt_one (z : ℂ) (hz : norm z < 1) : 1 - z ≠ 0 := by
   intro h
-  have h1 : 1 = z := by
-    have := congrArg (fun w : ℂ => w + z) h
-    simpa [sub_add_cancel, zero_add] using this
-  have habs1lt : norm (1 : ℂ) < 1 := by simpa [h1] using hz
-  have hnorm1lt : ‖(1 : ℂ)‖ < 1 := by simp [norm] at habs1lt
-  have : (1 : ℝ) < 1 := by simp [norm_one] at hnorm1lt
-  exact (lt_irrefl _) this
+  simp_all [(by grind : z = 1)]
 
 lemma inv_mul_div_cancel_right_of_ne_zero (a b : ℂ) (ha : a ≠ 0) : ((a * b)⁻¹) / a⁻¹ = b⁻¹ := by
-  simp [div_eq_mul_inv, inv_inv, mul_inv_rev, mul_comm, mul_left_comm, mul_assoc, ha]
+  field
 
 lemma ratio_invs (z : ℂ) (hz : norm z < 1) : (1 - z^2)⁻¹ / (1 - z)⁻¹ = (1 + z)⁻¹ := by
   have hz1 : 1 - z ≠ 0 := one_sub_ne_zero_of_abs_lt_one z hz
@@ -93,10 +87,7 @@ lemma ratio_invs (z : ℂ) (hz : norm z < 1) : (1 - z^2)⁻¹ / (1 - z)⁻¹ = (
 -- Theorem zeta_ratio_identity
 
 lemma complex_cpow_neg_two_mul (z w : ℂ) : z^(-(2*w)) = (z^(-w))^2 := by
-  have h1 : -(2*w) = 2*(-w) := by ring
-  rw [h1]
-  have h2 : (2 : ℂ)*(-w) = ((2 : ℕ) : ℂ)*(-w) := by norm_cast
-  rw [h2, Complex.cpow_nat_mul]
+  rw [← Complex.cpow_nat_mul, Nat.cast_ofNat, mul_neg]
 
 theorem zeta_ratio_identity (s : ℂ) (hs : 1 < s.re) : riemannZeta (2 * s) / riemannZeta s = ∏' p : ℙ, (1 + ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹ := by
   rw [zeta_ratios s hs]; congr 1; ext p
