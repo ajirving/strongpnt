@@ -41,26 +41,11 @@ lemma zetaEulerprod (s : ℂ) (hs : 1 < s.re) : Multipliable (fun p : ℙ => (1 
   · exact hprod.multipliable
   · simpa using (hprod.tprod_eq.symm)
 
--- Lemma one_minus_p_s_neq_0
-lemma one_minus_p_s_neq_0 (p : ℙ) (s : ℂ) (hs : 1 < s.re) : 1 - ((p : ℕ) : ℂ) ^ (-s : ℂ) ≠ 0 := by
-  intro h
-  have hz : ((p : ℕ) : ℂ) ^ (-s : ℂ) = 1 := by
-    simpa using (sub_eq_zero.mp h).symm
-  have : (1 : ℝ) < 1 := by
-    simpa [hz] using (p_s_abs_1 p s hs)
-  exact (lt_irrefl (1 : ℝ)) this
-
 -- Lemma abs_zeta_prod_prime
 lemma abs_zeta_prod_prime (s : ℂ) (hs : 1 < s.re) :
   norm (riemannZeta s) = ∏' p : ℙ, (norm (1 - ((p : ℕ) : ℂ) ^ (-s : ℂ)))⁻¹ := by
   rw [← riemannZeta_eulerProduct_tprod hs, (riemannZeta_eulerProduct_hasProd hs).multipliable.norm_tprod]
   simp_rw [norm_inv]
-
--- Lemma zeta_ratio_prod
-lemma zeta_ratio_prod (s : ℂ) (hs : 1 < s.re) : riemannZeta (2 * s) / riemannZeta s = (∏' p : ℙ, (1 - ((p : ℕ) : ℂ) ^ (-(2 * s) : ℂ))⁻¹) / (∏' p : ℙ, (1 - ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹) := by
-  rw [riemannZeta_eulerProduct_tprod hs, riemannZeta_eulerProduct_tprod]
-  simp
-  linarith
 
 theorem HasProd.inv₀ {α β : Type*} {f : α → β} {a : β} [CommGroupWithZero β] [TopologicalSpace β]
     [ContinuousInv₀ β] (h : HasProd f a) (ha : a ≠ 0) :
@@ -76,54 +61,13 @@ theorem HasProd.div₀ {α :  Type*} {f g : α → ℂ} {a b : ℂ}
   exact hf.mul <| hg.inv₀ hb
 
 
--- Lemma prod_of_ratios
-lemma prod_of_ratios {P : Type*} (a b : P → ℂ) (ha : Multipliable a) (hb : Multipliable b) (h_b_nonzero : ∀ p, b p ≠ 0) (hA_nonzero' : ∀ A, HasProd a A → A ≠ 0) (hB_nonzero' : ∀ B, HasProd b B → B ≠ 0):
-  (∏' p : P, a p) / (∏' p : P, b p) = ∏' p : P, (a p / b p) := by
-  have ha := ha.hasProd
-  have hb := hb.hasProd
-  exact ha.div₀ hb (hB_nonzero' _ hb) |>.tprod_eq.symm
-
--- Lemma simplify_prod_ratio
-lemma simplify_prod_ratio (s : ℂ) (hs : 1 < s.re) : (∏' p : ℙ, (1 - (p : ℂ) ^ (-(2 * s) : ℂ))⁻¹) / (∏' p : ℙ, (1 - (p : ℂ) ^ (-s : ℂ))⁻¹) = ∏' p : ℙ, ((1 - (p : ℂ) ^ (-(2 * s) : ℂ))⁻¹ / (1 - (p : ℂ) ^ (-s : ℂ))⁻¹) := by
-  -- Use prod_of_ratios with a(p) = (1 - p^{-2s})^{-1} and b(p) = (1 - p^{-s})^{-1}
-  let a := fun p : ℙ => (1 - (p : ℂ) ^ (-(2 * s) : ℂ))⁻¹
-  let b := fun p : ℙ => (1 - (p : ℂ) ^ (-s : ℂ))⁻¹
-
-  -- Get multipliability from zetaEulerprod
-  have ha : Multipliable a := (zetaEulerprod (2 * s) (by simp; linarith)).1
-  have hb : Multipliable b := (zetaEulerprod s hs).1
-
-  -- Show that b p ≠ 0 for all p
-  have h_b_nonzero : ∀ p, b p ≠ 0 := by
-    intro p
-    exact inv_ne_zero (one_minus_p_s_neq_0 p s hs)
-
-  -- Apply prod_of_ratios
-  exact prod_of_ratios a b ha hb h_b_nonzero (by
-    intro A hA
-    -- write the product as ζ(2s)
-    have h_eq : A = riemannZeta (2 * s) := by
-      have h : HasProd a (riemannZeta (2 * s)) := by
-        simpa [a] using riemannZeta_eulerProduct_hasProd (s := 2 * s) (by simp; linarith)
-      exact HasProd.unique hA h
-    rw [h_eq]
-    exact riemannZeta_ne_zero_of_one_lt_re (by simp; linarith)
-  ) (by
-  intro B hB
-  -- express the product for b as ζ(s)
-  have h_eq : B = riemannZeta s := by
-    have h : HasProd b (riemannZeta s) := by
-      simpa [b] using riemannZeta_eulerProduct_hasProd (s := s) hs
-    exact HasProd.unique hB h
-  rw [h_eq]
-  exact riemannZeta_ne_zero_of_one_lt_re hs
-  )
 
 -- Lemma zeta_ratios
 lemma zeta_ratios (s : ℂ) (hs : 1 < s.re) : riemannZeta (2 * s) / riemannZeta s = ∏' p : ℙ, ((1 - ((p : ℕ) : ℂ) ^ (-(2 * s) : ℂ))⁻¹ / (1 - ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹) := by
-  have h1 := zeta_ratio_prod s hs
-  have h2 := simplify_prod_ratio s hs
-  exact h1.trans h2
+  have zetas := riemannZeta_eulerProduct_hasProd hs
+  have zeta2s := riemannZeta_eulerProduct_hasProd (show (2 * s).re > 1 by simp; linarith)
+  have := zeta2s.div₀ zetas (riemannZeta_ne_zero_of_one_lt_re hs)
+  exact this.tprod_eq.symm
 
 -- Lemma diff_of_squares
 lemma diff_of_squares (z : ℂ) : 1 - z^2 = (1 - z) * (1 + z) := by ring
