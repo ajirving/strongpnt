@@ -62,35 +62,25 @@ theorem HasProd.div₀ {α :  Type*} {f g : α → ℂ} {a b : ℂ}
 
 
 
--- Lemma zeta_ratios
-lemma zeta_ratios (s : ℂ) (hs : 1 < s.re) : riemannZeta (2 * s) / riemannZeta s = ∏' p : ℙ, ((1 - ((p : ℕ) : ℂ) ^ (-(2 * s) : ℂ))⁻¹ / (1 - ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹) := by
-  have zetas := riemannZeta_eulerProduct_hasProd hs
-  have zeta2s := riemannZeta_eulerProduct_hasProd (show (2 * s).re > 1 by simp; linarith)
-  have := zeta2s.div₀ zetas (riemannZeta_ne_zero_of_one_lt_re hs)
-  exact this.tprod_eq.symm
-
 -- Theorem zeta_ratio_identity
 theorem zeta_ratio_identity (s : ℂ) (hs : 1 < s.re) : riemannZeta (2 * s) / riemannZeta s = ∏' p : ℙ, (1 + ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹ := by
-  rw [zeta_ratios s hs]; congr 1; ext p
+  have zeta2s := riemannZeta_eulerProduct_hasProd (show (2 * s).re > 1 by simp; linarith)
+  have := zeta2s.div₀ (riemannZeta_eulerProduct_hasProd hs) (riemannZeta_ne_zero_of_one_lt_re hs)
+  rw [← this.tprod_eq]
+  congr
+  ext p
   field_simp
   calc
   _ = (1 - (p : ℂ)^(-s)) / (1 - ((p : ℂ)^(-s)) ^ 2) := by
     rw [← Complex.cpow_nat_mul, Nat.cast_ofNat, mul_neg]
-  _ = (1 - (p : ℂ)^(-s)) / ((1 - (p : ℂ) ^ (-s)) * (1 + (p : ℂ) ^ (-s))) := by
-    ring
+  _ = (1 - (p : ℂ)^(-s)) / ((1 - (p : ℂ) ^ (-s)) * (1 + (p : ℂ) ^ (-s))) := by ring
   _ = _ := by
     field [Complex.one_sub_prime_cpow_ne_zero p.property hs]
 
 -- Lemma zeta_ratio_at_3_2
-lemma zeta_ratio_identity_ofReal_div_two (r : ℝ) (hr : 1 < ( ((r : ℝ) / 2 : ℂ) ).re) : riemannZeta (r : ℂ) / riemannZeta ((r / 2 : ℝ) : ℂ) = ∏' p : ℙ, (1 + ((p : ℕ) : ℂ) ^ (-(((r : ℝ) / 2) : ℂ)))⁻¹ := by
-  have h := zeta_ratio_identity (((r : ℝ) / 2 : ℂ)) hr
-  convert h <;> norm_cast
-  field
-
 lemma zeta_ratio_at_3_2 : riemannZeta 3 / riemannZeta ((3 : ℝ) / 2) = ∏' p : ℙ, (1 + ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) : ℂ)))⁻¹ := by
-  have hr : 1 < (((3 : ℝ) / 2 : ℂ)).re := by
-    simpa using (by norm_num : (1 : ℝ) < (3 : ℝ) / 2)
-  simpa using zeta_ratio_identity_ofReal_div_two (3 : ℝ) hr
+  convert zeta_ratio_identity (s := 3 / 2) (by norm_num)
+  norm_num
 
 -- Lemma triangle_inequality_specific
 lemma triangle_inequality_specific (z : ℂ) : norm (1 - z) ≤ 1 + norm z := by
