@@ -82,25 +82,10 @@ theorem zeta_ratio_identity (s : ℂ) (hs : 1 < s.re) : riemannZeta (2 * s) / ri
     field [Complex.one_sub_prime_cpow_ne_zero p.property hs]
 
 -- Lemma zeta_ratio_at_3_2
-
-lemma two_mul_ofReal_div_two (r : ℝ) : (2 : ℂ) * ((r : ℝ) / 2 : ℂ) = (r : ℂ) := by
-  have hreal : (2 : ℝ) * (r / 2) = r := by
-    calc
-      (2 : ℝ) * (r / 2) = (2 : ℝ) * r / 2 := by
-        have h : (2 : ℝ) * r / 2 = (2 : ℝ) * (r / 2) := by
-          simpa using (mul_div_assoc (2 : ℝ) r (2 : ℝ))
-        simpa using h.symm
-      _ = r := by
-        simp
-  calc
-    (2 : ℂ) * ((r : ℝ) / 2 : ℂ)
-        = ((2 * (r / 2) : ℝ) : ℂ) := by
-              simp
-    _ = (r : ℂ) := by simp [hreal]
-
 lemma zeta_ratio_identity_ofReal_div_two (r : ℝ) (hr : 1 < ( ((r : ℝ) / 2 : ℂ) ).re) : riemannZeta (r : ℂ) / riemannZeta ((r / 2 : ℝ) : ℂ) = ∏' p : ℙ, (1 + ((p : ℕ) : ℂ) ^ (-(((r : ℝ) / 2) : ℂ)))⁻¹ := by
   have h := zeta_ratio_identity (((r : ℝ) / 2 : ℂ)) hr
-  simpa [two_mul_ofReal_div_two r] using h
+  convert h <;> norm_cast
+  field
 
 lemma zeta_ratio_at_3_2 : riemannZeta 3 / riemannZeta ((3 : ℝ) / 2) = ∏' p : ℙ, (1 + ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) : ℂ)))⁻¹ := by
   have hr : 1 < (((3 : ℝ) / 2 : ℂ)).re := by
