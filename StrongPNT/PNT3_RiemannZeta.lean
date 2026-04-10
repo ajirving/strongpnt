@@ -69,32 +69,17 @@ lemma zeta_ratios (s : ℂ) (hs : 1 < s.re) : riemannZeta (2 * s) / riemannZeta 
   have := zeta2s.div₀ zetas (riemannZeta_ne_zero_of_one_lt_re hs)
   exact this.tprod_eq.symm
 
--- Lemma diff_of_squares
-lemma diff_of_squares (z : ℂ) : 1 - z^2 = (1 - z) * (1 + z) := by ring
-
-lemma one_sub_ne_zero_of_abs_lt_one (z : ℂ) (hz : norm z < 1) : 1 - z ≠ 0 := by
-  intro h
-  simp_all [(by grind : z = 1)]
-
-lemma inv_mul_div_cancel_right_of_ne_zero (a b : ℂ) (ha : a ≠ 0) : ((a * b)⁻¹) / a⁻¹ = b⁻¹ := by
-  field
-
-lemma ratio_invs (z : ℂ) (hz : norm z < 1) : (1 - z^2)⁻¹ / (1 - z)⁻¹ = (1 + z)⁻¹ := by
-  have hz1 : 1 - z ≠ 0 := one_sub_ne_zero_of_abs_lt_one z hz
-  simpa [diff_of_squares z] using
-    inv_mul_div_cancel_right_of_ne_zero (1 - z) (1 + z) hz1
-
 -- Theorem zeta_ratio_identity
-
-lemma complex_cpow_neg_two_mul (z w : ℂ) : z^(-(2*w)) = (z^(-w))^2 := by
-  rw [← Complex.cpow_nat_mul, Nat.cast_ofNat, mul_neg]
-
 theorem zeta_ratio_identity (s : ℂ) (hs : 1 < s.re) : riemannZeta (2 * s) / riemannZeta s = ∏' p : ℙ, (1 + ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹ := by
   rw [zeta_ratios s hs]; congr 1; ext p
-  have hp : ((p : ℕ) : ℂ) ≠ 0 := by rw [ne_eq, Nat.cast_eq_zero]; exact Nat.Prime.ne_zero p.2
-  have h1 : ((p : ℕ) : ℂ) ^ (-(2 * s)) = (((p : ℕ) : ℂ) ^ (-s))^2 := complex_cpow_neg_two_mul ((p : ℕ) : ℂ) s
-  have h2 : norm (((p : ℕ) : ℂ) ^ (-s)) < 1 := p_s_abs_1 p s hs
-  rw [h1]; exact ratio_invs (((p : ℕ) : ℂ) ^ (-s)) h2
+  field_simp
+  calc
+  _ = (1 - (p : ℂ)^(-s)) / (1 - ((p : ℂ)^(-s)) ^ 2) := by
+    rw [← Complex.cpow_nat_mul, Nat.cast_ofNat, mul_neg]
+  _ = (1 - (p : ℂ)^(-s)) / ((1 - (p : ℂ) ^ (-s)) * (1 + (p : ℂ) ^ (-s))) := by
+    ring
+  _ = _ := by
+    field [Complex.one_sub_prime_cpow_ne_zero p.property hs]
 
 -- Lemma zeta_ratio_at_3_2
 
