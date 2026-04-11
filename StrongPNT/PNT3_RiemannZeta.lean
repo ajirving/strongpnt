@@ -10,36 +10,6 @@ import StrongPNT.PNT2_LogDerivative
 open scoped BigOperators Topology
 abbrev ℙ := Nat.Primes
 
--- Lemma p_s_abs_1
-lemma p_s_abs_1 (p : ℙ) (s : ℂ) (hs : 1 < s.re) : norm (((p : ℕ) : ℂ) ^ (-s : ℂ)) < 1 := by
-  -- p ≥ 2 ⇒ (p : ℝ) > 1
-  have hx1 : 1 < ((p : ℕ) : ℝ) := by
-    have h2 : (2 : ℝ) ≤ ((p : ℕ) : ℝ) := by
-      exact_mod_cast (p.2.two_le : 2 ≤ (p : ℕ))
-    exact lt_of_lt_of_le one_lt_two h2
-  have hx0 : 0 < ((p : ℕ) : ℝ) := lt_trans zero_lt_one hx1
-  -- compute the norm via the cpow formula for positive real bases
-  have hnorm_eq : ‖(((p : ℕ) : ℂ) ^ (-s : ℂ))‖ = ((p : ℕ) : ℝ) ^ ((-s : ℂ).re) := by
-    simpa using (Complex.norm_cpow_eq_rpow_re_of_pos hx0 (-s : ℂ))
-  -- the exponent is negative since Re s > 1 > 0
-  have hz : ((-s : ℂ).re) < 0 := by
-    have h0 : 0 < s.re := lt_trans zero_lt_one hs
-    have : -s.re < 0 := neg_lt_zero.mpr h0
-    simpa using this
-  -- apply the real inequality x^z < 1 when x > 1 and z < 0
-  have hlt : ((p : ℕ) : ℝ) ^ ((-s : ℂ).re) < 1 :=
-    Real.rpow_lt_one_of_one_lt_of_neg hx1 hz
-  -- conclude for the complex absolute value (norm)
-  have : ‖(((p : ℕ) : ℂ) ^ (-s : ℂ))‖ < 1 := by simpa [hnorm_eq] using hlt
-  simpa [norm] using this
-
--- Lemma zetaEulerprod
-lemma zetaEulerprod (s : ℂ) (hs : 1 < s.re) : Multipliable (fun p : ℙ => (1 - ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹) ∧ riemannZeta s = ∏' p : ℙ, (1 - ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹ := by
-  have hprod : HasProd (fun p : ℙ => (1 - ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹) (riemannZeta s) := by
-    simpa using (riemannZeta_eulerProduct_hasProd (s := s) hs)
-  refine And.intro ?_ ?_
-  · exact hprod.multipliable
-  · simpa using (hprod.tprod_eq.symm)
 
 -- Lemma abs_zeta_prod_prime
 lemma abs_zeta_prod_prime (s : ℂ) (hs : 1 < s.re) :
