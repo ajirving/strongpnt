@@ -146,13 +146,6 @@ lemma abs_term_inv_bound (p : ℙ) (t : ℝ) : (1 + ((p : ℕ) : ℝ) ^ (-((3 : 
   have h3 := norm_pos_iff.mpr h2
   exact inv_inequality h3 h1
 
--- Lemma prod_inequality
-open NNReal in
-lemma prod_inequality {P : Type*} (a b : P → ℝ≥0) (ha : Multipliable a) (hb : Multipliable b)
-  (hab : ∀ p : P, a p ≤ b p) :
-  ∏' p : P, a p ≤ ∏' p : P, b p := by
-  exact Multipliable.tprod_le_tprod hab ha hb
-
 -- Lemma abs_zeta_inequality
 
 lemma multipliable_complex_abs_inv {i : Type*} (g : i → ℂ) (h_mult : Multipliable (fun i => (1 - g i)⁻¹)) : Multipliable (fun i => (norm (1 - g i))⁻¹) := by
@@ -197,151 +190,27 @@ lemma multipliable_positive_inv_powers (r : ℝ) (hr : 1 < r) : Multipliable (fu
   -- Apply the multipliable criterion
   exact Real.multipliable_of_summable_log h_pos h_log_inv_sum
 
-lemma hasProd_nonneg_of_pos {i : Type*} (f : i → ℝ) (hpos : ∀ i, 0 < f i) (a : ℝ) (ha : HasProd f a) : 0 ≤ a := by
-  -- All finite products are positive
-  have h_pos : ∀ s : Finset i, 0 < ∏ i ∈ s, f i := fun s => Finset.prod_pos (fun i _ => hpos i)
-  -- Since all finite products are positive, they are ≥ 0
-  have h_nonneg : ∀ s : Finset i, 0 ≤ ∏ i ∈ s, f i := fun s => le_of_lt (h_pos s)
-  -- Apply ge_of_tendsto with eventually property
-  exact ge_of_tendsto ha (Filter.Eventually.of_forall h_nonneg)
+lemma hasProd_le_of_nonneg {α : Type*} {f g : α → ℝ} {a b : ℝ}
+    (hf : HasProd f a) (hg : HasProd g b) (h_nonneg : ∀ i, 0 ≤ f i) (h : ∀ i, f i ≤ g i)
+    : a ≤ b :=
+  le_of_tendsto_of_tendsto' hf hg fun _ ↦ Finset.prod_le_prod (fun i _ ↦ h_nonneg i) (fun i _ ↦ h i )
 
-lemma tendsto_finprod_coe_iff_tendsto_coe_finprod {i : Type*} (f : i → NNReal) (a : NNReal) :
-  Filter.Tendsto (fun s => ∏ i ∈ s, (f i : ℝ)) Filter.atTop (𝓝 (a : ℝ)) ↔
-  Filter.Tendsto ((fun x : NNReal => (x : ℝ)) ∘ (fun s => ∏ i ∈ s, f i)) Filter.atTop (𝓝 (a : ℝ)) := by
-  -- The right side is convergence of fun s => ↑(∏ i ∈ s, f i) by definition of composition
-  have h_comp : ((fun x : NNReal => (x : ℝ)) ∘ (fun s => ∏ i ∈ s, f i)) = (fun s => ↑(∏ i ∈ s, f i)) := by
-    rfl
-  -- By NNReal.coe_prod, we have ∏ i ∈ s, ↑(f i) = ↑(∏ i ∈ s, f i)
-  have h_eq : (fun s => ∏ i ∈ s, (f i : ℝ)) = (fun s => ↑(∏ i ∈ s, f i)) := by
-    ext s
-    exact (NNReal.coe_prod s f).symm
-  -- Since the functions are equal, their convergence is equivalent
-  rw [h_comp, ← h_eq]
-
-lemma HasProd.of_coe_hasProd {i : Type*} (f : i → NNReal) (a : NNReal) (h : HasProd (fun i => (f i : ℝ)) (a : ℝ)) : HasProd f a := by
-  -- Use tendsto_finprod_coe_iff_tendsto_coe_finprod to convert h to composition form
-  have h_comp : Filter.Tendsto ((fun x : NNReal => (x : ℝ)) ∘ (fun s => ∏ i ∈ s, f i)) Filter.atTop (𝓝 (a : ℝ)) := by
-    rw [← tendsto_finprod_coe_iff_tendsto_coe_finprod]
-    exact h
-
-  -- Use the embedding property to lift convergence from ℝ to NNReal
-  have h_embed : Topology.IsEmbedding (fun x : NNReal => (x : ℝ)) := NNReal.isEmbedding_coe
-
-  -- Apply IsEmbedding.tendsto_nhds_iff (mpr direction)
-  -- We have Tendsto (g ∘ f) l (𝓝 (g y)), so f converges to y
-  exact h_embed.tendsto_nhds_iff.mpr h_comp
-
-lemma hasProd_nnreal_of_coe {i : Type*} (g : i → NNReal) (b : NNReal) (h : HasProd (fun i => (g i : ℝ)) (b : ℝ)) : HasProd g b := by
-  exact HasProd.of_coe_hasProd g b h
-
-lemma multipliable_real_to_nnreal {i : Type*} (f : i → ℝ) (hpos : ∀ i, 0 < f i) (h_mult : Multipliable f) : Multipliable (fun i => ⟨f i, le_of_lt (hpos i)⟩ : i → NNReal) := by
-  -- Get the HasProd from multipliability
-  obtain ⟨a, ha⟩ := h_mult
-  -- Show that a is nonnegative since all terms are positive
-  have ha_nonneg : 0 ≤ a := hasProd_nonneg_of_pos f hpos a ha
-  -- Create the NNReal version of a
-  let a_nnreal : NNReal := ⟨a, ha_nonneg⟩
-  -- Show the coerced function equals the original function
-  have h_coe_eq : (fun i => ((⟨f i, le_of_lt (hpos i)⟩ : NNReal) : ℝ)) = f := by
-    ext i
-    simp only [NNReal.coe_mk]
-  -- The HasProd for the coerced version follows by rewriting
-  have ha_coe : HasProd (fun i => ((⟨f i, le_of_lt (hpos i)⟩ : NNReal) : ℝ)) (a_nnreal : ℝ) := by
-    rw [h_coe_eq]
-    simp only [a_nnreal, NNReal.coe_mk]
-    exact ha
-  -- Use hasProd_nnreal_of_coe to get HasProd for NNReal
-  have ha_nnreal : HasProd (fun i => ⟨f i, le_of_lt (hpos i)⟩) a_nnreal :=
-    hasProd_nnreal_of_coe (fun i => ⟨f i, le_of_lt (hpos i)⟩) a_nnreal ha_coe
-  -- Therefore the NNReal function is multipliable
-  exact ⟨a_nnreal, ha_nnreal⟩
-
-lemma nnreal_coe_tprod_eq_tprod_coe {i : Type*} (f : i → NNReal) (hf : Multipliable f) :
-  ∏' i, (↑(f i) : ℝ) = ↑(∏' i, f i) := by
-  -- f is multipliable in NNReal, so we have HasProd f (∏' i, f i)
-  have h_prod : HasProd f (∏' i, f i) := Multipliable.hasProd hf
-  -- Apply HasProd.map with NNReal.toRealHom (the coercion monoid homomorphism)
-  have h_map : HasProd (NNReal.toRealHom ∘ f) (NNReal.toRealHom (∏' i, f i)) :=
-    HasProd.map h_prod NNReal.toRealHom NNReal.continuous_coe
-  -- Simplify: NNReal.toRealHom ∘ f = fun i => ↑(f i) and NNReal.toRealHom (∏' i, f i) = ↑(∏' i, f i)
-  have h_comp : NNReal.toRealHom ∘ f = fun i => (↑(f i) : ℝ) := by
-    ext i
-    rfl
-  have h_val : NNReal.toRealHom (∏' i, f i) = ↑(∏' i, f i) := rfl
-  -- Apply the simplifications
-  rw [h_comp, h_val] at h_map
-  -- Use HasProd.tprod_eq to get the equality
-  exact HasProd.tprod_eq h_map
-
-lemma nnreal_tprod_le_coe {i : Type*} (f g : i → NNReal) (hf : Multipliable f) (hg : Multipliable g) (h : ∏' i, f i ≤ ∏' i, g i) : ∏' i, (f i : ℝ) ≤ ∏' i, (g i : ℝ) := by
-  -- Use the fact that coercion commutes with infinite products
-  rw [nnreal_coe_tprod_eq_tprod_coe f hf, nnreal_coe_tprod_eq_tprod_coe g hg]
-  -- Now we have ↑(∏' i, f i) ≤ ↑(∏' i, g i), which follows from h and monotonicity of coercion
-  exact NNReal.coe_le_coe.mpr h
+lemma Multipliable.tprod_le_tprod_of_nonneg {α : Type*} {f g : α → ℝ}
+    (hf : Multipliable f) (hg : Multipliable g) (h_nonneg : ∀ i, 0 ≤ f i) (h : ∀ i, f i ≤ g i)
+    : ∏' i, f i ≤ ∏' i, g i :=
+  hasProd_le_of_nonneg hf.hasProd hg.hasProd h_nonneg h
 
 lemma abs_zeta_inequality (t : ℝ) :
   ∏' p : ℙ, (1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹ ≤
   ∏' p : ℙ, (norm (1 - ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I))))⁻¹ := by
-  -- Following the informal proof: use abs_term_inv_bound, prod_inequality, and zetaEulerprod
-
-  -- Establish positivity for NNReal conversion
-  have h_pos_left : ∀ p : ℙ, 0 < (1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹ := by
-    intro p
-    apply inv_pos.mpr
-    apply add_pos zero_lt_one
-    -- Since p ≥ 2 > 0 and exponent is negative, p^(-3/2) > 0
-    apply Real.rpow_pos_of_pos
-    exact_mod_cast (p.property.pos : 0 < (p : ℕ))
-
-  have h_pos_right : ∀ p : ℙ, 0 < (norm (1 - ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I))))⁻¹ := by
-    intro p
-    apply inv_pos.mpr
-    -- norm z > 0 iff z ≠ 0, using the fact that norm = norm
-    rw [norm_pos_iff]
-    exact condp32 p t
-
-  -- Establish multipliability using zetaEulerprod and given lemmas
-  have h_mult_left : Multipliable (fun p : ℙ => (1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹) :=
-    multipliable_positive_inv_powers ((3 : ℝ) / 2) (by norm_num : 1 < (3 : ℝ) / 2)
-
-  have h_mult_right : Multipliable (fun p : ℙ => (norm (1 - ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I))))⁻¹) := by
-    let s := ((3 : ℝ) / 2) + t * Complex.I
-    have hs : 1 < s.re := by
-      simp only [s, Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, mul_zero, add_zero]
-      norm_num
-    -- Use zetaEulerprod to get multipliability
-    have h_euler := (zetaEulerprod s hs).1
-    have h_nonzero : ∀ p : ℙ, 1 - ((p : ℕ) : ℂ) ^ (-s) ≠ 0 := fun p => condp32 p t
-    exact multipliable_complex_abs_inv (fun p : ℙ => ((p : ℕ) : ℂ) ^ (-s)) h_euler
-
-  -- Convert to NNReal to use prod_inequality
-  let f : ℙ → NNReal := fun p => ⟨(1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹, le_of_lt (h_pos_left p)⟩
-  let g : ℙ → NNReal := fun p => ⟨(norm (1 - ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I))))⁻¹, le_of_lt (h_pos_right p)⟩
-
-  have hf : Multipliable f := multipliable_real_to_nnreal _ h_pos_left h_mult_left
-  have hg : Multipliable g := multipliable_real_to_nnreal _ h_pos_right h_mult_right
-
-  -- Apply pointwise inequality from abs_term_inv_bound
-  have h_pointwise : ∀ p : ℙ, f p ≤ g p := by
-    intro p
-    simp only [f, g, ← NNReal.coe_le_coe, NNReal.coe_mk]
+  refine Multipliable.tprod_le_tprod_of_nonneg ?_ ?_ ?_ ?_
+  · apply multipliable_positive_inv_powers _ (by norm_num)
+  · apply multipliable_complex_abs_inv
+    exact riemannZeta_eulerProduct_hasProd (by simp; norm_num)|>.multipliable
+  · intro p
+    positivity
+  · intro p
     exact abs_term_inv_bound p t
-
-  -- Apply prod_inequality
-  have h_nnreal_ineq : ∏' p, f p ≤ ∏' p, g p := prod_inequality f g hf hg h_pointwise
-
-  -- Convert back to ℝ using nnreal_tprod_le_coe
-  have h_convert : ∏' p, (f p : ℝ) ≤ ∏' p, (g p : ℝ) := nnreal_tprod_le_coe f g hf hg h_nnreal_ineq
-
-  -- Show the equality with original expressions
-  have h_eq_f : ∏' p, (f p : ℝ) = ∏' p : ℙ, (1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹ := by
-    simp only [f, NNReal.coe_mk]
-
-  have h_eq_g : ∏' p, (g p : ℝ) = ∏' p : ℙ, (norm (1 - ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I))))⁻¹ := by
-    simp only [g, NNReal.coe_mk]
-
-  rw [h_eq_f, h_eq_g] at h_convert
-  exact h_convert
 
 -- Theorem zeta_lower_bound
 
