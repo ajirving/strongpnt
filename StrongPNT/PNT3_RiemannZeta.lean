@@ -82,70 +82,6 @@ lemma zeta_ratio_at_3_2 : riemannZeta 3 / riemannZeta ((3 : ℝ) / 2) = ∏' p :
   convert zeta_ratio_identity (s := 3 / 2) (by norm_num)
   norm_num
 
--- Lemma triangle_inequality_specific
-lemma triangle_inequality_specific (z : ℂ) : norm (1 - z) ≤ 1 + norm z := by
-  simpa [sub_eq_add_neg, norm_one, norm_neg] using (norm_add_le (1 : ℂ) (-z))
-
--- Lemma abs_p_pow_s
-
-lemma abs_cpow_eq_rpow_re_of_pos {x : ℝ} (hx : 0 < x) (y : ℂ) : norm ((x : ℂ) ^ y) = x ^ y.re := by
-  simpa using Complex.norm_cpow_eq_rpow_re_of_pos hx y
-
-lemma abs_p_pow_s (p : ℙ) (s : ℂ) : norm (((p : ℕ) : ℂ) ^ (-s : ℂ)) = ((p : ℕ) : ℝ) ^ (-s.re : ℝ) := by
-  have hx : 0 < ((p : ℕ) : ℝ) := by
-    exact_mod_cast (p.property.pos : 0 < (p : ℕ))
-  simpa [Complex.ofReal_natCast] using
-    (abs_cpow_eq_rpow_re_of_pos hx (-s))
-
--- Lemma abs_term_bound
-lemma abs_term_bound (p : ℙ) (t : ℝ) :
-  norm (1 - ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I))) ≤ 1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)) := by
-  -- Apply triangle_inequality_specific with z = p^{-(3/2+it)}
-  have h1 := triangle_inequality_specific (((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I)))
-  -- Apply abs_p_pow_s with s = (3/2 + t*I) to get |p^{-(3/2+it)}| = p^{-Re(3/2+it)}
-  have h2 := abs_p_pow_s p (((3 : ℝ) / 2) + t * Complex.I)
-  -- Simplify: Re(3/2 + t*I) = 3/2
-  have h3 : (((3 : ℝ) / 2) + t * Complex.I).re = ((3 : ℝ) / 2) := by simp [Complex.add_re, Complex.ofReal_re, Complex.mul_I_re]
-  -- Therefore -Re(3/2 + t*I) = -3/2
-  have h4 : -(((3 : ℝ) / 2) + t * Complex.I).re = -((3 : ℝ) / 2) := by simp [h3]
-  -- Substitute into h2
-  have h5 : norm (((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I))) = ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)) := by
-    rw [h2, h4]
-  -- Apply to h1
-  rw [h5] at h1
-  exact h1
-
--- Lemma inv_inequality
-lemma inv_inequality {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) : b⁻¹ ≤ a⁻¹ := by
-  simpa [one_div] using (one_div_le_one_div_of_le ha hab)
-
--- Lemma condp32
-
-lemma eq_of_one_sub_eq_zero (z : ℂ) (h : 1 - z = 0) : z = 1 := by
-  rw [sub_eq_zero] at h
-  exact h.symm
-
-lemma condp32 (p : ℙ) (t : ℝ) : 1 - ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I)) ≠ 0 := by
-  intro h
-  have hp_eq_one : ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I)) = 1 := eq_of_one_sub_eq_zero _ h
-  let s := ((3 : ℝ) / 2) + t * Complex.I
-  have hs : 1 < s.re := by
-    simp only [s, Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im, mul_zero, add_zero]
-    norm_num
-  have h_abs_lt : norm (((p : ℕ) : ℂ) ^ (-s)) < 1 := p_s_abs_1 p s hs
-  have h_s_eq : ((p : ℕ) : ℂ) ^ (-s) = ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I)) := by simp only [s]
-  rw [h_s_eq, hp_eq_one] at h_abs_lt
-  have : norm (1 : ℂ) = 1 := by simp [norm, norm_one]
-  rw [this] at h_abs_lt
-  exact lt_irrefl 1 h_abs_lt
-
--- Lemma abs_term_inv_bound
-lemma abs_term_inv_bound (p : ℙ) (t : ℝ) : (1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹ ≤ (norm (1 - ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I))))⁻¹ := by
-  have h1 := abs_term_bound p t
-  have h2 := condp32 p t
-  have h3 := norm_pos_iff.mpr h2
-  exact inv_inequality h3 h1
-
 -- Lemma abs_zeta_inequality
 
 lemma multipliable_complex_abs_inv {i : Type*} (g : i → ℂ) (h_mult : Multipliable (fun i => (1 - g i)⁻¹)) : Multipliable (fun i => (norm (1 - g i))⁻¹) := by
@@ -210,7 +146,13 @@ lemma abs_zeta_inequality (t : ℝ) :
   · intro p
     positivity
   · intro p
-    exact abs_term_inv_bound p t
+    gcongr
+    · apply norm_pos_iff.mpr
+      exact Complex.one_sub_prime_cpow_ne_zero p.property (by simp; norm_num)
+    · grw [norm_sub_le]
+      simp
+      rw [← Complex.ofReal_natCast, Complex.norm_cpow_eq_rpow_re_of_pos (mod_cast p.property.pos)]
+      simp
 
 -- Theorem zeta_lower_bound
 
