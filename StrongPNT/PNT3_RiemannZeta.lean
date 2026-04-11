@@ -99,112 +99,11 @@ theorem zeta_lower_bound (t : ℝ) :
     rw [← Complex.ofReal_natCast, Complex.norm_cpow_eq_rpow_re_of_pos (mod_cast p.property.pos)]
     simp
 
--- Lemma zetapos
 
-lemma summable_one_div_nat_add_rpow' {x : ℝ} (hx : 1 < x) : Summable (fun n : ℕ => 1 / ((n + 1 : ℝ) ^ x)) := by
-  have h := (Real.summable_one_div_nat_add_rpow (1 : ℝ) x).2 hx
-  have h' : Summable (fun n : ℕ => (|((n : ℝ) + 1)| ^ x)⁻¹) := by
-    simpa [one_div] using h
-  have h2 : (fun n : ℕ => (|((n : ℝ) + 1)| ^ x)⁻¹) = (fun n : ℕ => (((n : ℝ) + 1) ^ x)⁻¹) := by
-    funext n
-    have hn : 0 ≤ (n : ℝ) + 1 := by
-      have : 0 ≤ (n : ℝ) := by exact_mod_cast (Nat.zero_le n)
-      exact add_nonneg this (show 0 ≤ (1 : ℝ) from zero_le_one)
-    simp [abs_of_nonneg hn]
-  have h'' : Summable (fun n : ℕ => (((n : ℝ) + 1) ^ x)⁻¹) := by
-    simpa [h2] using h'
-  have h''' : Summable (fun n : ℕ => ((n + 1 : ℝ) ^ x)⁻¹) := by
-    simpa [Nat.cast_add] using h''
-  simpa [one_div] using h'''
-
-lemma tsum_pos_of_pos_first_term {f : ℕ → ℝ} (hf : Summable f) (h0 : 0 < f 0) (hnonneg : ∀ n, 0 ≤ f n) : 0 < ∑' n, f n := by
-  have hsum0 : ∑ n ∈ Finset.range 1, f n = f 0 := by
-    simp [Finset.sum_range_zero]
-  have hpos_partial : 0 < ∑ n ∈ Finset.range 1, f n := by
-    simpa [hsum0] using h0
-  have hsumle : ∑ n ∈ Finset.range 1, f n ≤ ∑' n, f n := by
-    have hnonneg' : ∀ n ∉ Finset.range 1, 0 ≤ f n := by
-      intro n hn
-      exact hnonneg n
-    simpa using (hf.sum_le_tsum (s := Finset.range 1) hnonneg')
-  exact lt_of_lt_of_le hpos_partial hsumle
-
-lemma terms_nonneg (x : ℝ) : ∀ n : ℕ, 0 ≤ (1 : ℝ) / ((n + 1 : ℝ) ^ x) := by
-  intro n
-  have hposb' : 0 < ((n : ℝ) + 1) :=
-    add_pos_of_nonneg_of_pos (show 0 ≤ (n : ℝ) from by exact_mod_cast (Nat.zero_le n)) zero_lt_one
-  have hposb : 0 < ((n + 1 : ℝ)) := by
-    simpa [Nat.cast_add, Nat.cast_one] using hposb'
-  have hdenpos : 0 < ((n + 1 : ℝ) ^ x) := by
-    simpa using (Real.rpow_pos_of_pos hposb x)
-  have hden_nonneg : 0 ≤ ((n + 1 : ℝ) ^ x) := le_of_lt hdenpos
-  have hnum_nonneg : 0 ≤ (1 : ℝ) := le_of_lt (zero_lt_one : 0 < (1 : ℝ))
-  exact div_nonneg hnum_nonneg hden_nonneg
-
-lemma term_eq_ofRealC (x : ℝ) (n : ℕ) : (1 / ((n + 1 : ℂ) ^ (x : ℂ))) = ((1 / ((n + 1 : ℝ) ^ x) : ℝ) : ℂ) := by
-  have hbase_nonneg : 0 ≤ (n + 1 : ℝ) := by
-    have hn : 0 ≤ (n : ℝ) := by exact_mod_cast (Nat.zero_le n)
-    have : 0 ≤ (n : ℝ) + 1 := add_nonneg hn (show 0 ≤ (1 : ℝ) from zero_le_one)
-    simpa [Nat.cast_add, Nat.cast_one] using this
-  have hpow' : ((n + 1 : ℂ) ^ (x : ℂ)) = (((n + 1 : ℝ) ^ x : ℝ) : ℂ) := by
-    simpa using (Complex.ofReal_cpow (x := (n + 1 : ℝ)) (hx := hbase_nonneg) (y := x)).symm
-  have hdiv : (1 : ℂ) / (((n + 1 : ℝ) ^ x : ℝ) : ℂ) = ((1 / ((n + 1 : ℝ) ^ x) : ℝ) : ℂ) := by
-    simp
-  calc
-    1 / ((n + 1 : ℂ) ^ (x : ℂ))
-        = (1 : ℂ) / (((n + 1 : ℝ) ^ x : ℝ) : ℂ) := by simp [hpow']
-    _ = ((1 / ((n + 1 : ℝ) ^ x) : ℝ) : ℂ) := hdiv
-
-lemma im_tsum_ofReal (g : ℕ → ℝ) : (∑' n : ℕ, (g n : ℂ)).im = 0 := by
-  have him := congrArg Complex.im (Complex.ofReal_tsum (L := SummationFilter.unconditional _) (f := g)).symm
-  have hz : (((∑' n : ℕ, g n) : ℝ) : ℂ).im = 0 := by
-    simp
-  exact Eq.trans him hz
-
-lemma re_tsum_ofReal (g : ℕ → ℝ) : (∑' n : ℕ, (g n : ℂ)).re = ∑' n : ℕ, g n := by
-  have h := congrArg Complex.re (Complex.ofReal_tsum (L := SummationFilter.unconditional _) (f := g)).symm
-  simpa [Complex.ofReal_re] using h
-
-lemma zetapos (x : ℝ) (hx : 1 < x) : (riemannZeta x).im = 0 ∧ 0 < (riemannZeta x).re := by
-  have hxC : 1 < (Complex.ofReal x).re := by simpa [Complex.ofReal_re] using hx
-  have hz : riemannZeta (x : ℂ) = ∑' n : ℕ, 1 / (n + 1 : ℂ) ^ (x : ℂ) :=
-    zeta_eq_tsum_one_div_nat_add_one_cpow (s := (x : ℂ)) hxC
-  have him : (riemannZeta x).im = 0 := by
-    simpa [hz, term_eq_ofRealC x] using
-      (im_tsum_ofReal (fun n : ℕ => 1 / ((n + 1 : ℝ) ^ x)))
-  have hre : (riemannZeta x).re = ∑' n : ℕ, 1 / ((n + 1 : ℝ) ^ x) := by
-    simpa [hz, term_eq_ofRealC x] using
-      (re_tsum_ofReal (fun n : ℕ => 1 / ((n + 1 : ℝ) ^ x)))
-  have hsum : Summable (fun n : ℕ => 1 / ((n + 1 : ℝ) ^ x)) :=
-    summable_one_div_nat_add_rpow' (x := x) hx
-  have hpos0 : 0 < 1 / ((Nat.cast 0 + 1 : ℝ) ^ x) := by
-    simp [Nat.cast_zero, zero_add]
-  have hnonneg : ∀ n : ℕ, 0 ≤ 1 / ((n + 1 : ℝ) ^ x) := terms_nonneg x
-  have hpos : 0 < ∑' n : ℕ, 1 / ((n + 1 : ℝ) ^ x) :=
-    tsum_pos_of_pos_first_term hsum hpos0 hnonneg
-  exact ⟨him, by simpa [hre] using hpos⟩
-
--- Lemma zeta332pos
-lemma zeta332pos : 0 < norm (riemannZeta 3 / riemannZeta ((3 : ℝ) / 2)) := by
-  have h3 : (1 : ℝ) < 3 := by norm_num
-  have h32 : (1 : ℝ) < (3 : ℝ) / 2 := by norm_num
-  obtain ⟨h3im, h3repos⟩ := zetapos 3 h3
-  obtain ⟨h32im, h32repos⟩ := zetapos ((3 : ℝ) / 2) h32
-  have h3ne : riemannZeta (3 : ℝ) ≠ 0 := by
-    intro hz
-    exact (ne_of_gt h3repos) (by simpa using congrArg Complex.re hz)
-  have h32ne : riemannZeta ((3 : ℝ) / 2) ≠ 0 := by
-    intro hz
-    exact (ne_of_gt h32repos) (by simpa using congrArg Complex.re hz)
-  have hdivne : riemannZeta (3 : ℝ) / riemannZeta ((3 : ℝ) / 2) ≠ 0 :=
-    div_ne_zero h3ne h32ne
-  simpa using (norm_pos_iff.mpr hdivne)
-
--- Lemma zeta_low_332
 lemma zeta_low_332 : ∃ a : ℝ, 0 < a ∧ ∀ t : ℝ, a ≤ norm (riemannZeta (((3 : ℝ) / 2) + t * Complex.I)) := by
-  use norm (riemannZeta 3 / riemannZeta ((3 : ℝ) / 2))
-  exact ⟨zeta332pos, zeta_lower_bound⟩
-
+  refine ⟨norm (riemannZeta 3 / riemannZeta ((3 : ℝ) / 2)), ?_, zeta_lower_bound⟩
+  apply norm_pos_iff.mpr
+  apply div_ne_zero <;> apply riemannZeta_ne_zero_of_one_lt_re <;> norm_num
 
 open Real Set Filter Topology MeasureTheory
 open scoped BigOperators Topology
