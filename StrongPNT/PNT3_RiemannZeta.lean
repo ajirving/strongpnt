@@ -13,9 +13,10 @@ abbrev ℙ := Nat.Primes
 
 -- Lemma abs_zeta_prod_prime
 lemma abs_zeta_prod_prime (s : ℂ) (hs : 1 < s.re) :
-  norm (riemannZeta s) = ∏' p : ℙ, (norm (1 - ((p : ℕ) : ℂ) ^ (-s : ℂ)))⁻¹ := by
-  rw [← riemannZeta_eulerProduct_tprod hs, (riemannZeta_eulerProduct_hasProd hs).multipliable.norm_tprod]
-  simp_rw [norm_inv]
+    HasProd (fun (p : ℙ) ↦ (norm (1 - ((p : ℕ) : ℂ) ^ (-s : ℂ)))⁻¹) (norm (riemannZeta s)) := by
+  have := riemannZeta_eulerProduct_hasProd hs|>.norm
+  simp_rw [norm_inv] at this
+  exact this
 
 theorem HasProd.inv₀ {α β : Type*} {f : α → β} {a : β} [CommGroupWithZero β] [TopologicalSpace β]
     [ContinuousInv₀ β] (h : HasProd f a) (ha : a ≠ 0) :
@@ -33,11 +34,11 @@ theorem HasProd.div₀ {α :  Type*} {f g : α → ℂ} {a b : ℂ}
 
 
 -- Theorem zeta_ratio_identity
-theorem zeta_ratio_identity (s : ℂ) (hs : 1 < s.re) : riemannZeta (2 * s) / riemannZeta s = ∏' p : ℙ, (1 + ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹ := by
+theorem zeta_ratio_identity (s : ℂ) (hs : 1 < s.re) : HasProd (fun (p : ℙ) ↦ (1 + ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹) (riemannZeta (2 * s) / riemannZeta s ) := by
   have zeta2s := riemannZeta_eulerProduct_hasProd (show (2 * s).re > 1 by simp; linarith)
   have := zeta2s.div₀ (riemannZeta_eulerProduct_hasProd hs) (riemannZeta_ne_zero_of_one_lt_re hs)
-  rw [← this.tprod_eq]
-  congr
+  convert this using 1
+  symm
   ext p
   field_simp
   calc
@@ -48,7 +49,7 @@ theorem zeta_ratio_identity (s : ℂ) (hs : 1 < s.re) : riemannZeta (2 * s) / ri
     field [Complex.one_sub_prime_cpow_ne_zero p.property hs]
 
 -- Lemma zeta_ratio_at_3_2
-lemma zeta_ratio_at_3_2 : riemannZeta 3 / riemannZeta ((3 : ℝ) / 2) = ∏' p : ℙ, (1 + ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) : ℂ)))⁻¹ := by
+lemma zeta_ratio_at_3_2 :  HasProd (fun (p : ℙ) ↦ (1 + ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) : ℂ)))⁻¹) (riemannZeta 3 / riemannZeta ((3 : ℝ) / 2)) := by
   convert zeta_ratio_identity (s := 3 / 2) (by norm_num)
   norm_num
 
@@ -126,59 +127,26 @@ lemma abs_zeta_inequality (t : ℝ) :
 
 -- Theorem zeta_lower_bound
 
-lemma abs_zeta_ratio_eval : norm (riemannZeta 3 / riemannZeta ((3 : ℝ) / 2)) = ∏' p : ℙ, (1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹ := by
+lemma abs_zeta_ratio_eval : HasProd (fun (p : ℙ) ↦ (1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹) (norm (riemannZeta 3 / riemannZeta ((3 : ℝ) / 2)))  := by
   -- Start from the Euler product identity at 3/2
-  have hratio := zeta_ratio_at_3_2
-  -- Define complex and real Euler factors
-  let w : ℙ → ℂ := fun p => (1 + ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) : ℂ)))⁻¹
-  let u : ℙ → ℝ := fun p => (1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹
-  -- Multipliability of the real factors
-  have hu_mult : Multipliable u :=
-    multipliable_positive_inv_powers ((3 : ℝ) / 2) (by norm_num : 1 < (3 : ℝ) / 2)
-  -- Show w is the complexification of u
-  have hw_eq : w = fun p : ℙ => (u p : ℂ) := by
-    funext p
-    -- rewrite the complex cpow as a real rpow, using nonnegativity of the base
-    have hx : 0 ≤ ((p : ℕ) : ℝ) := by exact_mod_cast (Nat.zero_le (p : ℕ))
-    have hcpow : (((((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2))) : ℝ) : ℂ)
-        = ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) : ℂ)) := by
-      simpa using (Complex.ofReal_cpow (x := ((p : ℕ) : ℝ)) (hx := hx) (y := -((3 : ℝ) / 2)))
-    calc
-      w p = (1 + ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) : ℂ)))⁻¹ := rfl
-      _ = (1 + (((((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2))) : ℝ) : ℂ))⁻¹ := by
-        simp [hcpow]
-      _ = (((1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹ : ℝ) : ℂ) := by
-        simp [Complex.ofReal_add, Complex.ofReal_inv, Complex.ofReal_one]
-  -- Multipliability of the complex factors via mapping by ofReal
-  have hw_mult : Multipliable w := by
-    have hmap : Multipliable ((fun x : ℝ => (x : ℂ)) ∘ u) :=
-      Multipliable.map (hf := hu_mult) Complex.ofRealHom Complex.continuous_ofReal
-    simpa [hw_eq] using hmap
-  -- Take absolute values inside the product
-  have h_abs_tprod : norm (∏' p : ℙ, w p) = ∏' p : ℙ, norm (w p) :=
-    hw_mult.norm_tprod
-  -- For each factor, the absolute value equals the real factor
-  have h_abs_eq_fun : (fun p : ℙ => norm (w p)) = u := by
-    funext p
-    -- u p ≥ 0
-    have hge : 0 ≤ ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)) :=
-      Real.rpow_nonneg (by exact_mod_cast (Nat.zero_le (p : ℕ))) _
-    have hpos : 0 < 1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)) := by linarith
-    have hnonneg : 0 ≤ u p := by
-      have : 0 < (1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹ := inv_pos.mpr hpos
-      exact this.le
-    -- conclude
-    simp [hw_eq, Complex.norm_real, abs_of_nonneg hnonneg]
-  -- Rewrite the ratio using the identity, then conclude
-  have h_abs_ratio : norm (riemannZeta 3 / riemannZeta ((3 : ℝ) / 2))
-      = norm (∏' p : ℙ, w p) := by
-    simpa [w] using congrArg norm hratio
+  have hratio := zeta_ratio_at_3_2.norm
+  convert hratio using 1
+  ext p
+  rw [norm_inv]
+  congr
+  simp
+  symm
   calc
-    norm (riemannZeta 3 / riemannZeta ((3 : ℝ) / 2))
-        = norm (∏' p : ℙ, w p) := h_abs_ratio
-    _ = ∏' p : ℙ, norm (w p) := h_abs_tprod
-    _ = ∏' p : ℙ, u p := by simp [h_abs_eq_fun]
-    _ = ∏' p : ℙ, (1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹ := rfl
+  _ = ‖1 + ((((p : ℝ) ^ (-((3 : ℝ) / 2))) : ℝ) : ℂ)‖ := by
+    congr
+    rw [Complex.ofReal_cpow]
+    · simp
+    · norm_cast
+      exact p.property.pos.le
+  _ = _ := by
+    norm_cast
+    simp
+    positivity
 
 theorem zeta_lower_bound (t : ℝ) :
   norm (riemannZeta 3 / riemannZeta ((3 : ℝ) / 2)) ≤
@@ -188,11 +156,11 @@ theorem zeta_lower_bound (t : ℝ) :
     norm_num
   calc
     norm (riemannZeta 3 / riemannZeta ((3 : ℝ) / 2))
-        = ∏' p : ℙ, (1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹ := abs_zeta_ratio_eval
+        = ∏' p : ℙ, (1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹ := abs_zeta_ratio_eval.tprod_eq.symm
     _ ≤ ∏' p : ℙ, (norm (1 - ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I))))⁻¹ :=
           abs_zeta_inequality t
     _ = norm (riemannZeta (((3 : ℝ) / 2 : ℂ) + t * Complex.I)) := by
-          simpa using (abs_zeta_prod_prime (((3 : ℝ) / 2 : ℂ) + t * Complex.I) hs).symm
+          simpa using (abs_zeta_prod_prime (((3 : ℝ) / 2 : ℂ) + t * Complex.I) hs).tprod_eq
 
 -- Lemma zetapos
 
