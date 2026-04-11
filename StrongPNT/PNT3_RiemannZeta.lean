@@ -54,76 +54,10 @@ lemma zeta_ratio_at_3_2 :  HasProd (fun (p : ℙ) ↦ (1 + ((p : ℕ) : ℂ) ^ (
   norm_num
 
 -- Lemma abs_zeta_inequality
-
-lemma multipliable_complex_abs_inv {i : Type*} (g : i → ℂ) (h_mult : Multipliable (fun i => (1 - g i)⁻¹)) : Multipliable (fun i => (norm (1 - g i))⁻¹) := by
-  -- Use the fact that norm z = ‖z‖ for complex numbers
-  have h_eq : (fun i => (norm (1 - g i))⁻¹) = (fun i => ‖1 - g i‖⁻¹) := by
-    ext i
-    simp
-  rw [h_eq]
-  -- Use Multipliable.norm and norm_inv
-  have h_norm_mult : Multipliable (fun i => ‖(1 - g i)⁻¹‖) := Multipliable.norm h_mult
-  have h_norm_eq : (fun i => ‖(1 - g i)⁻¹‖) = (fun i => ‖1 - g i‖⁻¹) := by
-    ext i
-    rw [norm_inv]
-  rwa [← h_norm_eq]
-
-lemma multipliable_positive_inv_powers (r : ℝ) (hr : 1 < r) : Multipliable (fun p : ℙ => (1 + ((p : ℕ) : ℝ) ^ (-r))⁻¹) := by
-  -- Since r > 1, we have -r < -1, so the series ∑ p^{-r} converges
-  have h_sum : Summable (fun p : ℙ => ((p : ℕ) : ℝ) ^ (-r)) := by
-    rw [Nat.Primes.summable_rpow]
-    linarith
-
-  -- The series ∑ log(1 + p^{-r}) converges
-  have h_log_sum : Summable (fun p : ℙ => Real.log (1 + ((p : ℕ) : ℝ) ^ (-r))) := by
-    exact Real.summable_log_one_add_of_summable h_sum
-
-  -- Since log((1 + x)^{-1}) = -log(1 + x), the series ∑ log((1 + p^{-r})^{-1}) converges
-  have h_log_inv_sum : Summable (fun p : ℙ => Real.log ((1 + ((p : ℕ) : ℝ) ^ (-r))⁻¹)) := by
-    have h_eq : (fun p : ℙ => Real.log ((1 + ((p : ℕ) : ℝ) ^ (-r))⁻¹)) =
-                (fun p : ℙ => -(Real.log (1 + ((p : ℕ) : ℝ) ^ (-r)))) := by
-      ext p
-      rw [Real.log_inv]
-    rw [h_eq]
-    exact Summable.neg h_log_sum
-
-  -- All terms are positive
-  have h_pos : ∀ p : ℙ, 0 < (1 + ((p : ℕ) : ℝ) ^ (-r))⁻¹ := by
-    intro p
-    apply inv_pos.mpr
-    have h_ge : 0 ≤ ((p : ℕ) : ℝ) ^ (-r) := Real.rpow_nonneg (Nat.cast_nonneg _) _
-    linarith
-
-  -- Apply the multipliable criterion
-  exact Real.multipliable_of_summable_log h_pos h_log_inv_sum
-
 lemma hasProd_le_of_nonneg {α : Type*} {f g : α → ℝ} {a b : ℝ}
     (hf : HasProd f a) (hg : HasProd g b) (h_nonneg : ∀ i, 0 ≤ f i) (h : ∀ i, f i ≤ g i)
     : a ≤ b :=
   le_of_tendsto_of_tendsto' hf hg fun _ ↦ Finset.prod_le_prod (fun i _ ↦ h_nonneg i) (fun i _ ↦ h i )
-
-lemma Multipliable.tprod_le_tprod_of_nonneg {α : Type*} {f g : α → ℝ}
-    (hf : Multipliable f) (hg : Multipliable g) (h_nonneg : ∀ i, 0 ≤ f i) (h : ∀ i, f i ≤ g i)
-    : ∏' i, f i ≤ ∏' i, g i :=
-  hasProd_le_of_nonneg hf.hasProd hg.hasProd h_nonneg h
-
-lemma abs_zeta_inequality (t : ℝ) :
-  ∏' p : ℙ, (1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹ ≤
-  ∏' p : ℙ, (norm (1 - ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I))))⁻¹ := by
-  refine Multipliable.tprod_le_tprod_of_nonneg ?_ ?_ ?_ ?_
-  · apply multipliable_positive_inv_powers _ (by norm_num)
-  · apply multipliable_complex_abs_inv
-    exact riemannZeta_eulerProduct_hasProd (by simp; norm_num)|>.multipliable
-  · intro p
-    positivity
-  · intro p
-    gcongr
-    · apply norm_pos_iff.mpr
-      exact Complex.one_sub_prime_cpow_ne_zero p.property (by simp; norm_num)
-    · grw [norm_sub_le]
-      simp
-      rw [← Complex.ofReal_natCast, Complex.norm_cpow_eq_rpow_re_of_pos (mod_cast p.property.pos)]
-      simp
 
 -- Theorem zeta_lower_bound
 
@@ -154,13 +88,16 @@ theorem zeta_lower_bound (t : ℝ) :
   have hs : 1 < (((3 : ℝ) / 2 : ℂ) + t * Complex.I).re := by
     simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_I_re, mul_zero, add_zero]
     norm_num
-  calc
-    norm (riemannZeta 3 / riemannZeta ((3 : ℝ) / 2))
-        = ∏' p : ℙ, (1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹ := abs_zeta_ratio_eval.tprod_eq.symm
-    _ ≤ ∏' p : ℙ, (norm (1 - ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I))))⁻¹ :=
-          abs_zeta_inequality t
-    _ = norm (riemannZeta (((3 : ℝ) / 2 : ℂ) + t * Complex.I)) := by
-          simpa using (abs_zeta_prod_prime (((3 : ℝ) / 2 : ℂ) + t * Complex.I) hs).tprod_eq
+  have := abs_zeta_prod_prime (((3 : ℝ) / 2 : ℂ) + t * Complex.I) hs
+  apply hasProd_le_of_nonneg abs_zeta_ratio_eval this fun _ ↦ (by positivity)
+  intro p
+  gcongr
+  · apply norm_pos_iff.mpr
+    exact Complex.one_sub_prime_cpow_ne_zero p.property (by simp; norm_num)
+  · grw [norm_sub_le]
+    simp
+    rw [← Complex.ofReal_natCast, Complex.norm_cpow_eq_rpow_re_of_pos (mod_cast p.property.pos)]
+    simp
 
 -- Lemma zetapos
 
