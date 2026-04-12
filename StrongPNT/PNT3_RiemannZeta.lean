@@ -5,6 +5,7 @@ import Mathlib.NumberTheory.EulerProduct.DirichletLSeries
 import Mathlib.Topology.Metrizable.Basic
 import Mathlib.Topology.Compactness.Lindelof
 import StrongPNT.PNT2_LogDerivative
+import PrimeNumberTheoremAnd.ZetaBounds
 
 
 open scoped BigOperators Topology
@@ -2245,60 +2246,32 @@ lemma lem_integralBoundValue (s : ℂ) (hs : 0 < s.re) : ∫ u in Ioi (1 : ℝ),
 
 /-- Lemma: Zeta bound 2. -/
 lemma lem_zetaBound2 (s : ℂ) (hs_re : 1/10 < s.re) (hs_ne : s ≠ 1) : ‖riemannZeta s‖ ≤ 1 + ‖1 / (s - 1)‖ + ‖s‖ / s.re := by
-  -- Define the integrand and its real bound
-  set f : ℝ → ℂ := fun u => (Int.fract u : ℝ) * (u : ℂ) ^ (-s - 1) with hfdef
-  set g : ℝ → ℝ := fun u => u ^ (-s.re - 1) with hgdef
-  -- Start from the basic bound
-  have hζ : ‖riemannZeta s‖ ≤ 1 + ‖1 / (s - 1)‖ + ‖s‖ * ‖∫ u in Ioi (1 : ℝ), f u‖ := by
-    simpa [hfdef] using lem_zetaBound1 s hs_re hs_ne
-  -- Work with the restricted measure on Ioi(1)
-  let μ : Measure ℝ := (volume : Measure ℝ).restrict (Ioi (1 : ℝ))
-  -- Pointwise bound a.e. on Ioi(1)
-  have h_ae_bound : ∀ᵐ u ∂μ, ‖f u‖ ≤ g u := by
-    have hforall : ∀ u ∈ Ioi (1 : ℝ), ‖f u‖ ≤ g u := by
-      intro u hu
-      have := lem_integrandBound u (le_of_lt hu) s
-      simpa [hfdef, hgdef] using this
-    have hmeas : MeasurableSet (Ioi (1 : ℝ)) := measurableSet_Ioi
-    simpa [μ] using
-      (MeasureTheory.ae_restrict_of_forall_mem (μ := volume) (s := Ioi (1 : ℝ)) hmeas hforall)
-  -- Show integrability of g on Ioi(1) using the explicit value of its integral
-  have hg_intOn : IntegrableOn g (Ioi (1 : ℝ)) := by
-    classical
-    by_contra hnot
-    have hnot' : ¬ Integrable g μ := by simpa [μ, IntegrableOn] using hnot
-    have hint0 : (∫ u, g u ∂μ) = 0 := by
-      simpa using (integral_undef (μ := μ) (f := g) hnot')
-    have hval : ∫ u in Ioi (1 : ℝ), g u = 1 / s.re := by
-      simpa [hgdef] using lem_integralBoundValue s (by linarith [hs_re])
-    have hne : (1 / s.re) ≠ 0 := by exact one_div_ne_zero (ne_of_gt (by linarith [hs_re]))
-    have : (∫ u in Ioi (1 : ℝ), g u) = 0 := by simpa [μ] using hint0
-    exact hne (by simpa [hval] using this)
-  have hg_int : Integrable g μ := by simpa [μ, IntegrableOn] using hg_intOn
-  -- Bound the norm of the integral of f by the integral of g
-  have h_int_bound : ‖∫ u in Ioi (1 : ℝ), f u‖ ≤ ∫ u in Ioi (1 : ℝ), g u := by
-    have :=
-      (MeasureTheory.norm_integral_le_of_norm_le (μ := μ) (f := f) (g := g) hg_int h_ae_bound)
-    simpa [μ] using this
-  -- Evaluate the integral of g explicitly and obtain a concrete bound
-  have h_g_val : ∫ u in Ioi (1 : ℝ), g u = 1 / s.re := by
-    simpa [hgdef] using lem_integralBoundValue s (by linarith [hs_re])
-  have h_int_bound_conc : ‖∫ u in Ioi (1 : ℝ), f u‖ ≤ 1 / s.re := by
-    simpa [h_g_val] using h_int_bound
-  -- Multiply by ‖s‖ ≥ 0
-  have hmul : ‖s‖ * ‖∫ u in Ioi (1 : ℝ), f u‖ ≤ ‖s‖ * (1 / s.re) := by
-    exact mul_le_mul_of_nonneg_left h_int_bound_conc (by exact norm_nonneg s)
-  -- Add the other terms
-  have hsum0 : (1 + ‖1 / (s - 1)‖) + ‖s‖ * ‖∫ u in Ioi (1 : ℝ), f u‖
-      ≤ (1 + ‖1 / (s - 1)‖) + ‖s‖ * (1 / s.re) := by
-    gcongr
-  have hsum : 1 + ‖1 / (s - 1)‖ + ‖s‖ * ‖∫ u in Ioi (1 : ℝ), f u‖
-      ≤ 1 + ‖1 / (s - 1)‖ + ‖s‖ * (1 / s.re) := by
-    simpa [add_assoc] using hsum0
-  -- Combine and rewrite the right-most term as a division
-  have hfinal1 : ‖riemannZeta s‖ ≤ 1 + ‖1 / (s - 1)‖ + ‖s‖ * (1 / s.re) :=
-    le_trans hζ hsum
-  simpa [div_eq_mul_inv] using hfinal1
+  rw [← Zeta0EqZeta (by norm_num : 0 < 1) (by linarith) hs_ne, riemannZeta0_apply, Finset.sum_range_succ]
+  simp
+  have : s ≠ 0 := by
+    intro h
+    have : s.re = 0 := by simp [h]
+    linarith
+  rw [Complex.zero_cpow this]
+  simp
+  ring_nf
+  grw [norm_add_le]
+  rw [add_assoc]
+  gcongr
+  · norm_num
+  grw [norm_sub_le]
+  rw [add_comm]
+  gcongr
+  · rw [norm_inv, (by ring : 1 - s = -(-1+s)), norm_neg]
+  rw [norm_mul]
+  gcongr
+  have := ZetaBnd_aux1b 1 (by norm_num) (σ := s.re) (t := s.im) (by linarith)
+  simp at this
+  ring_nf at this
+  convert this using 4
+  simp
+  rw [← Complex.cpow_neg]
+  ring_nf
 
 /-- Lemma: Zeta bound 3. -/ lemma lem_zetaBound3 (s : ℂ) (hs_re : 1/10 < s.re) (hs_ne : s ≠ 1) : ‖riemannZeta s‖ ≤ 1 + 1 / ‖s - 1‖ + ‖s‖ / s.re := by
   simpa using lem_zetaBound2 s hs_re hs_ne
