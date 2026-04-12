@@ -167,87 +167,6 @@ lemma lem_zetaUppBd (z : ℂ) (hz_re : z.re ∈ Ico (1/2 : ℝ) (3 : ℝ)) (hz_i
   ring_nf
   rfl
 
-/-- Lemma: `z` from `s` (first version). -/
-lemma lem_zfroms_calc (s : ℂ) (t : ℝ) :
-    (let z := s + (3/2 : ℝ) + I * t
-     z.re = s.re + (3/2 : ℝ) ∧ z.im = s.im + t) := by
-  constructor
-  · -- z.re = s.re + (3/2 : ℝ)
-    simp only [Complex.add_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
-    -- After expansion: s.re + 3/2 + (I.re * t - I.im * 0) = s.re + 3/2
-    have h1 : I.re = 0 := Complex.I_re
-    have h2 : I.im * 0 = 0 := mul_zero _
-    rw [h1, h2]
-    simp
-  · -- z.im = s.im + t
-    simp only [Complex.add_im, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im]
-    -- After expansion: s.im + 0 + (I.re * 0 + I.im * t) = s.im + t
-    have h1 : I.re * 0 = 0 := mul_zero _
-    have h2 : I.im = 1 := Complex.I_im
-    rw [h1, h2]
-    simp
-
-lemma lem_zfroms_conditions (s : ℂ) (t : ℝ)
-    (hs : ‖s‖ ≤ (1 : ℝ)) (ht : (2 : ℝ) < |t|) :
-    (let z := s + (3/2 : ℝ) + I * t
-     z.re ∈ Ico (1/2 : ℝ) (3 : ℝ) ∧ (1 : ℝ) ≤ |z.im|) := by
-  -- Apply lem_zfroms_calc to get z.re and z.im formulas
-  have h_calc := lem_zfroms_calc s t
-  simp only [h_calc.1, h_calc.2]
-  constructor
-
-  -- Part 1: prove z.re ∈ Ico (1/2 : ℝ) (3 : ℝ)
-  · -- z.re = s.re + 3/2, we need 1/2 ≤ s.re + 3/2 < 3
-    -- Since ‖s‖ ≤ 1, we have |s.re| ≤ ‖s‖ ≤ 1, so -1 ≤ s.re ≤ 1
-    have hs_re_bound : |s.re| ≤ 1 :=
-      (Complex.abs_re_le_norm s).trans hs
-    rw [abs_le] at hs_re_bound
-    -- Now hs_re_bound : -1 ≤ s.re ∧ s.re ≤ 1
-
-    rw [Set.mem_Ico]
-    constructor
-    · -- 1/2 ≤ s.re + 3/2, i.e., -1 ≤ s.re
-      linarith [hs_re_bound.1]
-    · -- s.re + 3/2 < 3, i.e., s.re < 3/2
-      linarith [hs_re_bound.2]
-
-  -- Part 2: prove (1 : ℝ) ≤ |z.im|
-  · -- z.im = s.im + t, and |t| > 3, |s.im| ≤ 1
-    have hs_im_bound : |s.im| ≤ 1 :=
-      (Complex.abs_im_le_norm s).trans hs
-    rw [abs_le] at hs_im_bound
-    -- Now hs_im_bound : -1 ≤ s.im ∧ s.im ≤ 1
-
-    -- Since |t| > 3, we consider two cases
-    by_cases h : 0 ≤ t
-    · -- Case: t ≥ 0, so |t| = t, hence t > 3
-      have ht_pos : t > 2 := by
-        rwa [abs_of_nonneg h] at ht
-      -- Then s.im + t ≥ -1 + 3 = 2 > 1
-      have lower_bound : s.im + t ≥ 1 := by
-        linarith [hs_im_bound.1, ht_pos]
-      have nonneg : 0 ≤ s.im + t := by linarith
-      rw [abs_of_nonneg nonneg]
-      linarith [lower_bound]
-    · -- Case: t < 0, so |t| = -t, hence -t > 3, so t < -3
-      push_neg at h
-      have ht_neg : t < -2 := by
-        rw [abs_of_neg h] at ht
-        linarith [ht]
-      -- Then s.im + t ≤ 1 + (-3) = -2 < 0, so |s.im + t| ≥ 2 > 1
-      have upper_bound : s.im + t ≤ -1 := by
-        linarith [hs_im_bound.2, ht_neg]
-      have neg : s.im + t < 0 := by linarith
-      rw [abs_of_neg neg]
-      linarith [upper_bound]
-
-/-- Helper lemma for the final bound. -/
-lemma lem_abs_im_bound (s : ℂ) (t : ℝ) (hs : ‖s‖ ≤ 1) : |s.im + t| ≤ 1 + |t| := by
-  have h1 : |s.im| ≤ ‖s‖ := Complex.abs_im_le_norm s
-  have h2 : |s.im| ≤ 1 := le_trans h1 hs
-  have h3 : |s.im + t| ≤ |s.im| + |t| := abs_add_le s.im t
-  linarith
-
 /-- Lemma: Final zeta upper bound with shift. -/
 lemma lem_zetaUppBound :
     ∀ t : ℝ, ∀ s : ℂ, ‖s‖ ≤ (1 : ℝ) → (2 : ℝ) < |t| →
@@ -255,28 +174,20 @@ lemma lem_zetaUppBound :
   intro t s hs ht
   set z := s + (3/2 : ℝ) + I * t with hz_def
   -- Apply lem_zfroms_conditions to get conditions on z
-  have hz_cond : z.re ∈ Ico (1/2 : ℝ) (3 : ℝ) ∧ (1 : ℝ) ≤ |z.im| :=
-    lem_zfroms_conditions s t hs ht
+  have hz_cond : z.re ∈ Ico (1/2 : ℝ) (3 : ℝ) ∧ (1 : ℝ) ≤ |z.im| := by
+    simp [hz_def, I, -one_div]
+    have re_bound := Complex.abs_re_le_norm s|>.trans hs
+    have im_bound := Complex.abs_im_le_norm s|>.trans hs
+    grind
   -- Apply lem_zetaUppBd
   have h_bound : ‖riemannZeta z‖ < (8 : ℝ) + 2 * |z.im| :=
     lem_zetaUppBd z hz_cond.1 hz_cond.2
-  -- Use lem_abs_im_bound to bound |z.im|
-  have hz_im_calc : z.im = s.im + t := (lem_zfroms_calc s t).2
   have h_im_bound : |z.im| ≤ 1 + |t| := by
-    rw [hz_im_calc]
-    exact lem_abs_im_bound s t hs
-  -- Combine bounds
-  have h_intermediate : ‖riemannZeta z‖ < (8 : ℝ) + 2 * (1 + |t|) := by
-    calc ‖riemannZeta z‖
-      < (8 : ℝ) + 2 * |z.im| := h_bound
-      _ ≤ (8 : ℝ) + 2 * (1 + |t|) := by linarith [h_im_bound]
-  -- Simplify algebraically
-  have h_algebra : (8 : ℝ) + 2 * (1 + |t|) = (10 : ℝ) + 2 * |t| := by ring
-  -- Final bound
-  have h_final : ‖riemannZeta z‖ < (10 : ℝ) + 2 * |t| := by
-    linarith [h_intermediate, h_algebra]
-  -- Apply to the goal using the definition of z
-  rwa [hz_def] at h_final
+    simp [hz_def, I]
+    grw [abs_add_le]
+    gcongr
+    exact Complex.abs_im_le_norm s|>.trans hs
+  linarith
 
 open Metric Set Filter Asymptotics BigOperators
 
