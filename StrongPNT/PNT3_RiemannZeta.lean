@@ -111,7 +111,7 @@ open scoped BigOperators Topology
 
 
 /-- Lemma: Zeta bound 2. -/
-lemma lem_zetaBound2 (s : ℂ) (hs_re : 1/10 < s.re) (hs_ne : s ≠ 1) : ‖riemannZeta s‖ ≤ 1 + ‖1 / (s - 1)‖ + ‖s‖ / s.re := by
+lemma lem_zetaBound2 (s : ℂ) (hs_re : 1/10 < s.re) (hs_ne : s ≠ 1) : ‖riemannZeta s‖ ≤ 1 + 1 / ‖s - 1‖ + ‖s‖ / s.re := by
   have zeta_formula : riemannZeta s = 1 / 2 + 1 / (s - 1) + s * ∫ (x : ℝ) in Ioi 1, (⌊x⌋ + 1 / 2 - x) * (x : ℂ) ^ (-(s + 1)) := by
     have : s ≠ 0 := by
       intro h
@@ -124,6 +124,7 @@ lemma lem_zetaBound2 (s : ℂ) (hs_re : 1/10 < s.re) (hs_ne : s ≠ 1) : ‖riem
   grw [zeta_formula, norm_add_le, norm_add_le, norm_mul]
   gcongr
   · norm_num
+  · simp
   conv => rhs; rw [div_eq_mul_inv]
   gcongr
   have := ZetaBnd_aux1b 1 (by norm_num) (σ := s.re) (t := s.im) (by linarith)
@@ -133,76 +134,7 @@ lemma lem_zetaBound2 (s : ℂ) (hs_re : 1/10 < s.re) (hs_ne : s ≠ 1) : ‖riem
   rw [div_eq_mul_inv, ← Complex.cpow_neg]
   ring_nf
 
-/-- Lemma: Zeta bound 3. -/ lemma lem_zetaBound3 (s : ℂ) (hs_re : 1/10 < s.re) (hs_ne : s ≠ 1) : ‖riemannZeta s‖ ≤ 1 + 1 / ‖s - 1‖ + ‖s‖ / s.re := by
-  simpa using lem_zetaBound2 s hs_re hs_ne
 
-lemma helper_normsq (z : ℂ) : ‖z‖ ^ 2 = z.re ^ 2 + z.im ^ 2 := by
-  simpa [Complex.normSq, pow_two] using (Complex.normSq_eq_norm_sq z).symm
-
-lemma helper_three_abs_sq (t : ℝ) : (3 : ℝ) ^ 2 + t ^ 2 ≤ (3 + |t|) ^ 2 := by
-  have hnonneg : 0 ≤ (6 : ℝ) * |t| := by
-    have h6 : (0 : ℝ) ≤ 6 := by norm_num
-    exact mul_nonneg h6 (abs_nonneg t)
-  have hmul : |t| * |t| = t * t := by
-    simp
-  calc
-    (3 : ℝ) ^ 2 + t ^ 2 = (3 : ℝ) ^ 2 + t * t := by simp [pow_two]
-    _ = (3 : ℝ) ^ 2 + |t| * |t| := by simp [hmul]
-    _ ≤ (3 : ℝ) ^ 2 + |t| * |t| + (6 : ℝ) * |t| := by exact le_add_of_nonneg_right hnonneg
-    _ = (3 + |t|) ^ 2 := by ring
-
-/-- Lemma: Bound on `‖s‖` when `1/2 ≤ Re(s) < 3`. -/
-lemma lem_sBound (s : ℂ) (hs : (1/2 : ℝ) ≤ s.re ∧ s.re < (3 : ℝ)) : ‖s‖ < (3 : ℝ) + |s.im| := by
-  have hnegthree_lt_re : (- (3 : ℝ)) < s.re := by
-    have hlt : (- (3 : ℝ)) < (1 / 2 : ℝ) := by norm_num
-    exact lt_of_lt_of_le hlt hs.1
-  have hlt3 : s.re < (3 : ℝ) := hs.2
-  have h_re_sq_lt : s.re ^ 2 < (3 : ℝ) ^ 2 := by
-    simpa using (sq_lt_sq' hnegthree_lt_re hlt3)
-  have hsumlt : s.re ^ 2 + s.im ^ 2 < (3 : ℝ) ^ 2 + s.im ^ 2 := by
-    gcongr
-  have hsq : ‖s‖ ^ 2 < (3 + |s.im|) ^ 2 := by
-    have h := lt_of_lt_of_le hsumlt (helper_three_abs_sq s.im)
-    simpa [helper_normsq s] using h
-  have hnormnn : 0 ≤ ‖s‖ := norm_nonneg _
-  have hpos : 0 ≤ (3 : ℝ) + |s.im| := add_nonneg (by norm_num) (abs_nonneg _)
-  exact (sq_lt_sq₀ hnormnn hpos).1 hsq
-
-/-- Lemma: Bound on `1 / Re(s)` under `1/2 ≤ Re(s) < 3`. -/
-lemma lem_invReSbound (s : ℂ) (hs : (1/2 : ℝ) ≤ s.re ∧ s.re < (3 : ℝ)) :
-    1 / s.re ≤ (2 : ℝ) := by
-  have h_pos : (0 : ℝ) < s.re := by
-    linarith [hs.1]
-  have h_half_pos : (0 : ℝ) < (1/2 : ℝ) := by norm_num
-  have h_recip : 1 / s.re ≤ 1 / (1/2 : ℝ) := one_div_le_one_div_of_le h_half_pos hs.1
-  have h_simplify : 1 / (1/2 : ℝ) = (2 : ℝ) := by norm_num
-  rw [h_simplify] at h_recip
-  exact h_recip
-
-/-- Lemma: Lower bound on `‖s - 1‖` when `1/2 ≤ Re(s) < 3` and `|Im(s)| ≥ 1`. -/
-lemma lem_invSminus1bound (s : ℂ) (hs_im : (1 : ℝ) ≤ |s.im|) : (1 : ℝ) ≤ ‖s - 1‖ := by
-  have h2 : |s.im| ≤ ‖s - 1‖ := by
-    have : (s - (1 : ℂ)).im = s.im := by
-      simp [Complex.sub_im, Complex.one_im]
-    simpa [this] using Complex.abs_im_le_norm (s - 1)
-  exact le_trans hs_im h2
-
-lemma reciprocal_le_one_of_one_le {x : ℝ} (hx_pos : 0 < x) (hx_ge : 1 ≤ x) : 1 / x ≤ 1 := by
-  -- Multiply both sides of 1 ≤ x by 1/x (which is positive)
-  have h_div_pos : 0 < 1 / x := one_div_pos.mpr hx_pos
-  -- Multiply inequality 1 ≤ x by 1/x
-  have h1 : (1 / x) * 1 ≤ (1 / x) * x := by
-    exact mul_le_mul_of_nonneg_left hx_ge (le_of_lt h_div_pos)
-  -- Simplify: (1/x) * 1 = 1/x and (1/x) * x = 1
-  rw [mul_one] at h1
-  rw [one_div_mul_cancel (ne_of_gt hx_pos)] at h1
-  exact h1
-
-lemma div_le_mul_of_one_div_le {a c d : ℝ} (ha : 0 ≤ a) (h : 1 / c ≤ d) : a / c ≤ a * d := by
-  -- Rewrite a / c as a * (1 / c)
-  rw [div_eq_mul_one_div]
-  -- Apply mul_le_mul_of_nonneg_left with 1 / c ≤ d and ha : 0 ≤ a
-  exact mul_le_mul_of_nonneg_left h ha
 
 /-- Lemma: Final bound combination. -/
 lemma lem_finalBoundCombination (s : ℂ) (hs_re : (1/2 : ℝ) ≤ s.re ∧ s.re < (3 : ℝ)) (hs_im : (1 : ℝ) ≤ |s.im|) : ‖riemannZeta s‖ < 1 + 1 + ((3 : ℝ) + |s.im|) * 2 := by
@@ -212,35 +144,28 @@ lemma lem_finalBoundCombination (s : ℂ) (hs_re : (1/2 : ℝ) ≤ s.re ∧ s.re
     rw [h] at hs_im
     simp at hs_im
     linarith
-  -- Show 0 < s.re from 1/2 ≤ s.re
-  have hs_re_pos : 0 < s.re := by linarith [hs_re.1]
-  -- Apply lem_zetaBound3 to get the main bound
-  have h1 : ‖riemannZeta s‖ ≤ 1 + 1 / ‖s - 1‖ + ‖s‖ / s.re := lem_zetaBound3 s (by linarith [hs_re_pos]) hs_ne
-  -- Apply lem_invSminus1bound to bound 1/‖s-1‖ ≤ 1
-  have h2 : (1 : ℝ) ≤ ‖s - 1‖ := lem_invSminus1bound s hs_im
-  have h3 : 1 / ‖s - 1‖ ≤ 1 := reciprocal_le_one_of_one_le (by linarith [h2]) h2
-  -- Apply lem_sBound to get ‖s‖ < 3 + |s.im|
-  have h4 : ‖s‖ < (3 : ℝ) + |s.im| := lem_sBound s hs_re
-  -- Apply lem_invReSbound to get 1/s.re ≤ 2
-  have h5 : 1 / s.re ≤ (2 : ℝ) := lem_invReSbound s hs_re
-  -- Combine the bounds using calc
-  calc ‖riemannZeta s‖
-    ≤ 1 + 1 / ‖s - 1‖ + ‖s‖ / s.re := h1
-    _ ≤ 1 + 1 + ‖s‖ / s.re := by linarith [h3]
-    _ ≤ 1 + 1 + ‖s‖ * 2 := by
-      have s_nonneg : 0 ≤ ‖s‖ := norm_nonneg _
-      exact add_le_add_right (div_le_mul_of_one_div_le s_nonneg h5) _
-    _ < 1 + 1 + ((3 : ℝ) + |s.im|) * 2 := by linarith [h4]
-
-/-- Lemma: Final algebraic simplification. -/
-lemma lem_finalAlgebra (t : ℝ) : 1 + 1 + ((3 : ℝ) + |t|) * 2 = (8 : ℝ) + 2 * |t| := by ring
+  grw [lem_zetaBound2 s (by linarith) hs_ne]
+  apply add_lt_add_of_le_of_lt
+  · gcongr
+    have h2 : (1 : ℝ) ≤ ‖s - 1‖ := by
+      have := Complex.abs_im_le_norm (s - 1)
+      simp at this
+      linarith
+    exact div_le_one (by linarith)|>.mpr h2
+  rw [← mul_one_div]
+  apply mul_lt_mul_of_lt_of_le_of_pos_of_nonneg
+  · grw [Complex.norm_le_abs_re_add_abs_im]
+    simp
+    exact abs_lt.mpr (by grind)
+  · exact one_div_le (by linarith) (by norm_num)|>.mpr hs_re.1
+  · exact div_pos (by norm_num) (by linarith)
+  · positivity
 
 /-- Lemma: Upper bound on zeta in the vertical strip. -/
 lemma lem_zetaUppBd (z : ℂ) (hz_re : z.re ∈ Ico (1/2 : ℝ) (3 : ℝ)) (hz_im : (1 : ℝ) ≤ |z.im|) : ‖riemannZeta z‖ < (8 : ℝ) + 2 * |z.im| := by
-  have hz_re' : (1/2 : ℝ) ≤ z.re ∧ z.re < (3 : ℝ) := by
-    simpa [Ico] using hz_re
-  have h := lem_finalBoundCombination z hz_re' hz_im
-  simpa [lem_finalAlgebra] using h
+  apply lt_of_lt_of_le <| lem_finalBoundCombination z (by grind) hz_im
+  ring_nf
+  rfl
 
 /-- Lemma: `z` from `s` (first version). -/
 lemma lem_zfroms_calc (s : ℂ) (t : ℝ) :
