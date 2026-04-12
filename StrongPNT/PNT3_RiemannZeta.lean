@@ -112,31 +112,25 @@ open scoped BigOperators Topology
 
 /-- Lemma: Zeta bound 2. -/
 lemma lem_zetaBound2 (s : ℂ) (hs_re : 1/10 < s.re) (hs_ne : s ≠ 1) : ‖riemannZeta s‖ ≤ 1 + ‖1 / (s - 1)‖ + ‖s‖ / s.re := by
-  rw [← Zeta0EqZeta (by norm_num : 0 < 1) (by linarith) hs_ne, riemannZeta0_apply, Finset.sum_range_succ]
-  simp
-  have : s ≠ 0 := by
-    intro h
-    have : s.re = 0 := by simp [h]
-    linarith
-  rw [Complex.zero_cpow this]
-  simp
-  ring_nf
-  grw [norm_add_le]
-  rw [add_assoc]
+  have zeta_formula : riemannZeta s = 1 / 2 + 1 / (s - 1) + s * ∫ (x : ℝ) in Ioi 1, (⌊x⌋ + 1 / 2 - x) * (x : ℂ) ^ (-(s + 1)) := by
+    have : s ≠ 0 := by
+      intro h
+      have : s.re = 0 := by simp [h]
+      linarith
+    rw [← Zeta0EqZeta (by norm_num : 0 < 1) (by linarith) hs_ne, riemannZeta0_apply,
+      Finset.sum_range_succ]
+    simp  [Complex.zero_cpow this]
+    grind
+  grw [zeta_formula, norm_add_le, norm_add_le, norm_mul]
   gcongr
   · norm_num
-  grw [norm_sub_le]
-  rw [add_comm]
-  gcongr
-  · rw [norm_inv, (by ring : 1 - s = -(-1+s)), norm_neg]
-  rw [norm_mul]
+  conv => rhs; rw [div_eq_mul_inv]
   gcongr
   have := ZetaBnd_aux1b 1 (by norm_num) (σ := s.re) (t := s.im) (by linarith)
-  simp at this
-  ring_nf at this
-  convert this using 4
-  simp
-  rw [← Complex.cpow_neg]
+  convert this using 1 <;> simp
+  congr
+  ext
+  rw [div_eq_mul_inv, ← Complex.cpow_neg]
   ring_nf
 
 /-- Lemma: Zeta bound 3. -/ lemma lem_zetaBound3 (s : ℂ) (hs_re : 1/10 < s.re) (hs_ne : s ≠ 1) : ‖riemannZeta s‖ ≤ 1 + 1 / ‖s - 1‖ + ‖s‖ / s.re := by
