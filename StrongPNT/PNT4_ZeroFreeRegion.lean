@@ -79,15 +79,6 @@ lemma zerosetKfRc_eq_ZetaZerosNearPoint (t : ℝ) :
   zerosetKfRc (5/6 : ℝ) ((3/2 : ℂ) + t * Complex.I) riemannZeta = ZetaZerosNearPoint t := by
   ext ρ; constructor <;>   simp +contextual [zerosetKfRc, ZetaZerosNearPoint, zeroZ, dist_eq_norm_sub]
 
-lemma center_eq_comm (t : ℝ) :
-  ((3/2 : ℂ) + (Complex.I : ℂ) * (t : ℂ)) = ((3/2 : ℂ) + (t : ℂ) * Complex.I) := by
-  ring
-
-lemma log_abs_le_log_abs_add_two {t : ℝ} (ht : 2 < |t|) :
-  Real.log (abs t) ≤ Real.log (abs t + 2) := by
-  gcongr
-  linarith
-
 lemma s_notin_ZetaZerosNearPoint (δ t : ℝ) (hδ_pos : 0 < δ) :
   ((1 : ℂ) + δ + t * Complex.I) ∉ ZetaZerosNearPoint t := by
   intro hmem
@@ -177,7 +168,7 @@ lemma lem_explicit1deltat :
   -- Centers and evaluation point
   let c_std : ℂ := ((3/2 : ℂ) + Complex.I * (t : ℂ))
   let c_comm : ℂ := ((3/2 : ℂ) + (t : ℝ) * Complex.I)
-  have hcenter_eq : c_std = c_comm := by simpa [c_std, c_comm] using (center_eq_comm t)
+  have hcenter_eq : c_std = c_comm := by simp [c_std, c_comm]; ring
   let s : ℂ := (1 : ℂ) + δ + t * Complex.I
   -- s ∈ closedBall c_std r1
   have hs_mem_comm : s ∈ Metric.closedBall c_comm r1 := s_in_closedBall_12 δ t hδ_pos hδ_lt1
@@ -262,8 +253,9 @@ lemma lem_explicit1deltat :
     have := add_le_add_left hζ_log_le (Real.log (b * |t|))
     simpa [hlog_mul1, hlog_mul2, add_comm, add_left_comm, add_assoc] using this
   -- Replace log |t| by log(|t| + 2)
-  have hlog_mono : Real.log (|t|) ≤ Real.log (|t| + 2) :=
-    log_abs_le_log_abs_add_two (by simpa using ht)
+  have hlog_mono : Real.log (|t|) ≤ Real.log (|t| + 2) := by
+    gcongr
+    linarith
   have hlog_bound2 :
       Real.log (b * |t| / ‖riemannZeta c_std‖)
         ≤ Real.log (|t| + 2) + (Real.log b + A) := by
