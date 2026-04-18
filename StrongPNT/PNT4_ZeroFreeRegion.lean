@@ -63,27 +63,12 @@ lemma lem_sigmage1 (sigma t : ℝ) (hsigma : sigma > 1) : riemannZeta (sigma + t
   linarith
 
 lemma lem_sigmale1 (sigma1 t1 : ℝ) : riemannZeta (sigma1 + t1 * Complex.I) = 0 → sigma1 ≤ 1 := by
-  intro h
-  -- Use contrapositive of lem_sigmage1
-  by_contra h_not_le
-  -- h_not_le : ¬sigma1 ≤ 1, which means sigma1 > 1
-  push_neg at h_not_le
-  -- Now we have sigma1 > 1, so by lem_sigmage1, the zeta function is nonzero
-  have h_nonzero := lem_sigmage1 sigma1 t1 h_not_le
-  -- But this contradicts our hypothesis h that it equals zero
-  exact h_nonzero h
+  contrapose!
+  exact fun h ↦ lem_sigmage1 _ _ h
 
 lemma lem_sigmale1Zt (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) : rho1.re ≤ 1 := by
-  -- From the definition of ZetaZerosNearPoint, we have rho1 ∈ zeroZ
-  have h1 : rho1 ∈ zeroZ := h_rho1_in_Zt.1
-  -- From the definition of zeroZ, this means riemannZeta rho1 = 0
-  have h2 : riemannZeta rho1 = 0 := h1
-  -- We can write rho1 as rho1.re + rho1.im * Complex.I
-  have h3 : rho1 = rho1.re + rho1.im * Complex.I := by simp [Complex.re_add_im]
-  -- Rewrite h2 using this representation
-  rw [h3] at h2
-  -- Now apply lem_sigmale1
-  exact lem_sigmale1 rho1.re rho1.im h2
+  apply lem_sigmale1 rho1.re rho1.im
+  simp_all [ZetaZerosNearPoint, zeroZ]
 
 lemma complex_abs_of_real (x : ℝ) : ‖(x : ℂ)‖ = abs x := by
   rw [Complex.norm_real, Real.norm_eq_abs]
