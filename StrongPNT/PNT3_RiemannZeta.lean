@@ -197,79 +197,17 @@ noncomputable def logDerivZeta (s : ℂ) : ℂ := deriv riemannZeta s / riemannZ
 def zerosetKfRc (R : ℝ) (c : ℂ) (f : ℂ → ℂ) : Set ℂ :=
   {ρ : ℂ | ρ ∈ Metric.closedBall c R ∧ f ρ = 0}
 
--- Lemma 1: zetadiffAtnot1
-lemma zetadiffAtnot1 : ∀ s : ℂ, s ≠ 1 → DifferentiableAt ℂ riemannZeta s :=
-  fun _ => differentiableAt_riemannZeta
-
--- Lemma 4: DiffAtOn
-lemma DiffAtOn {T : Set ℂ} {g : ℂ → ℂ} :
-    (∀ s ∈ T, DifferentiableAt ℂ g s) → DifferentiableOn ℂ g T := by
-  intro h s hs
-  exact (h s hs).differentiableWithinAt
-
--- Lemma 5: DiffOnanalOnNhd
-lemma DiffOnanalOnNhd {T : Set ℂ} (hT : IsOpen T) {g : ℂ → ℂ} :
-    DifferentiableOn ℂ g T → AnalyticOnNhd ℂ g T := by
-  intro hdiff
-  exact hdiff.analyticOnNhd hT
-
--- Lemma 6: DiffAtallanalOnNhd
-lemma DiffAtallanalOnNhd {T : Set ℂ} (hT : IsOpen T) {g : ℂ → ℂ} :
-    (∀ s ∈ T, DifferentiableAt ℂ g s) → AnalyticOnNhd ℂ g T := by
-  intro hdiff
-  apply DiffOnanalOnNhd hT
-  exact DiffAtOn hdiff
-
 -- Lemma 7: zetaanalOnnot1
 lemma zetaanalOnnot1 : AnalyticOnNhd ℂ riemannZeta {s : ℂ | s ≠ 1} := by
-  apply DiffAtallanalOnNhd
-  · apply isOpen_compl_singleton
-  · exact zetadiffAtnot1
-
-lemma I_mul_ofReal_im (t : ℝ) : (I * ↑t).im = t := by
-  have h1 : (I * (↑t : ℂ)).im = (↑t : ℂ).re := Complex.I_mul_im (↑t : ℂ)
-  rw [h1]
-  simp [Complex.ofReal_re]
-
-lemma complex_im_sub_I_mul (a : ℂ) (t : ℝ) : (a - I * t).im = a.im - t := by
-  rw [Complex.sub_im]
-  rw [I_mul_ofReal_im]
+  exact DifferentiableOn.analyticOnNhd (fun s hs ↦ (differentiableAt_riemannZeta (by simp_all)).differentiableWithinAt)  isOpen_compl_singleton
 
 lemma D1cinTt_pre (t : ℝ) (ht : |t| > 1) :
     ∀ s ∈ closedBall (3/2 + I * t : ℂ) 1, s ≠ 1 := by
-  intro s hs
-  by_contra h
-  -- h : s = 1, hs : s ∈ closedBall (3/2 + I * t) 1
-  rw [h] at hs
-  -- Now hs : 1 ∈ closedBall (3/2 + I * t) 1
-  rw [mem_closedBall] at hs
-  -- hs : dist 1 (3/2 + I * t) ≤ 1
-  rw [Complex.dist_eq] at hs
-  -- hs : ‖1 - (3/2 + I * t)‖ ≤ 1
-
-  -- Simplify 1 - (3/2 + I * t) = -1/2 - I * t
-  have h1 : (1 : ℂ) - (3/2 + I * t) = -1/2 - I * t := by ring
-  rw [h1] at hs
-
-  -- The imaginary part of (-1/2 - I * t) is -t using the helper lemma
-  have h2 : (-1/2 - I * t : ℂ).im = -t := by
-    have : (-1/2 - I * t : ℂ) = (-1/2 : ℂ) - I * t := by ring
-    rw [this]
-    rw [complex_im_sub_I_mul]
-    simp [Complex.ofReal_im]
-
-  -- Use the fact that |z| ≥ |Im(z)|
-  have h3 : ‖(-1/2 - I * t : ℂ)‖ ≥ |(-1/2 - I * t : ℂ).im| := Complex.abs_im_le_norm _
-
-  -- So ‖(-1/2 - I * t)‖ ≥ |-t| = |t|
-  rw [h2] at h3
-  rw [abs_neg] at h3
-
-  -- Since |t| > 1 and |t| ≤ ‖(-1/2 - I * t)‖, we have ‖(-1/2 - I * t)‖ > 1
-  have h4 : ‖(-1/2 - I * t : ℂ)‖ > 1 := lt_of_lt_of_le ht h3
-
-  -- This contradicts hs : ‖-1/2 - I * t‖ ≤ 1
-  linarith [h4, hs]
+  intro s hs h
+  simp [Complex.dist_eq, h] at hs
+  have := le_trans (Complex.abs_im_le_norm (1 - (3 / 2 + I * ↑t))) hs
+  simp [I] at this
+  linarith
 
 -- Lemma 10: D1cinTt
 lemma D1cinTt (t : ℝ) (ht : |t| > 1) :
@@ -284,27 +222,10 @@ lemma zetaanalOnD1c (t : ℝ) (ht : |t| > 1) :
   exact D1cinTt t ht
 
 
--- Lemma 12: sigmageq1
-lemma sigmageq1 (s : ℂ) (hs : s.re > 1) : riemannZeta s ≠ 0 :=
-  riemannZeta_ne_zero_of_one_lt_re hs
-
 -- Lemma 13: zetacnot0
-
-lemma Complex_I_mul_ofReal_re (r : ℝ) : (I * (r : ℂ)).re = 0 := by
-  have h : (I * (r : ℂ)).re = -(r : ℂ).im := Complex.I_mul_re (r : ℂ)
-  rw [h]
-  simp
-
-lemma re_real_add_I_mul_gt (a b : ℝ) (h : a > 1) : (a + I * b).re > 1 := by
-  rw [Complex.add_re]
-  rw [Complex.ofReal_re]
-  rw [Complex_I_mul_ofReal_re]
-  simp
-  exact h
-
 lemma zetacnot0 (t : ℝ) : riemannZeta (3/2 + I * t) ≠ 0 := by
-  apply sigmageq1
-  apply re_real_add_I_mul_gt
+  apply riemannZeta_ne_zero_of_one_lt_re
+  simp [I]
   norm_num
 
 -- Lemma: fc_analytic_normalized
