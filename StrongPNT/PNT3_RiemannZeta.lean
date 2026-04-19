@@ -232,28 +232,8 @@ lemma zetacnot0 (t : ℝ) : riemannZeta (3/2 + I * t) ≠ 0 := by
 lemma fc_analytic_normalized (c : ℂ) (f : ℂ → ℂ)
     (h_analytic : AnalyticOnNhd ℂ f (closedBall c 1)) (h_nonzero : f c ≠ 0) :
     (AnalyticOnNhd ℂ (fun z => f (z + c) / f c) (closedBall (0 : ℂ) 1)) ∧ (fun z => f (z + c) / f c) 0 = 1 := by
-  constructor
-  · -- First part: show AnalyticOnNhd
-    apply AnalyticOnNhd.div
-    · -- Show f ∘ (· + c) is analytic on closedBall 0 1
-      apply AnalyticOnNhd.comp h_analytic
-      · -- Show · + c is analytic
-        intro z _
-        exact analyticAt_id.add analyticAt_const
-      · -- Show · + c maps closedBall 0 1 to closedBall c 1
-        intro z hz
-        rw [mem_closedBall] at hz ⊢
-        rw [Complex.dist_eq] at hz ⊢
-        -- Goal: ‖z + c - c‖ ≤ 1, have: ‖z - 0‖ ≤ 1
-        convert hz using 1
-        ring_nf
-    · -- Show constant function f c is analytic
-      exact analyticOnNhd_const
-    · -- Show f c ≠ 0 everywhere
-      intro z _
-      exact h_nonzero
-  · -- Second part: show evaluation at 0 equals 1
-    simpa
+  refine ⟨AnalyticOnNhd.div ?_ analyticOnNhd_const (by simp_all), (by simpa)⟩
+  exact h_analytic.comp (analyticOnNhd_id.add analyticOnNhd_const) (fun _ _ ↦ (by simp_all))
 
 lemma frac_cancel_const {x y c : ℂ} (hc : c ≠ 0) (hy : y ≠ 0) : (x / c) / (y / c) = x / y := by
   field_simp [hc, hy]
@@ -263,60 +243,27 @@ lemma fc_bound (B : ℝ) (R : ℝ) (c : ℂ) (f : ℂ → ℂ)
     (h_bound : ∀ z ∈ closedBall c R, ‖f z‖ ≤ B) :
     ∀ z ∈ closedBall (0 : ℂ) R, ‖(fun w => f (w + c) / f c) z‖ ≤ B / ‖f c‖ := by
   intro z hz
-  have hz' : ‖z‖ ≤ R := by
-    simpa [mem_closedBall, Complex.dist_eq] using hz
-  have hz_plus : z + c ∈ closedBall c R := by
-    have : ‖(z + c) - c‖ ≤ R := by simpa [add_sub_cancel] using hz'
-    simpa [mem_closedBall, Complex.dist_eq] using this
-  have hfb : ‖f (z + c)‖ ≤ B := h_bound (z + c) hz_plus
-  have hnorm : ‖f (z + c) / f c‖ = ‖f (z + c)‖ / ‖f c‖ := by
-    simp [div_eq_mul_inv, norm_mul, norm_inv]
-  have : ‖f (z + c)‖ / ‖f c‖ ≤ B / ‖f c‖ :=
-    div_le_div_of_nonneg_right hfb (norm_nonneg _)
-  simpa [hnorm] using this
+  simp
+  gcongr
+  apply h_bound
+  simp_all
 
 -- Lemma: fc_zeros (relation between zeros of f_c and zeros of f)
 lemma fc_zeros (r : ℝ) (c : ℂ) (f : ℂ → ℂ) (h_nonzero : f c ≠ 0) :
     (zerosetKfRc r (0 : ℂ) (fun z => f (z + c) / f c)) = (fun ρ => ρ - c) '' (zerosetKfRc r c f) := by
   ext ρ'; constructor
   · intro hmem
-    rcases hmem with ⟨hball, hzero⟩
-    -- From f (ρ' + c) / f c = 0 and h_nonzero, deduce f (ρ' + c) = 0
-    have hprod : f (ρ' + c) * (f c)⁻¹ = 0 := by simpa [div_eq_mul_inv] using hzero
-    have hnum0 : f (ρ' + c) = 0 := by
-      rcases mul_eq_zero.mp hprod with hnum | hinv
-      · exact hnum
-      · have : (f c)⁻¹ ≠ 0 := inv_ne_zero h_nonzero
-        exact (this hinv).elim
-    refine ⟨ρ' + c, ?_, ?_⟩
-    · -- Show ρ' + c ∈ zerosetKfRc r c f
-      have hdist0 : dist ρ' (0 : ℂ) ≤ r := by simpa [mem_closedBall] using hball
-      have hdist1 : dist (ρ' + c) c ≤ r := by
-        simpa [Complex.dist_eq, add_sub_cancel] using hdist0
-      have hmem_ball : ρ' + c ∈ closedBall c r := by
-        simpa [mem_closedBall] using hdist1
-      exact And.intro hmem_ball hnum0
-    · -- (ρ' + c) - c = ρ'
-      simp
+    use ρ' + c
+    simp_all [zerosetKfRc]
   · intro him
-    rcases him with ⟨y, hy_mem, hy_eq⟩
-    -- y ∈ zerosetKfRc r c f and ρ' = y - c
-    subst hy_eq
-    rcases hy_mem with ⟨hy_ball, hy_zero⟩
-    refine And.intro ?_ ?_
-    · -- (y - c) ∈ closedBall 0 r
-      have hdist : dist y c ≤ r := by simpa [mem_closedBall] using hy_ball
-      have hdist0 : dist (y - c) (0 : ℂ) ≤ r := by
-        simpa [Complex.dist_eq, sub_zero] using hdist
-      simpa [mem_closedBall] using hdist0
-    · -- f ((y - c) + c) / f c = 0
-      simp [sub_add_cancel, hy_zero]
+    simp_all [zerosetKfRc, Complex.dist_eq]
+    rcases him with ⟨x, hx1, rfl⟩
+    simp_all
 
 -- Lemma: fc_m_order (orders of zeros are preserved under the shift)
 
 lemma analyticOrderAt_mul_const_eq (f : ℂ → ℂ) (a z0 : ℂ) (ha : a ≠ 0) :
     analyticOrderAt (fun z => f z * a) z0 = analyticOrderAt f z0 := by
-  classical
   -- Rewrite right-multiplication by a as left-multiplication
   have hcomm : (fun z => f z * a) = (fun z => a * f z) := by
     funext z; simp [mul_comm]
@@ -325,41 +272,18 @@ lemma analyticOrderAt_mul_const_eq (f : ℂ → ℂ) (a z0 : ℂ) (ha : a ≠ 0)
     simp [hcomm]
   by_cases hf : AnalyticAt ℂ f z0
   · -- Analytic case: use additivity of analytic order under multiplication
-    have hconst : AnalyticAt ℂ (fun _ : ℂ => a) z0 := by
-      simpa using (analyticAt_const : AnalyticAt ℂ (fun _ : ℂ => a) z0)
     have hadd : analyticOrderAt (fun z => a * f z) z0
         = analyticOrderAt (fun _ : ℂ => a) z0 + analyticOrderAt f z0 := by
-      simpa using (analyticOrderAt_mul hconst hf)
+      exact analyticOrderAt_mul analyticAt_const hf
     -- order of a nonzero constant is zero
     have hconst_zero : analyticOrderAt (fun _ : ℂ => a) z0 = 0 := by
-      have hiff := (AnalyticAt.analyticOrderAt_eq_zero hconst)
-      have hval : (fun _ : ℂ => a) z0 ≠ 0 := by simpa using ha
-      exact hiff.mpr hval
-    calc
-      analyticOrderAt (fun z => f z * a) z0
-          = analyticOrderAt (fun z => a * f z) z0 := hrew
-      _ = analyticOrderAt (fun _ : ℂ => a) z0 + analyticOrderAt f z0 := hadd
-      _ = 0 + analyticOrderAt f z0 := by simp [hconst_zero]
-      _ = analyticOrderAt f z0 := by simp
-  · -- Non-analytic case: (a * f) is also non-analytic since a ≠ 0
-    have hnot : ¬ AnalyticAt ℂ (fun z => a * f z) z0 := by
-      intro hmul
-      have hconst : AnalyticAt ℂ (fun _ : ℂ => a) z0 := by
-        simpa using (analyticAt_const : AnalyticAt ℂ (fun _ : ℂ => a) z0)
-      have hval : (fun _ : ℂ => a) z0 ≠ 0 := by simpa using ha
-      -- use the smul equivalence with a constant nonzero scalar
-      have hiff := (analyticAt_iff_analytic_fun_smul (h₁f := hconst) (h₂f := hval)
-                        (g := f) (z := z0))
-      have hsmul : AnalyticAt ℂ (fun z => (fun _ : ℂ => a) z • f z) z0 := by
-        -- In ℂ, smul is multiplication
-        simpa [smul_eq_mul] using hmul
-      have : AnalyticAt ℂ f z0 := hiff.mpr hsmul
-      exact hf this
-    calc
-      analyticOrderAt (fun z => f z * a) z0
-          = analyticOrderAt (fun z => a * f z) z0 := hrew
-      _ = 0 := by simp [analyticOrderAt, hnot]
-      _ = analyticOrderAt f z0 := by simp [analyticOrderAt, hf]
+      exact AnalyticAt.analyticOrderAt_eq_zero analyticAt_const|>.mpr ha
+    rw [hrew, hadd, hconst_zero, zero_add]
+  · rw [hrew, analyticOrderAt_eq_zero.mpr, analyticOrderAt_eq_zero.mpr]
+    · simp [hf]
+    · left
+      contrapose hf
+      exact analyticAt_iff_analytic_fun_mul analyticAt_const ha|>.mpr hf
 
 lemma fc_m_order (c : ℂ) (f : ℂ → ℂ) (h_nonzero : f c ≠ 0)
     {ρ' : ℂ} :
@@ -369,13 +293,10 @@ lemma fc_m_order (c : ℂ) (f : ℂ → ℂ) (h_nonzero : f c ≠ 0)
   set g0 : ℂ → ℂ := fun z => f (z + c) with hg0
   -- Remove the constant factor using invariance under right-multiplication by a nonzero constant
   have hconst : analyticOrderAt (fun z => g0 z * (1 / f c)) ρ' = analyticOrderAt g0 ρ' := by
-    have hne : (1 / f c) ≠ 0 := one_div_ne_zero h_nonzero
-    simpa using (analyticOrderAt_mul_const_eq (f := g0) (a := (1 / f c)) (z0 := ρ') hne)
+    exact analyticOrderAt_mul_const_eq _ _ _ <| one_div_ne_zero h_nonzero
   have hconst_rewrite : analyticOrderAt (fun z => f (z + c) / f c) ρ'
         = analyticOrderAt (fun z => g0 z * (1 / f c)) ρ' := by
-    have : (fun z => f (z + c) / f c) = (fun z => g0 z * (1 / f c)) := by
-      funext z; simp [g0, hg0, div_eq_mul_inv, mul_comm]
-    simp [this]
+    simp [g0, div_eq_mul_inv]
   -- Prove translation invariance for g0
   have htrans : analyticOrderAt g0 ρ' = analyticOrderAt f (ρ' + c) := by
     -- Cases on analyticity of f at ρ' + c
@@ -459,12 +380,7 @@ lemma fc_m_order (c : ℂ) (f : ℂ → ℂ) (h_nonzero : f c ≠ 0)
         exact hfA this
       -- In the non-analytic case, both sides reduce to 0 by definition
       simp [analyticOrderAt, hfA, hg_not]
-  -- Conclude by chaining the constant-factor reduction and the translation invariance
-  calc
-    analyticOrderAt (fun z => f (z + c) / f c) ρ'
-        = analyticOrderAt (fun z => g0 z * (1 / f c)) ρ' := hconst_rewrite
-    _ = analyticOrderAt g0 ρ' := hconst
-    _ = analyticOrderAt f (ρ' + c) := htrans
+  rw [hconst_rewrite, hconst, htrans]
 
 -- Lemma: DminusK (characterization of points in shifted domain minus shifted zeros)
 lemma DminusK (r1 : ℝ) (R1 : ℝ) (c : ℂ) (f : ℂ → ℂ)
