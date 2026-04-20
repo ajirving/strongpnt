@@ -288,99 +288,22 @@ lemma analyticOrderAt_mul_const_eq (f : ℂ → ℂ) (a z0 : ℂ) (ha : a ≠ 0)
 lemma fc_m_order (c : ℂ) (f : ℂ → ℂ) (h_nonzero : f c ≠ 0)
     {ρ' : ℂ} :
     analyticOrderAt (fun z => f (z + c) / f c) ρ' = analyticOrderAt f (ρ' + c) := by
-  classical
-  -- Unnormalized translated function
-  set g0 : ℂ → ℂ := fun z => f (z + c) with hg0
-  -- Remove the constant factor using invariance under right-multiplication by a nonzero constant
-  have hconst : analyticOrderAt (fun z => g0 z * (1 / f c)) ρ' = analyticOrderAt g0 ρ' := by
-    exact analyticOrderAt_mul_const_eq _ _ _ <| one_div_ne_zero h_nonzero
-  have hconst_rewrite : analyticOrderAt (fun z => f (z + c) / f c) ρ'
-        = analyticOrderAt (fun z => g0 z * (1 / f c)) ρ' := by
-    simp [g0, div_eq_mul_inv]
-  -- Prove translation invariance for g0
-  have htrans : analyticOrderAt g0 ρ' = analyticOrderAt f (ρ' + c) := by
-    -- Cases on analyticity of f at ρ' + c
-    by_cases hfA : AnalyticAt ℂ f (ρ' + c)
-    · -- Then g0 is analytic at ρ' by composition with addition
-      have h_add : AnalyticAt ℂ (fun z : ℂ => z + c) ρ' := by
-        simpa using (AnalyticAt.add (analyticAt_id : AnalyticAt ℂ (fun z : ℂ => z) ρ')
-                                    (analyticAt_const : AnalyticAt ℂ (fun _ : ℂ => c) ρ'))
-      have hgA : AnalyticAt ℂ g0 ρ' := by
-        have : AnalyticAt ℂ f ((fun z : ℂ => z + c) ρ') := by simpa using hfA
-        simpa [g0, hg0] using (AnalyticAt.comp (g := f) (f := fun z : ℂ => z + c) (x := ρ') this h_add)
-      -- Consider whether g0 vanishes identically near ρ'
-      by_cases hgez : (∀ᶠ z in nhds ρ', g0 z = 0)
-      · -- Transport the eventual zero along w ↦ w - c to get eventual zero for f near ρ' + c
-        have hT_sub_cont : ContinuousAt (fun w : ℂ => w - c) (ρ' + c) := by
-          simpa using (ContinuousAt.sub (continuousAt_id : ContinuousAt (fun w : ℂ => w) (ρ' + c))
-                                        (continuousAt_const : ContinuousAt (fun _ : ℂ => c) (ρ' + c)))
-        have hT_sub : Tendsto (fun w : ℂ => w - c) (nhds (ρ' + c)) (nhds ρ') := by
-          simpa using (hT_sub_cont.tendsto)
-        have hEfw : ∀ᶠ w in nhds (ρ' + c), f w = 0 := by
-          have : ∀ᶠ w in nhds (ρ' + c), g0 (w - c) = 0 := hT_sub.eventually hgez
-          -- simplify g0 (w - c) to f w
-          simpa [g0, hg0, sub_add_cancel] using this
-        -- Conclude both analytic orders are ⊤ via the characterization
-        have hg_top : analyticOrderAt g0 ρ' = ⊤ :=
-          (analyticOrderAt_eq_top (f := g0) (z₀ := ρ')).2 hgez
-        have hf_top : analyticOrderAt f (ρ' + c) = ⊤ :=
-          (analyticOrderAt_eq_top (f := f) (z₀ := ρ' + c)).2 hEfw
-        simp [hg_top, hf_top]
-      · -- Not eventually zero: obtain a precise factorization and transfer it
-        have h_exists := (AnalyticAt.exists_eventuallyEq_pow_smul_nonzero_iff hgA).mpr hgez
-        rcases h_exists with ⟨n, φ, hφA, hφ_ne, hevent⟩
-        -- Push the event along w ↦ w - c
-        have hT_sub_cont : ContinuousAt (fun w : ℂ => w - c) (ρ' + c) := by
-          simpa using (ContinuousAt.sub (continuousAt_id : ContinuousAt (fun w : ℂ => w) (ρ' + c))
-                                        (continuousAt_const : ContinuousAt (fun _ : ℂ => c) (ρ' + c)))
-        have hT_sub : Tendsto (fun w : ℂ => w - c) (nhds (ρ' + c)) (nhds ρ') := by
-          simpa using (hT_sub_cont.tendsto)
-        have hevent_w : ∀ᶠ w in nhds (ρ' + c), f w
-              = (w - (ρ' + c)) ^ n * ((fun w => φ (w - c)) w) := by
-          have : ∀ᶠ w in nhds (ρ' + c), g0 (w - c)
-                    = ((w - c) - ρ') ^ n * φ (w - c) :=
-            hT_sub.eventually hevent
-          -- simplify ((w - c) + c) = w and ((w - c) - ρ') = w - (ρ' + c)
-          refine this.mono ?_
-          intro w hw
-          have hsubsimp : (w - c) - ρ' = w - (ρ' + c) := by ring
-          simpa [g0, hg0, hsubsimp] using hw
-        -- Define ψ(w) = φ (w - c) and check analyticity and nonvanishing at w0
-        have hψA : AnalyticAt ℂ (fun w => φ (w - c)) (ρ' + c) := by
-          have h_subA : AnalyticAt ℂ (fun w : ℂ => w - c) (ρ' + c) := by
-            simpa using (AnalyticAt.sub (analyticAt_id : AnalyticAt ℂ (fun z : ℂ => z) (ρ' + c))
-                                        (analyticAt_const : AnalyticAt ℂ (fun _ : ℂ => c) (ρ' + c)))
-          have hφA_at : AnalyticAt ℂ φ ((fun w : ℂ => w - c) (ρ' + c)) := by simpa using hφA
-          simpa using (AnalyticAt.comp (g := φ) (f := fun w => w - c) (x := (ρ' + c)) hφA_at h_subA)
-        have hψ_ne : (fun w => φ (w - c)) (ρ' + c) ≠ 0 := by
-          -- value at (ρ' + c) is φ ρ'
-          simpa using hφ_ne
-        -- Identify the orders using the finite order factorization
-        have hg_eq_n : analyticOrderAt g0 ρ' = n := by
-          exact (AnalyticAt.analyticOrderAt_eq_natCast (f := g0) (z₀ := ρ') hgA).mpr
-            ⟨φ, hφA, hφ_ne, hevent⟩
-        have hf_eq_n : analyticOrderAt f (ρ' + c) = n := by
-          exact (AnalyticAt.analyticOrderAt_eq_natCast (f := f) (z₀ := ρ' + c) hfA).mpr
-            ⟨(fun w => φ (w - c)), hψA, hψ_ne, hevent_w⟩
-        simp [hg_eq_n, hf_eq_n]
-    · -- If f is not analytic at ρ' + c, then g0 is not analytic at ρ' either
-      have hg_not : ¬ AnalyticAt ℂ g0 ρ' := by
-        intro hgA
-        -- Compose with w ↦ w - c to deduce analyticity of f at ρ' + c
-        have h_subA : AnalyticAt ℂ (fun w : ℂ => w - c) (ρ' + c) := by
-          simpa using (AnalyticAt.sub (analyticAt_id : AnalyticAt ℂ (fun z : ℂ => z) (ρ' + c))
-                                      (analyticAt_const : AnalyticAt ℂ (fun _ : ℂ => c) (ρ' + c)))
-        have hgA_at : AnalyticAt ℂ g0 ((ρ' + c) - c) := by simpa using hgA
-        have hcomp := (AnalyticAt.comp (g := g0) (f := fun w => w - c)
-                          (x := (ρ' + c)) hgA_at h_subA)
-        -- simplify composition to f
-        have : AnalyticAt ℂ (fun w : ℂ => g0 (w - c)) (ρ' + c) := by simpa using hcomp
-        have : AnalyticAt ℂ f (ρ' + c) := by
-          simpa [g0, hg0, sub_add_cancel] using this
-        exact hfA this
-      -- In the non-analytic case, both sides reduce to 0 by definition
-      simp [analyticOrderAt, hfA, hg_not]
-  rw [hconst_rewrite, hconst, htrans]
+  simp [div_eq_mul_inv]
+  rw [analyticOrderAt_mul_const_eq _ _ _ <| inv_ne_zero h_nonzero]
+  by_cases hfA : AnalyticAt ℂ f (ρ' + c)
+  · rw [(by rfl : (fun z ↦ f (z + c)) = (f ∘ fun z ↦ z + c)),
+      hfA.analyticOrderAt_comp (g := (fun z ↦  z + c)) (by fun_prop)]
+    simp
+    suffices analyticOrderAt (fun x ↦ x - ρ') ρ' = 1  by simp_all
+    apply AnalyticAt.analyticOrderAt_eq_natCast (by fun_prop)|>.mpr
+    exact ⟨(fun _ ↦ 1), analyticAt_const, (by simp), (by simp)⟩
+  · -- If f is not analytic at ρ' + c, then g0 is not analytic at ρ' either
+    have hg_not : ¬ AnalyticAt ℂ (fun z ↦ f (z + c)) ρ' := by
+      contrapose! hfA
+      convert hfA.comp_sub c
+      ring
+    -- In the non-analytic case, both sides reduce to 0 by definition
+    simp [analyticOrderAt, hfA, hg_not]
 
 -- Lemma: DminusK (characterization of points in shifted domain minus shifted zeros)
 lemma DminusK (r1 : ℝ) (R1 : ℝ) (c : ℂ) (f : ℂ → ℂ)
