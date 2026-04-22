@@ -312,54 +312,8 @@ lemma DminusK (r1 : ℝ) (R1 : ℝ) (c : ℂ) (f : ℂ → ℂ)
              z + c ∈ closedBall c r1 \ zerosetKfRc R1 c f := by
   intro z
   constructor
-  · -- Forward direction: z ∈ D_{r1} \ K_{f_c}(R1) → z+c ∈ D_{r1}(c) \ K_f(R1;c)
-    intro ⟨hz_ball, hz_not_zero⟩
-    constructor
-    · -- Show z + c ∈ closedBall c r1
-      have hdist : dist z (0 : ℂ) ≤ r1 := by simpa [mem_closedBall] using hz_ball
-      have hdist_c : dist (z + c) c ≤ r1 := by
-        simpa [Complex.dist_eq, add_sub_cancel] using hdist
-      simpa [mem_closedBall] using hdist_c
-    · -- Show z + c ∉ zerosetKfRc R1 c f
-      intro h_contra
-      apply hz_not_zero
-      -- From z + c ∈ zerosetKfRc R1 c f, show z ∈ zerosetKfRc R1 0 (fun w => f (w + c) / f c)
-      rcases h_contra with ⟨hz_c_ball, hz_c_zero⟩
-      constructor
-      · -- Show z ∈ closedBall 0 R1
-        have hdist_c : dist (z + c) c ≤ R1 := by simpa [mem_closedBall] using hz_c_ball
-        have hdist_0 : dist z (0 : ℂ) ≤ R1 := by
-          simpa [Complex.dist_eq, add_sub_cancel] using hdist_c
-        simpa [mem_closedBall] using hdist_0
-      · -- Show f (z + c) / f c = 0
-        have : f (z + c) = 0 := hz_c_zero
-        simp [this, zero_div]
-  · -- Reverse direction: z+c ∈ D_{r1}(c) \ K_f(R1;c) → z ∈ D_{r1} \ K_{f_c}(R1)
-    intro ⟨hz_c_ball, hz_c_not_zero⟩
-    constructor
-    · -- Show z ∈ closedBall 0 r1
-      have hdist_c : dist (z + c) c ≤ r1 := by simpa [mem_closedBall] using hz_c_ball
-      have hdist_0 : dist z (0 : ℂ) ≤ r1 := by
-        simpa [Complex.dist_eq, add_sub_cancel] using hdist_c
-      simpa [mem_closedBall] using hdist_0
-    · -- Show z ∉ zerosetKfRc R1 0 (fun w => f (w + c) / f c)
-      intro h_contra
-      apply hz_c_not_zero
-      -- From z ∈ zerosetKfRc R1 0 (fun w => f (w + c) / f c), show z + c ∈ zerosetKfRc R1 c f
-      rcases h_contra with ⟨hz_ball, hz_zero⟩
-      constructor
-      · -- Show z + c ∈ closedBall c R1
-        have hdist_0 : dist z (0 : ℂ) ≤ R1 := by simpa [mem_closedBall] using hz_ball
-        have hdist_c : dist (z + c) c ≤ R1 := by
-          simpa [Complex.dist_eq, add_sub_cancel] using hdist_0
-        simpa [mem_closedBall] using hdist_c
-      · -- Show f (z + c) = 0
-        have h_div_zero : f (z + c) / f c = 0 := hz_zero
-        have h_mul_zero : f (z + c) * (f c)⁻¹ = 0 := by simpa [div_eq_mul_inv] using h_div_zero
-        cases' mul_eq_zero.mp h_mul_zero with h_num h_inv
-        · exact h_num
-        · have : (f c)⁻¹ ≠ 0 := inv_ne_zero h_nonzero
-          exact (this h_inv).elim
+  · simp +contextual [zerosetKfRc]
+  · simp_all [zerosetKfRc]
 
 lemma shifted_zeros_correspondence (R1 : ℝ) (c z : ℂ)
     (f : ℂ → ℂ) (h_nonzero : f c ≠ 0)
