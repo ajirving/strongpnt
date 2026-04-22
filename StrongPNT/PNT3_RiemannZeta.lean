@@ -505,23 +505,6 @@ lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
   -- Replace derivative quotient by logDerivZeta
   simpa [logDerivZeta] using hineq2
 
---   let c := (3/2 : ℂ) + I * t
---   -- Apply log_Deriv_Expansion0 as mentioned in the informal proof
---   obtain ⟨C, hC_pos, hC⟩ := log_Deriv_Expansion0
---   use C
---   constructor
---   · exact hC_pos
---   · intro B hB_pos hB_bound hfin z hz
---     -- Apply the conditions from lem:zetaanalOnD1c and lem:zetacnot0
---     have h_analytic : AnalyticOnNhd ℂ riemannZeta (closedBall c 1) := by
---       apply zetaanalOnD1c
---       linarith [ht]
---     have h_nonzero : riemannZeta c ≠ 0 := zetacnot0 t
---     -- Expand logDerivZeta definition
---     rw [logDerivZeta]
---     -- Apply log_Deriv_Expansion0 directly with the required constraint now included
---     exact hC B hB_pos r R1 R hr hrR1 hR1R hR c riemannZeta h_analytic h_nonzero hB_bound hfin z hz
--- -- Lemma 16: zeta32lower
 
 lemma zeta32lower : ∃ a > 0, ∀ t : ℝ, ‖riemannZeta (3/2 + I * t)‖ ≥ a := by
   rcases zeta_low_332 with ⟨a, ha_pos, hbound⟩
