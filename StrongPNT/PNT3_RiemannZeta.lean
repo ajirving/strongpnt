@@ -336,11 +336,7 @@ lemma shifted_zeros_correspondence (R1 : ℝ) (c z : ℂ)
 
   -- Show injectivity: if ρ₁ - c = ρ₂ - c then ρ₁ = ρ₂
   · intro ρ₁ hρ₁ ρ₂ hρ₂ h_eq
-    -- From ρ₁ - c = ρ₂ - c, we get ρ₁ = ρ₂
-    have : ρ₁ = ρ₁ - c + c := by ring
-    rw [this, h_eq]
-    ring
-
+    grind
   -- Show surjectivity
   · intro ρ' hρ'
     simp only [Set.Finite.mem_toFinset] at hρ'
@@ -379,57 +375,16 @@ lemma final_ineq2
       ((analyticOrderNatAt (fun w => f (w + c) / f c) ρ) : ℂ) / (z - ρ)‖ ≤ (16 * r^2 / ((r - r1)^3) +
     1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log (B / ‖f c‖) := by
   intro z hz
-
-  -- Set up the normalized function
   let g : ℂ → ℂ := fun w => f (w + c) / f c
-
-  -- Basic inequalities
-  have hR_pos : 0 < R := by linarith [hr1pos, hr1_lt_r, hr_lt_R1, hR1_lt_R]
-  have hR1_pos : 0 < R1 := by linarith [hr1pos, hr1_lt_r, hr_lt_R1]
-  have h_norm_pos : 0 < ‖f c‖ := norm_pos_iff.mpr h_nonzero
-
-  -- Key: ‖f c‖ < B because c ∈ closedBall c R
-  have h_fc_bound_at_c : ‖f c‖ < B := by
-    apply h_bound
-    rw [mem_closedBall, dist_self]
-    exact le_of_lt hR_pos
-
-  -- This gives us 1 < B / ‖f c‖
-  have h_B_div_gt_one : 1 < B / ‖f c‖ := by
-    rw [one_lt_div h_norm_pos]
-    exact h_fc_bound_at_c
-
-  -- g satisfies the conditions for final_ineq1
-  have h_g_analytic : ∀ w ∈ closedBall (0 : ℂ) 1, AnalyticAt ℂ g w :=
-    (fc_analytic_normalized c f h_analytic h_nonzero).1
-
-  have h_g_zero : g 0 = 1 :=
-    (fc_analytic_normalized c f h_analytic h_nonzero).2
-
-  have h_g_bound : ∀ w ∈ closedBall (0 : ℂ) R, ‖g w‖ ≤ B / ‖f c‖ := by
-    apply fc_bound B R c f
+  apply final_ineq1 (B / ‖f c‖) _ r1 r R R1 hr1pos hr1_lt_r hr_lt_R1 hR1_lt_R hR
+  · exact (fc_analytic_normalized c f h_analytic h_nonzero).1
+  · exact (fc_analytic_normalized c f h_analytic h_nonzero).2
+  · apply fc_bound B R c f
     intro w hw
     exact le_of_lt (h_bound w hw)
-
-  -- Convert finite zero set condition
-  have h_zeroset_equiv : zerosetKfRc R1 (0 : ℂ) g = zerosetKfR R1 g := by
-    ext ρ
-    simp only [zerosetKfRc, zerosetKfR, mem_setOf_eq, mem_closedBall, Complex.dist_eq, sub_zero]
-
-  have h_g_finite : (zerosetKfR R1 g).Finite := by
-    rwa [← h_zeroset_equiv]
-
-  -- Apply final_ineq1 to g
-  have := final_ineq1 (B / ‖f c‖) h_B_div_gt_one r1 r R R1 hr1pos hr1_lt_r hr_lt_R1 hR1_lt_R hR
-    g h_g_analytic h_g_zero h_g_finite h_g_bound z
-
-  -- Convert the domain condition
-  have hz_domain : z ∈ closedBall (0 : ℂ) r1 \ zerosetKfR R1 g := by
-    rw [h_zeroset_equiv] at hz
-    exact hz
-
-  -- Apply and conclude
-  exact this hz_domain
+  · apply hz
+  · rw [one_lt_div <| norm_pos_iff.mpr h_nonzero]
+    exact h_bound _ (by simp; linarith)
 
 lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
     (r1 r R1 R : ℝ)
