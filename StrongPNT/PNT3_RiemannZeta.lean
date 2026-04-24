@@ -652,7 +652,7 @@ lemma Zeta1_Zeta_Expansion
     (r1 r : ℝ)
     (hr1_pos : 0 < r1) (hr1_lt_r : r1 < r) (hr_lt_R1 : r < 5 / (6 : ℝ)) :
     ∃ C > 1,
-    ∀ (t : ℝ) (_ : |t| > 3),
+    ∀ (t : ℝ) (_ : |t| > 2),
     let c := (3/2 : ℂ) + I * t;
     ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
     ∀ z ∈ closedBall c r1 \ zerosetKfRc (5 / (6 : ℝ)) c riemannZeta,
@@ -709,7 +709,7 @@ lemma Zeta1_Zeta_Expansion
       add_le_add hα_le hβ_le
     simpa [K, mul_add, mul_one, add_comm, add_left_comm, add_assoc] using this
   -- Build the final constant C (independent of t)
-  let C : ℝ := max (Kcoeff * (1 + S / Real.log 3)) 2
+  let C : ℝ := max (Kcoeff * (1 + S / Real.log 2)) 2
   have hC_gt1 : 1 < C := by
     have : (1 : ℝ) < 2 := by norm_num
     exact lt_of_lt_of_le this (le_max_right _ _)
@@ -735,36 +735,35 @@ lemma Zeta1_Zeta_Expansion
     rw [← hK_eq, ← hLS_eq]
     exact hineq1
   -- Bound (Real.log |t| + S) by (1 + S/log 3) * Real.log |t|
-  have hlog3pos : 0 < Real.log (3 : ℝ) := by
-    have : (1 : ℝ) < 3 := by norm_num
-    exact Real.log_pos this
+  have hlog2pos : 0 < Real.log (2 : ℝ) := by
+    exact Real.log_pos (by norm_num)
   -- Since |t| > 3, we have log 3 ≤ log |t|
   have hpos_t : 0 < |t| := lt_trans (by norm_num) ht
-  have hL_ge_log3' : Real.log 3 ≤ Real.log |t| := by
-    have hge : (3 : ℝ) ≤ |t| := le_of_lt ht
+  have hL_ge_log3' : Real.log 2 ≤ Real.log |t| := by
+    have hge : (2 : ℝ) ≤ |t| := le_of_lt ht
     exact Real.log_le_log (by norm_num) hge
-  have hratio_nonneg : 0 ≤ S / Real.log 3 := le_of_lt (div_pos hS_pos hlog3pos)
-  have hneq : Real.log 3 ≠ 0 := ne_of_gt hlog3pos
+  have hratio_nonneg : 0 ≤ S / Real.log 2 := le_of_lt (div_pos hS_pos hlog2pos)
+  have hneq : Real.log 2 ≠ 0 := ne_of_gt hlog2pos
 
   -- Key inequality: S ≤ (S / log 3) * log |t|
-  have hS_le : S ≤ (S / Real.log 3) * Real.log |t| := by
+  have hS_le : S ≤ (S / Real.log 2) * Real.log |t| := by
     -- Since log 3 ≤ log |t| and S/log 3 ≥ 0, we have (S/log 3) * log 3 ≤ (S/log 3) * log |t|
     -- But (S/log 3) * log 3 = S, so S ≤ (S/log 3) * log |t|
     calc S
-      = (S / Real.log 3) * Real.log 3 := by simp [div_mul_cancel, hneq]
-      _ ≤ (S / Real.log 3) * Real.log |t| := mul_le_mul_of_nonneg_left hL_ge_log3' hratio_nonneg
+      = (S / Real.log 2) * Real.log 2 := by simp [div_mul_cancel, hneq]
+      _ ≤ (S / Real.log 2) * Real.log |t| := mul_le_mul_of_nonneg_left hL_ge_log3' hratio_nonneg
 
-  have hsum_bound : Real.log |t| + S ≤ (1 + S / Real.log 3) * Real.log |t| := by
-    have hstep : Real.log |t| + S ≤ Real.log |t| + (S / Real.log 3) * Real.log |t| := by
+  have hsum_bound : Real.log |t| + S ≤ (1 + S / Real.log 2) * Real.log |t| := by
+    have hstep : Real.log |t| + S ≤ Real.log |t| + (S / Real.log 2) * Real.log |t| := by
       gcongr
     -- Real.log |t| + (S / Real.log 3) * Real.log |t| = (1 + S / Real.log 3) * Real.log |t|
-    have h_factor : Real.log |t| + (S / Real.log 3) * Real.log |t| = (1 + S / Real.log 3) * Real.log |t| := by ring
+    have h_factor : Real.log |t| + (S / Real.log 2) * Real.log |t| = (1 + S / Real.log 2) * Real.log |t| := by ring
     rw [← h_factor]
     exact hstep
   -- Chain: ≤ K*(1 + S/log 3) * log|t|
   have hineq3 : ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
         (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ)‖
-        ≤ K * ((1 + S / Real.log 3) * Real.log |t|) :=
+        ≤ K * ((1 + S / Real.log 2) * Real.log |t|) :=
     le_trans hineq2 (mul_le_mul_of_nonneg_left hsum_bound (by
       have hr2_nonneg : 0 ≤ r^2 := by
         have : 0 ≤ r * r := mul_nonneg (le_of_lt hr_pos) (le_of_lt hr_pos)
@@ -774,23 +773,23 @@ lemma Zeta1_Zeta_Expansion
       have : 0 ≤ K := add_nonneg hterm1 (le_of_lt hA0_pos)
       exact this))
   -- Replace K by Kcoeff * (1/d + 1)
-  have hKcoeff : K * ((1 + S / Real.log 3) * Real.log |t|)
-      ≤ (Kcoeff * (1 / d + 1)) * ((1 + S / Real.log 3) * Real.log |t|) :=
+  have hKcoeff : K * ((1 + S / Real.log 2) * Real.log |t|)
+      ≤ (Kcoeff * (1 / d + 1)) * ((1 + S / Real.log 2) * Real.log |t|) :=
     mul_le_mul_of_nonneg_right hK_le (by
       have hLpos : 0 < Real.log |t| :=
         Real.log_pos (lt_trans (by norm_num) ht)
-      have hcoef_pos : 0 < 1 + S / Real.log 3 :=
-        add_pos_of_pos_of_nonneg (by norm_num) (le_of_lt (div_pos hS_pos hlog3pos))
-      have : 0 ≤ (1 + S / Real.log 3) * Real.log |t| :=
+      have hcoef_pos : 0 < 1 + S / Real.log 2 :=
+        add_pos_of_pos_of_nonneg (by norm_num) (le_of_lt (div_pos hS_pos hlog2pos))
+      have : 0 ≤ (1 + S / Real.log 2) * Real.log |t| :=
         le_of_lt (mul_pos hcoef_pos hLpos)
       simpa using this)
   -- Put everything together and rewrite into the target form using C
   have hfinal := le_trans hineq3 hKcoeff
   -- C was chosen so that C ≥ Kcoeff * (1 + S/log 3)
-  have hC_ge : Kcoeff * (1 + S / Real.log 3) ≤ C := by
+  have hC_ge : Kcoeff * (1 + S / Real.log 2) ≤ C := by
     exact le_max_left _ _
   -- Therefore RHS ≤ C * (1/d + 1) * log|t|
-  have : (Kcoeff * (1 / d + 1)) * ((1 + S / Real.log 3) * Real.log |t|)
+  have : (Kcoeff * (1 / d + 1)) * ((1 + S / Real.log 2) * Real.log |t|)
       ≤ C * (1 / d + 1) * Real.log |t| := by
     have hnonneg_term : 0 ≤ (1 / d + 1) * Real.log |t| := by
       have h1 : 0 ≤ 1 / d := le_of_lt (one_div_pos.mpr hd_pos)

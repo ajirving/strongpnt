@@ -2885,7 +2885,7 @@ lemma lem_Zeta_Expansion_ZFR :
     simpa [c] using (lem_ZFRnotK t ht2 z hz)
   have hz_in_diff : z ∈ Metric.closedBall c (2/3) \ zerosetKfRc (5/6) c riemannZeta :=
     ⟨hz_in_ball, hz_not_in_K⟩
-  have h_expansion := hC_expansion t ht hfin z hz_in_diff
+  have h_expansion := hC_expansion t ht2 hfin z hz_in_diff
   rw [show logDerivZeta z = deriv riemannZeta z / riemannZeta z from rfl] at h_expansion
   exact h_expansion
 
