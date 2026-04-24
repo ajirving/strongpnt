@@ -376,8 +376,8 @@ lemma final_ineq2
     1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log (B / ‖f c‖) := by
   intro z hz
   let g : ℂ → ℂ := fun w => f (w + c) / f c
-  apply final_ineq1 (B / ‖f c‖) _ r1 r R R1 hr1pos hr1_lt_r hr_lt_R1 hR1_lt_R hR
-  · exact (fc_analytic_normalized c f h_analytic h_nonzero).1
+  apply final_ineq1 (B / ‖f c‖) _ r1 r R R1 hr1pos hr1_lt_r hr_lt_R1 hR1_lt_R
+  · exact (fc_analytic_normalized c f h_analytic h_nonzero).1.mono (by gcongr)
   · exact (fc_analytic_normalized c f h_analytic h_nonzero).2
   · apply fc_bound B R c f
     intro w hw
