@@ -204,24 +204,6 @@ lemma lem_explicit2Real :
   simp only [Complex.ofReal_mul] at h_bound
   exact h_bound
 
-lemma lem_sumrho1 (t : ℝ) (δ : ℝ) :
-    (Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t))
-        (fun rho1 : ℂ =>
-                    (analyticOrderNatAt riemannZeta rho1 : ℂ) /
-                      (((1 : ℂ) + δ + t * Complex.I) - rho1))).re =
-    Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t))
-    (fun rho1 : ℂ =>
-                    ((analyticOrderNatAt riemannZeta rho1 : ℂ) /
-                      (((1 : ℂ) + δ + t * Complex.I) - rho1)).re) := by
-  exact Complex.re_sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t)) _
-
-lemma lem_sumrho2 (t : ℝ) (delta : ℝ) :
-    (Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t)))
-        (fun rho1 : ℂ => (analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + (2 * t) * Complex.I) - rho1))).re =
-    Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t)))
-    (fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + (2 * t) * Complex.I) - rho1)).re) := by
-  rw [Complex.re_sum]
-
 lemma lem_Re1deltatge0 (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
 (1 / ((1 : ℂ) + delta + t * Complex.I - rho1)).re ≥ 0 := by
   simp
@@ -268,8 +250,7 @@ Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t))) (fun rho1 :
 lemma lem_sumrho2ge02 (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
     (Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t)))
 (fun rho1 : ℂ => (analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + (2 * t) * Complex.I) - rho1))).re ≥ 0 := by
-  -- Apply lem_sumrho2 to rewrite the real part of the sum as the sum of real parts
-  rw [lem_sumrho2 t delta]
+  rw [Complex.re_sum]
   -- Apply lem_sumrho2ge to show the sum of real parts is ≥ 0
   exact lem_sumrho2ge t delta hdelta
 
@@ -299,9 +280,7 @@ lemma lem_explicit2Real2 :
   have hS_nonneg : 0 ≤ Sre := by
     -- Start from the nonnegativity of the real part of the complex sum
     have h0 := lem_sumrho2ge02 t δ hδ.1
-    -- Rewrite to the sum of real parts
-    -- lem_sumrho2 rewrites (sum complex).re to sum of reals
-    simpa [s, S, Sre, lem_sumrho2 t δ] using h0
+    simpa [s, S, Sre] using h0
   -- From |a - b| ≤ M get the left inequality
   have h_left : -(C * Real.log (abs (2 * t) + 2)) ≤ (logDerivZeta s).re - Sre :=
     (abs_le.mp h_bound).1
@@ -648,9 +627,7 @@ lemma lem_Z1splitge3 (delta : ℝ) (hdelta : delta > 0) (sigma t : ℝ) (rho : �
   (h_rho_eq : rho = sigma + t * Complex.I) (h_rho_in_zeroZ : rho ∈ zeroZ)
   (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint t) :
 (Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t)) (fun rho1 : ℂ => (analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + t * Complex.I) - rho1)) ).re ≥ 1 / ((1 : ℝ) + delta - sigma) := by
-  -- Apply lem_sumrho1 to convert the real part of the sum to the sum of real parts
-  rw [lem_sumrho1 t delta]
-
+  rw [Complex.re_sum]
   -- Extract rho.im = t and rho.re = sigma from h_rho_eq
   have h_rho_im : rho.im = t := by
     rw [h_rho_eq]
@@ -733,11 +710,10 @@ lemma Z1bound :
       have : s = s.re + s.im * Complex.I := by simp [Complex.re_add_im]
       simpa [sigma, hs.2] using this
     -- Real-part of the complex sum equals Sre
-    have hsum_rew := lem_sumrho1 t delta
     have h_sum_ge' :=
       lem_Z1splitge3 delta hdelta.1 sigma t s h_rho_eq hs.1 hmem
     have h_sum_ge : Sre ≥ 1 / ((1 : ℝ) + delta - sigma) := by
-      simpa [sp, S, Sre, hsum_rew] using h_sum_ge'
+      simpa [sp, S, Sre] using h_sum_ge'
     -- Chain inequalities: -(logDerivZeta sp).re ≤ C0*log - Sre ≤ C0*log - 1/(...)
     have h1 : (-(logDerivZeta sp)).re ≤ C0 * Real.log (abs t + 2) - (1 / ((1 : ℝ) + delta - sigma)) := by
       have : (1 / ((1 : ℝ) + delta - sigma)) ≤ Sre := h_sum_ge
