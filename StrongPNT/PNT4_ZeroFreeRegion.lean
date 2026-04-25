@@ -174,37 +174,10 @@ lemma lem_explicit1RealReal :
           ≤ C * Real.log (|t| + 2) := by
   rcases lem_explicit1deltat with ⟨C, hCpos, hE⟩
   refine ⟨C, hCpos, ?_⟩
-  intro t ht δ hδ
-  -- Abbreviations
-  let s : ℂ := (1 : ℂ) + (δ : ℝ) + (t : ℝ) * Complex.I
-  let S : Finset ℂ := Set.Finite.toFinset (ZetaZerosNearPoint_finite t)
-  let g : ℂ → ℂ := fun rho1 : ℂ =>
-    (analyticOrderNatAt riemannZeta rho1 : ℂ) / (s - rho1)
-  -- Complex bound from lem_explicit1deltat
-  have ht' : ‖logDerivZeta s - ∑ rho1 ∈ S, g rho1‖
-      ≤ C * Real.log (abs t + 2) := by
-    -- Use lem_explicit1deltat with norm symmetry
-    have h_app := hE t ht δ hδ
-    rw [norm_sub_rev] at h_app
-    exact h_app
-  -- Real part of the difference
-  have hleft_eq :
-      abs ((logDerivZeta s).re - ∑ rho1 ∈ S, (g rho1).re)
-        = abs ((logDerivZeta s - ∑ rho1 ∈ S, g rho1).re) := by
-    simp [Complex.sub_re, Complex.re_sum]
-  -- |Re z| ≤ |z|
-  have hbound :
-      abs ((logDerivZeta s - ∑ rho1 ∈ S, g rho1).re)
-        ≤ ‖logDerivZeta s - ∑ rho1 ∈ S, g rho1‖ := by
-    simpa using Complex.abs_re_le_norm (logDerivZeta s - ∑ rho1 ∈ S, g rho1)
-  -- Combine
-  have hfinal :
-      abs ((logDerivZeta s - ∑ rho1 ∈ S, g rho1).re)
-        ≤ C * Real.log (abs t + 2) :=
-    le_trans hbound ht'
-  -- Replace abbreviations and note |t| = abs t by rfl
-  have hnorm : |t| = abs t := rfl
-  simpa [s, S, g, hleft_eq, hnorm] using hfinal
+  peel hE with t ht δ hδ hE
+  rw [← Complex.re_sum, ← Complex.sub_re]
+  grw [Complex.abs_re_le_norm]
+  rwa [norm_sub_rev]
 
 -- Updated lem_explicit2Real
 lemma lem_explicit2Real :
