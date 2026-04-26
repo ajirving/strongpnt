@@ -214,22 +214,9 @@ lemma lem_Re1deltatge0m (delta : ℝ) (hdelta : delta > 0) (t : ℝ)
   (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
   ((analyticOrderNatAt riemannZeta rho1 : ℂ) /
     (((1 : ℂ) + delta + t * Complex.I) - rho1)).re ≥ 0 := by
-  -- Set n = analyticOrderNatAt riemannZeta rho1
-  let n := analyticOrderNatAt riemannZeta rho1
-  let z := ((1 : ℂ) + delta + t * Complex.I) - rho1
-
-  -- The key insight: (n : ℂ) / z = n • (1/z)
-  -- And by Complex.re_nsmul: (n • w).re = n • w.re
-  have h_eq : (n : ℂ) / z = n • (1/z) := by
-    rw [nsmul_eq_mul]
-    simp [div_eq_mul_inv]
-
-  rw [h_eq, Complex.re_nsmul]
-
-  -- Now we have n • (1/z).re ≥ 0
-  -- Since (1/z).re ≥ 0 by lem_Re1deltatge0 and n ≥ 0 (natural number)
-  apply nsmul_nonneg
-  exact lem_Re1deltatge0 delta hdelta t rho1 h_rho1_in_Zt
+  simp [div_eq_mul_inv]
+  refine mul_nonneg (by positivity) <| mul_nonneg ?_ (inv_nonneg.mpr (Complex.normSq_nonneg _))
+  linarith [lem_sigmale1Zt t rho1 h_rho1_in_Zt]
 
 lemma lem_Re1delta2tge0 (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint (2 * t)) :
 ((analyticOrderNatAt riemannZeta rho1 : ℂ) / ((1 : ℂ) + delta + (2 * t) * Complex.I - rho1)).re ≥ 0 := by
