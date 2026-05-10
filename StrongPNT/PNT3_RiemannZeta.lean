@@ -197,79 +197,17 @@ noncomputable def logDerivZeta (s : ℂ) : ℂ := deriv riemannZeta s / riemannZ
 def zerosetKfRc (R : ℝ) (c : ℂ) (f : ℂ → ℂ) : Set ℂ :=
   {ρ : ℂ | ρ ∈ Metric.closedBall c R ∧ f ρ = 0}
 
--- Lemma 1: zetadiffAtnot1
-lemma zetadiffAtnot1 : ∀ s : ℂ, s ≠ 1 → DifferentiableAt ℂ riemannZeta s :=
-  fun _ => differentiableAt_riemannZeta
-
--- Lemma 4: DiffAtOn
-lemma DiffAtOn {T : Set ℂ} {g : ℂ → ℂ} :
-    (∀ s ∈ T, DifferentiableAt ℂ g s) → DifferentiableOn ℂ g T := by
-  intro h s hs
-  exact (h s hs).differentiableWithinAt
-
--- Lemma 5: DiffOnanalOnNhd
-lemma DiffOnanalOnNhd {T : Set ℂ} (hT : IsOpen T) {g : ℂ → ℂ} :
-    DifferentiableOn ℂ g T → AnalyticOnNhd ℂ g T := by
-  intro hdiff
-  exact hdiff.analyticOnNhd hT
-
--- Lemma 6: DiffAtallanalOnNhd
-lemma DiffAtallanalOnNhd {T : Set ℂ} (hT : IsOpen T) {g : ℂ → ℂ} :
-    (∀ s ∈ T, DifferentiableAt ℂ g s) → AnalyticOnNhd ℂ g T := by
-  intro hdiff
-  apply DiffOnanalOnNhd hT
-  exact DiffAtOn hdiff
-
 -- Lemma 7: zetaanalOnnot1
 lemma zetaanalOnnot1 : AnalyticOnNhd ℂ riemannZeta {s : ℂ | s ≠ 1} := by
-  apply DiffAtallanalOnNhd
-  · apply isOpen_compl_singleton
-  · exact zetadiffAtnot1
-
-lemma I_mul_ofReal_im (t : ℝ) : (I * ↑t).im = t := by
-  have h1 : (I * (↑t : ℂ)).im = (↑t : ℂ).re := Complex.I_mul_im (↑t : ℂ)
-  rw [h1]
-  simp [Complex.ofReal_re]
-
-lemma complex_im_sub_I_mul (a : ℂ) (t : ℝ) : (a - I * t).im = a.im - t := by
-  rw [Complex.sub_im]
-  rw [I_mul_ofReal_im]
+  exact DifferentiableOn.analyticOnNhd (fun s hs ↦ (differentiableAt_riemannZeta (by simp_all)).differentiableWithinAt)  isOpen_compl_singleton
 
 lemma D1cinTt_pre (t : ℝ) (ht : |t| > 1) :
     ∀ s ∈ closedBall (3/2 + I * t : ℂ) 1, s ≠ 1 := by
-  intro s hs
-  by_contra h
-  -- h : s = 1, hs : s ∈ closedBall (3/2 + I * t) 1
-  rw [h] at hs
-  -- Now hs : 1 ∈ closedBall (3/2 + I * t) 1
-  rw [mem_closedBall] at hs
-  -- hs : dist 1 (3/2 + I * t) ≤ 1
-  rw [Complex.dist_eq] at hs
-  -- hs : ‖1 - (3/2 + I * t)‖ ≤ 1
-
-  -- Simplify 1 - (3/2 + I * t) = -1/2 - I * t
-  have h1 : (1 : ℂ) - (3/2 + I * t) = -1/2 - I * t := by ring
-  rw [h1] at hs
-
-  -- The imaginary part of (-1/2 - I * t) is -t using the helper lemma
-  have h2 : (-1/2 - I * t : ℂ).im = -t := by
-    have : (-1/2 - I * t : ℂ) = (-1/2 : ℂ) - I * t := by ring
-    rw [this]
-    rw [complex_im_sub_I_mul]
-    simp [Complex.ofReal_im]
-
-  -- Use the fact that |z| ≥ |Im(z)|
-  have h3 : ‖(-1/2 - I * t : ℂ)‖ ≥ |(-1/2 - I * t : ℂ).im| := Complex.abs_im_le_norm _
-
-  -- So ‖(-1/2 - I * t)‖ ≥ |-t| = |t|
-  rw [h2] at h3
-  rw [abs_neg] at h3
-
-  -- Since |t| > 1 and |t| ≤ ‖(-1/2 - I * t)‖, we have ‖(-1/2 - I * t)‖ > 1
-  have h4 : ‖(-1/2 - I * t : ℂ)‖ > 1 := lt_of_lt_of_le ht h3
-
-  -- This contradicts hs : ‖-1/2 - I * t‖ ≤ 1
-  linarith [h4, hs]
+  intro s hs h
+  simp [Complex.dist_eq, h] at hs
+  have := le_trans (Complex.abs_im_le_norm (1 - (3 / 2 + I * ↑t))) hs
+  simp [I] at this
+  linarith
 
 -- Lemma 10: D1cinTt
 lemma D1cinTt (t : ℝ) (ht : |t| > 1) :
@@ -284,55 +222,18 @@ lemma zetaanalOnD1c (t : ℝ) (ht : |t| > 1) :
   exact D1cinTt t ht
 
 
--- Lemma 12: sigmageq1
-lemma sigmageq1 (s : ℂ) (hs : s.re > 1) : riemannZeta s ≠ 0 :=
-  riemannZeta_ne_zero_of_one_lt_re hs
-
 -- Lemma 13: zetacnot0
-
-lemma Complex_I_mul_ofReal_re (r : ℝ) : (I * (r : ℂ)).re = 0 := by
-  have h : (I * (r : ℂ)).re = -(r : ℂ).im := Complex.I_mul_re (r : ℂ)
-  rw [h]
-  simp
-
-lemma re_real_add_I_mul_gt (a b : ℝ) (h : a > 1) : (a + I * b).re > 1 := by
-  rw [Complex.add_re]
-  rw [Complex.ofReal_re]
-  rw [Complex_I_mul_ofReal_re]
-  simp
-  exact h
-
 lemma zetacnot0 (t : ℝ) : riemannZeta (3/2 + I * t) ≠ 0 := by
-  apply sigmageq1
-  apply re_real_add_I_mul_gt
+  apply riemannZeta_ne_zero_of_one_lt_re
+  simp [I]
   norm_num
 
 -- Lemma: fc_analytic_normalized
 lemma fc_analytic_normalized (c : ℂ) (f : ℂ → ℂ)
     (h_analytic : AnalyticOnNhd ℂ f (closedBall c 1)) (h_nonzero : f c ≠ 0) :
     (AnalyticOnNhd ℂ (fun z => f (z + c) / f c) (closedBall (0 : ℂ) 1)) ∧ (fun z => f (z + c) / f c) 0 = 1 := by
-  constructor
-  · -- First part: show AnalyticOnNhd
-    apply AnalyticOnNhd.div
-    · -- Show f ∘ (· + c) is analytic on closedBall 0 1
-      apply AnalyticOnNhd.comp h_analytic
-      · -- Show · + c is analytic
-        intro z _
-        exact analyticAt_id.add analyticAt_const
-      · -- Show · + c maps closedBall 0 1 to closedBall c 1
-        intro z hz
-        rw [mem_closedBall] at hz ⊢
-        rw [Complex.dist_eq] at hz ⊢
-        -- Goal: ‖z + c - c‖ ≤ 1, have: ‖z - 0‖ ≤ 1
-        convert hz using 1
-        ring_nf
-    · -- Show constant function f c is analytic
-      exact analyticOnNhd_const
-    · -- Show f c ≠ 0 everywhere
-      intro z _
-      exact h_nonzero
-  · -- Second part: show evaluation at 0 equals 1
-    simpa
+  refine ⟨AnalyticOnNhd.div ?_ analyticOnNhd_const (by simp_all), (by simpa)⟩
+  exact h_analytic.comp (analyticOnNhd_id.add analyticOnNhd_const) (fun _ _ ↦ (by simp_all))
 
 lemma frac_cancel_const {x y c : ℂ} (hc : c ≠ 0) (hy : y ≠ 0) : (x / c) / (y / c) = x / y := by
   field_simp [hc, hy]
@@ -342,60 +243,27 @@ lemma fc_bound (B : ℝ) (R : ℝ) (c : ℂ) (f : ℂ → ℂ)
     (h_bound : ∀ z ∈ closedBall c R, ‖f z‖ ≤ B) :
     ∀ z ∈ closedBall (0 : ℂ) R, ‖(fun w => f (w + c) / f c) z‖ ≤ B / ‖f c‖ := by
   intro z hz
-  have hz' : ‖z‖ ≤ R := by
-    simpa [mem_closedBall, Complex.dist_eq] using hz
-  have hz_plus : z + c ∈ closedBall c R := by
-    have : ‖(z + c) - c‖ ≤ R := by simpa [add_sub_cancel] using hz'
-    simpa [mem_closedBall, Complex.dist_eq] using this
-  have hfb : ‖f (z + c)‖ ≤ B := h_bound (z + c) hz_plus
-  have hnorm : ‖f (z + c) / f c‖ = ‖f (z + c)‖ / ‖f c‖ := by
-    simp [div_eq_mul_inv, norm_mul, norm_inv]
-  have : ‖f (z + c)‖ / ‖f c‖ ≤ B / ‖f c‖ :=
-    div_le_div_of_nonneg_right hfb (norm_nonneg _)
-  simpa [hnorm] using this
+  simp
+  gcongr
+  apply h_bound
+  simp_all
 
 -- Lemma: fc_zeros (relation between zeros of f_c and zeros of f)
 lemma fc_zeros (r : ℝ) (c : ℂ) (f : ℂ → ℂ) (h_nonzero : f c ≠ 0) :
     (zerosetKfRc r (0 : ℂ) (fun z => f (z + c) / f c)) = (fun ρ => ρ - c) '' (zerosetKfRc r c f) := by
   ext ρ'; constructor
   · intro hmem
-    rcases hmem with ⟨hball, hzero⟩
-    -- From f (ρ' + c) / f c = 0 and h_nonzero, deduce f (ρ' + c) = 0
-    have hprod : f (ρ' + c) * (f c)⁻¹ = 0 := by simpa [div_eq_mul_inv] using hzero
-    have hnum0 : f (ρ' + c) = 0 := by
-      rcases mul_eq_zero.mp hprod with hnum | hinv
-      · exact hnum
-      · have : (f c)⁻¹ ≠ 0 := inv_ne_zero h_nonzero
-        exact (this hinv).elim
-    refine ⟨ρ' + c, ?_, ?_⟩
-    · -- Show ρ' + c ∈ zerosetKfRc r c f
-      have hdist0 : dist ρ' (0 : ℂ) ≤ r := by simpa [mem_closedBall] using hball
-      have hdist1 : dist (ρ' + c) c ≤ r := by
-        simpa [Complex.dist_eq, add_sub_cancel] using hdist0
-      have hmem_ball : ρ' + c ∈ closedBall c r := by
-        simpa [mem_closedBall] using hdist1
-      exact And.intro hmem_ball hnum0
-    · -- (ρ' + c) - c = ρ'
-      simp
+    use ρ' + c
+    simp_all [zerosetKfRc]
   · intro him
-    rcases him with ⟨y, hy_mem, hy_eq⟩
-    -- y ∈ zerosetKfRc r c f and ρ' = y - c
-    subst hy_eq
-    rcases hy_mem with ⟨hy_ball, hy_zero⟩
-    refine And.intro ?_ ?_
-    · -- (y - c) ∈ closedBall 0 r
-      have hdist : dist y c ≤ r := by simpa [mem_closedBall] using hy_ball
-      have hdist0 : dist (y - c) (0 : ℂ) ≤ r := by
-        simpa [Complex.dist_eq, sub_zero] using hdist
-      simpa [mem_closedBall] using hdist0
-    · -- f ((y - c) + c) / f c = 0
-      simp [sub_add_cancel, hy_zero]
+    simp_all [zerosetKfRc, Complex.dist_eq]
+    rcases him with ⟨x, hx1, rfl⟩
+    simp_all
 
 -- Lemma: fc_m_order (orders of zeros are preserved under the shift)
 
 lemma analyticOrderAt_mul_const_eq (f : ℂ → ℂ) (a z0 : ℂ) (ha : a ≠ 0) :
     analyticOrderAt (fun z => f z * a) z0 = analyticOrderAt f z0 := by
-  classical
   -- Rewrite right-multiplication by a as left-multiplication
   have hcomm : (fun z => f z * a) = (fun z => a * f z) := by
     funext z; simp [mul_comm]
@@ -404,146 +272,38 @@ lemma analyticOrderAt_mul_const_eq (f : ℂ → ℂ) (a z0 : ℂ) (ha : a ≠ 0)
     simp [hcomm]
   by_cases hf : AnalyticAt ℂ f z0
   · -- Analytic case: use additivity of analytic order under multiplication
-    have hconst : AnalyticAt ℂ (fun _ : ℂ => a) z0 := by
-      simpa using (analyticAt_const : AnalyticAt ℂ (fun _ : ℂ => a) z0)
     have hadd : analyticOrderAt (fun z => a * f z) z0
         = analyticOrderAt (fun _ : ℂ => a) z0 + analyticOrderAt f z0 := by
-      simpa using (analyticOrderAt_mul hconst hf)
+      exact analyticOrderAt_mul analyticAt_const hf
     -- order of a nonzero constant is zero
     have hconst_zero : analyticOrderAt (fun _ : ℂ => a) z0 = 0 := by
-      have hiff := (AnalyticAt.analyticOrderAt_eq_zero hconst)
-      have hval : (fun _ : ℂ => a) z0 ≠ 0 := by simpa using ha
-      exact hiff.mpr hval
-    calc
-      analyticOrderAt (fun z => f z * a) z0
-          = analyticOrderAt (fun z => a * f z) z0 := hrew
-      _ = analyticOrderAt (fun _ : ℂ => a) z0 + analyticOrderAt f z0 := hadd
-      _ = 0 + analyticOrderAt f z0 := by simp [hconst_zero]
-      _ = analyticOrderAt f z0 := by simp
-  · -- Non-analytic case: (a * f) is also non-analytic since a ≠ 0
-    have hnot : ¬ AnalyticAt ℂ (fun z => a * f z) z0 := by
-      intro hmul
-      have hconst : AnalyticAt ℂ (fun _ : ℂ => a) z0 := by
-        simpa using (analyticAt_const : AnalyticAt ℂ (fun _ : ℂ => a) z0)
-      have hval : (fun _ : ℂ => a) z0 ≠ 0 := by simpa using ha
-      -- use the smul equivalence with a constant nonzero scalar
-      have hiff := (analyticAt_iff_analytic_fun_smul (h₁f := hconst) (h₂f := hval)
-                        (g := f) (z := z0))
-      have hsmul : AnalyticAt ℂ (fun z => (fun _ : ℂ => a) z • f z) z0 := by
-        -- In ℂ, smul is multiplication
-        simpa [smul_eq_mul] using hmul
-      have : AnalyticAt ℂ f z0 := hiff.mpr hsmul
-      exact hf this
-    calc
-      analyticOrderAt (fun z => f z * a) z0
-          = analyticOrderAt (fun z => a * f z) z0 := hrew
-      _ = 0 := by simp [analyticOrderAt, hnot]
-      _ = analyticOrderAt f z0 := by simp [analyticOrderAt, hf]
+      exact AnalyticAt.analyticOrderAt_eq_zero analyticAt_const|>.mpr ha
+    rw [hrew, hadd, hconst_zero, zero_add]
+  · rw [hrew, analyticOrderAt_eq_zero.mpr, analyticOrderAt_eq_zero.mpr]
+    · simp [hf]
+    · left
+      contrapose hf
+      exact analyticAt_iff_analytic_fun_mul analyticAt_const ha|>.mpr hf
 
 lemma fc_m_order (c : ℂ) (f : ℂ → ℂ) (h_nonzero : f c ≠ 0)
     {ρ' : ℂ} :
     analyticOrderAt (fun z => f (z + c) / f c) ρ' = analyticOrderAt f (ρ' + c) := by
-  classical
-  -- Unnormalized translated function
-  set g0 : ℂ → ℂ := fun z => f (z + c) with hg0
-  -- Remove the constant factor using invariance under right-multiplication by a nonzero constant
-  have hconst : analyticOrderAt (fun z => g0 z * (1 / f c)) ρ' = analyticOrderAt g0 ρ' := by
-    have hne : (1 / f c) ≠ 0 := one_div_ne_zero h_nonzero
-    simpa using (analyticOrderAt_mul_const_eq (f := g0) (a := (1 / f c)) (z0 := ρ') hne)
-  have hconst_rewrite : analyticOrderAt (fun z => f (z + c) / f c) ρ'
-        = analyticOrderAt (fun z => g0 z * (1 / f c)) ρ' := by
-    have : (fun z => f (z + c) / f c) = (fun z => g0 z * (1 / f c)) := by
-      funext z; simp [g0, hg0, div_eq_mul_inv, mul_comm]
-    simp [this]
-  -- Prove translation invariance for g0
-  have htrans : analyticOrderAt g0 ρ' = analyticOrderAt f (ρ' + c) := by
-    -- Cases on analyticity of f at ρ' + c
-    by_cases hfA : AnalyticAt ℂ f (ρ' + c)
-    · -- Then g0 is analytic at ρ' by composition with addition
-      have h_add : AnalyticAt ℂ (fun z : ℂ => z + c) ρ' := by
-        simpa using (AnalyticAt.add (analyticAt_id : AnalyticAt ℂ (fun z : ℂ => z) ρ')
-                                    (analyticAt_const : AnalyticAt ℂ (fun _ : ℂ => c) ρ'))
-      have hgA : AnalyticAt ℂ g0 ρ' := by
-        have : AnalyticAt ℂ f ((fun z : ℂ => z + c) ρ') := by simpa using hfA
-        simpa [g0, hg0] using (AnalyticAt.comp (g := f) (f := fun z : ℂ => z + c) (x := ρ') this h_add)
-      -- Consider whether g0 vanishes identically near ρ'
-      by_cases hgez : (∀ᶠ z in nhds ρ', g0 z = 0)
-      · -- Transport the eventual zero along w ↦ w - c to get eventual zero for f near ρ' + c
-        have hT_sub_cont : ContinuousAt (fun w : ℂ => w - c) (ρ' + c) := by
-          simpa using (ContinuousAt.sub (continuousAt_id : ContinuousAt (fun w : ℂ => w) (ρ' + c))
-                                        (continuousAt_const : ContinuousAt (fun _ : ℂ => c) (ρ' + c)))
-        have hT_sub : Tendsto (fun w : ℂ => w - c) (nhds (ρ' + c)) (nhds ρ') := by
-          simpa using (hT_sub_cont.tendsto)
-        have hEfw : ∀ᶠ w in nhds (ρ' + c), f w = 0 := by
-          have : ∀ᶠ w in nhds (ρ' + c), g0 (w - c) = 0 := hT_sub.eventually hgez
-          -- simplify g0 (w - c) to f w
-          simpa [g0, hg0, sub_add_cancel] using this
-        -- Conclude both analytic orders are ⊤ via the characterization
-        have hg_top : analyticOrderAt g0 ρ' = ⊤ :=
-          (analyticOrderAt_eq_top (f := g0) (z₀ := ρ')).2 hgez
-        have hf_top : analyticOrderAt f (ρ' + c) = ⊤ :=
-          (analyticOrderAt_eq_top (f := f) (z₀ := ρ' + c)).2 hEfw
-        simp [hg_top, hf_top]
-      · -- Not eventually zero: obtain a precise factorization and transfer it
-        have h_exists := (AnalyticAt.exists_eventuallyEq_pow_smul_nonzero_iff hgA).mpr hgez
-        rcases h_exists with ⟨n, φ, hφA, hφ_ne, hevent⟩
-        -- Push the event along w ↦ w - c
-        have hT_sub_cont : ContinuousAt (fun w : ℂ => w - c) (ρ' + c) := by
-          simpa using (ContinuousAt.sub (continuousAt_id : ContinuousAt (fun w : ℂ => w) (ρ' + c))
-                                        (continuousAt_const : ContinuousAt (fun _ : ℂ => c) (ρ' + c)))
-        have hT_sub : Tendsto (fun w : ℂ => w - c) (nhds (ρ' + c)) (nhds ρ') := by
-          simpa using (hT_sub_cont.tendsto)
-        have hevent_w : ∀ᶠ w in nhds (ρ' + c), f w
-              = (w - (ρ' + c)) ^ n * ((fun w => φ (w - c)) w) := by
-          have : ∀ᶠ w in nhds (ρ' + c), g0 (w - c)
-                    = ((w - c) - ρ') ^ n * φ (w - c) :=
-            hT_sub.eventually hevent
-          -- simplify ((w - c) + c) = w and ((w - c) - ρ') = w - (ρ' + c)
-          refine this.mono ?_
-          intro w hw
-          have hsubsimp : (w - c) - ρ' = w - (ρ' + c) := by ring
-          simpa [g0, hg0, hsubsimp] using hw
-        -- Define ψ(w) = φ (w - c) and check analyticity and nonvanishing at w0
-        have hψA : AnalyticAt ℂ (fun w => φ (w - c)) (ρ' + c) := by
-          have h_subA : AnalyticAt ℂ (fun w : ℂ => w - c) (ρ' + c) := by
-            simpa using (AnalyticAt.sub (analyticAt_id : AnalyticAt ℂ (fun z : ℂ => z) (ρ' + c))
-                                        (analyticAt_const : AnalyticAt ℂ (fun _ : ℂ => c) (ρ' + c)))
-          have hφA_at : AnalyticAt ℂ φ ((fun w : ℂ => w - c) (ρ' + c)) := by simpa using hφA
-          simpa using (AnalyticAt.comp (g := φ) (f := fun w => w - c) (x := (ρ' + c)) hφA_at h_subA)
-        have hψ_ne : (fun w => φ (w - c)) (ρ' + c) ≠ 0 := by
-          -- value at (ρ' + c) is φ ρ'
-          simpa using hφ_ne
-        -- Identify the orders using the finite order factorization
-        have hg_eq_n : analyticOrderAt g0 ρ' = n := by
-          exact (AnalyticAt.analyticOrderAt_eq_natCast (f := g0) (z₀ := ρ') hgA).mpr
-            ⟨φ, hφA, hφ_ne, hevent⟩
-        have hf_eq_n : analyticOrderAt f (ρ' + c) = n := by
-          exact (AnalyticAt.analyticOrderAt_eq_natCast (f := f) (z₀ := ρ' + c) hfA).mpr
-            ⟨(fun w => φ (w - c)), hψA, hψ_ne, hevent_w⟩
-        simp [hg_eq_n, hf_eq_n]
-    · -- If f is not analytic at ρ' + c, then g0 is not analytic at ρ' either
-      have hg_not : ¬ AnalyticAt ℂ g0 ρ' := by
-        intro hgA
-        -- Compose with w ↦ w - c to deduce analyticity of f at ρ' + c
-        have h_subA : AnalyticAt ℂ (fun w : ℂ => w - c) (ρ' + c) := by
-          simpa using (AnalyticAt.sub (analyticAt_id : AnalyticAt ℂ (fun z : ℂ => z) (ρ' + c))
-                                      (analyticAt_const : AnalyticAt ℂ (fun _ : ℂ => c) (ρ' + c)))
-        have hgA_at : AnalyticAt ℂ g0 ((ρ' + c) - c) := by simpa using hgA
-        have hcomp := (AnalyticAt.comp (g := g0) (f := fun w => w - c)
-                          (x := (ρ' + c)) hgA_at h_subA)
-        -- simplify composition to f
-        have : AnalyticAt ℂ (fun w : ℂ => g0 (w - c)) (ρ' + c) := by simpa using hcomp
-        have : AnalyticAt ℂ f (ρ' + c) := by
-          simpa [g0, hg0, sub_add_cancel] using this
-        exact hfA this
-      -- In the non-analytic case, both sides reduce to 0 by definition
-      simp [analyticOrderAt, hfA, hg_not]
-  -- Conclude by chaining the constant-factor reduction and the translation invariance
-  calc
-    analyticOrderAt (fun z => f (z + c) / f c) ρ'
-        = analyticOrderAt (fun z => g0 z * (1 / f c)) ρ' := hconst_rewrite
-    _ = analyticOrderAt g0 ρ' := hconst
-    _ = analyticOrderAt f (ρ' + c) := htrans
+  simp [div_eq_mul_inv]
+  rw [analyticOrderAt_mul_const_eq _ _ _ <| inv_ne_zero h_nonzero]
+  by_cases hfA : AnalyticAt ℂ f (ρ' + c)
+  · rw [(by rfl : (fun z ↦ f (z + c)) = (f ∘ fun z ↦ z + c)),
+      hfA.analyticOrderAt_comp (g := (fun z ↦  z + c)) (by fun_prop)]
+    simp
+    suffices analyticOrderAt (fun x ↦ x - ρ') ρ' = 1  by simp_all
+    apply AnalyticAt.analyticOrderAt_eq_natCast (by fun_prop)|>.mpr
+    exact ⟨(fun _ ↦ 1), analyticAt_const, (by simp), (by simp)⟩
+  · -- If f is not analytic at ρ' + c, then g0 is not analytic at ρ' either
+    have hg_not : ¬ AnalyticAt ℂ (fun z ↦ f (z + c)) ρ' := by
+      contrapose! hfA
+      convert hfA.comp_sub c
+      ring
+    -- In the non-analytic case, both sides reduce to 0 by definition
+    simp [analyticOrderAt, hfA, hg_not]
 
 -- Lemma: DminusK (characterization of points in shifted domain minus shifted zeros)
 lemma DminusK (r1 : ℝ) (R1 : ℝ) (c : ℂ) (f : ℂ → ℂ)
@@ -552,54 +312,8 @@ lemma DminusK (r1 : ℝ) (R1 : ℝ) (c : ℂ) (f : ℂ → ℂ)
              z + c ∈ closedBall c r1 \ zerosetKfRc R1 c f := by
   intro z
   constructor
-  · -- Forward direction: z ∈ D_{r1} \ K_{f_c}(R1) → z+c ∈ D_{r1}(c) \ K_f(R1;c)
-    intro ⟨hz_ball, hz_not_zero⟩
-    constructor
-    · -- Show z + c ∈ closedBall c r1
-      have hdist : dist z (0 : ℂ) ≤ r1 := by simpa [mem_closedBall] using hz_ball
-      have hdist_c : dist (z + c) c ≤ r1 := by
-        simpa [Complex.dist_eq, add_sub_cancel] using hdist
-      simpa [mem_closedBall] using hdist_c
-    · -- Show z + c ∉ zerosetKfRc R1 c f
-      intro h_contra
-      apply hz_not_zero
-      -- From z + c ∈ zerosetKfRc R1 c f, show z ∈ zerosetKfRc R1 0 (fun w => f (w + c) / f c)
-      rcases h_contra with ⟨hz_c_ball, hz_c_zero⟩
-      constructor
-      · -- Show z ∈ closedBall 0 R1
-        have hdist_c : dist (z + c) c ≤ R1 := by simpa [mem_closedBall] using hz_c_ball
-        have hdist_0 : dist z (0 : ℂ) ≤ R1 := by
-          simpa [Complex.dist_eq, add_sub_cancel] using hdist_c
-        simpa [mem_closedBall] using hdist_0
-      · -- Show f (z + c) / f c = 0
-        have : f (z + c) = 0 := hz_c_zero
-        simp [this, zero_div]
-  · -- Reverse direction: z+c ∈ D_{r1}(c) \ K_f(R1;c) → z ∈ D_{r1} \ K_{f_c}(R1)
-    intro ⟨hz_c_ball, hz_c_not_zero⟩
-    constructor
-    · -- Show z ∈ closedBall 0 r1
-      have hdist_c : dist (z + c) c ≤ r1 := by simpa [mem_closedBall] using hz_c_ball
-      have hdist_0 : dist z (0 : ℂ) ≤ r1 := by
-        simpa [Complex.dist_eq, add_sub_cancel] using hdist_c
-      simpa [mem_closedBall] using hdist_0
-    · -- Show z ∉ zerosetKfRc R1 0 (fun w => f (w + c) / f c)
-      intro h_contra
-      apply hz_c_not_zero
-      -- From z ∈ zerosetKfRc R1 0 (fun w => f (w + c) / f c), show z + c ∈ zerosetKfRc R1 c f
-      rcases h_contra with ⟨hz_ball, hz_zero⟩
-      constructor
-      · -- Show z + c ∈ closedBall c R1
-        have hdist_0 : dist z (0 : ℂ) ≤ R1 := by simpa [mem_closedBall] using hz_ball
-        have hdist_c : dist (z + c) c ≤ R1 := by
-          simpa [Complex.dist_eq, add_sub_cancel] using hdist_0
-        simpa [mem_closedBall] using hdist_c
-      · -- Show f (z + c) = 0
-        have h_div_zero : f (z + c) / f c = 0 := hz_zero
-        have h_mul_zero : f (z + c) * (f c)⁻¹ = 0 := by simpa [div_eq_mul_inv] using h_div_zero
-        cases' mul_eq_zero.mp h_mul_zero with h_num h_inv
-        · exact h_num
-        · have : (f c)⁻¹ ≠ 0 := inv_ne_zero h_nonzero
-          exact (this h_inv).elim
+  · simp +contextual [zerosetKfRc]
+  · simp_all [zerosetKfRc]
 
 lemma shifted_zeros_correspondence (R1 : ℝ) (c z : ℂ)
     (f : ℂ → ℂ) (h_nonzero : f c ≠ 0)
@@ -622,11 +336,7 @@ lemma shifted_zeros_correspondence (R1 : ℝ) (c z : ℂ)
 
   -- Show injectivity: if ρ₁ - c = ρ₂ - c then ρ₁ = ρ₂
   · intro ρ₁ hρ₁ ρ₂ hρ₂ h_eq
-    -- From ρ₁ - c = ρ₂ - c, we get ρ₁ = ρ₂
-    have : ρ₁ = ρ₁ - c + c := by ring
-    rw [this, h_eq]
-    ring
-
+    grind
   -- Show surjectivity
   · intro ρ' hρ'
     simp only [Set.Finite.mem_toFinset] at hρ'
@@ -665,57 +375,16 @@ lemma final_ineq2
       ((analyticOrderNatAt (fun w => f (w + c) / f c) ρ) : ℂ) / (z - ρ)‖ ≤ (16 * r^2 / ((r - r1)^3) +
     1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log (B / ‖f c‖) := by
   intro z hz
-
-  -- Set up the normalized function
   let g : ℂ → ℂ := fun w => f (w + c) / f c
-
-  -- Basic inequalities
-  have hR_pos : 0 < R := by linarith [hr1pos, hr1_lt_r, hr_lt_R1, hR1_lt_R]
-  have hR1_pos : 0 < R1 := by linarith [hr1pos, hr1_lt_r, hr_lt_R1]
-  have h_norm_pos : 0 < ‖f c‖ := norm_pos_iff.mpr h_nonzero
-
-  -- Key: ‖f c‖ < B because c ∈ closedBall c R
-  have h_fc_bound_at_c : ‖f c‖ < B := by
-    apply h_bound
-    rw [mem_closedBall, dist_self]
-    exact le_of_lt hR_pos
-
-  -- This gives us 1 < B / ‖f c‖
-  have h_B_div_gt_one : 1 < B / ‖f c‖ := by
-    rw [one_lt_div h_norm_pos]
-    exact h_fc_bound_at_c
-
-  -- g satisfies the conditions for final_ineq1
-  have h_g_analytic : ∀ w ∈ closedBall (0 : ℂ) 1, AnalyticAt ℂ g w :=
-    (fc_analytic_normalized c f h_analytic h_nonzero).1
-
-  have h_g_zero : g 0 = 1 :=
-    (fc_analytic_normalized c f h_analytic h_nonzero).2
-
-  have h_g_bound : ∀ w ∈ closedBall (0 : ℂ) R, ‖g w‖ ≤ B / ‖f c‖ := by
-    apply fc_bound B R c f
+  apply final_ineq1 (B / ‖f c‖) _ r1 r R R1 hr1pos hr1_lt_r hr_lt_R1 hR1_lt_R
+  · exact (fc_analytic_normalized c f h_analytic h_nonzero).1.mono (by gcongr)
+  · exact (fc_analytic_normalized c f h_analytic h_nonzero).2
+  · apply fc_bound B R c f
     intro w hw
     exact le_of_lt (h_bound w hw)
-
-  -- Convert finite zero set condition
-  have h_zeroset_equiv : zerosetKfRc R1 (0 : ℂ) g = zerosetKfR R1 g := by
-    ext ρ
-    simp only [zerosetKfRc, zerosetKfR, mem_setOf_eq, mem_closedBall, Complex.dist_eq, sub_zero]
-
-  have h_g_finite : (zerosetKfR R1 g).Finite := by
-    rwa [← h_zeroset_equiv]
-
-  -- Apply final_ineq1 to g
-  have := final_ineq1 (B / ‖f c‖) h_B_div_gt_one r1 r R R1 hr1pos hr1_lt_r hr_lt_R1 hR1_lt_R hR
-    g h_g_analytic h_g_zero h_g_finite h_g_bound z
-
-  -- Convert the domain condition
-  have hz_domain : z ∈ closedBall (0 : ℂ) r1 \ zerosetKfR R1 g := by
-    rw [h_zeroset_equiv] at hz
-    exact hz
-
-  -- Apply and conclude
-  exact this hz_domain
+  · apply hz
+  · rw [one_lt_div <| norm_pos_iff.mpr h_nonzero]
+    exact h_bound _ (by simp; linarith)
 
 lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
     (r1 r R1 R : ℝ)
@@ -791,23 +460,6 @@ lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
   -- Replace derivative quotient by logDerivZeta
   simpa [logDerivZeta] using hineq2
 
---   let c := (3/2 : ℂ) + I * t
---   -- Apply log_Deriv_Expansion0 as mentioned in the informal proof
---   obtain ⟨C, hC_pos, hC⟩ := log_Deriv_Expansion0
---   use C
---   constructor
---   · exact hC_pos
---   · intro B hB_pos hB_bound hfin z hz
---     -- Apply the conditions from lem:zetaanalOnD1c and lem:zetacnot0
---     have h_analytic : AnalyticOnNhd ℂ riemannZeta (closedBall c 1) := by
---       apply zetaanalOnD1c
---       linarith [ht]
---     have h_nonzero : riemannZeta c ≠ 0 := zetacnot0 t
---     -- Expand logDerivZeta definition
---     rw [logDerivZeta]
---     -- Apply log_Deriv_Expansion0 directly with the required constraint now included
---     exact hC B hB_pos r R1 R hr hrR1 hR1R hR c riemannZeta h_analytic h_nonzero hB_bound hfin z hz
--- -- Lemma 16: zeta32lower
 
 lemma zeta32lower : ∃ a > 0, ∀ t : ℝ, ‖riemannZeta (3/2 + I * t)‖ ≥ a := by
   rcases zeta_low_332 with ⟨a, ha_pos, hbound⟩
@@ -1000,7 +652,7 @@ lemma Zeta1_Zeta_Expansion
     (r1 r : ℝ)
     (hr1_pos : 0 < r1) (hr1_lt_r : r1 < r) (hr_lt_R1 : r < 5 / (6 : ℝ)) :
     ∃ C > 1,
-    ∀ (t : ℝ) (_ : |t| > 3),
+    ∀ (t : ℝ) (_ : |t| > 2),
     let c := (3/2 : ℂ) + I * t;
     ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
     ∀ z ∈ closedBall c r1 \ zerosetKfRc (5 / (6 : ℝ)) c riemannZeta,
@@ -1057,7 +709,7 @@ lemma Zeta1_Zeta_Expansion
       add_le_add hα_le hβ_le
     simpa [K, mul_add, mul_one, add_comm, add_left_comm, add_assoc] using this
   -- Build the final constant C (independent of t)
-  let C : ℝ := max (Kcoeff * (1 + S / Real.log 3)) 2
+  let C : ℝ := max (Kcoeff * (1 + S / Real.log 2)) 2
   have hC_gt1 : 1 < C := by
     have : (1 : ℝ) < 2 := by norm_num
     exact lt_of_lt_of_le this (le_max_right _ _)
@@ -1083,36 +735,35 @@ lemma Zeta1_Zeta_Expansion
     rw [← hK_eq, ← hLS_eq]
     exact hineq1
   -- Bound (Real.log |t| + S) by (1 + S/log 3) * Real.log |t|
-  have hlog3pos : 0 < Real.log (3 : ℝ) := by
-    have : (1 : ℝ) < 3 := by norm_num
-    exact Real.log_pos this
+  have hlog2pos : 0 < Real.log (2 : ℝ) := by
+    exact Real.log_pos (by norm_num)
   -- Since |t| > 3, we have log 3 ≤ log |t|
   have hpos_t : 0 < |t| := lt_trans (by norm_num) ht
-  have hL_ge_log3' : Real.log 3 ≤ Real.log |t| := by
-    have hge : (3 : ℝ) ≤ |t| := le_of_lt ht
+  have hL_ge_log3' : Real.log 2 ≤ Real.log |t| := by
+    have hge : (2 : ℝ) ≤ |t| := le_of_lt ht
     exact Real.log_le_log (by norm_num) hge
-  have hratio_nonneg : 0 ≤ S / Real.log 3 := le_of_lt (div_pos hS_pos hlog3pos)
-  have hneq : Real.log 3 ≠ 0 := ne_of_gt hlog3pos
+  have hratio_nonneg : 0 ≤ S / Real.log 2 := le_of_lt (div_pos hS_pos hlog2pos)
+  have hneq : Real.log 2 ≠ 0 := ne_of_gt hlog2pos
 
   -- Key inequality: S ≤ (S / log 3) * log |t|
-  have hS_le : S ≤ (S / Real.log 3) * Real.log |t| := by
+  have hS_le : S ≤ (S / Real.log 2) * Real.log |t| := by
     -- Since log 3 ≤ log |t| and S/log 3 ≥ 0, we have (S/log 3) * log 3 ≤ (S/log 3) * log |t|
     -- But (S/log 3) * log 3 = S, so S ≤ (S/log 3) * log |t|
     calc S
-      = (S / Real.log 3) * Real.log 3 := by simp [div_mul_cancel, hneq]
-      _ ≤ (S / Real.log 3) * Real.log |t| := mul_le_mul_of_nonneg_left hL_ge_log3' hratio_nonneg
+      = (S / Real.log 2) * Real.log 2 := by simp [div_mul_cancel, hneq]
+      _ ≤ (S / Real.log 2) * Real.log |t| := mul_le_mul_of_nonneg_left hL_ge_log3' hratio_nonneg
 
-  have hsum_bound : Real.log |t| + S ≤ (1 + S / Real.log 3) * Real.log |t| := by
-    have hstep : Real.log |t| + S ≤ Real.log |t| + (S / Real.log 3) * Real.log |t| := by
+  have hsum_bound : Real.log |t| + S ≤ (1 + S / Real.log 2) * Real.log |t| := by
+    have hstep : Real.log |t| + S ≤ Real.log |t| + (S / Real.log 2) * Real.log |t| := by
       gcongr
     -- Real.log |t| + (S / Real.log 3) * Real.log |t| = (1 + S / Real.log 3) * Real.log |t|
-    have h_factor : Real.log |t| + (S / Real.log 3) * Real.log |t| = (1 + S / Real.log 3) * Real.log |t| := by ring
+    have h_factor : Real.log |t| + (S / Real.log 2) * Real.log |t| = (1 + S / Real.log 2) * Real.log |t| := by ring
     rw [← h_factor]
     exact hstep
   -- Chain: ≤ K*(1 + S/log 3) * log|t|
   have hineq3 : ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
         (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ)‖
-        ≤ K * ((1 + S / Real.log 3) * Real.log |t|) :=
+        ≤ K * ((1 + S / Real.log 2) * Real.log |t|) :=
     le_trans hineq2 (mul_le_mul_of_nonneg_left hsum_bound (by
       have hr2_nonneg : 0 ≤ r^2 := by
         have : 0 ≤ r * r := mul_nonneg (le_of_lt hr_pos) (le_of_lt hr_pos)
@@ -1122,23 +773,23 @@ lemma Zeta1_Zeta_Expansion
       have : 0 ≤ K := add_nonneg hterm1 (le_of_lt hA0_pos)
       exact this))
   -- Replace K by Kcoeff * (1/d + 1)
-  have hKcoeff : K * ((1 + S / Real.log 3) * Real.log |t|)
-      ≤ (Kcoeff * (1 / d + 1)) * ((1 + S / Real.log 3) * Real.log |t|) :=
+  have hKcoeff : K * ((1 + S / Real.log 2) * Real.log |t|)
+      ≤ (Kcoeff * (1 / d + 1)) * ((1 + S / Real.log 2) * Real.log |t|) :=
     mul_le_mul_of_nonneg_right hK_le (by
       have hLpos : 0 < Real.log |t| :=
         Real.log_pos (lt_trans (by norm_num) ht)
-      have hcoef_pos : 0 < 1 + S / Real.log 3 :=
-        add_pos_of_pos_of_nonneg (by norm_num) (le_of_lt (div_pos hS_pos hlog3pos))
-      have : 0 ≤ (1 + S / Real.log 3) * Real.log |t| :=
+      have hcoef_pos : 0 < 1 + S / Real.log 2 :=
+        add_pos_of_pos_of_nonneg (by norm_num) (le_of_lt (div_pos hS_pos hlog2pos))
+      have : 0 ≤ (1 + S / Real.log 2) * Real.log |t| :=
         le_of_lt (mul_pos hcoef_pos hLpos)
       simpa using this)
   -- Put everything together and rewrite into the target form using C
   have hfinal := le_trans hineq3 hKcoeff
   -- C was chosen so that C ≥ Kcoeff * (1 + S/log 3)
-  have hC_ge : Kcoeff * (1 + S / Real.log 3) ≤ C := by
+  have hC_ge : Kcoeff * (1 + S / Real.log 2) ≤ C := by
     exact le_max_left _ _
   -- Therefore RHS ≤ C * (1/d + 1) * log|t|
-  have : (Kcoeff * (1 / d + 1)) * ((1 + S / Real.log 3) * Real.log |t|)
+  have : (Kcoeff * (1 / d + 1)) * ((1 + S / Real.log 2) * Real.log |t|)
       ≤ C * (1 / d + 1) * Real.log |t| := by
     have hnonneg_term : 0 ≤ (1 / d + 1) * Real.log |t| := by
       have h1 : 0 ≤ 1 / d := le_of_lt (one_div_pos.mpr hd_pos)
