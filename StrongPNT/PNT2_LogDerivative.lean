@@ -397,7 +397,7 @@ lemma lem_mod_lower_bound_1 (R R1 : ℝ) (hR1_pos : 0 < R1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     ∏ ρ ∈ h_finite_zeros.toFinset,
       (R/R1 : ℝ) ^ analyticOrderNatAt f ρ ≥ 1 := by
-  refine Finset.one_le_prod _ fun z ↦ one_le_pow₀ ?_
+  refine Finset.one_le_prod fun z hz ↦ one_le_pow₀ ?_
   exact one_le_div hR1_pos|>.mpr hR1_lt_R.le
 
 theorem lem_mod_Bf_at_0_ge_1 (R R1 : ℝ) (hR1_pos : 0 < R1)
