@@ -1078,7 +1078,7 @@ lemma I4Bound {SmoothingF : ℝ → ℝ}
       rw[reThree, imOne] at temp
       ring_nf at temp ⊢
       rw[abs_of_neg, neg_neg] at temp
-      · have : (3 : NNReal) ≤ ‖↑σ₂ - ↑σ₂ * ↑x + (↑x - I * 3)‖₊ := by exact temp
+      · have : (3 : NNReal) ≤ ‖↑σ₂ - ↑σ₂ * ↑x + ↑x - I * 3‖₊ := by exact temp
         positivity
       · rw[neg_lt_zero]
         norm_num
@@ -1927,10 +1927,7 @@ theorem Strong_PNT : ∃ c > 0,
     iterate 5
       apply le_trans (by apply norm_add_le)
       gcongr
-    apply le_trans (by apply norm_add_le)
-    rw [(by ring : ‖I₁ ν ε X T‖ + ‖I₂ ν ε T X σ₁‖ + ‖I₃ ν ε T X σ₁‖ + ‖I₄ ν ε X σ₁ σ₂‖ =
-      (‖I₁ ν ε X T‖ + ‖I₂ ν ε T X σ₁‖) + (‖I₃ ν ε T X σ₁‖ + ‖I₄ ν ε X σ₁ σ₂‖))]
-    gcongr <;> apply le_trans (by apply norm_sub_le) <;> rfl
+    grw [norm_sub_le, norm_add_le, norm_sub_le]
   specialize h_main ε ⟨ε_pos, ε_lt_ε_main⟩
   have main : ‖𝓜 (fun x ↦ (Smooth1 ν ε x : ℂ)) 1 * X - X‖ ≤ C_main * ε * X := by
     nth_rewrite 2 [← one_mul X]

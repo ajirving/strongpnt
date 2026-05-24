@@ -480,6 +480,7 @@ lemma analyticOrderAt_pos_toNat_of_zero_of_analytic_not_eventually_zero {f : ℂ
     apply hne0
     -- rewrite analyticOrderAt in terms of n
     simp [hn.symm, hn0]
+    rfl
   -- Therefore 1 ≤ n
   have hposn : 1 ≤ n := Nat.succ_le_of_lt (Nat.pos_of_ne_zero hn_ne_zero)
   -- Conclude for toNat; rewrite using hn
@@ -912,7 +913,7 @@ lemma summable_of_support_singleton {α : Type*} [SeminormedAddCommGroup α] (f 
     exact Set.Finite.subset (Set.finite_singleton n₀) h_subset
 
   -- Use the fact that functions with finite support are summable
-  exact summable_of_finite_support h_finite_support
+  exact summable_of_hasFiniteSupport h_finite_support
 
 lemma summable_of_summable_add_sub {α : Type*} [SeminormedAddCommGroup α] (f g h : ℕ → α) (h_eq : f = g + h) (hf : Summable f) (hh : Summable h) : Summable g := by
   -- Since f = g + h, we have g = f - h
@@ -2331,6 +2332,7 @@ lemma riemannZeta_no_zeros_accumulate_at_one :
   -- This gives 1 < 1/2, which is a contradiction
   norm_num at h_bound
 
+set_option backward.isDefEq.respectTransparency false in
 lemma complex_minus_singleton_connected : IsPreconnected ({s : ℂ | s ≠ 1} : Set ℂ) := by
   -- The set {s : ℂ | s ≠ 1} is the complement of the singleton {1}
   have h_eq : {s : ℂ | s ≠ 1} = ({1} : Set ℂ)ᶜ := by
@@ -2382,9 +2384,7 @@ lemma riemannZeta_zeros_finite_of_compact (K : Set ℂ) (hK : IsCompact K) :
   -- and isolated points in a compact set must be finite
 
   -- Suppose for contradiction that the set of zeros is infinite
-  by_contra h_not_finite
-  push_neg at h_not_finite
-
+  by_contra! h_not_finite
   -- Let Z be the set of zeros in K
   let Z := {z ∈ K | riemannZeta z = 0}
 
@@ -2724,6 +2724,7 @@ lemma lem_DImt2d :
     rw [← diff_im]
     exact Complex.abs_im_le_norm _
   -- Combining with the ball constraint
+  rw [dist_eq_norm_sub] at hz
   have h2 : |z.im - t| ≤ 5/6 := le_trans h1 hz
   -- Use triangle inequality: since z.im = (z.im - t) + t, we have |z.im| ≤ |z.im - t| + |t|
   have h3 : |z.im| ≤ |z.im - t| + |t| := by
@@ -4173,7 +4174,7 @@ theorem thm_final_result :
       rw [← h_eq]
       exact hσ
 
-    by_cases h : σ ≥ 3/2
+    by_cases! h : σ ≥ 3/2
     · -- Case σ ≥ 3/2: use lem_logDerivZetalogt32
       have bound := hC₃₂ t ht σ h
       have hC_le : C₃₂ ≤ max C₀ C₃₂ := le_max_right _ _
@@ -4201,7 +4202,6 @@ theorem thm_final_result :
           apply mul_le_mul_of_nonneg_right hC_le (sq_nonneg _)
 
     · -- Case σ < 3/2: use lem_logDerivZetalogt0
-      push_neg at h
       have h_conditions : 1 - deltaz_t t ≤ σ ∧ σ ≤ 3/2 ∧ t = t := by
         exact ⟨hσ', le_of_lt h, rfl⟩
       have bound := hC₀ t ht ⟨σ, t⟩ h_conditions
