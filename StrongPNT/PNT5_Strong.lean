@@ -463,17 +463,7 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
 
   have MellinBound : ∀ (t : ℝ) , ‖𝓜 (fun x ↦ (Smooth1 SmoothingF ε x : ℂ)) (σ₁ + t * I)‖ ≤ CM * (ε * ‖(σ₁ + t * I)‖ ^ 2)⁻¹ := by
     intro t
-    apply CMhyp σ₁
-    exact σ₁pos
-    dsimp
-    ring_nf
-    rfl
-    dsimp
-    ring_nf
-    linarith
-    exact εgt0
-    exact εlt1
-
+    exact CMhyp σ₁ σ₁pos _ (by simp) (by simp; linarith) _ εgt0 εlt1
   have logzetabnd : ∀ t : ℝ, 3 < |t| ∧ |t| < T → ‖ζ' (↑σ₁ + ↑t * I) / ζ (↑σ₁ + ↑t * I)‖ ≤ Cζ * Real.log (|t| : ℝ) ^ 9 := by
     intro t tbounds
     obtain ⟨tgt3, tltT⟩ := tbounds
@@ -536,8 +526,7 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
     intro t
     have Xpos : 0 < X := by linarith
     have : ((↑σ₁ + ↑t * I).re) = σ₁ := by
-      dsimp
-      ring_nf
+      simp
     nth_rw 2[← this]
     apply Complex.norm_cpow_eq_rpow_re_of_pos Xpos
 

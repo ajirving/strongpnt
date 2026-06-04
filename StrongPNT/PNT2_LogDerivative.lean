@@ -1222,7 +1222,7 @@ lemma blaschke_prod_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
       exact hpair.2
     -- Use DifferentiableAt.finset_prod and identify the function
     have hdiff :=
-      (DifferentiableAt.finset_prod (u := h_finite_zeros.toFinset)
+      (DifferentiableAt.finsetProd (u := h_finite_zeros.toFinset)
         (f := fun ρ => fun w ↦ ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ)
         (x := z) hdiff_each)
     have hfun_eq :

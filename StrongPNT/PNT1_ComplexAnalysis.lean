@@ -1,6 +1,7 @@
 import Mathlib.Analysis.Analytic.Order
 import Mathlib.Analysis.CStarAlgebra.Classes
 import Mathlib.Analysis.Complex.AbsMax
+import Mathlib.Analysis.Complex.BorelCaratheodory
 import Mathlib.Analysis.Complex.HasPrimitives
 import Mathlib.Analysis.Complex.RemovableSingularity
 import Mathlib.Analysis.Normed.Module.Connected
@@ -10,7 +11,7 @@ import Mathlib.GroupTheory.MonoidLocalization.Basic
 import Mathlib.Order.CompletePartialOrder
 import Mathlib.RingTheory.SimpleRing.Principal
 import Mathlib.Topology.Algebra.Module.ModuleTopology
-import PrimeNumberTheoremAnd.BorelCaratheodory
+
 
 lemma lem_coseveny (n : ℕ) (_hn : n ≥ 1) (y : ℝ) : Real.cos (-y * Real.log (n : ℝ)) = Real.cos (y * Real.log (n : ℝ)) := by
   rw [neg_mul, Real.cos_neg]
@@ -101,16 +102,16 @@ norm (deriv f z) ≤ (2 * r_int ^ 2 * M) / ((R_analytic - r_int) * (r_int - r_z)
   · exact le_of_eq (by ring)
   · intro z' hz'
     rw [smul_eq_mul, norm_mul]
-    grw[borelCaratheodory_closedBall (by grind) analytic hf0 hM_pos hRe_f_le_M h_r_int_lt_R_analytic
-      (Metric.sphere_subset_closedBall hz')]
+    grw [Complex.borelCaratheodory_zero hM_pos 
+      (analytic.differentiableOn.mono Metric.ball_subset_closedBall) 
+      (fun z hz ↦ hRe_f_le_M _ (Metric.ball_subset_closedBall hz)) hR_analytic_pos (by simp_all) hf0]
     suffices ‖(z' - z)⁻¹ ^ 2‖ ≤ 1 / (r_int - r_z) ^ 2 by
+      simp at hz'
       grw [this]
-      · exact le_of_eq (by field)
+      · rw [hz']; exact le_of_eq (by field)
       · refine mul_nonneg (mul_nonneg ?_ ?_) (inv_nonneg.mpr ?_) <;> linarith
     rw [norm_pow, norm_inv, one_div, inv_pow]
     gcongr
-    · exact pow_pos (by linarith) _
-    · linarith
     · simp only [mem_sphere_iff_norm, sub_zero, Metric.mem_closedBall,
       dist_zero_right] at hz' hz
       rw [← hz']
@@ -132,10 +133,9 @@ norm (deriv f z) ≤ (16 * M * R ^ 2) / ((R - r) ^ 3) := by
   _ = (4 * (R + r) ^ 2 * M) / ((R - r) ^ 3) := by field
   _ ≤ _ := by
     gcongr 1
-    · exact pow_nonneg (by linarith) _
-    · grw [(by linarith : R + r ≤ 2 * R)]
-      field_simp
-      norm_num
+    grw [(by linarith : R + r ≤ 2 * R)]
+    field_simp
+    norm_num
 
 #print axioms borel_caratheodory_II
 
