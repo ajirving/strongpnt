@@ -562,7 +562,7 @@ lemma lem_mod_Bf_eq_mod_f_on_boundary (R R1 : ℝ)
       -- Prove R is not zero
       · linarith [hR1_pos, hR1_lt_R]
       -- Prove the norm is not zero
-      · simp [norm_ne_zero_iff, sub_ne_zero, z_ne_rho]
+      · simp [sub_ne_zero, z_ne_rho]
     -- field_simp can now use this fact to solve the goal.
     rw [Complex.norm_real, norm_norm, hz]
     field_simp [h_denom_ne_zero]
@@ -1053,7 +1053,7 @@ lemma Lf_deriv_is_logBf_deriv (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
   rw [h_eq]
   -- Show that Bf ... 0 ≠ 0 using Bf_never_zero
   have h0_in_ball : (0 : ℂ) ∈ Metric.closedBall (0 : ℂ) R1 := by
-    simp [Metric.mem_closedBall, dist_zero_right]
+    simp
     exact le_of_lt hR1_pos
   have h_Bf0_ne_zero := Bf_never_zero R R1 hR1_pos hR1_lt_R f h_f_analytic ne_top 0 h0_in_ball
   -- Show that the inverse is non-zero
@@ -1120,8 +1120,7 @@ lemma blaschke_num_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
       exact le_trans h1 h2
     -- Evaluate ‖(R : ℂ)‖ as R (since R > 0)
     have hnorm_R : ‖(R : ℂ)‖ = R := by
-      have h1 : ‖(R : ℂ)‖ = |R| := by simp
-      simp [h1, abs_of_pos (hR1_pos.trans hR1_lt_R)]
+      simp [abs_of_pos (hR1_pos.trans hR1_lt_R)]
     -- Rewrite the equality using hnorm_R
     have : R * R = ‖ρ‖ * ‖z‖ := by simpa [hnorm_R] using hnorm_eq
     have hle' : R * R ≤ R1 * R := by simpa [this] using hle
@@ -1277,7 +1276,7 @@ lemma logDeriv_fprod_is_sum {R R1 : ℝ} {f : ℂ → ℂ}
 lemma div_mul_eq_mul_mul_inv_fun {α} (f A B : α → ℂ) :
   (fun w => (f w / A w) * B w) = (fun w => f w * (B w * (A w)⁻¹)) := by
   funext w
-  simp [div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc]
+  field
 
 lemma prod_num_mul_inv_den_eq_prod_ratio_fun_mem
   (K : Finset ℂ) (N D : ℂ → ℂ → ℂ) (m : ℂ → ℕ) :
@@ -1585,9 +1584,8 @@ lemma logDeriv_linear {a b : ℂ} {z : ℂ} :
   have h_id : HasDerivAt (fun w : ℂ => w) (1 : ℂ) z := hasDerivAt_id _
   have h_mul' : HasDerivAt (fun w : ℂ => a * w) a z := by
     simpa [one_mul] using (h_id.const_mul a)
-  have h_deriv_mul : deriv (fun w : ℂ => a * w) z = a := h_mul'.deriv
   -- unfold logDeriv and compute
-  simp [logDeriv, h_deriv_mul]
+  simp [logDeriv]
 
 -- Lemma 29: logDeriv_denominator
 lemma logDeriv_denominator {ρ : ℂ} {z : ℂ} :
@@ -1603,20 +1601,13 @@ lemma logDeriv_numerator_pre {R : ℝ} {ρ : ℂ} {z : ℂ} :
   -- Put the function in the linear form b + a * w
   let a : ℂ := -(star ρ) / (R : ℂ)
   let b : ℂ := (R : ℂ)
-  have hlin : (fun w : ℂ ↦ (R : ℂ) - (star ρ) * w / (R : ℂ)) = (fun w : ℂ ↦ b + a * w) := by
-    funext w
-    -- rewrite as b + a*w
-    simp [a, b, sub_eq_add_neg, div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc,
-          add_comm, add_left_comm, add_assoc]
   -- Compute the derivative of b + a * w
   have hderiv_add : deriv (fun w : ℂ => b + a * w) z =
       deriv (fun _ : ℂ => b) z + deriv (fun y : ℂ => a * y) z := by
     simp
-  have hderiv_ab : deriv (fun w : ℂ => b + a * w) z = a := by
-    simp [deriv_const, deriv_const_mul, mul_comm]
   -- Now compute the logarithmic derivative and rewrite back
-  simp [hlin, logDeriv, hderiv_ab, a, b, sub_eq_add_neg, div_eq_mul_inv,
-         mul_comm, mul_left_comm, mul_assoc, add_comm, add_left_comm, add_assoc]
+  simp [logDeriv, sub_eq_add_neg, div_eq_mul_inv,
+         mul_comm, mul_left_comm, mul_assoc, add_comm]
 
 lemma star_ne_zero_of_ne_zero {ρ : ℂ} (hρ : ρ ≠ 0) : star ρ ≠ 0 := by
   -- Use that conjugation preserves (and reflects) zero over ℂ
@@ -1787,8 +1778,7 @@ lemma norm_Rsq_div_conj (R : ℝ) (ρ : ℂ) (hρ : ρ ≠ 0) : ‖((R^2 : ℂ) 
     have : ρ = 0 := by simpa [star_star] using h'
     exact hρ this
   have hnormR : ‖(R^2 : ℂ)‖ = (R^2 : ℝ) := by
-    have h := (RCLike.norm_ofReal (K:=ℂ) (R^2))
-    simp [abs_of_nonneg (sq_nonneg R)]
+    simp
   calc
     ‖((R^2 : ℂ) / (star ρ))‖
         = ‖(R^2 : ℂ)‖ / ‖star ρ‖ := norm_div _ _

@@ -87,7 +87,7 @@ theorem zeta_lower_bound (t : ℝ) :
   norm (riemannZeta 3 / riemannZeta ((3 : ℝ) / 2)) ≤
     norm (riemannZeta (((3 : ℝ) / 2) + t * Complex.I)) := by
   have hs : 1 < (((3 : ℝ) / 2 : ℂ) + t * Complex.I).re := by
-    simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_I_re, mul_zero, add_zero]
+    simp
     norm_num
   have := abs_zeta_prod_prime (((3 : ℝ) / 2 : ℂ) + t * Complex.I) hs
   apply hasProd_le_of_nonneg abs_zeta_ratio_eval this fun _ ↦ (by positivity)
@@ -728,7 +728,7 @@ lemma Zeta1_Zeta_Expansion
   have hK_eq : (16 * r^2 / (r - r1)^3 + 1 / ((R^2 / R1 - R1) * Real.log (R / R1))) = K := by
     simp [K, A0, d, R1, R]
   have hLS_eq : Real.log |t| + Real.log b + A = Real.log |t| + S := by
-    simp [S, add_comm, add_left_comm, add_assoc]
+    simp [S, add_comm, add_assoc]
   have hineq2 : ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
         (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ)‖
         ≤ K * (Real.log |t| + S) := by
@@ -750,7 +750,7 @@ lemma Zeta1_Zeta_Expansion
     -- Since log 3 ≤ log |t| and S/log 3 ≥ 0, we have (S/log 3) * log 3 ≤ (S/log 3) * log |t|
     -- But (S/log 3) * log 3 = S, so S ≤ (S/log 3) * log |t|
     calc S
-      = (S / Real.log 2) * Real.log 2 := by simp [div_mul_cancel, hneq]
+      = (S / Real.log 2) * Real.log 2 := by field
       _ ≤ (S / Real.log 2) * Real.log |t| := mul_le_mul_of_nonneg_left hL_ge_log3' hratio_nonneg
 
   have hsum_bound : Real.log |t| + S ≤ (1 + S / Real.log 2) * Real.log |t| := by

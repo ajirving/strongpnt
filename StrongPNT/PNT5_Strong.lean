@@ -156,15 +156,15 @@ lemma I2Bound {SmoothingF : ℝ → ℝ}
         exact log_deriv_zeta_bound
       · refine Mbd σ₁ σ₁pos _ ?_ ?_ ε ε_pos ε_lt_one
         · simp only [mem_Ioc, sub_re, ofReal_re, mul_re, I_re, mul_zero, ofReal_im, I_im, mul_one,
-            sub_self, sub_zero, sigma1Of] at hσ ⊢
+            sub_self, sub_zero] at hσ ⊢
           linarith
         · simp only [mem_Ioc, sub_re, ofReal_re, mul_re, I_re, mul_zero, ofReal_im, I_im, mul_one,
-            sub_self, sub_zero, sigma1Of] at hσ ⊢
+            sub_self, sub_zero] at hσ ⊢
           linarith[one_add_inv_log X_gt.le]
       · rw[cpow_def_of_ne_zero]
         · rw[norm_exp,← ofReal_log, re_ofReal_mul]
           simp only [sub_re, ofReal_re, mul_re, I_re, mul_zero, ofReal_im, I_im, mul_one, sub_self,
-            sub_zero, sigma1Of]
+            sub_zero]
           rw[← le_log_iff_exp_le, Real.log_mul (exp_ne_zero 1), Real.log_exp, ← le_div_iff₀', add_comm, add_div, div_self, one_div]
           exact hσ.2
           · refine (Real.log_pos ?_).ne.symm
@@ -497,23 +497,11 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
         -ζ' (↑σ₁ + ↑t * I) / ζ (↑σ₁ + ↑t * I) *
         𝓜 (fun x ↦ ↑(Smooth1 SmoothingF ε x)) (↑σ₁ + ↑t * I) *
         ↑T ^ (↑σ₁ + ↑t * I)‖ := by
-    simp only [norm_mul, norm_eq_abs, abs_neg, abs_one, one_mul, mul_one]
+    simp only [norm_mul]
     rw[Complex.norm_I]
-    simp only [norm_mul, norm_eq_abs, abs_neg, abs_one, one_mul, mul_one]
+    simp only [one_mul]
     have : ‖1 / (2 * ↑π * I)‖ = 1 / (2 * π) := by
-      dsimp
-      ring_nf
-      simp only [norm_mul, norm_eq_abs, abs_neg, abs_one, one_mul, mul_one]
-      rw[inv_I]
-      have : ‖-I‖ = ‖-1 * I‖ := by
-        simp
-      rw[this]
-      have : ‖-1 * I‖ = ‖-1‖ * ‖I‖ := by
-        simp
-      rw[this, Complex.norm_I]
-      ring_nf
-      simp
-      exact pi_nonneg
+      simpa using pi_nonneg
     rw[this]
 
   let f t := (-ζ' (↑σ₁ + ↑t * I) / ζ (↑σ₁ + ↑t * I)) *
@@ -1186,7 +1174,7 @@ lemma I4Bound {SmoothingF : ℝ → ℝ}
             rw[Complex.ofReal_ne_one]
             exact ne_of_lt (by exact hσ₂.2)
         unfold f
-        simp only [Complex.norm_mul, norm_neg]
+        simp only [Complex.norm_mul]
         have : C * X * X ^ (-A / Real.log T) / ε =
           (C / ε) * (X * X ^ (-A / Real.log T)) := by ring
         rw[this]
@@ -1509,7 +1497,7 @@ theorem Strong_PNT : ∃ c > 0,
     simp_all only [one_div, support_subset_iff, ne_eq, mem_Icc, gt_iff_lt, mem_Ioo, and_imp,
       mem_Ioc, lt_sup_iff,
       inv_pos, Nat.ofNat_pos, or_true, sup_lt_iff, neg_le_self_iff, Nat.ofNat_nonneg, uIcc_of_le,
-      div_pos_iff_of_pos_right, div_pos_iff_of_pos_left, σ₂, c, c_εx]
+      div_pos_iff_of_pos_right, σ₂, c, c_εx]
   let c_Tx : ℝ := A ^ ((1 : ℝ) / 2)
   have c_Tx_pos : 0 < c_Tx := by
     simp_all only [one_div, support_subset_iff, ne_eq, mem_Icc, gt_iff_lt, mem_Ioo, and_imp,
@@ -1562,7 +1550,7 @@ theorem Strong_PNT : ∃ c > 0,
       (tendsto_log_atTop.comp Tx_to_inf))
     have := Tendsto.const_mul (b := A) this
     convert (tendsto_const_nhds (x := (1 : ℝ))).sub this using 2
-    · simp [Function.comp, pow_one, div_eq_mul_inv]
+    · simp [Function.comp, div_eq_mul_inv]
     · simp
 
   have eventually_ε_lt_ε_main : ∀ᶠ (x : ℝ) in atTop, εx x < ε_main := by
