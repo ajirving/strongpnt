@@ -9,10 +9,10 @@ def zerosetKfR (R : ℝ) (f : ℂ → ℂ) : Set ℂ :=
   {ρ : ℂ | ρ ∈ Metric.closedBall (0 : ℂ) R ∧ f ρ = 0}
 
 open Filter Metric Set Bornology Function
-open Classical
 
 /-! ### The quotient `Cf` (no core wrapper) -/
 
+open Classical in
 noncomputable def trailingCoeff (f : ℂ → ℂ) (z : ℂ) : ℂ :=
     if h1 : AnalyticAt ℂ f z then
     if h2 : analyticOrderAt f z ≠ ⊤ then
@@ -43,6 +43,7 @@ lemma order_ne_top {f : ℂ → ℂ} {r : ℝ} {z : ℂ} (hf : AnalyticOnNhd ℂ
   refine hf.analyticOrderAt_ne_top_of_isPreconnected (isConnected_closedBall hr).isPreconnected hz'.1 hz ?_
   simp [AnalyticAt.analyticOrderAt_eq_zero (hf z' hz'.1)|>.mpr hz'.2]
 
+open Classical in
 /-- The “deflated” quotient: divide `f` by the product of `(z-ρ)^{m_ρ}`, and at a zero `z=σ`
     use the local factor function `h_σ σ` in the numerator (so the expression extends analytically). -/
 noncomputable def Cf
@@ -91,7 +92,7 @@ lemma lem_Cf_analytic_off_K
     {R R1 : ℝ}
     {f : ℂ → ℂ}
     {h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R)}
-    (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R \ zerosetKfR R1  f) :
+    (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R \ zerosetKfR R1 f) :
     AnalyticAt ℂ (Cf R1 f) z := by
   by_cases h_finite_zeros : (zerosetKfR R1 f).Finite
   swap
@@ -116,7 +117,7 @@ lemma lem_Cf_analytic_off_K
     -- Convert from membership in complement to non-membership
     have hw_not_in_zeros : w ∉ zerosetKfR R1 f := hw_not_in_compl
     -- Since w ∉ zerosetKfR R1, Cf w uses the else branch
-    show f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ analyticOrderNatAt f ρ =
+    change f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ analyticOrderNatAt f ρ =
          Cf R1 f w
     -- Apply the definition of Cf using dif_neg for dependent if-then-else
     simp [Cf, h_finite_zeros, hw_not_in_zeros]
@@ -145,7 +146,7 @@ lemma lem_Cf_at_sigma
     {R1 : ℝ}
     {f : ℂ → ℂ}
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 f) (hfσ : AnalyticAt ℂ  f σ) :
+    (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 f) (hfσ : AnalyticAt ℂ f σ) :
     ∃ g : ℂ → ℂ, AnalyticAt ℂ g σ ∧ ∀ᶠ z in nhds σ,
       Cf R1 f z =
       g z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase σ), (z - ρ) ^ analyticOrderNatAt f ρ := by
@@ -167,7 +168,7 @@ lemma lem_Cf_at_sigma
       apply mul_ne_zero (pow_ne_zero _ (by grind)) ne_zero
     have : z ∉ zerosetKfR R1 f := by
       simp [zerosetKfR, this]
-    simp [Cf, this, f_eq, h_finite_zeros]
+    simp only [Cf, h_finite_zeros, ↓reduceDIte, this, f_eq]
     rw [lem_prod_no_sigma1 h_finite_zeros σ hσ, mul_div_mul_left]
     grind
 
@@ -261,7 +262,7 @@ lemma lem_Cf_nonzero_on_K
     have hρ_ne_σ : ρ ≠ σ := (Finset.mem_erase.mp hρmem).1
     have hσ_ne_ρ : σ ≠ ρ := hρ_ne_σ.symm
     exact pow_ne_zero _ (sub_ne_zero.mpr hσ_ne_ρ)
-  simp [Cf, hσ, hden, h_finite_zeros]
+  simp only [Cf, h_finite_zeros, ↓reduceDIte, hσ, ne_eq, div_eq_zero_iff, hden, or_false]
   exact trailingCoeff_ne_zero hfσ ne_top
 
 lemma lem_Cf_never_zero
@@ -275,6 +276,7 @@ lemma lem_Cf_never_zero
   ·  apply lem_Cf_nonzero_on_K z h (hf z (by simp_all)) (ne_top z (by simp_all))
   · apply lem_Cf_nonzero_off_K z ⟨hz, h⟩
 
+open Classical in
 noncomputable def Bf
     (R R1 : ℝ)
     (f : ℂ → ℂ)
@@ -362,7 +364,7 @@ lemma lem_mod_Bf_at_0 (R R1 : ℝ)
   congr 1
   simp only [zero_mul, zero_div, sub_zero, zero_sub]
 
-theorem lem_mod_Bf_at_0_eval  (R R1 : ℝ)
+theorem lem_mod_Bf_at_0_eval (R R1 : ℝ)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
@@ -378,10 +380,10 @@ theorem lem_mod_Bf_at_0_eval  (R R1 : ℝ)
   -- Use Finset.prod_congr to show the products are equal
   apply Finset.prod_congr rfl
   intro ρ hρ
-  simp
+  simp only [Complex.norm_div, Complex.norm_real, Real.norm_eq_abs, norm_neg]
   rw [abs_of_nonneg (by linarith)]
 
-theorem lem_mod_Bf_at_0_as_ratio  (R R1 : ℝ)
+theorem lem_mod_Bf_at_0_as_ratio (R R1 : ℝ)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
@@ -482,7 +484,7 @@ theorem lem_Bf_is_analytic (R R1 : ℝ)
     exact hρ
   -- Now handle two cases: z is in the finite zero set or not
   unfold Bf
-  simp [h_finite_zeros]
+  simp only [h_finite_zeros, ↓reduceDIte, RCLike.star_def]
   by_cases hz_in : z ∈ zerosetKfR R1 f
   · -- z is a zero: use the local factor specification to get analyticity of Cf at σ
     have h_cf_at_sigma := @lem_Cf_analytic_at_K R1 f z hz_in (h_f_analytic z ?_)
@@ -562,7 +564,7 @@ lemma lem_mod_Bf_eq_mod_f_on_boundary (R R1 : ℝ)
       -- Prove R is not zero
       · linarith [hR1_pos, hR1_lt_R]
       -- Prove the norm is not zero
-      · simp [norm_ne_zero_iff, sub_ne_zero, z_ne_rho]
+      · simp [sub_ne_zero, z_ne_rho]
     -- field_simp can now use this fact to solve the goal.
     rw [Complex.norm_real, norm_norm, hz]
     field_simp [h_denom_ne_zero]
@@ -857,7 +859,7 @@ lemma lem_num_prod_never_zero_all
   have hρ_mem : ρ ∈ zerosetKfR R1 f := by
     rwa [Set.Finite.mem_toFinset h_finite_zeros] at hρ
   have hρ_bound : ‖ρ‖ ≤ R1 := by
-    rw [zerosetKfR] at hρ_mem; simp at hρ_mem; exact hρ_mem.1
+    rw [zerosetKfR] at hρ_mem; simp only [mem_closedBall, dist_zero_right, mem_setOf_eq] at hρ_mem; exact hρ_mem.1
   have hz_bound : ‖z‖ ≤ R1 := by
     rw [Metric.mem_closedBall, dist_zero_right] at hz; exact hz
 
@@ -970,7 +972,7 @@ lemma re_Lf_le_log_B
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (h_f_bound : ∀ z, norm z ≤ R → norm (f z) ≤ B) 
+    (h_f_bound : ∀ z, norm z ≤ R → norm (f z) ≤ B)
     (Lf : ℂ → ℂ)
     (hLf : isLf Lf f r R R1) :
     ∀ z, norm z ≤ r →
@@ -1053,8 +1055,8 @@ lemma Lf_deriv_is_logBf_deriv (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
   rw [h_eq]
   -- Show that Bf ... 0 ≠ 0 using Bf_never_zero
   have h0_in_ball : (0 : ℂ) ∈ Metric.closedBall (0 : ℂ) R1 := by
-    simp [Metric.mem_closedBall, dist_zero_right]
-    exact le_of_lt hR1_pos
+    simp
+    linarith
   have h_Bf0_ne_zero := Bf_never_zero R R1 hR1_pos hR1_lt_R f h_f_analytic ne_top 0 h0_in_ball
   -- Show that the inverse is non-zero
   have h_inv_ne_zero : (Bf R R1 f 0)⁻¹ ≠ 0 :=
@@ -1120,8 +1122,7 @@ lemma blaschke_num_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
       exact le_trans h1 h2
     -- Evaluate ‖(R : ℂ)‖ as R (since R > 0)
     have hnorm_R : ‖(R : ℂ)‖ = R := by
-      have h1 : ‖(R : ℂ)‖ = |R| := by simp
-      simp [h1, abs_of_pos (hR1_pos.trans hR1_lt_R)]
+      simp [abs_of_pos (hR1_pos.trans hR1_lt_R)]
     -- Rewrite the equality using hnorm_R
     have : R * R = ‖ρ‖ * ‖z‖ := by simpa [hnorm_R] using hnorm_eq
     have hle' : R * R ≤ R1 * R := by simpa [this] using hle
@@ -1277,7 +1278,7 @@ lemma logDeriv_fprod_is_sum {R R1 : ℝ} {f : ℂ → ℂ}
 lemma div_mul_eq_mul_mul_inv_fun {α} (f A B : α → ℂ) :
   (fun w => (f w / A w) * B w) = (fun w => f w * (B w * (A w)⁻¹)) := by
   funext w
-  simp [div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc]
+  field
 
 lemma prod_num_mul_inv_den_eq_prod_ratio_fun_mem
   (K : Finset ℂ) (N D : ℂ → ℂ → ℂ) (m : ℂ → ℕ) :
@@ -1312,7 +1313,7 @@ lemma prod_num_mul_inv_den_eq_prod_ratio_fun_mem
 lemma logDeriv_congr_of_eventuallyEq {f g : ℂ → ℂ} {z : ℂ}
   (hfg : f =ᶠ[nhds z] g) : logDeriv f z = logDeriv g z := by
   unfold logDeriv
-  simp
+  simp only [Pi.div_apply]
   rw [hfg.deriv_eq, hfg.eq_of_nhds]
 
 lemma logDeriv_Bf_is_sum (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
@@ -1394,7 +1395,7 @@ lemma logDeriv_def_as_frac {f : ℂ → ℂ} {z : ℂ} :
 
 def ball_containment {r R1 : ℝ} (_hr_pos : 0 < r) (hr_lt_R1 : r < R1) (z : ℂ) (hz : z ∈ Metric.closedBall 0 r) : z ∈ Metric.closedBall 0 R1 := by
   simp at *
-  exact le_trans hz (le_of_lt hr_lt_R1)
+  linarith
 
 theorem in_r_minus_kf {R1 r : ℝ} {f : ℂ → ℂ}
   (hr_pos : 0 < r)
@@ -1532,7 +1533,7 @@ lemma logDeriv_prod_is_sum_mul {R R1 : ℝ} {f : ℂ → ℂ}
     logDeriv_power_is_mul (R := R) (R1 := R1) (f := f) hR1_pos hR1_lt_R h_finite_zeros z hz ρ hρ
 
 -- Lemma 26: Lf_deriv_step2
-lemma Lf_deriv_step2  (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
+lemma Lf_deriv_step2 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     (hR1_pos : 0 < R1)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1))
     (h_f_zero : f 0 = 1)
@@ -1585,9 +1586,8 @@ lemma logDeriv_linear {a b : ℂ} {z : ℂ} :
   have h_id : HasDerivAt (fun w : ℂ => w) (1 : ℂ) z := hasDerivAt_id _
   have h_mul' : HasDerivAt (fun w : ℂ => a * w) a z := by
     simpa [one_mul] using (h_id.const_mul a)
-  have h_deriv_mul : deriv (fun w : ℂ => a * w) z = a := h_mul'.deriv
   -- unfold logDeriv and compute
-  simp [logDeriv, h_deriv_mul]
+  simp [logDeriv]
 
 -- Lemma 29: logDeriv_denominator
 lemma logDeriv_denominator {ρ : ℂ} {z : ℂ} :
@@ -1603,20 +1603,13 @@ lemma logDeriv_numerator_pre {R : ℝ} {ρ : ℂ} {z : ℂ} :
   -- Put the function in the linear form b + a * w
   let a : ℂ := -(star ρ) / (R : ℂ)
   let b : ℂ := (R : ℂ)
-  have hlin : (fun w : ℂ ↦ (R : ℂ) - (star ρ) * w / (R : ℂ)) = (fun w : ℂ ↦ b + a * w) := by
-    funext w
-    -- rewrite as b + a*w
-    simp [a, b, sub_eq_add_neg, div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc,
-          add_comm, add_left_comm, add_assoc]
   -- Compute the derivative of b + a * w
   have hderiv_add : deriv (fun w : ℂ => b + a * w) z =
       deriv (fun _ : ℂ => b) z + deriv (fun y : ℂ => a * y) z := by
     simp
-  have hderiv_ab : deriv (fun w : ℂ => b + a * w) z = a := by
-    simp [deriv_const, deriv_const_mul, mul_comm]
   -- Now compute the logarithmic derivative and rewrite back
-  simp [hlin, logDeriv, hderiv_ab, a, b, sub_eq_add_neg, div_eq_mul_inv,
-         mul_comm, mul_left_comm, mul_assoc, add_comm, add_left_comm, add_assoc]
+  simp [logDeriv, sub_eq_add_neg, div_eq_mul_inv,
+         mul_comm, mul_left_comm, mul_assoc, add_comm]
 
 lemma star_ne_zero_of_ne_zero {ρ : ℂ} (hρ : ρ ≠ 0) : star ρ ≠ 0 := by
   -- Use that conjugation preserves (and reflects) zero over ℂ
@@ -1633,7 +1626,7 @@ lemma field_identity_general {K : Type*} [Field K] {a b c : K} (ha : a ≠ 0) (h
   rw [← div_neg]
   ring
 
-lemma complex_identity_from_field {R : ℝ} {ρ z : ℂ} (hR : R ≠ 0) (hρ : ρ ≠ 0) (hden : (R:ℂ) - (star ρ) * z / R ≠ 0) : (-(star ρ) / (R:ℂ)) / ((R:ℂ) - (star ρ) * z / R) = (1 : ℂ) / (z - (R:ℂ)^2 / (star ρ)) := by
+lemma complex_identity_from_field {R : ℝ} {ρ z : ℂ} (hR : R ≠ 0) (hρ : ρ ≠ 0) (hden : (R : ℂ) - (star ρ) * z / R ≠ 0) : (-(star ρ) / (R:ℂ)) / ((R:ℂ) - (star ρ) * z / R) = (1 : ℂ) / (z - (R:ℂ)^2 / (star ρ)) := by
   have ha : (R : ℂ) ≠ 0 := by simpa using (Complex.ofReal_ne_zero.mpr hR)
   have hb : star ρ ≠ 0 := star_ne_zero_of_ne_zero hρ
   have hden' : (R : ℂ) - z * (star ρ) / (R : ℂ) ≠ 0 := by
@@ -1648,7 +1641,7 @@ lemma logDeriv_numerator_rearranged {R : ℝ} {ρ z : ℂ} (hR : R ≠ 0) (hrho 
 lemma logDeriv_numerator {R : ℝ} {ρ : ℂ} {z : ℂ}
     (hR : R ≠ 0)
     (hrho : ρ ≠ 0)
-    (h_denom_ne_zero : (R : ℂ) - (star ρ) * z / R ≠ 0):
+    (h_denom_ne_zero : (R : ℂ) - (star ρ) * z / R ≠ 0) :
     logDeriv (fun w ↦ R - (star ρ) * w / R) z = 1 / (z - R^2 / (star ρ)) := by
   rw [logDeriv_numerator_pre, logDeriv_numerator_rearranged]
   <;> assumption
@@ -1690,7 +1683,7 @@ lemma logDeriv_Blaschke_is_diff_frac {R R1 : ℝ} {f : ℂ → ℂ}
   rw [h_div, h_num, h_den]
 
 -- Lemma 34: Lf_deriv_step3
-lemma Lf_deriv_step3   (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
+lemma Lf_deriv_step3 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     (hR1_pos : 0 < R1)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1))
     (h_f_zero : f 0 = 1)
@@ -1759,7 +1752,7 @@ lemma rearrange_Lf_deriv (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R
   ring
 
 -- Lemma 40: target_inequality_setup
-lemma target_inequality_setup  (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
+lemma target_inequality_setup (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     (hR1_pos : 0 < R1)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1))
     (h_f_zero : f 0 = 1)
@@ -1787,8 +1780,7 @@ lemma norm_Rsq_div_conj (R : ℝ) (ρ : ℂ) (hρ : ρ ≠ 0) : ‖((R^2 : ℂ) 
     have : ρ = 0 := by simpa [star_star] using h'
     exact hρ this
   have hnormR : ‖(R^2 : ℂ)‖ = (R^2 : ℝ) := by
-    have h := (RCLike.norm_ofReal (K:=ℂ) (R^2))
-    simp [abs_of_nonneg (sq_nonneg R)]
+    simp
   calc
     ‖((R^2 : ℂ) / (star ρ))‖
         = ‖(R^2 : ℂ)‖ / ‖star ρ‖ := norm_div _ _
@@ -1828,7 +1820,7 @@ lemma mem_zerosetKfR_norm_le {R1 : ℝ} {f : ℂ → ℂ} {ρ : ℂ}
     simpa [Metric.mem_closedBall] using hmem
   simpa [dist_eq_norm, sub_zero] using hdist
 
-lemma lem_sum_bound_step2 {R R1: ℝ} {f : ℂ → ℂ}
+lemma lem_sum_bound_step2 {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (h_f_zero : f 0 = 1)
@@ -2024,9 +2016,7 @@ lemma final_inequality
   -- Lift z from r1-ball to R1-ball (needed for final_sum_bound)
   have hz_in_R1 : z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f := by
     constructor
-    · apply Metric.closedBall_subset_closedBall
-      exact le_of_lt (lt_trans hr1_lt_r hr_lt_R1)
-      exact hz.1
+    · exact Metric.closedBall_subset_closedBall (lt_trans hr1_lt_r hr_lt_R1).le hz.1
     · exact hz.2
 
   -- Apply final_sum_bound (from informal proof)

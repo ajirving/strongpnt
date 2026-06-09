@@ -43,10 +43,10 @@ lemma Z0bound_aux :
       exact h_tendsto_nhds.mono_left nhdsWithin_le_nhds
     · -- Part 2: Eventually not equal to the point `1`.
       -- This is equivalent to `Tendsto u l (𝓟 {1}ᶜ)`.
-      simp [tendsto_principal_principal]
+      simp only [tendsto_principal, mem_compl_iff, mem_singleton_iff]
       -- For any δ in `Ioi 0`, `u(δ) = 1 + δ ≠ 1`.
       filter_upwards [self_mem_nhdsWithin] with delta h_delta_pos
-      simp only [u, ne_eq, add_eq_right, Complex.ofReal_eq_zero]
+      simp only [u]
 
       refine add_ne_left.mpr ?_
       rw [Complex.ofReal_ne_zero]
@@ -59,7 +59,7 @@ lemma Z0bound_aux :
   convert h_comp using 1
   ext delta
   -- Unfold definitions to show the functions are the same.
-  simp only [F, u, Function.comp_apply, Pi.neg_apply, Pi.sub_apply, Pi.div_apply]
+  simp only [F, u, Function.comp_apply, Pi.div_apply]
   rw [inv_eq_one_div]
   aesop
 

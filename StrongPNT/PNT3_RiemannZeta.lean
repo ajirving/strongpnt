@@ -26,7 +26,7 @@ theorem HasProd.inv₀ {α β : Type*} {f : α → β} {a : β} [CommGroupWithZe
   convert Filter.Tendsto.inv₀ h ha
   rw [Finset.prod_inv_distrib]
 
-theorem HasProd.div₀ {α :  Type*} {f g : α → ℂ} {a b : ℂ}
+theorem HasProd.div₀ {α : Type*} {f g : α → ℂ} {a b : ℂ}
     (hf : HasProd f a) (hg : HasProd g b) (hb : b ≠ 0) :
     HasProd (fun x ↦ f x / g x) (a / b) := by
   simp only [div_eq_mul_inv]
@@ -69,7 +69,7 @@ lemma abs_zeta_ratio_eval : HasProd (fun (p : ℙ) ↦ (1 + ((p : ℕ) : ℝ) ^ 
   ext p
   rw [norm_inv]
   congr
-  simp
+  simp only [Complex.ofReal_ofNat]
   symm
   calc
   _ = ‖1 + ((((p : ℝ) ^ (-((3 : ℝ) / 2))) : ℝ) : ℂ)‖ := by
@@ -80,14 +80,14 @@ lemma abs_zeta_ratio_eval : HasProd (fun (p : ℙ) ↦ (1 + ((p : ℕ) : ℝ) ^ 
       exact p.property.pos.le
   _ = _ := by
     norm_cast
-    simp
+    simp only [Real.norm_eq_abs, abs_eq_self]
     positivity
 
 theorem zeta_lower_bound (t : ℝ) :
   norm (riemannZeta 3 / riemannZeta ((3 : ℝ) / 2)) ≤
     norm (riemannZeta (((3 : ℝ) / 2) + t * Complex.I)) := by
   have hs : 1 < (((3 : ℝ) / 2 : ℂ) + t * Complex.I).re := by
-    simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_I_re, mul_zero, add_zero]
+    simp
     norm_num
   have := abs_zeta_prod_prime (((3 : ℝ) / 2 : ℂ) + t * Complex.I) hs
   apply hasProd_le_of_nonneg abs_zeta_ratio_eval this fun _ ↦ (by positivity)
@@ -96,7 +96,7 @@ theorem zeta_lower_bound (t : ℝ) :
   · apply norm_pos_iff.mpr
     exact Complex.one_sub_prime_cpow_ne_zero p.property (by simp; norm_num)
   · grw [norm_sub_le]
-    simp
+    simp only [norm_one, Complex.ofReal_ofNat, neg_add_rev, add_le_add_iff_left]
     rw [← Complex.ofReal_natCast, Complex.norm_cpow_eq_rpow_re_of_pos (mod_cast p.property.pos)]
     simp
 
@@ -111,7 +111,7 @@ open scoped BigOperators Topology
 
 
 /-- Lemma: Zeta bound 2. -/
-lemma lem_zetaBound2 (s : ℂ) (hs_re : 1/10 < s.re) (hs_ne : s ≠ 1) : ‖riemannZeta s‖ ≤ 1 + 1 / ‖s - 1‖ + ‖s‖ / s.re := by
+lemma lem_zetaBound2 (s : ℂ) (hs_re : 1 / 10 < s.re) (hs_ne : s ≠ 1) : ‖riemannZeta s‖ ≤ 1 + 1 / ‖s - 1‖ + ‖s‖ / s.re := by
   have zeta_formula : riemannZeta s = 1 / 2 + 1 / (s - 1) + s * ∫ (x : ℝ) in Ioi 1, (⌊x⌋ + 1 / 2 - x) * (x : ℂ) ^ (-(s + 1)) := by
     have : s ≠ 0 := by
       intro h
@@ -128,7 +128,10 @@ lemma lem_zetaBound2 (s : ℂ) (hs_re : 1/10 < s.re) (hs_ne : s ≠ 1) : ‖riem
   conv => rhs; rw [div_eq_mul_inv]
   gcongr
   have := ZetaBnd_aux1b 1 (by norm_num) (σ := s.re) (t := s.im) (by linarith)
-  convert this using 1 <;> simp
+  convert this using 1
+  swap
+  · simp
+  simp only [one_div, neg_add_rev, Nat.cast_one, Complex.re_add_im]
   congr
   ext
   rw [div_eq_mul_inv, ← Complex.cpow_neg]
@@ -137,7 +140,7 @@ lemma lem_zetaBound2 (s : ℂ) (hs_re : 1/10 < s.re) (hs_ne : s ≠ 1) : ‖riem
 
 
 /-- Lemma: Final bound combination. -/
-lemma lem_finalBoundCombination (s : ℂ) (hs_re : (1/2 : ℝ) ≤ s.re ∧ s.re < (3 : ℝ)) (hs_im : (1 : ℝ) ≤ |s.im|) : ‖riemannZeta s‖ < 1 + 1 + ((3 : ℝ) + |s.im|) * 2 := by
+lemma lem_finalBoundCombination (s : ℂ) (hs_re : (1 / 2 : ℝ) ≤ s.re ∧ s.re < (3 : ℝ)) (hs_im : (1 : ℝ) ≤ |s.im|) : ‖riemannZeta s‖ < 1 + 1 + ((3 : ℝ) + |s.im|) * 2 := by
   -- First show s ≠ 1 since |s.im| ≥ 1 > 0, so s.im ≠ 0, but 1 has imaginary part 0
   have hs_ne : s ≠ 1 := by
     intro h
@@ -155,14 +158,14 @@ lemma lem_finalBoundCombination (s : ℂ) (hs_re : (1/2 : ℝ) ≤ s.re ∧ s.re
   rw [← mul_one_div]
   apply mul_lt_mul_of_lt_of_le_of_pos_of_nonneg
   · grw [Complex.norm_le_abs_re_add_abs_im]
-    simp
+    gcongr
     exact abs_lt.mpr (by grind)
   · exact one_div_le (by linarith) (by norm_num)|>.mpr hs_re.1
   · exact div_pos (by norm_num) (by linarith)
   · positivity
 
 /-- Lemma: Upper bound on zeta in the vertical strip. -/
-lemma lem_zetaUppBd (z : ℂ) (hz_re : z.re ∈ Ico (1/2 : ℝ) (3 : ℝ)) (hz_im : (1 : ℝ) ≤ |z.im|) : ‖riemannZeta z‖ < (8 : ℝ) + 2 * |z.im| := by
+lemma lem_zetaUppBd (z : ℂ) (hz_re : z.re ∈ Ico (1 / 2 : ℝ) (3 : ℝ)) (hz_im : (1 : ℝ) ≤ |z.im|) : ‖riemannZeta z‖ < (8 : ℝ) + 2 * |z.im| := by
   apply lt_of_lt_of_le <| lem_finalBoundCombination z (by grind) hz_im
   ring_nf
   rfl
@@ -183,7 +186,9 @@ lemma lem_zetaUppBound :
   have h_bound : ‖riemannZeta z‖ < (8 : ℝ) + 2 * |z.im| :=
     lem_zetaUppBd z hz_cond.1 hz_cond.2
   have h_im_bound : |z.im| ≤ 1 + |t| := by
-    simp [hz_def, I]
+    simp only [hz_def, Complex.ofReal_div, Complex.ofReal_ofNat, I, Complex.add_im,
+      Complex.div_ofNat_im, Complex.im_ofNat, zero_div, add_zero, Complex.mul_im, Complex.I_re,
+      Complex.ofReal_im, mul_zero, Complex.I_im, Complex.ofReal_re, one_mul, zero_add]
     grw [abs_add_le]
     gcongr
     exact Complex.abs_im_le_norm s|>.trans hs
@@ -204,7 +209,7 @@ lemma zetaanalOnnot1 : AnalyticOnNhd ℂ riemannZeta {s : ℂ | s ≠ 1} := by
 lemma D1cinTt_pre (t : ℝ) (ht : |t| > 1) :
     ∀ s ∈ closedBall (3/2 + I * t : ℂ) 1, s ≠ 1 := by
   intro s hs h
-  simp [Complex.dist_eq, h] at hs
+  simp only [h, mem_closedBall, Complex.dist_eq] at hs
   have := le_trans (Complex.abs_im_le_norm (1 - (3 / 2 + I * ↑t))) hs
   simp [I] at this
   linarith
@@ -243,7 +248,7 @@ lemma fc_bound (B : ℝ) (R : ℝ) (c : ℂ) (f : ℂ → ℂ)
     (h_bound : ∀ z ∈ closedBall c R, ‖f z‖ ≤ B) :
     ∀ z ∈ closedBall (0 : ℂ) R, ‖(fun w => f (w + c) / f c) z‖ ≤ B / ‖f c‖ := by
   intro z hz
-  simp
+  simp only [Complex.norm_div]
   gcongr
   apply h_bound
   simp_all
@@ -288,12 +293,12 @@ lemma analyticOrderAt_mul_const_eq (f : ℂ → ℂ) (a z0 : ℂ) (ha : a ≠ 0)
 lemma fc_m_order (c : ℂ) (f : ℂ → ℂ) (h_nonzero : f c ≠ 0)
     {ρ' : ℂ} :
     analyticOrderAt (fun z => f (z + c) / f c) ρ' = analyticOrderAt f (ρ' + c) := by
-  simp [div_eq_mul_inv]
+  simp only [div_eq_mul_inv]
   rw [analyticOrderAt_mul_const_eq _ _ _ <| inv_ne_zero h_nonzero]
   by_cases hfA : AnalyticAt ℂ f (ρ' + c)
   · rw [(by rfl : (fun z ↦ f (z + c)) = (f ∘ fun z ↦ z + c)),
       hfA.analyticOrderAt_comp (g := (fun z ↦  z + c)) (by fun_prop)]
-    simp
+    simp only [add_sub_add_right_eq_sub]
     suffices analyticOrderAt (fun x ↦ x - ρ') ρ' = 1  by simp_all
     apply AnalyticAt.analyticOrderAt_eq_natCast (by fun_prop)|>.mpr
     exact ⟨(fun _ ↦ 1), analyticAt_const, (by simp), (by simp)⟩
@@ -728,7 +733,7 @@ lemma Zeta1_Zeta_Expansion
   have hK_eq : (16 * r^2 / (r - r1)^3 + 1 / ((R^2 / R1 - R1) * Real.log (R / R1))) = K := by
     simp [K, A0, d, R1, R]
   have hLS_eq : Real.log |t| + Real.log b + A = Real.log |t| + S := by
-    simp [S, add_comm, add_left_comm, add_assoc]
+    simp [S, add_comm, add_assoc]
   have hineq2 : ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
         (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ)‖
         ≤ K * (Real.log |t| + S) := by
@@ -750,7 +755,7 @@ lemma Zeta1_Zeta_Expansion
     -- Since log 3 ≤ log |t| and S/log 3 ≥ 0, we have (S/log 3) * log 3 ≤ (S/log 3) * log |t|
     -- But (S/log 3) * log 3 = S, so S ≤ (S/log 3) * log |t|
     calc S
-      = (S / Real.log 2) * Real.log 2 := by simp [div_mul_cancel, hneq]
+      = (S / Real.log 2) * Real.log 2 := by field
       _ ≤ (S / Real.log 2) * Real.log |t| := mul_le_mul_of_nonneg_left hL_ge_log3' hratio_nonneg
 
   have hsum_bound : Real.log |t| + S ≤ (1 + S / Real.log 2) * Real.log |t| := by
