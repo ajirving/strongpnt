@@ -76,7 +76,7 @@ lemma lem_HardMMP (R B : ℝ) (hR : R > 0)
 def I := Complex.I
 
 lemma cauchy_formula_deriv {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ}
-    (hfdiff: DifferentiableOn ℂ f (Metric.ball 0 R_analytic))
+    (hfdiff : DifferentiableOn ℂ f (Metric.ball 0 R_analytic))
     (h_r_z_lt_r_int : r_z < r_int)
     (h_r_int_lt_R_analytic : r_int < R_analytic)
     {z : ℂ} (hz : z ∈ Metric.closedBall 0 r_z) :
@@ -106,7 +106,7 @@ norm (deriv f z) ≤ (2 * r_int ^ 2 * M) / ((R_analytic - r_int) * (r_int - r_z)
       (analytic.differentiableOn.mono Metric.ball_subset_closedBall) 
       (fun z hz ↦ hRe_f_le_M _ (Metric.ball_subset_closedBall hz)) hR_analytic_pos (by simp_all) hf0]
     suffices ‖(z' - z)⁻¹ ^ 2‖ ≤ 1 / (r_int - r_z) ^ 2 by
-      simp at hz'
+      simp only [mem_sphere_iff_norm, sub_zero] at hz'
       grw [this]
       · rw [hz']; exact le_of_eq (by field)
       · refine mul_nonneg (mul_nonneg ?_ ?_) (inv_nonneg.mpr ?_) <;> linarith
@@ -143,9 +143,6 @@ open Complex MeasureTheory intervalIntegral
 open scoped Interval
 
 open Filter Topology
-
-
-open Classical
 
 open scoped Topology
 

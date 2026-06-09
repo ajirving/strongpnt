@@ -2,7 +2,6 @@ import PrimeNumberTheoremAnd.MediumPNT
 import StrongPNT.ZetaZeroFree
 
 set_option lang.lemmaCmd true
-set_option maxHeartbeats 400000
 
 --Put in a namespace to avoid collisions with MediumPNT
 namespace Strong
@@ -57,7 +56,7 @@ lemma I2Bound {SmoothingF : ℝ → ℝ}
     (suppSmoothingF : Function.support SmoothingF ⊆ Icc (1 / 2) 2)
 --    (mass_one : ∫ x in Ioi 0, SmoothingF x / x = 1)
     (ContDiffSmoothingF : ContDiff ℝ 1 SmoothingF)
-    {A C₂ : ℝ} (has_bound: LogDerivZetaHasBound A C₂) (C₂pos : 0 < C₂) (A_in : A ∈ Ioc 0 (1 / 2)) :
+    {A C₂ : ℝ} (has_bound : LogDerivZetaHasBound A C₂) (C₂pos : 0 < C₂) (A_in : A ∈ Ioc 0 (1 / 2)) :
     ∃ (C : ℝ) (_ : 0 < C),
     ∀(X : ℝ) (_ : 3 < X) {ε : ℝ} (_ : 0 < ε)
     (_ : ε < 1) {T : ℝ} (_ : 3 < T),
@@ -93,8 +92,7 @@ lemma I2Bound {SmoothingF : ℝ → ℝ}
     refine Left.add_nonneg ?_ ?_
     · rw[inv_nonneg, log_nonneg_iff Xpos]
       exact le_trans (by norm_num) (le_of_lt X_gt)
-    · refine div_nonneg ?_ ?_
-      exact A_in.1.le
+    · refine div_nonneg A_in.1.le ?_
       rw[log_nonneg_iff Tpos]
       exact le_trans (by norm_num) (le_of_lt T_gt)
   have : σ₁ = sigma1Of A T := rfl
@@ -124,12 +122,11 @@ lemma I2Bound {SmoothingF : ℝ → ℝ}
         apply uIoc_of_le
         exact interval_length_nonneg
       _ ≤ C' * X / (ε * T) * 2 := by
-        apply mul_le_mul_of_nonneg_left
+        gcongr
         rw[abs_of_nonneg (sub_nonneg.mpr interval_length_nonneg)]
         calc
           1 + (Real.log X)⁻¹ - σ₁ ≤ 1 + (Real.log X)⁻¹ := by linarith
           _ ≤ 2 := (one_add_inv_log X_gt.le).le
-        positivity
       _ = 2 * C' * X / (ε * T) := by ring
   -- Now bound the integrand
   intro σ hσ
@@ -139,7 +136,10 @@ lemma I2Bound {SmoothingF : ℝ → ℝ}
       ‖ζ' (σ - (T : ℝ) * I) / ζ (σ - (T : ℝ) * I)‖ = ‖ζ' (σ + (-T : ℝ) * I) / ζ (σ + (-T : ℝ) * I)‖ := by
         have Z : σ - (T : ℝ) * I = σ + (- T : ℝ) * I := by simp; ring_nf
         simp [Z]
-      _ ≤ C₂ * Real.log |-T| ^ 9 := has_bound σ (-T) (by simp; rw [abs_of_pos Tpos]; exact T_gt) (by rw[this] at hσ; unfold sigma1Of at hσ; simp at hσ ⊢; replace hσ := hσ.1; linarith)
+      _ ≤ C₂ * Real.log |-T| ^ 9 := 
+        has_bound σ (-T) (by simp only [abs_neg]; rwa [abs_of_pos Tpos]) 
+        (by rw[this] at hσ; unfold sigma1Of at hσ; simp only [mem_Ioc, abs_neg, log_abs, mem_Ici,
+          tsub_le_iff_right] at hσ ⊢; replace hσ := hσ.1; linarith)
       _ ≤ C₂ * Real.log T ^ 9 := by simp
       _ ≤ C₂ * (C₃ * T) := by gcongr; exact hC₃ T (by linarith)
 
@@ -162,17 +162,16 @@ lemma I2Bound {SmoothingF : ℝ → ℝ}
             sub_self, sub_zero] at hσ ⊢
           linarith[one_add_inv_log X_gt.le]
       · rw[cpow_def_of_ne_zero]
-        · rw[norm_exp,← ofReal_log, re_ofReal_mul]
+        · rw[norm_exp,← ofReal_log Xpos.le, re_ofReal_mul]
           simp only [sub_re, ofReal_re, mul_re, I_re, mul_zero, ofReal_im, I_im, mul_one, sub_self,
             sub_zero]
           rw[← le_log_iff_exp_le, Real.log_mul (exp_ne_zero 1), Real.log_exp, ← le_div_iff₀', add_comm, add_div, div_self, one_div]
-          exact hσ.2
+          · exact hσ.2
           · refine (Real.log_pos ?_).ne.symm
             linarith
           · apply Real.log_pos
             linarith
           · linarith
-          · positivity
           · positivity
         · exact_mod_cast Xpos.ne.symm
       · positivity
@@ -194,11 +193,10 @@ lemma I2Bound {SmoothingF : ℝ → ℝ}
             exact le_add_of_nonneg_left (sq_nonneg _)
       calc
         C' * X * T / (ε * ‖↑σ - ↑T * I‖ ^ 2) ≤ C' * X * T / (ε * T ^ 2) := by
-          rw[div_le_div_iff_of_pos_left]
-          gcongr
-          positivity
-          apply mul_pos ε_pos
-          exact lt_of_lt_of_le (pow_pos Tpos 2) this
+          rw[div_le_div_iff_of_pos_left (by positivity)]
+          · gcongr
+          · apply mul_pos ε_pos
+            exact lt_of_lt_of_le (pow_pos Tpos 2) this
           positivity
         _ = C' * X / (ε * T) := by
           field
@@ -314,25 +312,13 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
     exact elt3
 
   have logXgt1 : Real.log X > 1 := by
-    refine (lt_log_iff_exp_lt ?_).mpr ?_
-    linarith
-    linarith
-
+    exact (lt_log_iff_exp_lt (by linarith)).mpr (by linarith)
   have logTgt1 : Real.log T > 1 := by
-    refine (lt_log_iff_exp_lt ?_).mpr ?_
-    linarith
-    linarith
-
+    refine (lt_log_iff_exp_lt (by linarith)).mpr (by linarith)
   have logX9gt1 : Real.log X ^ 1 > 1 := by
-    refine (one_lt_pow_iff_of_nonneg ?_ ?_).mpr logXgt1
-    linarith
-    linarith
-
+    refine (one_lt_pow_iff_of_nonneg ?_ ?_).mpr logXgt1 <;> linarith
   have logT9gt1 : Real.log T ^ 1 > 1 := by
-    refine (one_lt_pow_iff_of_nonneg ?_ ?_).mpr logTgt1
-    linarith
-    linarith
-
+    refine (one_lt_pow_iff_of_nonneg ?_ ?_).mpr logTgt1 <;> linarith
   have t_bounds : ∀ t ∈ Ioo (-T) (-3), 3 < |t| ∧ |t| < T := by
     intro t ht
     obtain ⟨h1,h2⟩ := ht
@@ -369,31 +355,21 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
     obtain h1 := logtltlogT_bounds t ht
     obtain h2 := logtgt1_bounds t ht
     have h3: 0 ≤ Real.log |t| := by linarith
-    refine (pow_lt_pow_iff_left₀ ?_ ?_ ?_).mpr h1
-    linarith
-    linarith
-    linarith
-
+    refine (pow_lt_pow_iff_left₀ ?_ ?_ ?_).mpr h1 <;> linarith
   have Aoverlogt9gtAoverlogT9_bounds : ∀ t, 3 < |t| ∧ |t| < T →
         A / Real.log |t| ^ 9 > A / Real.log T ^ 9 := by
     intro t ht
     have h1 := logt9ltlogT9_bounds t ht
     have h2 :=logt9gt1_bounds t ht
     refine div_lt_div_of_pos_left ?_ ?_ h1
-    linarith [hA.1]
+    · linarith [hA.1]
     linarith
 
   have AoverlogT9in0half: A / Real.log T ^ 1 ∈ Ioo 0 (1/2) := by
     constructor
-    · refine div_pos ?_ ?_
-      refine EReal.coe_pos.mp ?_
-      exact EReal.coe_lt_coe hA.1
-      linarith
-    · refine (div_lt_comm₀ ?_ ?_).mpr ?_
-      linarith
-      linarith
-      refine (div_lt_iff₀' ?_).mpr ?_
-      linarith
+    · exact div_pos hA.1 (by linarith)
+    · refine (div_lt_comm₀ (by linarith) (by linarith)).mpr ?_
+      refine (div_lt_iff₀' (by norm_num)).mpr ?_
       have hA_lt : A ≤ 1 / 2 := hA.2
       have hbound : 1 / 2 < (1 / 2) * Real.log T ^ 1 := by
         linarith
@@ -567,7 +543,8 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
   rw[int_mulbyI_is_int]
 
   have norm_1over2pii_le1: ‖1 / (2 * ↑π * I)‖ ≤ 1 := by
-    simp
+    simp only [one_div, mul_inv_rev, inv_I, neg_mul, norm_neg, Complex.norm_mul, norm_I, norm_inv,
+      norm_real, norm_eq_abs, Complex.norm_ofNat, one_mul]
     have pi_gt_3 : Real.pi > 3 := by
       exact pi_gt_three
     have pi_pos : 0 < π := by linarith [pi_gt_3]
@@ -598,12 +575,8 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
 
   have g_cont : ContinuousOn g (Icc (-T) (-3)) := by
     unfold g
-    refine ContinuousOn.mul ?_ ?_
-    refine ContinuousOn.mul ?_ ?_
-    refine ContinuousOn.mul ?_ ?_
-    refine ContinuousOn.mul ?_ ?_
-    · exact continuousOn_const
-    · exact continuousOn_const
+    refine ContinuousOn.mul ?_ (by fun_prop)
+    refine ContinuousOn.mul (ContinuousOn.mul (by fun_prop) ?_) ?_
     · refine ContinuousOn.pow ?_ 9
       refine ContinuousOn.log ?_ ?_
       · refine Continuous.continuousOn ?_
@@ -642,7 +615,6 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
         · linarith
         · rw [norm_sq_pos]
           exact ne_of_gt this
-    · exact continuousOn_const
 
   have g_integrable_Icc : IntegrableOn g (Icc (-T) (-3)) volume := by
     exact ContinuousOn.integrableOn_Icc g_cont
@@ -658,10 +630,7 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
     · have f_int : IntegrableOn (fun (t : ℝ) ↦ ‖f t‖) (Ioo (-T : ℝ) (-3 : ℝ)) volume := by
         have hle : -T ≤ -3 := by linarith
         exact (intervalIntegrable_iff_integrableOn_Ioo_of_le hle).mp h_int
-      apply MeasureTheory.setIntegral_mono_on
-      exact f_int
-      exact g_integrable_Ioo
-      exact measurableSet_Ioo
+      apply MeasureTheory.setIntegral_mono_on f_int g_integrable_Ioo measurableSet_Ioo
       intro t ht
       apply bound_integral
       have : |t| = -t := by
@@ -695,19 +664,13 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
           · linarith [ht.2]
           · linarith [ht.1]
         unfold g
-        apply mul_nonneg
-        apply mul_nonneg
-        apply mul_nonneg
-        apply mul_nonneg
-        · linarith
-        · linarith
+        apply mul_nonneg _ (by positivity)
+        apply mul_nonneg _ (by positivity)
+        apply mul_nonneg (by positivity)
         · have : 0 ≤ Real.log |t| := by
             apply Real.log_nonneg
             linarith [tbounds1.1]
           positivity
-        · positivity
-        · apply Real.rpow_nonneg
-          linarith
 
   apply le_trans int_normf_le_int_g
   unfold g
@@ -750,8 +713,7 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
       have : ∫ t in Ioo (-T) (-3), Real.log |t| ^ 9 / (σ₁ ^ 2 + t ^ 2)
             ≤ ∫ t in Ioo (-T) (-3), Real.log |t| ^ 9 /  t ^ 2 := by
         refine setIntegral_mono_on ?_ ?_ ?_ ?_
-        ·
-          have cont : ContinuousOn (fun t ↦ Real.log |t| ^ 9 / (σ₁ ^ 2 + t ^ 2)) (Set.Icc (-T) (-3)) := by
+        · have cont : ContinuousOn (fun t ↦ Real.log |t| ^ 9 / (σ₁ ^ 2 + t ^ 2)) (Set.Icc (-T) (-3)) := by
             refine ContinuousOn.div ?_ ?_ ?_
             · refine ContinuousOn.pow ?_ 9
               refine ContinuousOn.log ?_ ?_
@@ -1124,14 +1086,13 @@ lemma I4Bound {SmoothingF : ℝ → ℝ}
   rw[norm_mul, ← one_mul C]
   have : 1 * C * X * X ^ (-A / Real.log T) / ε = 1 * (C * X * X ^ (-A / Real.log T) / ε) := by ring
   rw[this]
-  apply mul_le_mul
+  apply mul_le_mul _ _ _ (by norm_num)
   · rw[norm_div, norm_one]
     repeat rw[norm_mul]
-    rw[Complex.norm_two, Complex.norm_real, Real.norm_of_nonneg, Complex.norm_I, mul_one]
+    rw[Complex.norm_two, Complex.norm_real, Real.norm_of_nonneg pi_nonneg, Complex.norm_I, mul_one]
     have : 1 / (2 * π) < 1 / 6 := by
       rw[one_div_lt_one_div]
-      · refine (div_lt_iff₀' ?_).mp ?_
-        norm_num
+      · refine (div_lt_iff₀' (by norm_num)).mp ?_
         ring_nf
         refine gt_iff_lt.mpr ?_
         exact Real.pi_gt_three
@@ -1139,7 +1100,6 @@ lemma I4Bound {SmoothingF : ℝ → ℝ}
       · norm_num
     apply le_of_lt
     exact lt_trans this (by norm_num)
-    exact pi_nonneg
   · let f : ℝ → ℂ := fun σ ↦ (-ζ' (↑σ - 3 * I) / ζ (↑σ - 3 * I) * 𝓜 (fun x ↦ ↑(Smooth1 SmoothingF ε x)) (↑σ - 3 * I) * ↑X ^ (↑σ - 3 * I))
     have temp : ‖∫ (σ : ℝ) in σ₂..σ₁, -ζ' (↑σ - 3 * I) / ζ (↑σ - 3 * I) * 𝓜 (fun x ↦ ↑(Smooth1 SmoothingF ε x)) (↑σ - 3 * I) * ↑X ^ (↑σ - 3 * I)‖ ≤
       C * X * X ^ (-A / Real.log T) / ε * |σ₁ - σ₂| := by
@@ -1307,8 +1267,6 @@ lemma I4Bound {SmoothingF : ℝ → ℝ}
       bound
     exact le_trans temp this
   simp only [norm_nonneg]
-  norm_num
-
 
 lemma I6Bound {SmoothingF : ℝ → ℝ}
     (suppSmoothingF : Function.support SmoothingF ⊆ Icc (1 / 2) 2)
@@ -1447,7 +1405,8 @@ theorem Strong_PNT : ∃ c > 0,
   have holo2 : HolomorphicOn (fun s ↦ ζ' s / ζ s) (uIcc σ₂ 2 ×ℂ uIcc (-3) 3 \ {1}) := by
     apply holo2'.mono
     intro s hs
-    simp [mem_reProdIm] at hs ⊢
+    simp only [neg_le_self_iff, Nat.ofNat_nonneg, uIcc_of_le, mem_diff, mem_reProdIm, mem_Icc,
+      mem_singleton_iff] at hs ⊢
     refine ⟨?_, hs.2⟩
     refine ⟨?_, hs.1.2⟩
     rcases hs.1.1 with ⟨left, right⟩
@@ -1788,16 +1747,16 @@ theorem Strong_PNT : ∃ c > 0,
     convert hx using 1
     ring_nf
     congr! 1
-    have : Real.log x * const2 * Real.log x ^ (-1 + pow1)
-        = const2 * Real.log x ^ pow1 := by
-      rw [mul_assoc, mul_comm, mul_assoc]
-      congr! 1
-      conv =>
-        enter [1, 2]
-        rw [← Real.rpow_one (Real.log x)]
-      rw [← Real.rpow_add (Real.log_pos (by linarith))]
-      ring_nf
-    rw [this]
+    · have : Real.log x * const2 * Real.log x ^ (-1 + pow1)
+          = const2 * Real.log x ^ pow1 := by
+        rw [mul_assoc, mul_comm, mul_assoc]
+        congr! 1
+        conv =>
+          enter [1, 2]
+          rw [← Real.rpow_one (Real.log x)]
+        rw [← Real.rpow_add (Real.log_pos (by linarith))]
+        ring_nf
+      rw [this]
     have : Real.log x * const3 * Real.log x ^ (-1 + pow1)
         = const3 * Real.log x ^ pow1 := by
       rw [mul_assoc, mul_comm, mul_assoc]
@@ -1982,10 +1941,10 @@ theorem Strong_PNT : ∃ c > 0,
                   + c₈ * X / (ε * T)
                   + c₉ * X * Real.log X / (ε * T)) := by
       gcongr
-      convert h_close using 1
-      rw [← norm_neg]
-      congr
-      ring
+      · convert h_close using 1
+        rw [← norm_neg]
+        congr
+        ring
 
       -- unfold σ₁
       change ‖I₂ ν ε (Tx X) X σ₁‖ ≤ c₂ * X / (ε * (Tx X))
@@ -2043,3 +2002,5 @@ SmoothedChebyshevPull1, SmoothedChebyshevPull2, I1Bound, I2Bound, I3Bound, I4Bou
 %%-/
 
 #print axioms Strong_PNT
+
+end Strong

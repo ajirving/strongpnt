@@ -43,7 +43,7 @@ lemma Z0bound_aux :
       exact h_tendsto_nhds.mono_left nhdsWithin_le_nhds
     · -- Part 2: Eventually not equal to the point `1`.
       -- This is equivalent to `Tendsto u l (𝓟 {1}ᶜ)`.
-      simp
+      simp only [tendsto_principal, mem_compl_iff, mem_singleton_iff]
       -- For any δ in `Ioi 0`, `u(δ) = 1 + δ ≠ 1`.
       filter_upwards [self_mem_nhdsWithin] with delta h_delta_pos
       simp only [u]

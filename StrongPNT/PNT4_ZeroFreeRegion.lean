@@ -43,12 +43,13 @@ lemma ZetaZerosNearPoint_finite (t : ℝ) : Set.Finite (ZetaZerosNearPoint t) :=
   apply (MeromorphicOn.divisor H (Metric.closedBall c R)).finiteSupport (isCompact_closedBall ..)|>.subset
   intro z hz
   have := Complex.analyticOnNhd_univ_iff_differentiable.mpr hH_diff
-  simp_all [ZetaZerosNearPoint]
+  simp_all only [ZetaZerosNearPoint, Set.mem_setOf_eq, Function.mem_support, ne_eq]
   rw [MeromorphicOn.divisor_apply (this.mono (Set.subset_univ _)).meromorphicOn (by simp_all [c, R, dist_eq_norm_sub]),
     (this z (Set.mem_univ _)).meromorphicOrderAt_eq]
-  simp_all [analyticOrderAt_ne_zero, this z]
+  simp_all only [WithTop.untop₀_eq_zero, ENat.map_natCast_eq_zero, ENat.map_eq_top_iff, not_or,
+    analyticOrderAt_ne_zero, Set.mem_univ, this z, true_and]
   constructor
-  · simp_all [zeroZ, H]
+  · simp_all only [zeroZ, Set.mem_setOf_eq, H]
     by_cases! h : z = 1
     · simp [h, riemannZeta_one_ne_zero] at hz
     · simp_all
@@ -206,7 +207,9 @@ lemma lem_explicit2Real :
 
 lemma lem_Re1deltatge0 (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
 (1 / ((1 : ℂ) + delta + t * Complex.I - rho1)).re ≥ 0 := by
-  simp
+  simp only [one_div, Complex.inv_re, Complex.sub_re, Complex.add_re, Complex.one_re,
+    Complex.ofReal_re, Complex.mul_re, Complex.I_re, mul_zero, Complex.ofReal_im, Complex.I_im,
+    mul_one, sub_self, add_zero, ge_iff_le]
   apply div_nonneg _ <| Complex.normSq_nonneg _
   linarith [lem_sigmale1Zt t rho1 h_rho1_in_Zt]
 
@@ -214,7 +217,11 @@ lemma lem_Re1deltatge0m (delta : ℝ) (hdelta : delta > 0) (t : ℝ)
   (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) :
   ((analyticOrderNatAt riemannZeta rho1 : ℂ) /
     (((1 : ℂ) + delta + t * Complex.I) - rho1)).re ≥ 0 := by
-  simp [div_eq_mul_inv]
+  simp only [div_eq_mul_inv, Complex.mul_re, Complex.natCast_re, Complex.inv_re, Complex.sub_re,
+    Complex.add_re, Complex.one_re, Complex.ofReal_re, Complex.I_re, mul_zero, Complex.ofReal_im,
+    Complex.I_im, mul_one, sub_self, add_zero, Complex.natCast_im, Complex.inv_im, Complex.sub_im,
+    Complex.add_im, Complex.one_im, Complex.mul_im, zero_add, neg_sub, zero_mul, sub_zero,
+    ge_iff_le]
   refine mul_nonneg (by positivity) <| mul_nonneg ?_ (inv_nonneg.mpr (Complex.normSq_nonneg _))
   linarith [lem_sigmale1Zt t rho1 h_rho1_in_Zt]
 
@@ -591,7 +598,7 @@ lemma lem_1delsigReal2 (delta : ℝ) (_hdelta : delta > 0) (rho : ℂ) (_h_rho_i
   -- The real part of 1 is 1
   rw [Complex.one_re]
 
-lemma lem_re_inv_one_plus_delta_minus_rho_real (delta : ℝ) (hdelta : delta > 0)  (rho : ℂ) (h_rho_in_zeroZ : rho ∈ zeroZ) :
+lemma lem_re_inv_one_plus_delta_minus_rho_real (delta : ℝ) (hdelta : delta > 0) (rho : ℂ) (h_rho_in_zeroZ : rho ∈ zeroZ) :
 (1 / ((1 : ℂ) + delta + rho.im * Complex.I - rho)).re = 1 / ((1 : ℝ) + delta - rho.re) := by
   -- Apply lem_1deltatrho0 to simplify the denominator
   rw [lem_1deltatrho0 delta hdelta rho h_rho_in_zeroZ]
@@ -634,9 +641,7 @@ lemma lem_Z1splitge3 (delta : ℝ) (hdelta : delta > 0) (sigma t : ℝ) (rho : �
 
   -- Since rho.im = t and rho.re = sigma, we can convert the bound
   convert h_bound using 1
-  -- Show the sums are equal by substituting rho.im = t
-  simp_rw [← h_rho_im]
-  -- Show the bounds are equal by substituting rho.re = sigma
+  · simp_rw [← h_rho_im]
   rw [h_rho_re]
 
 lemma Z1bound :
@@ -889,7 +894,7 @@ lemma summable_of_support_singleton {α : Type*} [SeminormedAddCommGroup α] (f 
       -- If n ≠ n₀, then by hypothesis h, f n = 0
       have h_zero : f n = 0 := h n h_ne
       -- But this contradicts f n ≠ 0
-      simp [Function.mem_support] at hn
+      simp only [Function.mem_support, ne_eq] at hn
       exact hn h_zero
     -- Since support ⊆ {n₀} and {n₀} is finite, support is finite
     exact Set.Finite.subset (Set.finite_singleton n₀) h_subset
@@ -1525,7 +1530,7 @@ lemma norm_one_div_coe_real_le_one_of_one_le {δ : ℝ} (h : 1 ≤ δ) : ‖(1 :
       simpa using (one_div_le_one_div_of_le (ha := (zero_lt_one)) (h := h))
 
 /-- There exists a constant `C > 0` such that for all `δ > 0`,
-`‖ -logDerivZeta (1 + δ) - 1/δ ‖ ≤ C`.  -/
+`‖ -logDerivZeta (1 + δ) - 1/δ ‖ ≤ C`. -/
 lemma Z0bound_const :
   ∃ C > 1, ∀ (δ : ℝ) (_hδ : δ > 0),
     ‖ -logDerivZeta ((1 : ℂ) + δ) - (1 / (δ : ℂ))‖ ≤ C := by
@@ -1838,12 +1843,10 @@ lemma lem341series (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
   -- Use additivity of tsum
   rw [← Summable.tsum_add (Summable.mul_left 3 h2) (Summable.mul_left 4 h3)]
   rw [← Summable.tsum_add]
-
   -- Factor out common terms
-  congr 1
-  ext n
-  ring
-
+  · congr 1
+    ext n
+    ring
   -- Apply the final summability result
   · exact Summable.add (Summable.mul_left 3 h2) (Summable.mul_left 4 h3)
   · exact h4
@@ -2238,7 +2241,7 @@ lemma lem_delta19 :
         have h_mul_ineq := mul_le_mul_of_nonneg_left h_inv_le_two h_num_nonneg
         convert h_mul_ineq using 1
         -- Show zerofree_constant / 20 * 2 = zerofree_constant / 10
-        field_simp
+        · field
         ring
       -- Final bound: zerofree_constant / 10 < 1/10 < 1/9
       have h_lt_tenth : zerofree_constant / 10 < 1 / 10 := by
@@ -3174,8 +3177,7 @@ lemma no_zero_of_bound_one_and_center_one
   ∀ z ∈ Metric.closedBall (0 : ℂ) R, g z ≠ 0 := by
   intro z hz
   by_cases hRpos : 0 < R
-  ·
-    -- differentiability inside the open ball
+  · -- differentiability inside the open ball
     have hdiff : DifferentiableOn ℂ g (Metric.ball (0 : ℂ) R) := by
       intro x hx
       have hxlt : ‖x‖ < R := by
@@ -3210,8 +3212,7 @@ lemma no_zero_of_bound_one_and_center_one
     have hz_eq1 : g z = g 0 := by simpa using hz_eq
     have gz_one : g z = 1 := by simpa [hg0_one] using hz_eq1
     simp [gz_one]
-  ·
-    -- If R ≤ 0, then any z in closedBall(0,R) must be 0, hence g z = 1 ≠ 0
+  · -- If R ≤ 0, then any z in closedBall(0,R) must be 0, hence g z = 1 ≠ 0
     have hRle : R ≤ 0 := le_of_not_gt hRpos
     have hz_le : ‖z‖ ≤ R := by
       simpa [Metric.mem_closedBall, Complex.dist_eq] using hz
