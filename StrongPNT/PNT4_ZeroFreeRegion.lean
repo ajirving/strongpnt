@@ -44,8 +44,7 @@ lemma ZetaZerosNearPoint_finite (t : ℝ) : Set.Finite (ZetaZerosNearPoint t) :=
   intro z hz
   have := Complex.analyticOnNhd_univ_iff_differentiable.mpr hH_diff
   simp_all only [ZetaZerosNearPoint, Set.mem_setOf_eq, Function.mem_support, ne_eq]
-  rw [MeromorphicOn.divisor_apply (this.mono (Set.subset_univ _)).meromorphicOn (by simp_all [c, R, dist_eq_norm_sub]),
-    (this z (Set.mem_univ _)).meromorphicOrderAt_eq]
+  rw [MeromorphicOn.AnalyticOnNhd.divisor_apply (this.mono (Set.subset_univ _)) (by simp_all [c, R, dist_eq_norm_sub])]
   simp_all only [WithTop.untop₀_eq_zero, ENat.map_natCast_eq_zero, ENat.map_eq_top_iff, not_or,
     analyticOrderAt_ne_zero, Set.mem_univ, this z, true_and]
   constructor
