@@ -1,5 +1,6 @@
 import Mathlib.Algebra.Lie.OfAssociative
 import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
+import Mathlib.Analysis.Complex.JensenFormula
 import Mathlib.Analysis.Normed.Module.Connected
 import Mathlib.Analysis.Complex.ExponentialBounds
 import StrongPNT.PNT1_ComplexAnalysis
@@ -656,147 +657,6 @@ lemma lem_Bf_bounded_in_disk_from_f (B R R1 : ℝ)
   exact (lem_Bf_bounded_in_disk_from_boundary B R R1 hB hR1_pos hR1_lt_R f h_f_analytic h_bd_boundary) z hz
 
 
-lemma lem_Bf_at_0_le_M (B R R1 : ℝ) (hB : 1 < B)
-    (hR1_pos : 0 < R1)
-    (hR1_lt_R : R1 < R)
-    (f : ℂ → ℂ)
-    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
-    (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
-  ‖Bf R R1 f 0‖ ≤ B := by
-  have h :=
-    lem_Bf_bounded_in_disk_from_f B R R1 hB hR1_pos hR1_lt_R f h_f_analytic h_finite_zeros hf_le_B
-  have h0 : ‖(0 : ℂ)‖ ≤ R := by simpa using (le_of_lt (by linarith))
-  simpa using h 0 h0
-
-
-lemma lem_combine_bounds_on_Bf0 (B R R1 : ℝ)
-    (hR1_pos : 0 < R1)
-    (hR1_lt_R : R1 < R)
-    (f : ℂ → ℂ)
-    (hf0_eq_one : f 0 = 1)
-    (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (hBf0 : ‖Bf R R1 f 0‖ ≤ B) :
-    (R / R1 : ℝ) ^ (∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ : ℝ) ≤ B := by
-  classical
-  -- Abbreviate the finite set of zeros
-  set K := h_finite_zeros.toFinset
-  -- Evaluate ‖Bf(0)‖ in terms of the product over zeros
-  have hf0_ne0 : f 0 ≠ 0 := by simp [hf0_eq_one]
-  have hf0_norm : ‖f 0‖ = 1 := by simp [hf0_eq_one]
-  have h_eval0 :=
-    lem_mod_Bf_at_0_eval R R1 hR1_pos hR1_lt_R f hf0_ne0 h_finite_zeros
-  have h_eval_prod :
-      ‖Bf R R1 f 0‖
-        = ∏ ρ ∈ K, (R / ‖ρ‖) ^ analyticOrderNatAt f ρ := by
-    rw [h_eval0, hf0_norm, one_mul]
-  -- For each zero ρ ∈ K, we have R/‖ρ‖ ≥ 3/2
-  have h_base_ge : ∀ ρ ∈ K, R / ‖ρ‖ ≥ (R/R1 : ℝ) := by
-    intro ρ hρK
-    have hρ_in : ρ ∈ zerosetKfR R1 f := by simpa [K] using hρK
-    simpa using
-      (lem_R_div_mod_rho_ge_R_over_R1 R R1 hR1_pos hR1_lt_R f hf0_ne0 ρ hρ_in)
-  -- Compare products termwise and combine
-  have R_over_R1_nonneg : 0 ≤ R/R1 := by
-    have : 0 ≤ R := by linarith
-    apply div_nonneg (by assumption) (le_of_lt hR1_pos)
-  have h_prod_le :
-      ∏ ρ ∈ K, (R/R1 : ℝ) ^ analyticOrderNatAt f ρ
-        ≤ ∏ ρ ∈ K, (R / ‖ρ‖) ^ analyticOrderNatAt f ρ := by
-    refine Finset.prod_le_prod       ?h_nonneg ?h_le
-    · intro ρ hρK; exact pow_nonneg (R_over_R1_nonneg) _
-    · intro ρ hρK
-      exact pow_le_pow_left₀ (by linarith : (0 : ℝ) ≤ R / R1) (h_base_ge ρ hρK) _
-  have h_prod_le_B :
-      ∏ ρ ∈ K, (R / R1: ℝ) ^ analyticOrderNatAt f ρ ≤ B := by
-    have h_right : ∏ ρ ∈ K, (R / ‖ρ‖) ^ analyticOrderNatAt f ρ =
-        ‖Bf R R1 f 0‖ := by
-      simp [h_eval_prod]
-    exact le_trans h_prod_le (by simpa [h_right] using hBf0)
-  -- Convert the product of powers to a single power with exponent the sum of exponents
-  have h_prod_pow_sum :
-      (∏ ρ ∈ K, (R/R1 : ℝ) ^ analyticOrderNatAt f ρ)
-        = (R/R1 : ℝ) ^ (∑ ρ ∈ K, analyticOrderNatAt f ρ) := by
-    simpa using
-      (Finset.prod_pow_eq_pow_sum K (fun ρ => analyticOrderNatAt f ρ) (R/R1 : ℝ))
-  -- Now we have a bound on (3/2)^(sum m_ρ) with a natural-number exponent
-  have h_natPow : (R / R1 : ℝ) ^ (∑ ρ ∈ K, analyticOrderNatAt f ρ) ≤ B := by
-    simpa [h_prod_pow_sum] using h_prod_le_B
-  -- Let S be that natural sum of multiplicities
-  set S : ℕ := ∑ ρ ∈ K, analyticOrderNatAt f ρ
-  have h_natPowS : (R / R1 : ℝ) ^ S ≤ B := by simpa [S] using h_natPow
-  -- Convert to real exponent using Real.rpow_natCast
-  have h_rpowS : (R / R1 : ℝ) ^ (S : ℝ) ≤ B := by
-    -- rewrite the left-hand side using rpow_natCast
-    simpa [(Real.rpow_natCast (R / R1 : ℝ) S)] using h_natPowS
-  -- Finally, rewrite S back as the sum over K and K as the toFinset
-  have h_cast_sum : (S : ℝ)
-      = (∑ ρ ∈ K, (analyticOrderNatAt f ρ : ℝ)) := by
-    simp [S]
-  -- Conclude by rewriting the exponent
-  have : (R / R1 : ℝ) ^ (∑ ρ ∈ K, (analyticOrderNatAt f ρ : ℝ)) ≤ B := by
-    simpa [h_cast_sum] using h_rpowS
-  simpa [K] using this
-
-
-lemma lem_jensen_inequality_form (B R R1 : ℝ) (hB : 1 < B)
-    (hR1_pos : 0 < R1)
-    (hR1_lt_R : R1 < R)
-    (f : ℂ → ℂ)
-    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
-    (hf0_eq_one : f 0 = 1)
-    (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
-    (R / R1 : ℝ) ^ (∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ : ℝ) ≤ B := by
-  -- Derive f 0 ≠ 0 from f 0 = 1
-  have hf0_ne0 : f 0 ≠ 0 := by
-    rw [hf0_eq_one]; norm_num
-  -- Bound Bf at 0 using the maximum modulus arguments
-  have hBf0 :=
-    lem_Bf_at_0_le_M B R R1 hB hR1_pos hR1_lt_R f h_f_analytic h_finite_zeros hf_le_B
-  -- Convert that bound into the desired product bound
-  let K := h_finite_zeros.toFinset
-  have hres := lem_combine_bounds_on_Bf0 B R R1 hR1_pos hR1_lt_R f hf0_eq_one h_finite_zeros hBf0
-  -- Align coercions and finish (adjust numerical coercions if necessary)
-  simpa using hres
-
-
-lemma lem_log_mono_inc {x y : ℝ} (hx : 0 < x) (hxy : x ≤ y) : Real.log x ≤ Real.log y := by
-  exact Real.log_le_log hx hxy
-
-lemma lem_jensen_log_form (B R R1 : ℝ) (hB : 1 < B)
-    (hR1_pos : 0 < R1)
-    (hR1_lt_R : R1 < R)
-    (f : ℂ → ℂ)
-    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
-    (hf0_eq_one : f 0 = 1)
-    (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
-    (∑ ρ ∈ h_finite_zeros.toFinset, (analyticOrderNatAt f ρ : ℝ)) * Real.log (R / R1) ≤ Real.log B := by
-  -- Let S denote the sum of the multiplicities
-  set S : ℝ := ∑ ρ ∈ h_finite_zeros.toFinset, (analyticOrderNatAt f ρ : ℝ)
-  -- From the Jensen-type inequality
-  have hpow_le : (R / R1 : ℝ) ^ S ≤ B := by
-    simpa [S] using
-      (lem_jensen_inequality_form B R R1 hB hR1_pos hR1_lt_R f h_f_analytic hf0_eq_one h_finite_zeros hf_le_B)
-  -- Base positivity
-  have hbase_pos : 1 < (R / R1 : ℝ) := by exact (one_lt_div hR1_pos).mpr hR1_lt_R
-  have hbase_pos' : 0 < (R / R1 : ℝ) := by
-    have : 0 < R := by linarith
-    linarith
-  -- Positivity of the left-hand side to apply log monotonicity
-  have hxpos : 0 < (R / R1 : ℝ) ^ S := by
-    simpa [S] using Real.rpow_pos_of_pos hbase_pos' S
-  -- Apply monotonicity of log
-  have hlog_le : Real.log ((R / R1 : ℝ) ^ S) ≤ Real.log B :=
-    lem_log_mono_inc hxpos hpow_le
-  -- Rewrite log of a power
-  have hlog_rpow : Real.log ((R / R1 : ℝ) ^ S) = S * Real.log (R / R1) := by
-    simpa using (Real.log_rpow hbase_pos' S)
-  -- Conclude
-  simpa [S, hlog_rpow] using hlog_le
-
-
 lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
@@ -806,18 +666,41 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
     (∑ ρ ∈ h_finite_zeros.toFinset, (analyticOrderNatAt f ρ : ℝ)) ≤ (1/Real.log (R/R1)) * Real.log B := by
-  have h_div_log : (∑ ρ ∈ h_finite_zeros.toFinset, (analyticOrderNatAt f ρ : ℝ)) * Real.log (R/R1) ≤ Real.log B := by
-    apply lem_jensen_log_form B R R1 hB hR1_pos hR1_lt_R f h_f_analytic hf0_eq_one h_finite_zeros hf_le_B
-  have log_pos' : R/R1 > 1 := by exact (one_lt_div hR1_pos).mpr hR1_lt_R
-  have log_pos : Real.log (R/R1) > 0 := by exact Real.log_pos log_pos'
-  calc
-    ∑ ρ ∈ h_finite_zeros.toFinset, ↑(analyticOrderNatAt f ρ)
-    _ = 1 / Real.log (R / R1) * (Real.log (R / R1) * (∑ ρ ∈ h_finite_zeros.toFinset, ↑(analyticOrderNatAt f ρ))) := by
-      field_simp [ne_of_gt log_pos]
-    _ ≤ 1 / Real.log (R / R1) * Real.log B := by
-      gcongr
-      rw [mul_comm]
-      exact h_div_log
+  convert  AnalyticOnNhd.sum_divisor_le (f := f) (M := B) (R := R) (r := R1) (c := 0) _ _ _ _ _ _ using 1
+  · rw [finsum_eq_finsetSum_of_support_subset (s := h_finite_zeros.toFinset)]
+    · push_cast
+      refine Finset.sum_congr rfl (fun z hz ↦ ?_)
+      rw [MeromorphicOn.AnalyticOnNhd.divisor_apply]
+      · norm_cast
+        unfold analyticOrderNatAt
+        cases analyticOrderAt f z <;> simp
+      · convert h_f_analytic.mono _
+        rw [abs_of_pos (by linarith)]
+        gcongr
+      · rw [abs_of_pos (by linarith)]
+        simp_all [zerosetKfR]
+    · intro z hz
+      simp_all only [mem_support, MeromorphicOn.divisor_def, mem_closedBall, dist_zero_right, ne_eq,
+        ite_eq_right_iff, WithTop.untop₀_eq_zero, and_imp, Classical.not_imp, not_or, zerosetKfR,
+        Finite.coe_toFinset, mem_setOf_eq]
+      rw [abs_of_pos (by linarith)] at hz
+      refine ⟨hz.2.1, apply_eq_zero_of_analyticOrderAt_ne_zero ?_⟩
+      rw [AnalyticAt.meromorphicOrderAt_eq] at hz
+      · simp_all
+      · apply h_f_analytic
+        simp only [mem_closedBall, dist_zero_right]
+        exact hz.2.1.trans (by linarith)
+  · simp_all; ring
+  · rw [abs_pos]; linarith
+  · rwa [abs_of_pos, abs_of_pos] <;> linarith
+  · exact hB.le
+  · convert h_f_analytic
+    rw [abs_of_pos]; linarith
+  · simp_all
+  · intro z hz
+    apply hf_le_B
+    simp_all only [mem_sphere_iff_norm, sub_zero]
+    rw [abs_of_pos (by linarith)]
 
 variable {R R1 r B : ℝ} {f : ℂ → ℂ}
 variable (h_finite_zeros : (zerosetKfR R1 f).Finite)
