@@ -666,18 +666,16 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
     (∑ ρ ∈ h_finite_zeros.toFinset, (analyticOrderNatAt f ρ : ℝ)) ≤ (1/Real.log (R/R1)) * Real.log B := by
-  convert  AnalyticOnNhd.sum_divisor_le (f := f) (M := B) (R := R) (r := R1) (c := 0) _ _ _ _ _ _ using 1
+  rw [← abs_of_nonneg (by linarith : 0 ≤ R)] at h_f_analytic
+  convert  AnalyticOnNhd.sum_divisor_le (by grind : 0 < |R1|) (by grind) hB.le h_f_analytic (by grind) _ using 1
   · rw [finsum_eq_finsetSum_of_support_subset (s := h_finite_zeros.toFinset)]
     · push_cast
       refine Finset.sum_congr rfl (fun z hz ↦ ?_)
-      rw [MeromorphicOn.AnalyticOnNhd.divisor_apply]
+      rw [MeromorphicOn.AnalyticOnNhd.divisor_apply (h_f_analytic.mono (by gcongr))]
       · norm_cast
         unfold analyticOrderNatAt
         cases analyticOrderAt f z <;> simp
-      · convert h_f_analytic.mono _
-        rw [abs_of_pos (by linarith)]
-        gcongr
-      · rw [abs_of_pos (by linarith)]
+      · rw [abs_of_nonneg (by linarith)]
         simp_all [zerosetKfR]
     · intro z hz
       simp_all only [mem_support, MeromorphicOn.divisor_def, mem_closedBall, dist_zero_right, ne_eq,
@@ -685,22 +683,13 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
         Finite.coe_toFinset, mem_setOf_eq]
       rw [abs_of_pos (by linarith)] at hz
       refine ⟨hz.2.1, apply_eq_zero_of_analyticOrderAt_ne_zero ?_⟩
-      rw [AnalyticAt.meromorphicOrderAt_eq] at hz
-      · simp_all
-      · apply h_f_analytic
-        simp only [mem_closedBall, dist_zero_right]
-        exact hz.2.1.trans (by linarith)
+      rw [(h_f_analytic _ (by simp; grind)).meromorphicOrderAt_eq] at hz
+      simp_all
   · simp_all; ring
-  · rw [abs_pos]; linarith
-  · rwa [abs_of_pos, abs_of_pos] <;> linarith
-  · exact hB.le
-  · convert h_f_analytic
-    rw [abs_of_pos]; linarith
-  · simp_all
   · intro z hz
     apply hf_le_B
     simp_all only [mem_sphere_iff_norm, sub_zero]
-    rw [abs_of_pos (by linarith)]
+    grind
 
 variable {R R1 r B : ℝ} {f : ℂ → ℂ}
 variable (h_finite_zeros : (zerosetKfR R1 f).Finite)
