@@ -340,70 +340,11 @@ lemma analyticAt_riemannZeta_of_ne_one {s : ℂ} (hs : s ≠ 1) : AnalyticAt ℂ
 lemma riemannZeta_not_eventually_zero_of_ne_one {s : ℂ} (hs : s ≠ 1) :
   ¬ (∀ᶠ z in nhds s, riemannZeta z = 0) := by
   intro hEvZero
-  -- Define H(s) = (s - 1) * ζ(s) with the removable singularity at s = 1 filled by H(1) = 1
-  let H : ℂ → ℂ := Function.update (fun z : ℂ => (z - 1) * riemannZeta z) 1 1
-  -- H is entire (complex-differentiable everywhere)
-  have hH_diff : Differentiable ℂ H := by
-    intro z
-    rcases eq_or_ne z 1 with rfl | hz
-    · -- at z = 1: removable singularity
-      refine (Complex.analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt ?_ ?_).differentiableAt
-      · -- differentiable on punctured neighborhood of 1
-        -- Show eventual differentiability at points t ≠ 1 near 1
-        filter_upwards [self_mem_nhdsWithin] with t ht
-        have h1 : DifferentiableAt ℂ (fun u : ℂ => u - 1) t := (differentiableAt_id.sub_const 1)
-        have h2 : DifferentiableAt ℂ riemannZeta t := by
-          -- zeta is differentiable away from 1
-          exact differentiableAt_riemannZeta ht
-        have hdiff := h1.mul h2
-        -- congruence with the updated function away from 1
-        apply hdiff.congr_of_eventuallyEq
-        filter_upwards [eventually_ne_nhds ht] with u hu
-        simp [H, Function.update_of_ne hu]
-      · -- continuity at 1 from the known limit
-        simpa [H, continuousAt_update_same] using riemannZeta_residue_one
-    · -- at z ≠ 1: equality with (z-1)ζ(z)
-      have h1 : DifferentiableAt ℂ (fun u : ℂ => u - 1) z := (differentiableAt_id.sub_const 1)
-      have h2 : DifferentiableAt ℂ riemannZeta z := by
-        exact differentiableAt_riemannZeta hz
-      have hdiff := h1.mul h2
-      -- congruence with H away from the updated point
-      apply hdiff.congr_of_eventuallyEq
-      filter_upwards [eventually_ne_nhds hz] with u hu
-      simp [H, Function.update_of_ne hu]
-  -- Hence H is analytic on a neighborhood of every point of the whole space
-  have hH_analytic : AnalyticOnNhd ℂ H Set.univ :=
-    (Complex.analyticOnNhd_univ_iff_differentiable).2 hH_diff
-  -- The zero function is analytic everywhere
-  have h0_analytic : AnalyticOnNhd ℂ (fun _ : ℂ => (0 : ℂ)) Set.univ := by
-    intro z _; simpa using (analyticAt_const : AnalyticAt ℂ (fun _ : ℂ => (0 : ℂ)) z)
-  -- From eventual vanishing of ζ near s and s ≠ 1, we get eventual vanishing of H near s
-  have hEv_ne1 : ∀ᶠ z in nhds s, z ≠ 1 := eventually_ne_nhds hs
-  have hEv_H0 : ∀ᶠ z in nhds s, H z = 0 := by
-    filter_upwards [hEvZero, hEv_ne1] with z hz_zero hz_ne1
-    -- On z ≠ 1, H z = (z - 1) * ζ z = 0
-    have : H z = (z - 1) * riemannZeta z := by simp [H, Function.update_of_ne hz_ne1]
-    simp [this, hz_zero]
-  -- Identity theorem on the connected set univ: H coincides with 0 everywhere
-  have hEqOn : Set.EqOn H (fun _ : ℂ => (0 : ℂ)) Set.univ := by
-    -- univ is preconnected
-    have hU : IsPreconnected (Set.univ : Set ℂ) := by simpa using isPreconnected_univ
-    exact AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq hH_analytic h0_analytic hU (by simp) hEv_H0
-  have hHeq : H = fun _ : ℂ => (0 : ℂ) := by
-    funext z; simpa using hEqOn (by simp : z ∈ (Set.univ : Set ℂ))
-  -- Evaluate at 2 to get a contradiction
-  have h2ne1 : (2 : ℂ) ≠ 1 := by norm_num
-  have hH2 : H (2 : ℂ) = (2 - 1) * riemannZeta (2 : ℂ) := by
-    simp [H]
-  have hzeta2_ne : riemannZeta (2 : ℂ) ≠ 0 :=
-    riemannZeta_ne_zero_of_one_le_re (by simp)
-  have hprod_zero' : 0 = (2 - 1) * riemannZeta (2 : ℂ) := by
-    simpa [hHeq] using hH2
-  have hprod_zero : (2 - 1) * riemannZeta (2 : ℂ) = 0 := hprod_zero'.symm
-  have hnonzero : (2 - 1) * riemannZeta (2 : ℂ) ≠ 0 := by
-    have hcoeff : (2 : ℂ) - 1 ≠ 0 := sub_ne_zero.mpr h2ne1
-    exact mul_ne_zero hcoeff hzeta2_ne
-  exact hnonzero hprod_zero
+  have := analyticOn_riemannZeta.eqOn_of_preconnected_of_eventuallyEq analyticOnNhd_const
+    (IsConnected.isPreconnected (isConnected_compl_singleton_of_one_lt_rank (by simp) _)) (by simpa)
+    hEvZero (x := 0) (by simp_all)
+  simp_all [riemannZeta_zero]
+
 
 lemma analyticOrderAt_pos_toNat_of_zero_of_analytic_not_eventually_zero {f : ℂ → ℂ} {z0 : ℂ}
   (hf : AnalyticAt ℂ f z0) (hzero : f z0 = 0)
