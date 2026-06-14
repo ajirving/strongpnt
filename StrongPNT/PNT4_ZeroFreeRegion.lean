@@ -513,17 +513,11 @@ lemma lem_Z1splitge (delta : ℝ) (hdelta_pos : delta > 0) (rho : ℂ)
   simpa using h
 
 
-lemma lem_1deltatrho0 (delta : ℝ) (_hdelta : delta > 0) (rho : ℂ) (_h_rho_in_zeroZ : rho ∈ zeroZ) :
+lemma lem_1deltatrho0 (delta : ℝ) (rho : ℂ) :
 ((1 : ℂ) + delta + rho.im * Complex.I - rho) = ((1 : ℝ) + delta - rho.re) := by
-  -- The key insight: rho = rho.re + rho.im * Complex.I
-  -- So: (1 + delta + rho.im * I) - rho = (1 + delta + rho.im * I) - (rho.re + rho.im * I)
-  --     = 1 + delta + rho.im * I - rho.re - rho.im * I
-  --     = 1 + delta - rho.re
-  calc (1 : ℂ) + delta + rho.im * Complex.I - rho
-    = (1 : ℂ) + delta + rho.im * Complex.I - (rho.re + rho.im * Complex.I) := by rw [Complex.re_add_im]
-  _ = (1 : ℂ) + delta - rho.re := by ring
-  _ = ((1 : ℝ) + delta - rho.re : ℂ) := by norm_cast
-
+  nth_rw 2 [← Complex.re_add_im rho]
+  push_cast
+  ring
 
 lemma lem_1delsigReal2 (delta : ℝ) (_hdelta : delta > 0) (rho : ℂ) (_h_rho_in_zeroZ : rho ∈ zeroZ) :
 (1 / ((1 : ℂ) + delta - rho.re)).re = 1 / ((1 : ℝ) + delta - rho.re) := by
@@ -543,7 +537,7 @@ lemma lem_1delsigReal2 (delta : ℝ) (_hdelta : delta > 0) (rho : ℂ) (_h_rho_i
 lemma lem_re_inv_one_plus_delta_minus_rho_real (delta : ℝ) (hdelta : delta > 0) (rho : ℂ) (h_rho_in_zeroZ : rho ∈ zeroZ) :
 (1 / ((1 : ℂ) + delta + rho.im * Complex.I - rho)).re = 1 / ((1 : ℝ) + delta - rho.re) := by
   -- Apply lem_1deltatrho0 to simplify the denominator
-  rw [lem_1deltatrho0 delta hdelta rho h_rho_in_zeroZ]
+  rw [lem_1deltatrho0 delta rho]
   -- Now apply lem_1delsigReal2
   exact lem_1delsigReal2 delta hdelta rho h_rho_in_zeroZ
 
