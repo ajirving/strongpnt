@@ -335,11 +335,7 @@ lemma re_ofReal_div_ge_one (a : ℝ) (z : ℂ) (ha : 1 ≤ a) (hz : 0 ≤ (1 / z
     _ = (1 / z).re := by simp [one_mul]
 
 lemma analyticAt_riemannZeta_of_ne_one {s : ℂ} (hs : s ≠ 1) : AnalyticAt ℂ riemannZeta s := by
-  -- Use characterization: analytic at s iff differentiable near s
-  refine (Complex.analyticAt_iff_eventually_differentiableAt).2 ?_
-  -- riemannZeta is differentiable at all points ≠ 1, and points near s are eventually ≠ 1
-  filter_upwards [eventually_ne_nhds hs] with z hz
-  exact differentiableAt_riemannZeta hz
+  exact analyticOn_riemannZeta s (by simpa)
 
 lemma riemannZeta_not_eventually_zero_of_ne_one {s : ℂ} (hs : s ≠ 1) :
   ¬ (∀ᶠ z in nhds s, riemannZeta z = 0) := by
