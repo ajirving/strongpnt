@@ -298,65 +298,18 @@ lemma lem_Z2bound :
       ∀ δ, 0 < δ ∧ δ < 1 →
         (-(logDerivZeta ((1 : ℂ) + (δ : ℝ) + (2 * (t : ℝ)) * Complex.I))).re
           ≤ C * Real.log (abs t + 2) := by
-  -- Start from the explicit bound with log(|2t| + 2)
   obtain ⟨C₁, hC₁_pos, hbound₁⟩ := lem_explicit2Real2
-
-  -- Show a concrete log comparison: log(|2t|+2) ≤ 2*log(|t|+2) for |t| > 3
-  have h_log_comp :
-      ∀ t : ℝ, 2 < |t| → Real.log (abs (2 * t) + 2) ≤ 2 * Real.log (abs t + 2) := by
-    intro t ht
-    have h_pos_2t : 0 < abs (2 * t) + 2 := by linarith [abs_nonneg (2 * t)]
-    have h_pos_t : 0 < abs t + 2 := by linarith [abs_nonneg t]
-    have h_2t_eq : abs (2 * t) = 2 * abs t := by
-      rw [abs_mul, abs_two]
-
-    -- For |t| > 3, we have |2t| + 2 = 2|t| + 2 ≤ 4|t| ≤ 4(|t| + 2) when |t| ≥ 2
-    have h_bound : abs (2 * t) + 2 ≤ 4 * (abs t + 2) := by
-      rw [h_2t_eq]
-      -- 2|t| + 2 ≤ 4(|t| + 2) = 4|t| + 8
-      linarith [abs_nonneg t]
-
-    have h_4_pos : (0 : ℝ) < 4 := by norm_num
-    have h_log_bound : Real.log (abs (2 * t) + 2) ≤ Real.log (4 * (abs t + 2)) :=
-      Real.log_le_log h_pos_2t h_bound
-
-    have h_log_mul_eq : Real.log (4 * (abs t + 2)) = Real.log 4 + Real.log (abs t + 2) := by
-      exact Real.log_mul (by norm_num : (4 : ℝ) ≠ 0) (ne_of_gt h_pos_t)
-
-    -- Now use that log(4) ≤ log(|t| + 2) since |t| > 3 implies |t| + 2 > 5 > 4
-    have h_4_le : (4 : ℝ) ≤ abs t + 2 := by linarith [ht]
-    have h_log_4 : Real.log 4 ≤ Real.log (abs t + 2) :=
-      Real.log_le_log (by norm_num) h_4_le
-
-    calc Real.log (abs (2 * t) + 2)
-      ≤ Real.log (4 * (abs t + 2)) := h_log_bound
-      _ = Real.log 4 + Real.log (abs t + 2) := h_log_mul_eq
-      _ ≤ Real.log (abs t + 2) + Real.log (abs t + 2) := by gcongr
-      _ = 2 * Real.log (abs t + 2) := by ring
-
-  -- Get positivity from C₁ > 1
-  have hC₁_nonneg : 0 ≤ C₁ := le_of_lt (lt_trans zero_lt_one hC₁_pos)
-
-  -- Use C = 2 * C₁
-  refine ⟨2 * C₁, ?_, ?_⟩
-  · -- Show 2 * C₁ > 1
-    linarith [hC₁_pos]
-  · -- Main bound
-    intro t ht δ hδ
-    let s := (1 : ℂ) + (δ : ℝ) + (2 * (t : ℝ)) * Complex.I
-
-    -- From lem_explicit2Real2
-    have h1 : (-(logDerivZeta s)).re ≤ C₁ * Real.log (abs (2 * t) + 2) := hbound₁ t ht δ hδ
-
-    -- Apply log comparison
-    have h3 : Real.log (abs (2 * t) + 2) ≤ 2 * Real.log (abs t + 2) := h_log_comp t ht
-
-    -- Combine everything
-    calc (-(logDerivZeta s)).re
-      ≤ C₁ * Real.log (abs (2 * t) + 2) := h1
-      _ ≤ C₁ * (2 * Real.log (abs t + 2)) := mul_le_mul_of_nonneg_left h3 hC₁_nonneg
-      _ = (2 * C₁) * Real.log (abs t + 2) := by ring
-
+  refine ⟨2 * C₁, (by linarith), fun t ht δ hδ ↦ hbound₁ t ht δ hδ|>.trans ?_⟩
+  suffices Real.log (|2 * t| + 2) ≤ 2 * Real.log (|t| + 2) by
+    grw [this]
+    exact le_of_eq (by ring)
+  calc
+    _ ≤ Real.log (4 * (abs t + 2)) := by
+      gcongr; simp; linarith
+    _ = Real.log 4 + Real.log (abs t + 2) := by
+      exact Real.log_mul (by norm_num) (by linarith)
+    _ ≤ Real.log (abs t + 2) + Real.log (abs t + 2) := by gcongr; linarith
+    _ = 2 * Real.log (abs t + 2) := by ring
 
 lemma lem_Z1split (delta : ℝ) (_hdelta : delta > 0) (rho : ℂ)
   (_h_rho_in_zeroZ : rho ∈ zeroZ)
