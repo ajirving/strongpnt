@@ -350,7 +350,6 @@ lemma analyticOrderAt_pos_toNat_of_zero_of_analytic_not_eventually_zero {f : ℂ
   (hf : AnalyticAt ℂ f z0) (hzero : f z0 = 0)
   (hnot : ¬ (∀ᶠ z in nhds z0, f z = 0)) :
   1 ≤ analyticOrderNatAt f z0 := by
-  classical
   -- The analytic order is nonzero since f z0 = 0
   have hne0 : analyticOrderAt f z0 ≠ 0 := by
     intro h0
@@ -359,27 +358,20 @@ lemma analyticOrderAt_pos_toNat_of_zero_of_analytic_not_eventually_zero {f : ℂ
   -- The analytic order is not top since f is not eventually zero near z0
   have hneTop : analyticOrderAt f z0 ≠ ⊤ := by
     intro htop
-    have hall : (∀ᶠ z in nhds z0, f z = 0) := (analyticOrderAt_eq_top).1 htop
-    exact hnot hall
+    exact hnot ((analyticOrderAt_eq_top).1 htop)
   -- Hence it is a finite natural number n
+  unfold analyticOrderNatAt
   rcases WithTop.ne_top_iff_exists.mp hneTop with ⟨n, hn⟩
-  -- Moreover, it is not zero
-  have hn_ne_zero : n ≠ 0 := by
-    intro hn0
-    apply hne0
-    -- rewrite analyticOrderAt in terms of n
-    simp [hn.symm, hn0]
-    rfl
-  -- Therefore 1 ≤ n
-  have hposn : 1 ≤ n := Nat.succ_le_of_lt (Nat.pos_of_ne_zero hn_ne_zero)
-  -- Conclude for toNat; rewrite using hn
-  simpa [analyticOrderNatAt, hn.symm] using hposn
+  rw [← hn] at ⊢ hne0 hneTop
+  suffices 1 ≤ n by simpa
+  refine Nat.one_le_iff_ne_zero.mpr fun hn0 ↦ (hne0 ?_)
+  simp [hn0]
+  rfl
 
 lemma lem_Z1splitge (delta : ℝ) (hdelta_pos : delta > 0) (rho : ℂ)
   (h_rho_in_zeroZ : rho ∈ zeroZ) (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint rho.im) :
     Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im)) (fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re) ≥
 (1 / (((1 : ℂ) + delta + rho.im * Complex.I) - rho)).re := by
-  classical
   -- Split off the rho term
   rw [lem_Z1split delta rho h_rho_in_Zt]
   -- Show the first term ≥ (1/(...)).re
