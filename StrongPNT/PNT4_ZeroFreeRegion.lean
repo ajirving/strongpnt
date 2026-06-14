@@ -311,25 +311,18 @@ lemma lem_Z2bound :
     _ ≤ Real.log (abs t + 2) + Real.log (abs t + 2) := by gcongr; linarith
     _ = 2 * Real.log (abs t + 2) := by ring
 
-lemma lem_Z1split (delta : ℝ) (_hdelta : delta > 0) (rho : ℂ)
-  (_h_rho_in_zeroZ : rho ∈ zeroZ)
+lemma lem_Z1split (delta : ℝ) (rho : ℂ)
   (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint rho.im) :
     Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im))
       (fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re) =
     ((analyticOrderNatAt riemannZeta rho : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho)).re +
     Finset.sum ((Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im)).erase rho)
       (fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re) := by
-  classical
-  set s := Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im)
-  set f := fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re
-  have hmem : rho ∈ s := by
-    simpa [s, Set.Finite.mem_toFinset (ZetaZerosNearPoint_finite rho.im)] using h_rho_in_Zt
-  -- Use the decomposition theorem for sums over finite sets
-  have h_decomp : ∑ x ∈ s, f x = f rho + ∑ x ∈ s.erase rho, f x := by
-    rw [← Finset.insert_erase hmem]
-    rw [Finset.sum_insert (Finset.notMem_erase rho s)]
-    simp
-  exact h_decomp
+  have hmem : rho ∈ Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im) := by
+    simp_all
+  rw [← Finset.insert_erase hmem, Finset.sum_insert (Finset.notMem_erase rho _)]
+  simp
+
 
 lemma re_ofReal_div_ge_one (a : ℝ) (z : ℂ) (ha : 1 ≤ a) (hz : 0 ≤ (1 / z).re) : ((a : ℂ) / z).re ≥ (1 / z).re := by
   have hrepr : ((a : ℂ) / z).re = a * (1 / z).re := by
@@ -451,10 +444,7 @@ lemma lem_Z1splitge (delta : ℝ) (hdelta_pos : delta > 0) (rho : ℂ)
 (1 / (((1 : ℂ) + delta + rho.im * Complex.I) - rho)).re := by
   classical
   -- Split off the rho term
-  have hsplit :=
-    lem_Z1split delta hdelta_pos rho h_rho_in_zeroZ h_rho_in_Zt
-  -- Rewrite the sum using the split
-  rw [hsplit]
+  rw [lem_Z1split delta rho h_rho_in_Zt]
   -- Show the first term ≥ (1/(...)).re
   have h_rho_ne_one : rho ≠ (1 : ℂ) := by
     intro h
