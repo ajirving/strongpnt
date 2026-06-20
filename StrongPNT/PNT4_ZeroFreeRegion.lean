@@ -423,24 +423,12 @@ lemma lem_1deltatrho0 (delta : ℝ) (rho : ℂ) :
 
 lemma lem_1delsigReal2 (delta : ℝ) (rho : ℂ) :
 (1 / ((1 : ℂ) + delta - rho.re)).re = 1 / ((1 : ℝ) + delta - rho.re) := by
-  -- First, rewrite the complex expression as a real number cast to complex
-  have h_eq : (1 : ℂ) + delta - rho.re = (1 + delta - rho.re : ℝ) := by
-    simp only [Complex.ofReal_add, Complex.ofReal_sub, Complex.ofReal_one]
-
-  -- Rewrite using this equality
-  rw [h_eq]
-
-  -- Use the formula for division by a real number
-  rw [Complex.div_ofReal_re]
-
-  -- The real part of 1 is 1
-  rw [Complex.one_re]
+  rw [(by simp : (1 : ℂ) + delta - rho.re = (1 + delta - rho.re : ℝ)), Complex.div_ofReal_re]
+  simp
 
 lemma lem_re_inv_one_plus_delta_minus_rho_real (delta : ℝ) (rho : ℂ) :
 (1 / ((1 : ℂ) + delta + rho.im * Complex.I - rho)).re = 1 / ((1 : ℝ) + delta - rho.re) := by
-  -- Apply lem_1deltatrho0 to simplify the denominator
   rw [lem_1deltatrho0 delta rho]
-  -- Now apply lem_1delsigReal2
   exact lem_1delsigReal2 delta rho
 
 lemma lem_Z1splitge2 (delta : ℝ) (hdelta : delta > 0) (rho : ℂ)
@@ -448,13 +436,7 @@ lemma lem_Z1splitge2 (delta : ℝ) (hdelta : delta > 0) (rho : ℂ)
     Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im))
       (fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / ((1 : ℂ) + delta + rho.im * Complex.I - rho1)).re) ≥
 1 / ((1 : ℝ) + delta - rho.re) := by
-  -- Apply lem_Z1splitge to get the first inequality
-  have h1 := lem_Z1splitge delta hdelta rho h_rho_in_zeroZ h_rho_in_Zt
-  -- Apply lem_re_inv_one_plus_delta_minus_rho_real to rewrite the right-hand side
-  have h2 := lem_re_inv_one_plus_delta_minus_rho_real delta rho
-  -- Combine the results
-  rw [← h2]
-  exact h1
+  grw [lem_Z1splitge delta hdelta rho h_rho_in_zeroZ h_rho_in_Zt, lem_re_inv_one_plus_delta_minus_rho_real delta rho]
 
 lemma lem_Z1splitge3 (delta : ℝ) (hdelta : delta > 0) (sigma t : ℝ) (rho : ℂ)
   (h_rho_eq : rho = sigma + t * Complex.I) (h_rho_in_zeroZ : rho ∈ zeroZ)
