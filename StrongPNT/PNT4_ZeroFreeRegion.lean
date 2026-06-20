@@ -377,8 +377,7 @@ lemma lem_Z1splitge (delta : ℝ) (hdelta_pos : delta > 0) (rho : ℂ)
   -- Show the first term ≥ (1/(...)).re
   have h_rho_ne_one : rho ≠ (1 : ℂ) := by
     intro h
-    have hz1_ne : riemannZeta (1 : ℂ) ≠ 0 := riemannZeta_ne_zero_of_one_le_re (by simp)
-    exact hz1_ne (by simpa [h] using h_rho_in_zeroZ)
+    exact riemannZeta_one_ne_zero (by simpa [h] using h_rho_in_zeroZ)
   have hAnal : AnalyticAt ℂ riemannZeta rho := analyticAt_riemannZeta_of_ne_one h_rho_ne_one
   have hNotEv : ¬ (∀ᶠ z in nhds rho, riemannZeta z = 0) :=
     riemannZeta_not_eventually_zero_of_ne_one h_rho_ne_one
@@ -405,42 +404,16 @@ lemma lem_Z1splitge (delta : ℝ) (hdelta_pos : delta > 0) (rho : ℂ)
             (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re) := by
     apply Finset.sum_nonneg
     intro rho1 hmem
+    have : (analyticOrderNatAt riemannZeta rho1 : ℂ) = ((analyticOrderNatAt riemannZeta rho1 : ℝ) : ℂ) := by norm_cast
+    rw [← mul_one_div, this, Complex.re_ofReal_mul]
     rcases Finset.mem_erase.mp hmem with ⟨_, hmemS⟩
     -- membership in the original set
     have hZt : rho1 ∈ ZetaZerosNearPoint rho.im := by
       simpa [Set.Finite.mem_toFinset (ZetaZerosNearPoint_finite rho.im)] using hmemS
-    -- Show rho1 ≠ 1
-    have hne1 : rho1 ≠ (1 : ℂ) := by
-      intro h
-      have hz1_ne : riemannZeta (1 : ℂ) ≠ 0 := riemannZeta_ne_zero_of_one_le_re (by simp)
-      have hzero1 : riemannZeta rho1 = 0 := hZt.1
-      exact hz1_ne (by simpa [h] using hzero1)
-    -- Order at rho1 is ≥ 1
-    have hAnal1 : AnalyticAt ℂ riemannZeta rho1 := analyticAt_riemannZeta_of_ne_one hne1
-    have hNotEv1 : ¬ (∀ᶠ z in nhds rho1, riemannZeta z = 0) :=
-      riemannZeta_not_eventually_zero_of_ne_one hne1
-    have hzero1 : riemannZeta rho1 = 0 := hZt.1
-    have horder1 : 1 ≤ analyticOrderNatAt riemannZeta rho1 :=
-      analyticOrderAt_pos_toNat_of_zero_of_analytic_not_eventually_zero hAnal1 hzero1 hNotEv1
-    have ha1_real : (1 : ℝ) ≤ (analyticOrderNatAt riemannZeta rho1 : ℝ) := by exact_mod_cast horder1
-    -- (1/(...)).re ≥ 0
-    have hz1_nonneg : 0 ≤ (1 / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re :=
-      lem_Re1deltatge0 delta hdelta_pos rho.im rho1 hZt
-    -- Lower bound: (1/z).re ≤ ((a:ℂ)/z).re
-    have hge :
-        (1 / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re ≤
-          ((((analyticOrderNatAt riemannZeta rho1 : ℝ) : ℂ) /
-            (((1 : ℂ) + delta + rho.im * Complex.I) - rho1))).re := by
-      simpa [ge_iff_le] using
-        (re_ofReal_div_ge_one (analyticOrderNatAt riemannZeta rho1 : ℝ)
-          ((((1 : ℂ) + delta + rho.im * Complex.I) - rho1)) ha1_real hz1_nonneg)
-    -- Thus the target real part is ≥ 0 by transitivity
-    exact le_trans hz1_nonneg hge
+    exact mul_nonneg (by positivity) <| lem_Re1deltatge0 delta hdelta_pos rho.im rho1 hZt
   -- Combine the two bounds
-  have h := add_le_add hfirst hsum_nonneg
-  -- simplify right-hand side
-  simpa using h
-
+  convert add_le_add hfirst hsum_nonneg|>.ge using 1
+  ring
 
 lemma lem_1deltatrho0 (delta : ℝ) (rho : ℂ) :
 ((1 : ℂ) + delta + rho.im * Complex.I - rho) = ((1 : ℝ) + delta - rho.re) := by
