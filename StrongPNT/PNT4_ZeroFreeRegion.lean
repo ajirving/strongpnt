@@ -641,39 +641,18 @@ lemma Z1bound :
 
 
 lemma absorb_pos_constant_into_log {L A c : ℝ} (hL : 1 ≤ L) (hc : 0 ≤ c) : A * L + c ≤ (A + c) * L := by
-  -- Since 1 ≤ L and c ≥ 0, we have c ≤ L * c
-  have hc_le : c ≤ L * c := by
-    have h := mul_le_mul_of_nonneg_right hL hc
-    simpa [one_mul] using h
-  -- Add A * L to both sides and rewrite
-  have h0 : A * L + c ≤ A * L + L * c := by
-    gcongr
-  calc
-    A * L + c ≤ A * L + L * c := h0
-    _ = A * L + c * L := by simp [mul_comm]
-    _ = (A + c) * L := by simp [right_distrib]
-
+  ring_nf
+  gcongr
+  exact le_mul_of_one_le_left hc hL
 
 lemma neg_logDeriv_zeta_eq_vonMangoldt_sum (s : ℂ) (hs : 1 < s.re) : -(deriv riemannZeta s / riemannZeta s) = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-s) := by
-  -- Use the key lemma relating L-series of vonMangoldt to the logarithmic derivative
-  have h1 := ArithmeticFunction.LSeries_vonMangoldt_eq_deriv_riemannZeta_div hs
-  -- h1: LSeries (fun n => ↑(ArithmeticFunction.vonMangoldt n)) s = -deriv riemannZeta s / riemannZeta s
-  -- From this we get: -deriv riemannZeta s / riemannZeta s = LSeries (fun n => ↑(ArithmeticFunction.vonMangoldt n)) s
-  have h2 : -deriv riemannZeta s / riemannZeta s = LSeries (fun n => ↑(ArithmeticFunction.vonMangoldt n)) s := h1.symm
-  -- Now deal with the parentheses: -(deriv riemannZeta s / riemannZeta s) = -deriv riemannZeta s / riemannZeta s
-  have h3 : -(deriv riemannZeta s / riemannZeta s) = -deriv riemannZeta s / riemannZeta s := by ring
-  rw [h3, h2]
-  -- Now goal is: LSeries (fun n => ↑(ArithmeticFunction.vonMangoldt n)) s = ∑' (n : ℕ), ↑(ArithmeticFunction.vonMangoldt n) * ↑n ^ (-s)
-  -- This follows from the definition of LSeries as a tsum of terms
-  rw [LSeries]
-  congr 1
-  ext n
-  rw [LSeries.term_def]
-  split_ifs with h_zero
-  · -- Case n = 0: both sides are 0
-    simp [h_zero]
-  · -- Case n ≠ 0: show vonMangoldt n / n ^ s = vonMangoldt n * n ^ (-s)
-    rw [div_eq_mul_inv, Complex.cpow_neg]
+  convert ArithmeticFunction.LSeries_vonMangoldt_eq_deriv_riemannZeta_div hs|>.symm using 1
+  · ring
+  · simp only [LSeries, LSeries.term_def]
+    refine tsum_congr fun n ↦ ?_
+    split_ifs with h
+    · simp [h]
+    · rw [div_eq_mul_inv, Complex.cpow_neg]
 
 lemma zeta1zetaseries {s : ℂ} (hs : 1 < s.re) :
 -logDerivZeta s = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-s) := by
