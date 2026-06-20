@@ -639,11 +639,6 @@ lemma Z1bound :
 
 
 
--- lemma extract_Z1bound : ∃ C1 > 0, ∀ δ0 > 0, ∀ δ : ℝ, 0 < δ → δ < δ0 → ∀ s : ℂ, (s ∈ zeroZ ∧ 0 < s.re ∧ s.re < 1) → (-(logDerivZeta ((1 : ℂ) + δ + s.im * Complex.I))).re ≤ - (1 / (1 + δ - s.re)) + C1 * Real.log (abs s.im + 2) := by
---   rcases Z1bound with ⟨C, hCpos, hC⟩
---   refine ⟨C, hCpos, ?_⟩
---   intro δ0 hδ0 δ hδpos hδlt s hs
---   exact hC δ hδpos s hs
 
 lemma absorb_pos_constant_into_log {L A c : ℝ} (hL : 1 ≤ L) (hc : 0 ≤ c) : A * L + c ≤ (A + c) * L := by
   -- Since 1 ≤ L and c ≥ 0, we have c ≤ L * c
