@@ -130,8 +130,7 @@ lemma lem_explicit1deltat :
   ∃ C > 1,
       ∀ t : ℝ, 2 < |t| →
         ∀ δ : ℝ, 0 < δ ∧ δ < 1 →
-          ‖Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t))
-                  (fun rho1 : ℂ =>
+          ‖(∑ rho1 ∈ Set.Finite.toFinset (ZetaZerosNearPoint_finite t),
                     (analyticOrderNatAt riemannZeta rho1 : ℂ) /
                       (((1 : ℂ) + δ + t * Complex.I) - rho1))
                 - logDerivZeta ((1 : ℂ) + (δ : ℝ) + (t : ℝ) * Complex.I)‖
@@ -167,10 +166,9 @@ lemma lem_explicit1RealReal :
       ∀ t : ℝ, 2 < |t| →
         ∀ δ : ℝ, 0 < δ ∧ δ < 1 →
           abs ((logDerivZeta ((1 : ℂ) + (δ : ℝ) + (t : ℝ) * Complex.I)).re
-            - (Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t))
-                (fun rho1 : ℂ =>
+            - (∑ rho1 ∈ Set.Finite.toFinset (ZetaZerosNearPoint_finite t),
                   ((analyticOrderNatAt riemannZeta rho1 : ℂ) /
-                    (((1 : ℂ) + δ + t * Complex.I) - rho1)).re)))
+                    (((1 : ℂ) + δ + t * Complex.I) - rho1)).re))
           ≤ C * Real.log (|t| + 2) := by
   rcases lem_explicit1deltat with ⟨C, hCpos, hE⟩
   refine ⟨C, hCpos, ?_⟩
@@ -186,10 +184,9 @@ lemma lem_explicit2Real :
         ∀ δ : ℝ, 0 < δ ∧ δ < 1 →
           abs (
             (logDerivZeta ((1 : ℂ) + (δ : ℝ) + (2 * (t : ℝ)) * Complex.I)).re
-            - (Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t)))
-                (fun rho1 : ℂ =>
+            - (∑ rho1 ∈ Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t)),
                   ((analyticOrderNatAt riemannZeta rho1 : ℂ) /
-                    (((1 : ℂ) + δ + (2 * t) * Complex.I) - rho1)).re))
+                    (((1 : ℂ) + δ + (2 * t) * Complex.I) - rho1)).re)
           )
           ≤ C * Real.log (abs (2 * t) + 2) := by
   rcases lem_explicit1RealReal with ⟨C, hCpos, hEv⟩
@@ -231,7 +228,7 @@ lemma lem_Re1delta2tge0 (delta : ℝ) (hdelta : delta > 0) (t : ℝ) (rho1 : ℂ
   simp
 
 lemma lem_sumrho2ge (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
-Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t))) (fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / ((1 : ℂ) + delta + (2 * t) * Complex.I - rho1)).re) ≥ 0 := by
+∑ rho1 ∈ Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t)), ((analyticOrderNatAt riemannZeta rho1 : ℂ) / ((1 : ℂ) + delta + (2 * t) * Complex.I - rho1)).re ≥ 0 := by
   apply Finset.sum_nonneg
   intro rho1 h_rho1_in_finset
   -- Convert membership in finite set to membership in original set
@@ -241,8 +238,8 @@ Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t))) (fun rho1 :
   exact lem_Re1delta2tge0 delta hdelta t rho1 h_rho1_in_Zt
 
 lemma lem_sumrho2ge02 (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
-    (Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t)))
-(fun rho1 : ℂ => (analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + (2 * t) * Complex.I) - rho1))).re ≥ 0 := by
+    (∑ rho1 ∈ Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t)),
+        (analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + (2 * t) * Complex.I) - rho1)).re ≥ 0 := by
   rw [Complex.re_sum]
   -- Apply lem_sumrho2ge to show the sum of real parts is ≥ 0
   exact lem_sumrho2ge t delta hdelta
@@ -260,10 +257,9 @@ lemma lem_explicit2Real2 :
   set s : ℂ := (1 : ℂ) + (δ : ℝ) + (2 * (t : ℝ)) * Complex.I
   set S : Finset ℂ := Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t))
   set Sre : ℝ :=
-    Finset.sum S
-      (fun rho1 : ℂ =>
+    ∑ rho1 ∈ S,
         ((analyticOrderNatAt riemannZeta rho1 : ℂ) /
-          (s - rho1)).re)
+          (s - rho1)).re
   -- From lem_explicit2Real: bound on the difference of real parts
   have h_bound :
       abs ((logDerivZeta s).re - Sre)
@@ -313,11 +309,11 @@ lemma lem_Z2bound :
 
 lemma lem_Z1split (delta : ℝ) (rho : ℂ)
   (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint rho.im) :
-    Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im))
-      (fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re) =
+    ∑ rho1 ∈ Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im),
+        ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re =
     ((analyticOrderNatAt riemannZeta rho : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho)).re +
-    Finset.sum ((Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im)).erase rho)
-      (fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re) := by
+    ∑ rho1 ∈ (Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im)).erase rho,
+        ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re := by
   have hmem : rho ∈ Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im) := by
     simp_all
   rw [← Finset.insert_erase hmem, Finset.sum_insert (Finset.notMem_erase rho _)]
@@ -370,7 +366,7 @@ lemma analyticOrderAt_pos_toNat_of_zero_of_analytic_not_eventually_zero {f : ℂ
 
 lemma lem_Z1splitge (delta : ℝ) (hdelta_pos : delta > 0) (rho : ℂ)
   (h_rho_in_zeroZ : rho ∈ zeroZ) (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint rho.im) :
-    Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im)) (fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re) ≥
+    ∑ rho1 ∈ Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im), ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re ≥
 (1 / (((1 : ℂ) + delta + rho.im * Complex.I) - rho)).re := by
   -- Split off the rho term
   rw [lem_Z1split delta rho h_rho_in_Zt]
@@ -397,11 +393,9 @@ lemma lem_Z1splitge (delta : ℝ) (hdelta_pos : delta > 0) (rho : ℂ)
         ((((1 : ℂ) + delta + rho.im * Complex.I) - rho)) ha_real hz_nonneg)
   -- Next, show the remaining sum is ≥ 0
   have hsum_nonneg :
-      0 ≤ Finset.sum
-        ((Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im)).erase rho)
-        (fun rho1 : ℂ =>
+      0 ≤ ∑ rho1 ∈ (Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im)).erase rho,
           ((analyticOrderNatAt riemannZeta rho1 : ℂ) /
-            (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re) := by
+            (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re := by
     apply Finset.sum_nonneg
     intro rho1 hmem
     have : (analyticOrderNatAt riemannZeta rho1 : ℂ) = ((analyticOrderNatAt riemannZeta rho1 : ℝ) : ℂ) := by norm_cast
@@ -433,15 +427,15 @@ lemma lem_re_inv_one_plus_delta_minus_rho_real (delta : ℝ) (rho : ℂ) :
 
 lemma lem_Z1splitge2 (delta : ℝ) (hdelta : delta > 0) (rho : ℂ)
   (h_rho_in_zeroZ : rho ∈ zeroZ) (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint rho.im) :
-    Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im))
-      (fun rho1 : ℂ => ((analyticOrderNatAt riemannZeta rho1 : ℂ) / ((1 : ℂ) + delta + rho.im * Complex.I - rho1)).re) ≥
+    ∑ rho1 ∈ Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im),
+        ((analyticOrderNatAt riemannZeta rho1 : ℂ) / ((1 : ℂ) + delta + rho.im * Complex.I - rho1)).re ≥
 1 / ((1 : ℝ) + delta - rho.re) := by
   grw [lem_Z1splitge delta hdelta rho h_rho_in_zeroZ h_rho_in_Zt, lem_re_inv_one_plus_delta_minus_rho_real delta rho]
 
 lemma lem_Z1splitge3 (delta : ℝ) (hdelta : delta > 0) (sigma t : ℝ) (rho : ℂ)
   (h_rho_eq : rho = sigma + t * Complex.I) (h_rho_in_zeroZ : rho ∈ zeroZ)
   (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint t) :
-(Finset.sum (Set.Finite.toFinset (ZetaZerosNearPoint_finite t)) (fun rho1 : ℂ => (analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + t * Complex.I) - rho1)) ).re ≥ 1 / ((1 : ℝ) + delta - sigma) := by
+(∑ rho1 ∈ Set.Finite.toFinset (ZetaZerosNearPoint_finite t), (analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + t * Complex.I) - rho1)).re ≥ 1 / ((1 : ℝ) + delta - sigma) := by
   rw [Complex.re_sum]
   -- Extract rho.im = t and rho.re = sigma from h_rho_eq
   have h_rho_im : rho.im = t := by
@@ -486,9 +480,8 @@ lemma Z1bound :
   set sp : ℂ := (1 : ℂ) + delta + t * Complex.I
   set S : Finset ℂ := Set.Finite.toFinset (ZetaZerosNearPoint_finite t)
   set Sre : ℝ :=
-    Finset.sum S
-      (fun rho1 : ℂ =>
-        ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (sp - rho1)).re)
+    ∑ rho1 ∈ S,
+        ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (sp - rho1)).re
   -- From explicit bound: |(logDerivZeta sp).re - Sre| ≤ C0 * log(|t|+2)
   have h_bound : abs ((logDerivZeta sp).re - Sre)
         ≤ C0 * Real.log (abs t + 2) := by
