@@ -72,7 +72,7 @@ lemma lem_denomAnalAt (S : Finset ℂ) (n : ℂ → ℕ)
     have h_each_analytic : ∀ s ∈ S, AnalyticAt ℂ (f s) w := by
       intro s hs
       fun_prop
-    convert S.analyticAt_prod h_each_analytic using 1
+    convert! S.analyticAt_prod h_each_analytic using 1
     ext
     simp [f]
   · -- Second part: nonzero product
@@ -945,7 +945,7 @@ lemma z_minus_rho_diff_nonzero {R1 : ℝ} {f : ℂ → ℂ} :
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     z - ρ ≠ 0 ∧ DifferentiableAt ℂ (fun w ↦ w - ρ) z := by
   intro ρ hρ z hz
-  have hz_pair := (Set.mem_diff z).1 hz
+  have hz_pair := (Set.mem_sdiff z).1 hz
   have hz_ball : z ∈ Metric.closedBall (0 : ℂ) R1 := hz_pair.1
   have hz_notK : z ∉ zerosetKfR R1 f := hz_pair.2
   -- Show z ≠ ρ hence z - ρ ≠ 0
@@ -1021,7 +1021,7 @@ lemma blaschke_frac_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
   -- Extract membership in the smaller closed ball
   have hz_in_small : z ∈ Metric.closedBall (0 : ℂ) R1 ∧
       z ∉ zerosetKfR R1 f := by
-    simpa [Set.mem_diff] using hz
+    simpa [Set.mem_sdiff] using hz
   have hz_small : z ∈ Metric.closedBall (0 : ℂ) R1 := hz_in_small.1
   -- Show z ∈ closedBall 0 1 to use the numerator lemma
   have hz_dist_le_small : dist z (0 : ℂ) ≤ R1 := by
@@ -1058,7 +1058,7 @@ lemma blaschke_pow_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
   rcases hfrac with ⟨hne, hdiff⟩
   constructor
   · exact pow_ne_zero _ hne
-  · simpa using hdiff.pow (analyticOrderNatAt f ρ)
+  · exact hdiff.pow (analyticOrderNatAt f ρ)
 
 -- Lemma 16: blaschke_prod_diff_nonzero
 lemma blaschke_prod_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
@@ -1117,7 +1117,7 @@ lemma f_diff_nonzero_outside_Kf {R1 : ℝ} {f : ℂ → ℂ}
   -- unpack membership in the set difference
   have hz' : z ∈ Metric.closedBall (0 : ℂ) R1 ∧
       z ∉ zerosetKfR R1 f := by
-    simpa [Set.mem_diff] using hz
+    simpa [Set.mem_sdiff] using hz
   have hz_in_R1 : z ∈ Metric.closedBall (0 : ℂ) R1 := hz'.1
   have hz_notin : z ∉ zerosetKfR R1 f := hz'.2
   -- show f z ≠ 0
@@ -1293,7 +1293,7 @@ lemma Lf_deriv_step1 (hR1_pos : 0 < R1) (h_f_analytic : AnalyticOnNhd ℂ f (clo
   intro z hz
   -- Extract closedBall membership
   have hz' : z ∈ Metric.closedBall (0 : ℂ) r ∧ z ∉ zerosetKfR R1 f := by
-    simpa [Set.mem_diff] using hz
+    simpa [Set.mem_sdiff] using hz
   have hz_ball : z ∈ Metric.closedBall (0 : ℂ) r := hz'.1
   -- From Lfderiv_is_logderivBf
   have hLf :=

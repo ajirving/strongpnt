@@ -18,12 +18,12 @@ name = "StrongPNT"
 [[require]]
 name  = "mathlib"
 scope = "leanprover-community"
-rev   = "v4.30.0"
+rev   = "db127794c79fdeb86f6b0cf6ff2c804026fbaff1"
 
 [[require]]
 name = "PrimeNumberTheoremAnd"
 git  = "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd.git"
-rev  = "v4.30.0"
+rev  = "837b0d6a0cd1e4f5f16b89030fabc9134f5f3563"
 
 [[require]]
 name = "checkdecls"

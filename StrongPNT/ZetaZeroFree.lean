@@ -31,7 +31,7 @@ theorem LogDerivZetaHolcLargeT' :
     · exact le_trans (min_le_left _ _) A_inter.2
   intro T hT
   apply LogDerivZetaHoloOn
-  · exact notMem_diff_of_mem rfl
+  · exact notMem_sdiff_of_mem rfl
   intro s hs
   rcases le_or_gt 1 s.re with one_le|lt_one
   · exact riemannZeta_ne_zero_of_one_le_re one_le

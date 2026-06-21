@@ -1,3 +1,4 @@
+import Mathlib.Algebra.Order.Star.Real
 import Mathlib.Analysis.Analytic.Order
 import Mathlib.Analysis.CStarAlgebra.Classes
 import Mathlib.Analysis.Complex.AbsMax
@@ -6,7 +7,6 @@ import Mathlib.Analysis.Complex.HasPrimitives
 import Mathlib.Analysis.Complex.RemovableSingularity
 import Mathlib.Analysis.Normed.Module.Connected
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-import Mathlib.Data.Real.StarOrdered
 import Mathlib.GroupTheory.MonoidLocalization.Basic
 import Mathlib.Order.CompletePartialOrder
 import Mathlib.RingTheory.SimpleRing.Principal

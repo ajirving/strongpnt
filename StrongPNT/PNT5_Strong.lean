@@ -944,7 +944,7 @@ lemma I4Bound {SmoothingF : ℝ → ℝ}
       apply h_logDeriv_holo.continuousOn.comp' (by fun_prop)
       unfold MapsTo
       intro x xInIcc
-      simp only [neg_le_self_iff, Nat.ofNat_nonneg, uIcc_of_le, mem_diff, mem_singleton_iff]
+      simp only [neg_le_self_iff, Nat.ofNat_nonneg, uIcc_of_le, Set.mem_sdiff, mem_singleton_iff]
       have : ¬↑σ₂ + ↑x * (1 - ↑σ₂) - 3 * I = 1 := by
         by_contra h
         rw[Complex.ext_iff, sub_re, add_re, sub_im, add_im] at h
@@ -1405,8 +1405,8 @@ theorem Strong_PNT : ∃ c > 0,
   have holo2 : HolomorphicOn (fun s ↦ ζ' s / ζ s) (uIcc σ₂ 2 ×ℂ uIcc (-3) 3 \ {1}) := by
     apply holo2'.mono
     intro s hs
-    simp only [neg_le_self_iff, Nat.ofNat_nonneg, uIcc_of_le, mem_diff, mem_reProdIm, mem_Icc,
-      mem_singleton_iff] at hs ⊢
+    simp only [neg_le_self_iff, Nat.ofNat_nonneg, uIcc_of_le, Set.mem_sdiff, mem_reProdIm,
+      mem_Icc, mem_singleton_iff] at hs ⊢
     refine ⟨?_, hs.2⟩
     refine ⟨?_, hs.1.2⟩
     rcases hs.1.1 with ⟨left, right⟩
@@ -1833,7 +1833,7 @@ theorem Strong_PNT : ∃ c > 0,
 
   have holo1_compat : HolomorphicOn (ζ' / ζ) (Icc σ₁ 2 ×ℂ Icc (-T) T \ {1}) := by
     -- direct from holo1 with ^1-rectangle
-    simpa [σ₁, pow_one] using holo1
+    simpa [σ₁, pow_one] using! holo1
 
   have holo2a : HolomorphicOn (SmoothedChebyshevIntegrand ν ε X)
       (Icc σ₂ 2 ×ℂ Icc (-3) 3 \ {1}) := by
@@ -1941,7 +1941,7 @@ theorem Strong_PNT : ∃ c > 0,
                   + c₈ * X / (ε * T)
                   + c₉ * X * Real.log X / (ε * T)) := by
       gcongr
-      · convert h_close using 1
+      · convert! h_close using 1
         rw [← norm_neg]
         congr
         ring

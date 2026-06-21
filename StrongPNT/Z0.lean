@@ -56,7 +56,7 @@ lemma Z0bound_aux :
   have h_comp := h_F_bigO.comp_tendsto h_tendsto
   -- `h_comp` is `IsBigO (nhdsWithin 0 (Ioi 0)) (F ∘ u) ( (fun _ => 1) ∘ u )`.
   -- This is equivalent to the goal.
-  convert h_comp using 1
+  convert! h_comp using 1
   ext delta
   -- Unfold definitions to show the functions are the same.
   simp only [F, u, Function.comp_apply, Pi.div_apply]
