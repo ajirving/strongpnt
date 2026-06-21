@@ -2794,7 +2794,7 @@ lemma helper_analyticOnNhd_shift_div (f : ℂ → ℂ) (c : ℂ)
     simpa using! (analyticAt_id.add analyticAt_const)
   -- Therefore, the composition z ↦ f (z + c) is analytic at z
   have h_comp : AnalyticAt ℂ (fun w => f (w + c)) z :=
-    (AnalyticAt.comp' h_f_at h_addc)
+    (AnalyticAt.fun_comp h_f_at h_addc)
   -- Multiplication by the constant (1 / f c) is analytic; hence division by f c is analytic
   have h_mul_const : AnalyticAt ℂ (fun w => (1 / f c) * f (w + c)) z :=
     (analyticAt_const.mul h_comp)
