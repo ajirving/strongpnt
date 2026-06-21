@@ -412,7 +412,7 @@ lemma lem_Z1splitge (delta : ℝ) (hdelta_pos : delta > 0) (rho : ℂ)
       simpa [Set.Finite.mem_toFinset (ZetaZerosNearPoint_finite rho.im)] using hmemS
     exact mul_nonneg (by positivity) <| lem_Re1deltatge0 delta hdelta_pos rho.im rho1 hZt
   -- Combine the two bounds
-  convert add_le_add hfirst hsum_nonneg|>.ge using 1
+  convert! add_le_add hfirst hsum_nonneg|>.ge using 1
   ring
 
 lemma lem_1deltatrho0 (delta : ℝ) (rho : ℂ) :
