@@ -1833,7 +1833,7 @@ theorem Strong_PNT : ∃ c > 0,
 
   have holo1_compat : HolomorphicOn (ζ' / ζ) (Icc σ₁ 2 ×ℂ Icc (-T) T \ {1}) := by
     -- direct from holo1 with ^1-rectangle
-    simpa [σ₁, pow_one] using holo1
+    simpa [σ₁, pow_one] using! holo1
 
   have holo2a : HolomorphicOn (SmoothedChebyshevIntegrand ν ε X)
       (Icc σ₂ 2 ×ℂ Icc (-3) 3 \ {1}) := by
@@ -1941,7 +1941,7 @@ theorem Strong_PNT : ∃ c > 0,
                   + c₈ * X / (ε * T)
                   + c₉ * X * Real.log X / (ε * T)) := by
       gcongr
-      · convert h_close using 1
+      · convert! h_close using 1
         rw [← norm_neg]
         congr
         ring
