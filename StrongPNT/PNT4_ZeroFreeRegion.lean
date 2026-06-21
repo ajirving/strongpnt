@@ -377,13 +377,13 @@ lemma lem_Z1splitge (delta : ℝ) (hdelta_pos : delta > 0) (rho : ℂ)
   -- Show the first term ≥ (1/(...)).re
   have h_rho_ne_one : rho ≠ (1 : ℂ) := by
     intro h
-    exact riemannZeta_one_ne_zero (by simpa [h] using h_rho_in_zeroZ)
+    exact riemannZeta_one_ne_zero (by simpa [h] using! h_rho_in_zeroZ)
   have hAnal : AnalyticAt ℂ riemannZeta rho := analyticAt_riemannZeta_of_ne_one h_rho_ne_one
   have hNotEv : ¬ (∀ᶠ z in nhds rho, riemannZeta z = 0) :=
     riemannZeta_not_eventually_zero_of_ne_one h_rho_ne_one
   have horder_nat : 1 ≤ analyticOrderNatAt riemannZeta rho :=
     analyticOrderAt_pos_toNat_of_zero_of_analytic_not_eventually_zero
-      hAnal (by simpa using h_rho_in_zeroZ) hNotEv
+      hAnal (by simpa using! h_rho_in_zeroZ) hNotEv
   have ha_real : (1 : ℝ) ≤ (analyticOrderNatAt riemannZeta rho : ℝ) := by exact_mod_cast horder_nat
   have hz_nonneg : 0 ≤ (1 / (((1 : ℂ) + delta + rho.im * Complex.I) - rho)).re :=
     lem_Re1deltatge0 delta hdelta_pos rho.im rho h_rho_in_Zt
@@ -575,7 +575,7 @@ lemma Z1bound :
     have habs_gt : (5/6 : ℝ) < |s.re - (3/2 : ℝ)| := by simpa [hdist_real] using hdist_gt
     -- Zeta zero implies s.re ≤ 1
     have h0 : riemannZeta (s.re + s.im * Complex.I) = 0 := by
-      simpa [Complex.re_add_im] using hs.1
+      simpa [Complex.re_add_im] using! hs.1
     have hs_le1 : s.re ≤ 1 := lem_sigmale1 s.re s.im h0
     -- Thus s.re - 3/2 ≤ 0, so |s.re - 3/2| = 3/2 - s.re
     have h_nonpos : s.re - (3/2 : ℝ) ≤ 0 := by linarith [hs_le1]
@@ -1179,7 +1179,7 @@ lemma bounded_on_compact_interval (a b : ℝ) (h0 : 0 < a) (_hle : a ≤ b) : �
       have h1 : HasDerivAt (fun u : ℂ => u - 1) 1 z := (hasDerivAt_id z).sub_const 1
       have h2 : HasDerivAt riemannZeta (deriv riemannZeta z) z :=
         (differentiableAt_riemannZeta hz_ne_one).hasDerivAt
-      simpa [one_mul, mul_comm, mul_left_comm, mul_assoc] using (h1.mul h2).deriv
+      simpa [one_mul, mul_comm, mul_left_comm, mul_assoc] using! (h1.mul h2).deriv
 
     have h_prodLog :
         logDeriv (fun u : ℂ => (u - 1) * riemannZeta u) z =
@@ -1188,7 +1188,7 @@ lemma bounded_on_compact_interval (a b : ℝ) (h0 : 0 < a) (_hle : a ≤ b) : �
       have h2 : DifferentiableAt ℂ riemannZeta z := (differentiableAt_riemannZeta hz_ne_one)
       have hfnz : (fun u : ℂ => u - 1) z ≠ 0 := by simpa using hz1
       have hgnz : riemannZeta z ≠ 0 := hζ
-      simpa [logDerivZeta] using
+      simpa [logDerivZeta] using!
         (logDeriv_mul (x := z) (f := fun u : ℂ => u - 1) (g := riemannZeta) hfnz hgnz h1 h2)
 
     have h_step : -logDerivZeta z - (1 / (z - 1))
@@ -1214,7 +1214,7 @@ lemma bounded_on_compact_interval (a b : ℝ) (h0 : 0 < a) (_hle : a ≤ b) : �
       have h1 : HasDerivAt (fun u : ℂ => u - 1) 1 z := (hasDerivAt_id z).sub_const 1
       have h2 : HasDerivAt riemannZeta (deriv riemannZeta z) z :=
         (differentiableAt_riemannZeta hz_ne_one).hasDerivAt
-      simpa [one_mul, mul_comm, mul_left_comm, mul_assoc] using (h1.mul h2)
+      simpa [one_mul, mul_comm, mul_left_comm, mul_assoc] using! (h1.mul h2)
 
     have h_hasDeriv_H :
         HasDerivAt H (riemannZeta z + (z - 1) * deriv riemannZeta z) z :=
@@ -2305,7 +2305,7 @@ lemma lem_ZFRinD (t : ℝ) (ht : |t| > 2) (z : ℂ) :
   rcases h with ⟨h_low, hrest⟩
   rcases hrest with ⟨h_high, him⟩
   have hsub : z - c = ((z.re - (3/2)) : ℂ) := by
-    simpa [c] using complex_sub_ofReal_I_real_eq_ofReal z (3/2) t him
+    simpa [c] using! complex_sub_ofReal_I_real_eq_ofReal z (3/2) t him
   have h1 : dist z c = ‖((z.re - (3/2)) : ℂ)‖ := by
     simp [dist_eq_norm, hsub]
   have h2 : ‖((z.re - (3/2)) : ℂ)‖ = ‖z.re - (3/2)‖ := by
@@ -2604,7 +2604,7 @@ lemma lem_deltarhotodeltat (t : ℝ) (ht : |t| > 3) (ρ : ℂ) :
   intro c hρK
   rcases hρK with ⟨hball, _hzero⟩
   have hball' : ρ ∈ Metric.closedBall ((3/2 : ℂ) + t * Complex.I) (5/6) := by
-    simpa [c, mul_comm] using hball
+    simpa [c, mul_comm] using! hball
   have hmain : deltaz_t t ≤ 3 * deltaz ρ := lem_Ddt2dz t ht ρ hball'
   have hthird_nonneg : 0 ≤ (1/3 : ℝ) := by norm_num
   have h_mul : (1/3 : ℝ) * deltaz_t t ≤ (1/3 : ℝ) * (3 * deltaz ρ) :=
@@ -2622,7 +2622,7 @@ lemma lem_Rerhotodeltat (t : ℝ) (ht : |t| > 3) (ρ : ℂ) :
   intros c h_rho_in
   -- Apply lem_Rerhotodeltarho to get Re(ρ) ≤ 1 - 9 * δ(ρ)
   have h1 : ρ.re ≤ 1 - 9 * deltaz ρ :=
-    lem_Rerhotodeltarho (ρ := ρ) t ht (by simpa [c, mul_comm] using h_rho_in)
+    lem_Rerhotodeltarho (ρ := ρ) t ht (by simpa [c, mul_comm] using! h_rho_in)
   -- Apply lem_deltarhotodeltat to get δ(ρ) ≥ (1/3) * δ_t
   have h2 : deltaz ρ ≥ (1/3) * deltaz_t t := lem_deltarhotodeltat t ht ρ h_rho_in
   -- From h2, we get 9 * δ(ρ) ≥ 9 * (1/3) * δ_t = 3 * δ_t
@@ -2791,7 +2791,7 @@ lemma helper_analyticOnNhd_shift_div (f : ℂ → ℂ) (c : ℂ)
   have h_f_at : AnalyticAt ℂ f (z + c) := h (z + c) hz_addc_mem
   -- The translation z ↦ z + c is analytic at z
   have h_addc : AnalyticAt ℂ (fun w => w + c) z := by
-    simpa using (analyticAt_id.add analyticAt_const)
+    simpa using! (analyticAt_id.add analyticAt_const)
   -- Therefore, the composition z ↦ f (z + c) is analytic at z
   have h_comp : AnalyticAt ℂ (fun w => f (w + c)) z :=
     (AnalyticAt.comp' h_f_at h_addc)
@@ -3040,7 +3040,7 @@ lemma helper_bound_on_ball_to_norm_imp
 
 lemma helper_pointwise_to_AnalyticOnNhd {S : Set ℂ} {f : ℂ → ℂ}
   (h : ∀ z ∈ S, AnalyticAt ℂ f z) : AnalyticOnNhd ℂ f S := by
-  simpa using h
+  simpa using! h
 
 lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
   (hR1_pos : 0 < R1)
@@ -3264,7 +3264,7 @@ lemma lem_sum_m_rho_zeta :
     exact Real.log_pos this
   -- Lower bound for |ζ c|
   have h_zeta_ge_a : a ≤ ‖riemannZeta c‖ := by
-    simpa [c, mul_comm] using ha_bound t
+    simpa [c, mul_comm] using! ha_bound t
   -- Now convert RHS to a multiple of log |t|
   -- First, bound the log of the quotient using a ≤ ‖ζ c‖
   have ht_abs_pos : 0 < |t| := lt_trans (by norm_num) ht
@@ -3638,13 +3638,13 @@ lemma lem_norm_logDeriv_le_tsum (s : ℂ) (hs : 1 < s.re) :
   let f : ℕ → ℂ := fun n => ((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ)
   -- Summability of the L-series terms on Re s > 1
   have hsum_term : Summable (fun n : ℕ => LSeries.term f s n) := by
-    simpa [f] using (ArithmeticFunction.LSeriesSummable_vonMangoldt (s := s) hs)
+    simpa [f] using! (ArithmeticFunction.LSeriesSummable_vonMangoldt (s := s) hs)
   -- Hence the sum of norms is summable as well in ℂ (finite-dimensional over ℝ)
   have hsum_norm : Summable (fun n : ℕ => ‖LSeries.term f s n‖) :=
     (summable_norm_iff).mpr hsum_term
   -- Identification of the L-series with the negative logarithmic derivative
   have hEq : (∑' n : ℕ, LSeries.term f s n) = - deriv riemannZeta s / riemannZeta s := by
-    simpa [f] using (ArithmeticFunction.LSeries_vonMangoldt_eq_deriv_riemannZeta_div (s := s) hs)
+    simpa [f] using! (ArithmeticFunction.LSeries_vonMangoldt_eq_deriv_riemannZeta_div (s := s) hs)
   -- Pointwise identification of the norm of the L-series term with the explicit quotient
   have hpoint : (fun n : ℕ => ‖LSeries.term f s n‖)
                 = (fun n : ℕ => ‖f n / ((n : ℂ) ^ s)‖) := by
@@ -3709,9 +3709,9 @@ lemma helper_norm_neg_logDeriv_eq_tsum_norm (σ : ℝ) (hσ : 1 < σ) :
   -- Define the series terms u n = LSeries.term f s n
   let u : ℕ → ℂ := fun n => LSeries.term f s n
   -- Summability of the L-series terms for Re s > 1
-  have hs_re : 1 < s.re := by simpa using hσ
+  have hs_re : 1 < s.re := by simpa using! hσ
   have hsum_term : Summable (fun n : ℕ => LSeries.term f s n) := by
-    simpa [f] using (ArithmeticFunction.LSeriesSummable_vonMangoldt (s := s) hs_re)
+    simpa [f] using! (ArithmeticFunction.LSeriesSummable_vonMangoldt (s := s) hs_re)
   -- Thus u is summable
   have hsum_u : Summable u := hsum_term
   -- Equality of the sum with the logarithmic derivative
