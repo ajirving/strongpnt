@@ -2021,7 +2021,7 @@ lemma lem_delta19 :
       have h_inv_le_two : 1 / Real.log (|z.im| + 2) ≤ 2 := by
         have h_pos_half : 0 < (1/2 : ℝ) := by norm_num
         have h_ineq := one_div_le_one_div_of_le h_pos_half h_den_ge_half
-        convert h_ineq using 1
+        convert! h_ineq using 1
         norm_num
       -- Now bound deltaz z
       have h_bound : deltaz z ≤ zerofree_constant / 10 := by
@@ -2033,7 +2033,7 @@ lemma lem_delta19 :
         have h_num_nonneg : 0 ≤ zerofree_constant / 20 := by
           exact le_of_lt (div_pos zerofree_constant_pos (by norm_num))
         have h_mul_ineq := mul_le_mul_of_nonneg_left h_inv_le_two h_num_nonneg
-        convert h_mul_ineq using 1
+        convert! h_mul_ineq using 1
         -- Show zerofree_constant / 20 * 2 = zerofree_constant / 10
         · field
         ring

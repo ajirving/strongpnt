@@ -51,7 +51,7 @@ theorem zeta_ratio_identity (s : ℂ) (hs : 1 < s.re) : HasProd (fun (p : ℙ) �
 
 -- Lemma zeta_ratio_at_3_2
 lemma zeta_ratio_at_3_2 :  HasProd (fun (p : ℙ) ↦ (1 + ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) : ℂ)))⁻¹) (riemannZeta 3 / riemannZeta ((3 : ℝ) / 2)) := by
-  convert zeta_ratio_identity (s := 3 / 2) (by norm_num)
+  convert! zeta_ratio_identity (s := 3 / 2) (by norm_num)
   norm_num
 
 -- Lemma abs_zeta_inequality
@@ -128,7 +128,7 @@ lemma lem_zetaBound2 (s : ℂ) (hs_re : 1 / 10 < s.re) (hs_ne : s ≠ 1) : ‖ri
   conv => rhs; rw [div_eq_mul_inv]
   gcongr
   have := ZetaBnd_aux1b 1 (by norm_num) (σ := s.re) (t := s.im) (by linarith)
-  convert this using 1
+  convert! this using 1
   swap
   · simp
   simp only [one_div, neg_add_rev, Nat.cast_one, Complex.re_add_im]
@@ -470,7 +470,7 @@ lemma zeta32lower : ∃ a > 0, ∀ t : ℝ, ‖riemannZeta (3/2 + I * t)‖ ≥ 
   rcases zeta_low_332 with ⟨a, ha_pos, hbound⟩
   refine ⟨a, ha_pos, ?_⟩
   intro t
-  simpa [mul_comm] using (hbound t)
+  simpa [I, mul_comm] using (hbound t)
 
 -- Lemma 17: zeta32lower_log
 lemma zeta32lower_log : ∃ A > 1, ∀ t : ℝ,
@@ -502,7 +502,7 @@ lemma zeta32upper_pre : ∃ b > 1, ∀ t : ℝ, ∀ s : ℂ, ‖s‖ ≤ 1 → (
   refine ⟨(12 : ℝ), by norm_num, ?_⟩
   intro t s hs ht
   have hlt : ‖riemannZeta (s + 3/2 + Complex.I * t)‖ < (10 : ℝ) + 2 * |t| := by
-    simpa using (lem_zetaUppBound t s hs ht)
+    simpa [I] using (lem_zetaUppBound t s hs ht)
   have honele : (1 : ℝ) ≤ |t| := by
     have : (1 : ℝ) < |t| := lt_trans (by norm_num) ht
     exact le_of_lt this

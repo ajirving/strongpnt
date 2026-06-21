@@ -72,7 +72,7 @@ lemma lem_denomAnalAt (S : Finset ℂ) (n : ℂ → ℕ)
     have h_each_analytic : ∀ s ∈ S, AnalyticAt ℂ (f s) w := by
       intro s hs
       fun_prop
-    convert S.analyticAt_prod h_each_analytic using 1
+    convert! S.analyticAt_prod h_each_analytic using 1
     ext
     simp [f]
   · -- Second part: nonzero product
@@ -1058,7 +1058,7 @@ lemma blaschke_pow_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
   rcases hfrac with ⟨hne, hdiff⟩
   constructor
   · exact pow_ne_zero _ hne
-  · simpa using hdiff.pow (analyticOrderNatAt f ρ)
+  · exact hdiff.pow (analyticOrderNatAt f ρ)
 
 -- Lemma 16: blaschke_prod_diff_nonzero
 lemma blaschke_prod_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
