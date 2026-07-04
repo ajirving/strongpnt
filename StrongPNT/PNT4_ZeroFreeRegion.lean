@@ -447,14 +447,9 @@ lemma lem_Z1splitge3 (delta : ℝ) (hdelta : delta > 0) (sigma t : ℝ) (rho : �
 
   -- Since rho.im = t, we have rho ∈ ZetaZerosNearPoint rho.im
   have h_rho_in_Zt' : rho ∈ ZetaZerosNearPoint rho.im := by
-    rw [h_rho_im]
-    exact h_rho_in_Zt
-
+    rwa [h_rho_im]
   -- Apply lem_Z1splitge2
-  have h_bound := lem_Z1splitge2 delta hdelta rho h_rho_in_Zt'
-
-  -- Since rho.im = t and rho.re = sigma, we can convert the bound
-  convert h_bound using 1
+  convert lem_Z1splitge2 delta hdelta rho h_rho_in_Zt' using 1
   · simp_rw [← h_rho_im]
   rw [h_rho_re]
 
@@ -465,8 +460,6 @@ lemma Z1bound :
         ∀ s : ℂ, s ∈ zeroZ ∧ s.im = t →
           (-(logDerivZeta ((1 : ℂ) + delta + t * Complex.I))).re
             ≤ - (1 / (1 + delta - s.re)) + C * Real.log (abs t + 2) := by
-  classical
-  -- Start from the explicit real-part bound
   obtain ⟨C0, hC0gt1, hExp⟩ := lem_explicit1RealReal
   -- Choose a global constant C ≥ C0 and large enough to absorb a fixed constant 3
   have hlog5pos : 0 < Real.log 4 := Real.log_pos (by norm_num : (1 : ℝ) < 4)
@@ -474,8 +467,7 @@ lemma Z1bound :
   have hCgt1 : 1 < C := by
     have : (1 : ℝ) < 2 := by norm_num
     exact lt_of_lt_of_le this (le_max_right _ _)
-  refine ⟨C, hCgt1, ?_⟩
-  intro delta hdelta t ht s hs
+  refine ⟨C, hCgt1, fun delta hdelta t ht s hs ↦ ?_⟩
   -- Abbreviations
   set sp : ℂ := (1 : ℂ) + delta + t * Complex.I
   set S : Finset ℂ := Set.Finite.toFinset (ZetaZerosNearPoint_finite t)
@@ -491,8 +483,7 @@ lemma Z1bound :
     neg_le_sub_of_abs_sub_le h_bound
   -- Show Sre ≥ 0 using nonnegativity termwise
   have hS_nonneg : 0 ≤ Sre := by
-    apply Finset.sum_nonneg
-    intro rho1 hmem
+    refine Finset.sum_nonneg fun rho1 hmem ↦ ?_
     have hZt : rho1 ∈ ZetaZerosNearPoint t := by
       simpa [S, Set.Finite.mem_toFinset (ZetaZerosNearPoint_finite t)] using hmem
     -- Each term's real part is ≥ 0
