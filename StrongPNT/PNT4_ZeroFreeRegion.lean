@@ -75,10 +75,10 @@ lemma lem_sigmale1Zt (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNe
   apply lem_sigmale1 rho1.re rho1.im
   simp_all [ZetaZerosNearPoint, zeroZ]
 
-lemma complex_abs_of_real (x : ℝ) : ‖(x : ℂ)‖ = abs x := by
+lemma complex_abs_of_real (x : ℝ) : ‖(x : ℂ)‖ = |x| := by
   rw [Complex.norm_real, Real.norm_eq_abs]
 
-lemma complex_abs_real_cast (r : ℝ) : ‖(r : ℂ)‖ = abs r := Complex.norm_real r
+lemma complex_abs_real_cast (r : ℝ) : ‖(r : ℂ)‖ = |r| := Complex.norm_real r
 
 lemma zerosetKfRc_eq_ZetaZerosNearPoint (t : ℝ) :
   zerosetKfRc (5/6 : ℝ) ((3/2 : ℂ) + t * Complex.I) riemannZeta = ZetaZerosNearPoint t := by
@@ -139,7 +139,7 @@ lemma lem_explicit1deltat :
                     (analyticOrderNatAt riemannZeta rho1 : ℂ) /
                       (((1 : ℂ) + δ + t * Complex.I) - rho1))
                 - logDerivZeta ((1 : ℂ) + (δ : ℝ) + (t : ℝ) * Complex.I)‖
-          ≤ C * Real.log (abs t + 2) := by
+          ≤ C * Real.log (|t| + 2) := by
   classical
   -- Fixed radii and parameters
   let r1 : ℝ := (1/2 : ℝ)
@@ -170,10 +170,10 @@ lemma lem_explicit1RealReal :
   ∃ C > 1,
       ∀ t : ℝ, 2 < |t| →
         ∀ δ : ℝ, 0 < δ ∧ δ < 1 →
-          abs ((logDerivZeta ((1 : ℂ) + (δ : ℝ) + (t : ℝ) * Complex.I)).re
+          |(logDerivZeta ((1 : ℂ) + (δ : ℝ) + (t : ℝ) * Complex.I)).re
             - (∑ rho1 ∈ Set.Finite.toFinset (ZetaZerosNearPoint_finite t),
                   ((analyticOrderNatAt riemannZeta rho1 : ℂ) /
-                    (((1 : ℂ) + δ + t * Complex.I) - rho1)).re))
+                    (((1 : ℂ) + δ + t * Complex.I) - rho1)).re)|
           ≤ C * Real.log (|t| + 2) := by
   rcases lem_explicit1deltat with ⟨C, hCpos, hE⟩
   refine ⟨C, hCpos, ?_⟩
@@ -187,13 +187,11 @@ lemma lem_explicit2Real :
   ∃ C > 1,
       ∀ t : ℝ, 2 < |t| →
         ∀ δ : ℝ, 0 < δ ∧ δ < 1 →
-          abs (
-            (logDerivZeta ((1 : ℂ) + (δ : ℝ) + (2 * (t : ℝ)) * Complex.I)).re
+          |(logDerivZeta ((1 : ℂ) + (δ : ℝ) + (2 * (t : ℝ)) * Complex.I)).re
             - (∑ rho1 ∈ Set.Finite.toFinset (ZetaZerosNearPoint_finite (2 * t)),
                   ((analyticOrderNatAt riemannZeta rho1 : ℂ) /
-                    (((1 : ℂ) + δ + (2 * t) * Complex.I) - rho1)).re)
-          )
-          ≤ C * Real.log (abs (2 * t) + 2) := by
+                    (((1 : ℂ) + δ + (2 * t) * Complex.I) - rho1)).re)|
+          ≤ C * Real.log (|2 * t| + 2) := by
   rcases lem_explicit1RealReal with ⟨C, hCpos, hEv⟩
   refine ⟨C, hCpos, ?_⟩
   intro t ht δ hδ
@@ -262,7 +260,7 @@ lemma lem_explicit2Real2 :
       ∀ t : ℝ, 2 < |t| →
         ∀ δ : ℝ, 0 < δ ∧ δ < 1 →
           ((-logDerivZeta ((1 : ℂ) + (δ : ℝ) + (2 * (t : ℝ)) * Complex.I)).re)
-          ≤ C * Real.log (abs (2 * t) + 2) := by
+          ≤ C * Real.log (|2 * t| + 2) := by
   rcases lem_explicit2Real with ⟨C, hCpos, hEv⟩
   refine ⟨C, hCpos, ?_⟩
   intro t ht δ hδ
@@ -275,8 +273,8 @@ lemma lem_explicit2Real2 :
           (s - rho1)).re
   -- From lem_explicit2Real: bound on the difference of real parts
   have h_bound :
-      abs ((logDerivZeta s).re - Sre)
-        ≤ C * Real.log (abs (2 * t) + 2) := by
+      |(logDerivZeta s).re - Sre|
+        ≤ C * Real.log (|2 * t| + 2) := by
     simpa [s, S, Sre] using hEv t ht δ hδ
   -- Nonnegativity of the sum (using lem_sumrho2ge02 and lem_sumrho2)
   have hS_nonneg : 0 ≤ Sre := by
@@ -293,19 +291,19 @@ lemma lem_Z2bound :
      ∀ t : ℝ, 2 < |t| →
       ∀ δ, 0 < δ ∧ δ < 1 →
         (-(logDerivZeta ((1 : ℂ) + (δ : ℝ) + (2 * (t : ℝ)) * Complex.I))).re
-          ≤ C * Real.log (abs t + 2) := by
+          ≤ C * Real.log (|t| + 2) := by
   obtain ⟨C₁, hC₁_pos, hbound₁⟩ := lem_explicit2Real2
   refine ⟨2 * C₁, (by linarith), fun t ht δ hδ ↦ hbound₁ t ht δ hδ|>.trans ?_⟩
   suffices Real.log (|2 * t| + 2) ≤ 2 * Real.log (|t| + 2) by
     grw [this]
     exact le_of_eq (by ring)
   calc
-    _ ≤ Real.log (4 * (abs t + 2)) := by
+    _ ≤ Real.log (4 * (|t| + 2)) := by
       gcongr; simp; linarith
-    _ = Real.log 4 + Real.log (abs t + 2) := by
+    _ = Real.log 4 + Real.log (|t| + 2) := by
       exact Real.log_mul (by norm_num) (by linarith)
-    _ ≤ Real.log (abs t + 2) + Real.log (abs t + 2) := by gcongr; linarith
-    _ = 2 * Real.log (abs t + 2) := by ring
+    _ ≤ Real.log (|t| + 2) + Real.log (|t| + 2) := by gcongr; linarith
+    _ = 2 * Real.log (|t| + 2) := by ring
 
 lemma lem_Z1split (delta : ℝ) (rho : ℂ)
   (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint rho.im) :
@@ -459,7 +457,7 @@ lemma Z1bound :
       ∀ t : ℝ, 2 < |t| →
         ∀ s : ℂ, s ∈ zeroZ ∧ s.im = t →
           (-(logDerivZeta ((1 : ℂ) + delta + t * Complex.I))).re
-            ≤ - (1 / (1 + delta - s.re)) + C * Real.log (abs t + 2) := by
+            ≤ - (1 / (1 + delta - s.re)) + C * Real.log (|t| + 2) := by
   obtain ⟨C0, hC0gt1, hExp⟩ := lem_explicit1RealReal
   -- Choose a global constant C ≥ C0 and large enough to absorb a fixed constant 3
   have hlog5pos : 0 < Real.log 4 := Real.log_pos (by norm_num : (1 : ℝ) < 4)
@@ -475,11 +473,11 @@ lemma Z1bound :
     ∑ rho1 ∈ S,
         ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (sp - rho1)).re
   -- From explicit bound: |(logDerivZeta sp).re - Sre| ≤ C0 * log(|t|+2)
-  have h_bound : abs ((logDerivZeta sp).re - Sre)
-        ≤ C0 * Real.log (abs t + 2) := by
+  have h_bound : |(logDerivZeta sp).re - Sre|
+        ≤ C0 * Real.log (|t| + 2) := by
     simpa [sp, S, Sre] using hExp t ht delta hdelta
   -- Isolate - (logDerivZeta sp).re using Sre and the triangle inequality
-  have h_isol : - (logDerivZeta sp).re ≤ C0 * Real.log (abs t + 2) - Sre :=
+  have h_isol : - (logDerivZeta sp).re ≤ C0 * Real.log (|t| + 2) - Sre :=
     neg_le_sub_of_abs_sub_le h_bound
   -- Show Sre ≥ 0 using nonnegativity termwise
   have hS_nonneg : 0 ≤ Sre := by
@@ -490,7 +488,7 @@ lemma Z1bound :
     simpa [sp] using
       (lem_Re1deltatge0m delta hdelta.1 t rho1 hZt)
   -- Basic bound with Sre dropped
-  have h_basic : (-(logDerivZeta sp)).re ≤ C0 * Real.log (abs t + 2) := by
+  have h_basic : (-(logDerivZeta sp)).re ≤ C0 * Real.log (|t| + 2) := by
     simpa [Complex.neg_re] using neg_le_of_abs_sub_le_of_nonneg h_bound hS_nonneg
   -- Split on whether s ∈ ZetaZerosNearPoint t
   by_cases hmem : s ∈ ZetaZerosNearPoint t
@@ -505,9 +503,9 @@ lemma Z1bound :
     have h_sum_ge : Sre ≥ 1 / ((1 : ℝ) + delta - sigma) := by
       simpa [sp, S, Sre] using h_sum_ge'
     -- Chain inequalities: -(logDerivZeta sp).re ≤ C0*log - Sre ≤ C0*log - 1/(...)
-    have h1 : (-(logDerivZeta sp)).re ≤ C0 * Real.log (abs t + 2) - (1 / ((1 : ℝ) + delta - sigma)) := by
+    have h1 : (-(logDerivZeta sp)).re ≤ C0 * Real.log (|t| + 2) - (1 / ((1 : ℝ) + delta - sigma)) := by
       have : (1 / ((1 : ℝ) + delta - sigma)) ≤ Sre := h_sum_ge
-      have := sub_le_sub_left this (C0 * Real.log (abs t + 2))
+      have := sub_le_sub_left this (C0 * Real.log (|t| + 2))
       exact le_trans h_isol (by simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using this)
     -- Enlarge C0 to C on the logarithmic term
     have hCge : C0 ≤ C :=
@@ -516,15 +514,15 @@ lemma Z1bound :
         have := add_le_add_left this C0
         simpa using this) (le_max_left _ _)
     -- log(|t|+2) ≥ 0 since |t| > 3
-    have hY_nonneg : 0 ≤ Real.log (abs t + 2) := by
-      have h2le : (2 : ℝ) ≤ abs t + 2 := by
+    have hY_nonneg : 0 ≤ Real.log (|t| + 2) := by
+      have h2le : (2 : ℝ) ≤ |t| + 2 := by
         have h0 : 0 ≤ |t| := abs_nonneg t
         linarith
       exact le_of_lt (Real.log_pos (lt_of_lt_of_le (by norm_num) h2le))
-    have h_enlarge : C0 * Real.log (abs t + 2) ≤ C * Real.log (abs t + 2) :=
+    have h_enlarge : C0 * Real.log (|t| + 2) ≤ C * Real.log (|t| + 2) :=
       mul_le_mul_of_nonneg_right hCge hY_nonneg
-    have h2 : C0 * Real.log (abs t + 2) - (1 / ((1 : ℝ) + delta - sigma)) ≤
-              C * Real.log (abs t + 2) - (1 / ((1 : ℝ) + delta - sigma)) := by
+    have h2 : C0 * Real.log (|t| + 2) - (1 / ((1 : ℝ) + delta - sigma)) ≤
+              C * Real.log (|t| + 2) - (1 / ((1 : ℝ) + delta - sigma)) := by
       simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using
         (sub_le_sub_right h_enlarge (1 / ((1 : ℝ) + delta - sigma)))
     have := le_trans h1 h2
@@ -573,43 +571,43 @@ lemma Z1bound :
     have hneg_ge : - (3 : ℝ) ≤ - (1 / (1 + delta - s.re)) := by
       simpa using (neg_le_neg hone_div_le3)
     -- Compare logs to absorb the constant 3
-    have hlog_ge : Real.log 4 ≤ Real.log (abs t + 2) := by
-      have : (4 : ℝ) < abs t + 2 := by linarith [ht]
+    have hlog_ge : Real.log 4 ≤ Real.log (|t| + 2) := by
+      have : (4 : ℝ) < |t| + 2 := by linarith [ht]
       exact Real.log_le_log (by norm_num) (le_of_lt this)
     have hC_ge_add : C ≥ C0 + 3 / Real.log 4 := by exact le_max_left _ _
     have hCminus : C - C0 ≥ 3 / Real.log 4 := by linarith
-    have hY_nonneg : 0 ≤ Real.log (abs t + 2) := by
-      have h2le : (2 : ℝ) ≤ abs t + 2 := by
+    have hY_nonneg : 0 ≤ Real.log (|t| + 2) := by
+      have h2le : (2 : ℝ) ≤ |t| + 2 := by
         have h0 : 0 ≤ |t| := abs_nonneg t
         linarith
       exact le_of_lt (Real.log_pos (lt_of_lt_of_le (by norm_num) h2le))
-    have hmul1 : (3 / Real.log 4) * Real.log 4 ≤ (3 / Real.log 4) * Real.log (abs t + 2) := by
+    have hmul1 : (3 / Real.log 4) * Real.log 4 ≤ (3 / Real.log 4) * Real.log (|t| + 2) := by
       have hk_nonneg : 0 ≤ 3 / Real.log 4 := le_of_lt (div_pos (by norm_num) hlog5pos)
       exact mul_le_mul_of_nonneg_left hlog_ge hk_nonneg
-    have hmul2 : (3 / Real.log 4) * Real.log (abs t + 2) ≤ (C - C0) * Real.log (abs t + 2) := by
+    have hmul2 : (3 / Real.log 4) * Real.log (|t| + 2) ≤ (C - C0) * Real.log (|t| + 2) := by
       exact mul_le_mul_of_nonneg_right hCminus hY_nonneg
-    have hmul_ge3 : (3 : ℝ) ≤ (C - C0) * Real.log (abs t + 2) := by
+    have hmul_ge3 : (3 : ℝ) ≤ (C - C0) * Real.log (|t| + 2) := by
       have hne5 : Real.log 4 ≠ 0 := ne_of_gt hlog5pos
       have hcalc : (3 / Real.log 4) * Real.log 4 = 3 := by
         simp [div_eq_mul_inv, hne5]
-      have : (3 / Real.log 4) * Real.log 4 ≤ (C - C0) * Real.log (abs t + 2) :=
+      have : (3 / Real.log 4) * Real.log 4 ≤ (C - C0) * Real.log (|t| + 2) :=
         le_trans hmul1 hmul2
       simpa [hcalc] using this
     -- Now C * log ≥ C0 * log + 3
-    have hCmul' : C0 * Real.log (abs t + 2) + 3 ≤ C * Real.log (abs t + 2) := by
-      have : C0 * Real.log (abs t + 2) + 3 ≤ C0 * Real.log (abs t + 2) + (C - C0) * Real.log (abs t + 2) := by
+    have hCmul' : C0 * Real.log (|t| + 2) + 3 ≤ C * Real.log (|t| + 2) := by
+      have : C0 * Real.log (|t| + 2) + 3 ≤ C0 * Real.log (|t| + 2) + (C - C0) * Real.log (|t| + 2) := by
         gcongr
-      have hcalc : C * Real.log (abs t + 2) =
-          C0 * Real.log (abs t + 2) + (C - C0) * Real.log (abs t + 2) := by
+      have hcalc : C * Real.log (|t| + 2) =
+          C0 * Real.log (|t| + 2) + (C - C0) * Real.log (|t| + 2) := by
         ring
       simpa [hcalc, add_comm, add_left_comm, add_assoc] using this
     -- Combine: from basic bound and the constant absorption and -1/(...) ≥ -3
-    have : (-(logDerivZeta sp)).re ≤ - (1 / (1 + delta - s.re)) + C * Real.log (abs t + 2) := by
-      have h1 : (-(logDerivZeta sp)).re ≤ C0 * Real.log (abs t + 2) := h_basic
-      have h2 : C0 * Real.log (abs t + 2) ≤ C * Real.log (abs t + 2) - 3 := by
+    have : (-(logDerivZeta sp)).re ≤ - (1 / (1 + delta - s.re)) + C * Real.log (|t| + 2) := by
+      have h1 : (-(logDerivZeta sp)).re ≤ C0 * Real.log (|t| + 2) := h_basic
+      have h2 : C0 * Real.log (|t| + 2) ≤ C * Real.log (|t| + 2) - 3 := by
         linarith [hCmul']
-      have h3 : C * Real.log (abs t + 2) - 3 ≤ - (1 / (1 + delta - s.re)) + C * Real.log (abs t + 2) := by
-        have := add_le_add_right hneg_ge (C * Real.log (abs t + 2))
+      have h3 : C * Real.log (|t| + 2) - 3 ≤ - (1 / (1 + delta - s.re)) + C * Real.log (|t| + 2) := by
+        have := add_le_add_right hneg_ge (C * Real.log (|t| + 2))
         simpa [add_comm, add_left_comm, add_assoc, sub_eq_add_neg] using this
       exact le_trans h1 (le_trans h2 h3)
     simpa [sp, Complex.neg_re, sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using this
@@ -1543,15 +1541,15 @@ lemma Z341pos (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
   exact lem_seriespos t delta hdelta
 
 
-lemma log_abs_add_two_pos (t : ℝ) : 0 < Real.log (abs t + 2) := by
+lemma log_abs_add_two_pos (t : ℝ) : 0 < Real.log (|t| + 2) := by
   -- First, note that |t| ≥ 0, hence |t| + 2 ≥ 2 > 1
-  have h0 : 0 ≤ abs t + 2 := by
-    have h' : 0 ≤ abs t := abs_nonneg t
+  have h0 : 0 ≤ |t| + 2 := by
+    have h' : 0 ≤ |t| := abs_nonneg t
     linarith
-  have hge : (2 : ℝ) ≤ abs t + 2 := by
-    have h' : 0 ≤ abs t := abs_nonneg t
+  have hge : (2 : ℝ) ≤ |t| + 2 := by
+    have h' : 0 ≤ |t| := abs_nonneg t
     linarith
-  have hgt : 1 < abs t + 2 := lt_of_lt_of_le (by norm_num : (1 : ℝ) < 2) hge
+  have hgt : 1 < |t| + 2 := lt_of_lt_of_le (by norm_num : (1 : ℝ) < 2) hge
   -- Apply the positivity criterion for log on nonnegative reals
   exact (Real.log_pos_iff h0).2 hgt
 
@@ -1585,7 +1583,7 @@ lemma lem341tsC :
     ∃ C > 1, ∀ s : ℂ,
         (s ∈ zeroZ ∧ 0 < s.re ∧ s.re < 1) →
           2 < |s.im| →
-    4 / (1 - s.re + 1 / (2 * C * Real.log (abs s.im + 2))) ≤ 7 * C * Real.log (abs s.im + 2) := by
+    4 / (1 - s.re + 1 / (2 * C * Real.log (|s.im| + 2))) ≤ 7 * C * Real.log (|s.im| + 2) := by
   -- Get the constant C from Z341bounds_const
   obtain ⟨C, hCpos, hbound⟩ := Z341bounds_const
   refine ⟨C, hCpos, ?_⟩
@@ -1665,14 +1663,14 @@ lemma lem341tsC2 :
     ∃ C > 1, ∀ s : ℂ,
         (s ∈ zeroZ ∧ 0 < s.re ∧ s.re < 1) →
           2 < |s.im| →
-          1 - s.re + 1 / (2 * C * Real.log (abs s.im + 2)) ≥ 4 / (7 * C * Real.log (abs s.im + 2)) := by
+          1 - s.re + 1 / (2 * C * Real.log (|s.im| + 2)) ≥ 4 / (7 * C * Real.log (|s.im| + 2)) := by
   -- Obtain the constant and bound from lem341tsC
   rcases lem341tsC with ⟨C, hCpos, hT⟩
   refine ⟨C, hCpos, ?_⟩
   intro s hs hTs
   -- Define a and b to flip the inequality 4/a ≤ b into 4/b ≤ a
-  set a := 1 - s.re + 1 / (2 * C * Real.log (abs s.im + 2)) with ha
-  set b := 7 * C * Real.log (abs s.im + 2) with hb
+  set a := 1 - s.re + 1 / (2 * C * Real.log (|s.im| + 2)) with ha
+  set b := 7 * C * Real.log (|s.im| + 2) with hb
   have hineq : 4 / a ≤ b := by
     simpa [ha, hb] using hT s hs hTs
   -- Show b &gt; 0
@@ -1746,17 +1744,17 @@ lemma lem341tsC3 :
     ∃ C > 1, ∀ s : ℂ,
         (s ∈ zeroZ ∧ 0 < s.re ∧ s.re < 1) →
           2 < |s.im| →
-    1 - s.re ≥ 1 / (14 * C * Real.log (abs s.im + 2)) := by
+    1 - s.re ≥ 1 / (14 * C * Real.log (|s.im| + 2)) := by
   obtain ⟨C, hCpos, hT⟩ := lem341tsC2
   refine ⟨C, hCpos, ?_⟩
   intro s hs hTle
   have h := hT s hs hTle
   -- Convert the inequality to the form required by fraction_diff_lower_bound
-  have h' : 4 / (7 * C * Real.log (abs s.im + 2)) ≤
-      (1 - s.re) + 1 / (2 * C * Real.log (abs s.im + 2)) := by
+  have h' : 4 / (7 * C * Real.log (|s.im| + 2)) ≤
+      (1 - s.re) + 1 / (2 * C * Real.log (|s.im| + 2)) := by
     simpa [ge_iff_le, add_comm, add_left_comm, add_assoc] using h
   -- Apply the algebraic rearrangement lemma
-  have h'' := fraction_diff_lower_bound C (Real.log (abs s.im + 2)) (1 - s.re) h'
+  have h'' := fraction_diff_lower_bound C (Real.log (|s.im| + 2)) (1 - s.re) h'
   -- Conclude
   simpa [ge_iff_le, mul_comm, mul_left_comm, mul_assoc] using h''
 
@@ -1765,7 +1763,7 @@ lemma lem341tsC3 :
 lemma zerofree :
     ∃ c, c > 0 ∧ c < 1 ∧ ∀ s : ℂ,
         (s ∈ zeroZ ∧ 0 < s.re ∧ s.re < 1) →
-          2 < |s.im| → s.re ≤ 1 - c / (Real.log (abs s.im + 2)) := by
+          2 < |s.im| → s.re ≤ 1 - c / (Real.log (|s.im| + 2)) := by
   -- Obtain the inequality from lem341tsC3
   rcases lem341tsC3 with ⟨C0, hC0pos, hT⟩
   -- Define the final constant C := 1 / (14 * C0)
@@ -1793,7 +1791,7 @@ lemma zerofree :
   refine ⟨C, hCpos, hClt1, ?_⟩
   intro s hs hTle
   -- Let L denote the logarithm term
-  set L := Real.log (abs s.im + 2) with hLdef
+  set L := Real.log (|s.im| + 2) with hLdef
   -- From lem341tsC3 we have: 1 / (14 * C0 * L) ≤ 1 - s.re
   have hb0 := hT s hs hTle
   -- Rewrite the bound to match C / L on the left
@@ -3728,8 +3726,8 @@ theorem thm_final_result :
   ∃ C : ℝ, C > 1 ∧
   ∀ t : ℝ, |t| > 3 →
     ∀ σ : ℝ,
-      σ ≥ 1 - A / Real.log (abs t + 2) →
-      ‖deriv riemannZeta (Complex.mk σ t) / riemannZeta (Complex.mk σ t)‖ ≤ C * (Real.log (abs t)) ^ 2 := by
+      σ ≥ 1 - A / Real.log (|t| + 2) →
+      ‖deriv riemannZeta (Complex.mk σ t) / riemannZeta (Complex.mk σ t)‖ ≤ C * (Real.log (|t|)) ^ 2 := by
   -- Apply lem_logDerivZetalogt2 and lem_logDerivZetalogt32 as suggested by informal proof
   obtain ⟨C₀, hC₀_pos, hC₀⟩ := lem_logDerivZetalogt0
   obtain ⟨C₃₂, hC₃₂_pos, hC₃₂⟩ := lem_logDerivZetalogt32
@@ -3759,8 +3757,8 @@ theorem thm_final_result :
   · -- Main bound
     intro t ht σ hσ
 
-    -- Key insight: A / Real.log (abs t + 2) = deltaz_t t when A = zerofree_constant / 20
-    have h_eq : zerofree_constant / 20 / Real.log (abs t + 2) = deltaz_t t := by
+    -- Key insight: A / Real.log (|t| + 2) = deltaz_t t when A = zerofree_constant / 20
+    have h_eq : zerofree_constant / 20 / Real.log (|t| + 2) = deltaz_t t := by
       unfold deltaz_t deltaz
       simp
 
@@ -3773,27 +3771,27 @@ theorem thm_final_result :
     · -- Case σ ≥ 3/2: use lem_logDerivZetalogt32
       have bound := hC₃₂ t ht σ h
       have hC_le : C₃₂ ≤ max C₀ C₃₂ := le_max_right _ _
-      -- Need to show C₃₂ ≤ C₃₂ * (Real.log (abs t))^2
-      have hlog_ge_one : 1 ≤ Real.log (abs t) := by
-        have h_ge : Real.exp 1 ≤ abs t := by
+      -- Need to show C₃₂ ≤ C₃₂ * (Real.log (|t|))^2
+      have hlog_ge_one : 1 ≤ Real.log (|t|) := by
+        have h_ge : Real.exp 1 ≤ |t| := by
           -- Since |t| > 3 and e < 3, we have e < |t|
           have he_lt_3 : Real.exp 1 < 3 := by linarith[Real.exp_one_lt_d9]
           linarith [ht, abs_nonneg t]
         exact (Real.le_log_iff_exp_le (by linarith [abs_nonneg t])).2 h_ge
-      have h_one_le_sq : 1 ≤ (Real.log (abs t)) ^ 2 := by
-        have h_sq : (Real.log (abs t)) ^ 2 = Real.log (abs t) * Real.log (abs t) := by
+      have h_one_le_sq : 1 ≤ (Real.log (|t|)) ^ 2 := by
+        have h_sq : (Real.log (|t|)) ^ 2 = Real.log (|t|) * Real.log (|t|) := by
           rw [pow_two]
         rw [h_sq]
-        have h_mul : 1 * 1 ≤ Real.log (abs t) * Real.log (abs t) :=
+        have h_mul : 1 * 1 ≤ Real.log (|t|) * Real.log (|t|) :=
           mul_self_le_mul_self (zero_le_one) hlog_ge_one
         simpa using h_mul
       have h_pos : 0 < C₃₂ := lt_trans zero_lt_one hC₃₂_pos
       calc ‖deriv riemannZeta (Complex.mk σ t) / riemannZeta (Complex.mk σ t)‖
         ≤ C₃₂ := bound
         _ = C₃₂ * 1 := by rw [mul_one]
-        _ ≤ C₃₂ * (Real.log (abs t)) ^ 2 := by
+        _ ≤ C₃₂ * (Real.log (|t|)) ^ 2 := by
           apply mul_le_mul_of_nonneg_left h_one_le_sq (le_of_lt h_pos)
-        _ ≤ max C₀ C₃₂ * (Real.log (abs t)) ^ 2 := by
+        _ ≤ max C₀ C₃₂ * (Real.log (|t|)) ^ 2 := by
           apply mul_le_mul_of_nonneg_right hC_le (sq_nonneg _)
 
     · -- Case σ < 3/2: use lem_logDerivZetalogt0
@@ -3901,7 +3899,7 @@ lemma ZetaZeroFree_p :
     have him_bound : 2 < |s.im| := by
       have : 2 < |t| := lt_trans (by norm_num) htgt3
       simpa [s] using this
-    have hbound_applied : s.re ≤ 1 - c / Real.log (abs s.im + 2) := hbound s hpre him_bound
+    have hbound_applied : s.re ≤ 1 - c / Real.log (|s.im| + 2) := hbound s hpre him_bound
     have hle : σ ≤ 1 - c / Lp := by simpa [s, hLpdef] using hbound_applied
     have hcontr : σ < σ := lt_of_le_of_lt hle hσ_gt
     exact (lt_irrefl _ : ¬ σ < σ) hcontr
@@ -3952,8 +3950,8 @@ lemma LogDerivZetaBndUnif2 :
     have h_eq : σ + t * Complex.I = Complex.mk σ t := by
       rw [Complex.mk_eq_add_mul_I]
     rw [h_eq]
-    have hσ_ge_required : σ ≥ 1 - c / Real.log (abs t + 2) := by
-      have h_abs_eq : abs t = |t| := by simp
+    have hσ_ge_required : σ ≥ 1 - c / Real.log (|t| + 2) := by
+      have h_abs_eq : |t| = |t| := by simp
       rw [h_abs_eq]
       exact le_of_lt hσ_gt
     exact hfinal t htgt3 σ hσ_ge_required
