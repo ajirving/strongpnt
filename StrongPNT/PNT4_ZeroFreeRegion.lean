@@ -152,13 +152,13 @@ lemma lem_explicit1deltat :
   peel hc2 with t ht hc2
   intro δ hδ
   have := zerosetKfRc_eq_ZetaZerosNearPoint t
-  rw [mul_comm, ← I] at this
+  rw [mul_comm] at this
   simp +contextual only [this] at hc2
   specialize hc2 (ZetaZerosNearPoint_finite t) (1 + δ + t * Complex.I)
-  have :   1 + δ + t * Complex.I ∈ Metric.closedBall (3 / 2 + I * ↑t) r1 \ ZetaZerosNearPoint t := by
+  have :   1 + δ + t * Complex.I ∈ Metric.closedBall (3 / 2 + Complex.I * ↑t) r1 \ ZetaZerosNearPoint t := by
     constructor
     · apply Set.mem_of_mem_of_subset ( s_in_closedBall_12 δ t hδ.1 hδ.2)
-      rw [mul_comm, I]
+      rw [mul_comm]
     · exact s_notin_ZetaZerosNearPoint _ _ hδ.1
   specialize hc2 this
   rw [norm_sub_rev]
@@ -638,16 +638,16 @@ lemma zeta1zetaseries {s : ℂ} (hs : 1 < s.re) :
   exact neg_logDeriv_zeta_eq_vonMangoldt_sum s hs
 
 lemma zeta1zetaseriesxy (x y : ℝ) (hx : 1 < x) :
-    -logDerivZeta (x + y * I) = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * I)) := by
+    -logDerivZeta (x + y * Complex.I) = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I)) := by
   apply zeta1zetaseries
-  simpa [I]
+  simpa
 
-lemma Zconverges1 (x y : ℝ) (hx : 1 < x) : riemannZeta (x + y * I) ≠ 0 := by
+lemma Zconverges1 (x y : ℝ) (hx : 1 < x) : riemannZeta (x + y * Complex.I) ≠ 0 := by
   apply riemannZeta_ne_zero_of_one_lt_re
-  simpa [I]
+  simpa
 
-lemma complex_re_of_real_add_imag (x y : ℝ) : (x + y * I).re = x := by
-  simp [I]
+lemma complex_re_of_real_add_imag (x y : ℝ) : (x + y * Complex.I).re = x := by
+  simp
 
 lemma vonMangoldt_LSeriesSummable (s : ℂ) (hs : 1 < s.re) : LSeriesSummable (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) s := by
   -- Use the existing theorem ArithmeticFunction.LSeriesSummable_vonMangoldt
@@ -665,43 +665,43 @@ lemma LSeriesSummable_to_summable (f : ℕ → ℂ) (s : ℂ) (h : LSeriesSummab
   exact h.congr_cofinite h_cofinite
 
 lemma ReZconverges1 (x y : ℝ) (hx : 1 < x) :
-Summable (fun n => ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) (-(x + y * I))).re) := by
+Summable (fun n => ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) (-(x + y * Complex.I))).re) := by
   -- Apply Lemma Zconverge1 (ensures zeta function is non-zero, so logDerivZeta is well-defined)
-  have h_nonzero : riemannZeta (x + y * I) ≠ 0 := Zconverges1 x y hx
+  have h_nonzero : riemannZeta (x + y * Complex.I) ≠ 0 := Zconverges1 x y hx
 
   -- Use the fact that the von Mangoldt L-series is summable for Re(s) > 1
-  have h_re_gt_one : 1 < (x + y * I).re := by
+  have h_re_gt_one : 1 < (x + y * Complex.I).re := by
     rw [complex_re_of_real_add_imag]
     exact hx
 
   -- The von Mangoldt L-series is summable
-  have h_L_summable : LSeriesSummable (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) (x + y * I) :=
-    vonMangoldt_LSeriesSummable (x + y * I) h_re_gt_one
+  have h_L_summable : LSeriesSummable (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) (x + y * Complex.I) :=
+    vonMangoldt_LSeriesSummable (x + y * Complex.I) h_re_gt_one
 
   -- Convert L-series summability to summability of our terms
-  have h_summable : Summable (fun n => (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * I))) :=
-    LSeriesSummable_to_summable (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) (x + y * I) h_L_summable
+  have h_summable : Summable (fun n => (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I))) :=
+    LSeriesSummable_to_summable (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) (x + y * Complex.I) h_L_summable
 
   -- If a complex function is summable, then its real part is summable
-  have h_hasSum : HasSum (fun n => (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * I))) (∑' n, (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * I))) :=
+  have h_hasSum : HasSum (fun n => (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I))) (∑' n, (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I))) :=
     h_summable.hasSum
 
   -- Use Complex.hasSum_re to get HasSum for real parts
-  have h_hasSum_re : HasSum (fun n => ((ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * I))).re) (∑' n, (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * I))).re :=
+  have h_hasSum_re : HasSum (fun n => ((ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I))).re) (∑' n, (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I))).re :=
     Complex.hasSum_re h_hasSum
 
   -- Convert HasSum to Summable
   exact h_hasSum_re.summable
 
 lemma lem_nxy (n : ℕ) (hn : n ≥ 1) (x y : ℝ) :
-    Complex.cpow (n : ℂ) (-(x + y * I)) = Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * I)) := by
-  -- Rewrite -(x + y * I) as (-x) + (-(y * I))
-  have h : -(x + y * I) = (-x : ℂ) + (-(y * I)) := by ring
+    Complex.cpow (n : ℂ) (-(x + y * Complex.I)) = Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * Complex.I)) := by
+  -- Rewrite -(x + y * Complex.I) as (-x) + (-(y * Complex.I))
+  have h : -(x + y * Complex.I) = (-x : ℂ) + (-(y * Complex.I)) := by ring
   rw [h]
   exact Complex.cpow_add _ _ (by norm_cast; linarith)
 
 lemma lem_zeta1zetaseriesxy2 (x y : ℝ) (hx : 1 < x) :
-    -logDerivZeta (x + y * I) = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℂ) * (Complex.cpow (n : ℂ) ((-x) : ℂ)) * (Complex.cpow (n : ℂ) (-(y * I))) := by
+    -logDerivZeta (x + y * Complex.I) = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℂ) * (Complex.cpow (n : ℂ) ((-x) : ℂ)) * (Complex.cpow (n : ℂ) (-(y * Complex.I))) := by
   -- Apply zeta1zetaseriesxy
   rw [zeta1zetaseriesxy x y hx]
   -- Transform the sum by rewriting each term
@@ -719,14 +719,14 @@ lemma lem_zeta1zetaseriesxy2 (x y : ℝ) (hx : 1 < x) :
     -- Rearrange multiplication: (a * b) * c = a * (b * c)
     ring
 
-lemma complex_add_re_ofReal_mul_I (x y : ℝ) : (x + y * I).re = x := by
+lemma complex_add_re_ofReal_mul_I (x y : ℝ) : (x + y * Complex.I).re = x := by
   rw [Complex.add_re, Complex.ofReal_re, Complex.re_ofReal_mul]
-  -- Now goal is: x + y * I.re = x
-  have h : I.re = 0 := Complex.I_re
+  -- Now goal is: x + y * Complex.I.re = x
+  have h : Complex.I.re = 0 := Complex.I_re
   rw [h]
   simp
 
-lemma LSeriesSummable_to_explicit_summable (x y : ℝ) (_hx : 1 < x) : LSeriesSummable (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) (x + y * I) → Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * I))) := by
+lemma LSeriesSummable_to_explicit_summable (x y : ℝ) (_hx : 1 < x) : LSeriesSummable (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) (x + y * Complex.I) → Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * Complex.I))) := by
   intro h_summable
 
   -- vonMangoldt(0) = 0, so we can use LSeries.term_def₀
@@ -734,15 +734,15 @@ lemma LSeriesSummable_to_explicit_summable (x y : ℝ) (_hx : 1 < x) : LSeriesSu
     simp
 
   -- Show the functions are pointwise equal
-  have h_eq : ∀ n : ℕ, LSeries.term (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) (x + y * I) n =
-    (ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * I)) := by
+  have h_eq : ∀ n : ℕ, LSeries.term (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) (x + y * Complex.I) n =
+    (ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * Complex.I)) := by
     intro n
     -- Use LSeries.term_def₀ since vonMangoldt(0) = 0
     rw [LSeries.term_def₀ h_vm_zero]
-    -- Now we have vonMangoldt(n) * (n : ℂ) ^ (-(x + y * I))
+    -- Now we have vonMangoldt(n) * (n : ℂ) ^ (-(x + y * Complex.I))
     -- Convert from ^ to cpow using Complex.cpow_eq_pow
     rw [← Complex.cpow_eq_pow]
-    -- Now we have vonMangoldt(n) * cpow (n : ℂ) (-(x + y * I))
+    -- Now we have vonMangoldt(n) * cpow (n : ℂ) (-(x + y * Complex.I))
     -- For n ≥ 1, use lem_nxy to split the exponent
     by_cases hn : n = 0
     · -- Case n = 0: both sides are 0
@@ -753,7 +753,7 @@ lemma LSeriesSummable_to_explicit_summable (x y : ℝ) (_hx : 1 < x) : LSeriesSu
       ring
 
   -- LSeriesSummable means summability of the terms
-  have h_term_summable : Summable (fun n => LSeries.term (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) (x + y * I) n) := by
+  have h_term_summable : Summable (fun n => LSeries.term (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) (x + y * Complex.I) n) := by
     exact h_summable
 
   -- Use the pointwise equality to transfer summability
@@ -762,16 +762,16 @@ lemma LSeriesSummable_to_explicit_summable (x y : ℝ) (_hx : 1 < x) : LSeriesSu
   exact (h_eq n).symm
 
 lemma Zseriesconverges1 (x y : ℝ) (hx : 1 < x) :
-Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * I))) := by
+Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * Complex.I))) := by
   -- Use Zconverge1 to ensure riemannZeta doesn't vanish
   have h_zeta_ne_zero := Zconverges1 x y hx
 
   -- Use lem_zeta1zetaseriesxy2 to get the series representation
   have h_series := lem_zeta1zetaseriesxy2 x y hx
 
-  -- The series is exactly the von Mangoldt L-series at s = x + y * I
+  -- The series is exactly the von Mangoldt L-series at s = x + y * Complex.I
   -- Apply the von Mangoldt L-series summability result
-  have h_re : 1 < (x + y * I).re := by
+  have h_re : 1 < (x + y * Complex.I).re := by
     rw [complex_add_re_ofReal_mul_I]
     exact hx
 
@@ -792,13 +792,13 @@ lemma lem_realnx (n : ℕ) (x : ℝ) (_hn : n ≥ 1) (_hx : x ≥ 1) :
     exact Nat.cast_nonneg n
 
 lemma sumRealLambda (x y : ℝ) (hx : 1 < x) :
-    (∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * I))).re =
-    ∑' (n : ℕ), ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * I))).re := by
+    (∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * Complex.I))).re =
+    ∑' (n : ℕ), ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * Complex.I))).re := by
   apply Complex.re_tsum
   exact Zseriesconverges1 x y hx
 
 lemma lem_sumRealZ (x y : ℝ) (hx : 1 < x) :
-    (-logDerivZeta (x + y * I)).re = ∑' (n : ℕ), ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * I))).re := by
+    (-logDerivZeta (x + y * Complex.I)).re = ∑' (n : ℕ), ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * Complex.I))).re := by
   -- Apply lem_zeta1zetaseriesxy2 and then take real part
   rw [lem_zeta1zetaseriesxy2 x y hx]
   -- Apply sumRealLambda to move .re inside the sum
@@ -817,8 +817,8 @@ lemma complex_cpow_neg_real (n : ℕ) (x : ℝ) (_hn : n ≥ 1) : Complex.cpow (
   simp
 
 lemma RealLambdaxy (n : ℕ) (x y : ℝ) (hn : n ≥ 1) (_hx : 1 < x) :
-    ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * I))).re =
-((ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x)) * (Complex.cpow (n : ℂ) (-(y * I))).re := by
+    ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * Complex.I))).re =
+((ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x)) * (Complex.cpow (n : ℂ) (-(y * Complex.I))).re := by
   -- Let b = ArithmeticFunction.vonMangoldt n * (n : ℝ) ^ (-x)
   let b := ArithmeticFunction.vonMangoldt n * (n : ℝ) ^ (-x)
 
@@ -832,8 +832,8 @@ lemma RealLambdaxy (n : ℕ) (x y : ℝ) (hn : n ≥ 1) (_hx : 1 < x) :
     rw [← Complex.ofReal_mul]
 
   -- Use associativity: a * b * c = (a * b) * c
-  have h2 : (ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * I)) =
-           ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ)) * Complex.cpow (n : ℂ) (-(y * I)) := by
+  have h2 : (ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * Complex.I)) =
+           ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ)) * Complex.cpow (n : ℂ) (-(y * Complex.I)) := by
     rw [mul_assoc]
 
   rw [h2, h1]
@@ -841,7 +841,7 @@ lemma RealLambdaxy (n : ℕ) (x y : ℝ) (hn : n ≥ 1) (_hx : 1 < x) :
 
 
 lemma ReZseriesRen (x y : ℝ) (hx : 1 < x) :
-    (-logDerivZeta (x + y * I)).re = ∑' (n : ℕ), ((ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x)) * (Complex.cpow (n : ℂ) (-(y * I))).re := by
+    (-logDerivZeta (x + y * Complex.I)).re = ∑' (n : ℕ), ((ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x)) * (Complex.cpow (n : ℂ) (-(y * Complex.I))).re := by
   rw [lem_sumRealZ x y hx]
   congr 1
   ext n
@@ -851,7 +851,7 @@ lemma ReZseriesRen (x y : ℝ) (hx : 1 < x) :
     exact RealLambdaxy n x y hn hx
 
 lemma Rezeta1zetaseries (x y : ℝ) (hx : 1 < x) :
-    (-logDerivZeta (x + y * I)).re = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x) * Real.cos (y * Real.log (n : ℝ)) := by
+    (-logDerivZeta (x + y * Complex.I)).re = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x) * Real.cos (y * Real.log (n : ℝ)) := by
   rw [ReZseriesRen x y hx]
   congr 1
   ext n
@@ -859,15 +859,15 @@ lemma Rezeta1zetaseries (x y : ℝ) (hx : 1 < x) :
   · simp [h]
   · have hn : n ≥ 1 := Nat.one_le_iff_ne_zero.mpr h
     rw [← lem_eacosalog3 n hn y]
-    -- Need to show (Complex.cpow (n : ℂ) (-(y * I))).re = ((n : ℂ) ^ (-y * Complex.I)).re
+    -- Need to show (Complex.cpow (n : ℂ) (-(y * Complex.I))).re = ((n : ℂ) ^ (-y * Complex.I)).re
     congr 1
-    -- Show Complex.cpow (n : ℂ) (-(y * I)) = (n : ℂ) ^ (-y * Complex.I)
+    -- Show Complex.cpow (n : ℂ) (-(y * Complex.I)) = (n : ℂ) ^ (-y * Complex.I)
     rw [Complex.cpow_eq_pow]
-    -- Show -(y * I) = -y * Complex.I
-    simp [I]
+    -- Show -(y * Complex.I) = -y * Complex.I
+    simp
 
 lemma complex_vonMangoldt_real_part_eq (n : ℕ) (x y : ℝ) (hn : n ≥ 1) (hx : 1 < x) :
-((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) (-(x + y * I))).re =
+((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) (-(x + y * Complex.I))).re =
 (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x) * Real.cos (y * Real.log (n : ℝ)) := by
   -- Step 1: Use lem_nxy to split the complex power
   rw [lem_nxy n hn x y]
@@ -878,14 +878,14 @@ lemma complex_vonMangoldt_real_part_eq (n : ℕ) (x y : ℝ) (hn : n ≥ 1) (hx 
   -- Step 3: Use RealLambdaxy to connect the product form to real terms
   rw [RealLambdaxy n x y hn hx]
 
-  -- Step 4: Convert Complex.cpow to ^ and handle I vs Complex.I for lem_eacosalog3
+  -- Step 4: Convert Complex.cpow to ^ and handle Complex.I vs Complex.I for lem_eacosalog3
   -- First, convert Complex.cpow to ^
-  have h_cpow : (Complex.cpow (n : ℂ) (-(y * I))).re = ((n : ℂ) ^ (-(y * I))).re := by
+  have h_cpow : (Complex.cpow (n : ℂ) (-(y * Complex.I))).re = ((n : ℂ) ^ (-(y * Complex.I))).re := by
     rw [Complex.cpow_eq_pow]
 
-  -- Second, convert I to Complex.I
-  have h_I : -(y * I) = -y * Complex.I := by
-    simp [I]
+  -- Second, convert Complex.I to Complex.I
+  have h_I : -(y * Complex.I) = -y * Complex.I := by
+    simp
 
   -- Apply both conversions
   rw [h_cpow, h_I]
@@ -896,11 +896,11 @@ lemma complex_vonMangoldt_real_part_eq (n : ℕ) (x y : ℝ) (hn : n ≥ 1) (hx 
 lemma Rezetaseries_convergence (x y : ℝ) (hx : 1 < x) :
     Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x) * Real.cos (y * Real.log (n : ℝ))) := by
   -- Apply ReZconverges1 to get summability of the complex series real part
-  have h1 : Summable (fun n => ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) (-(x + y * I))).re) :=
+  have h1 : Summable (fun n => ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) (-(x + y * Complex.I))).re) :=
     ReZconverges1 x y hx
 
   -- Show pointwise equality between the complex series and our target series
-  have h2 : ∀ n : ℕ, ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) (-(x + y * I))).re =
+  have h2 : ∀ n : ℕ, ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) (-(x + y * Complex.I))).re =
                       (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x) * Real.cos (y * Real.log (n : ℝ)) := by
     intro n
     by_cases h : n = 0
@@ -909,7 +909,7 @@ lemma Rezetaseries_convergence (x y : ℝ) (hx : 1 < x) :
       exact complex_vonMangoldt_real_part_eq n x y hn hx
 
   -- Apply the pointwise equality to transfer summability
-  have h3 : (fun n => ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) (-(x + y * I))).re) =
+  have h3 : (fun n => ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) (-(x + y * Complex.I))).re) =
             (fun n => (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x) * Real.cos (y * Real.log (n : ℝ))) :=
     funext h2
   rwa [← h3]
@@ -1419,7 +1419,7 @@ lemma Z341bounds_const :
 
 
 lemma Rezeta1zetaseries1 (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
-    (-logDerivZeta ((1 : ℂ) + delta + t * I)).re = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (t * Real.log (n : ℝ)) := by
+    (-logDerivZeta ((1 : ℂ) + delta + t * Complex.I)).re = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (t * Real.log (n : ℝ)) := by
   -- Apply Rezeta1zetaseries with x = 1 + delta and y = t
   have h1 : 1 < 1 + delta := by linarith [hdelta]
   convert Rezeta1zetaseries (1 + delta) t h1
@@ -1427,11 +1427,11 @@ lemma Rezeta1zetaseries1 (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
   simp [Complex.ofReal_add]
 
 lemma Rezeta1zetaseries2 (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
-    (-logDerivZeta ((1 : ℂ) + delta + (2 * t) * I)).re = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (2 * t * Real.log (n : ℝ)) := by
+    (-logDerivZeta ((1 : ℂ) + delta + (2 * t) * Complex.I)).re = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (2 * t * Real.log (n : ℝ)) := by
   -- Apply Rezeta1zetaseries with x = 1 + delta and y = 2 * t
   have h1 : 1 < 1 + delta := by linarith [hdelta]
   -- Rewrite the left side to match the pattern exactly, ensuring real arithmetic
-  have h2 : (1 : ℂ) + delta + (2 * t) * I = (1 + delta : ℝ) + ((2 * t) : ℝ) * I := by
+  have h2 : (1 : ℂ) + delta + (2 * t) * Complex.I = (1 + delta : ℝ) + ((2 * t) : ℝ) * Complex.I := by
     simp [Complex.ofReal_add, Complex.ofReal_one, Complex.ofReal_mul]
   rw [h2]
   exact Rezeta1zetaseries (1 + delta) (2 * t) h1
@@ -1439,12 +1439,12 @@ lemma Rezeta1zetaseries2 (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
 lemma Rezeta1zetaseries0 (delta : ℝ) (hdelta : delta > 0) :
     (-logDerivZeta ((1 : ℂ) + delta)).re = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) := by
   -- Start with Rezeta1zetaseries1 with t = 0
-  have h_series : (-logDerivZeta ((1 : ℂ) + delta + 0 * I)).re =
+  have h_series : (-logDerivZeta ((1 : ℂ) + delta + 0 * Complex.I)).re =
                   ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (0 * Real.log (n : ℝ)) :=
     Rezeta1zetaseries1 0 delta hdelta
 
-  -- Simplify the LHS: (1 : ℂ) + delta + 0 * I = (1 : ℂ) + delta
-  have h_lhs : (-logDerivZeta ((1 : ℂ) + delta + 0 * I)).re = (-logDerivZeta ((1 : ℂ) + delta)).re := by
+  -- Simplify the LHS: (1 : ℂ) + delta + 0 * Complex.I = (1 : ℂ) + delta
+  have h_lhs : (-logDerivZeta ((1 : ℂ) + delta + 0 * Complex.I)).re = (-logDerivZeta ((1 : ℂ) + delta)).re := by
     congr 2
     simp
 
@@ -1463,8 +1463,8 @@ lemma Rezeta1zetaseries0 (delta : ℝ) (hdelta : delta > 0) :
 
 lemma Z341series (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
     (3 * (-logDerivZeta ((1 : ℂ) + delta)).re +
-     4 * (-logDerivZeta ((1 : ℂ) + delta + t * I)).re +
-     (-logDerivZeta ((1 : ℂ) + delta + (2 * t) * I)).re)
+     4 * (-logDerivZeta ((1 : ℂ) + delta + t * Complex.I)).re +
+     (-logDerivZeta ((1 : ℂ) + delta + (2 * t) * Complex.I)).re)
     =
     (3 * ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) +
      4 * ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (t * Real.log (n : ℝ)) +
@@ -1507,8 +1507,8 @@ lemma lem341series (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
 
 lemma lem_341series2 (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
     (3 * (-logDerivZeta ((1 : ℂ) + delta)).re +
-     4 * (-logDerivZeta ((1 : ℂ) + delta + t * I)).re +
-     (-logDerivZeta ((1 : ℂ) + delta + (2 * t) * I)).re)
+     4 * (-logDerivZeta ((1 : ℂ) + delta + t * Complex.I)).re +
+     (-logDerivZeta ((1 : ℂ) + delta + (2 * t) * Complex.I)).re)
     =
     ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * (3 + 4 * Real.cos (t * Real.log (n : ℝ)) + Real.cos (2 * t * Real.log (n : ℝ))) := by
   rw [Z341series t delta hdelta]
@@ -1537,8 +1537,8 @@ lemma lem_seriespos (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
 
 lemma Z341pos (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
     0 ≤ 3 * (-logDerivZeta ((1 : ℂ) + delta)).re +
-        4 * (-logDerivZeta ((1 : ℂ) + delta + t * I)).re +
-        (-logDerivZeta ((1 : ℂ) + delta + (2 * t) * I)).re := by
+        4 * (-logDerivZeta ((1 : ℂ) + delta + t * Complex.I)).re +
+        (-logDerivZeta ((1 : ℂ) + delta + (2 * t) * Complex.I)).re := by
   rw [lem_341series2 t delta hdelta]
   exact lem_seriespos t delta hdelta
 
@@ -2142,7 +2142,7 @@ lemma complex_sub_ofReal_I_real_eq_ofReal (z : ℂ) (a t : ℝ) (him : z.im = t)
   · simp [him]
 
 lemma lem_ZFRinD (t : ℝ) (ht : |t| > 2) (z : ℂ) :
-    let c := (3/2 : ℂ) + I * t
+    let c := (3/2 : ℂ) + Complex.I * t
     1 - deltaz_t t ≤ Complex.re z ∧ Complex.re z ≤ 3/2 ∧ Complex.im z = t →
     z ∈ Metric.closedBall c (2/3) := by
   intro c h
@@ -2178,7 +2178,7 @@ lemma lem_ZFRinD (t : ℝ) (ht : |t| > 2) (z : ℂ) :
 
 -- lem_ZFRnotK: For t∈ℝ with |t|>3, c=3/2+it and z=σ+it with 1-δ_t ≤ σ ≤ 3/2, we have z∉ K_ζ(5/6;c)
 lemma lem_ZFRnotK (t : ℝ) (ht : |t| > 2) (z : ℂ) :
-    let c := (3/2 : ℂ) + I * t
+    let c := (3/2 : ℂ) + Complex.I * t
     1 - deltaz_t t ≤ Complex.re z ∧ Complex.re z ≤ 3/2 ∧ Complex.im z = t →
     z ∉ zerosetKfRc (5/6) c riemannZeta := by
   intro c h
@@ -2233,7 +2233,7 @@ lemma lem_ZFRnotK (t : ℝ) (ht : |t| > 2) (z : ℂ) :
 lemma lem_Zeta_Expansion_ZFR :
     ∃ C_1 : ℝ, C_1 > 1 ∧
     ∀ t : ℝ, |t| > 3 →
-      let c := (3/2 : ℂ) + I * t;
+      let c := (3/2 : ℂ) + Complex.I * t;
       ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
       ∀ z : ℂ, 1 - deltaz_t t ≤ Complex.re z ∧ Complex.re z ≤ 3/2 ∧ Complex.im z = t →
         ‖(deriv riemannZeta z / riemannZeta z) -
@@ -2279,10 +2279,10 @@ lemma lem_Rerhotodeltarho {ρ : ℂ} :
   -- From ρ ∈ zerosetKfRc, we get riemannZeta ρ = 0
   have h_zero : riemannZeta ρ = 0 := h_mem.2
 
-  -- ρ is in a closed ball of radius 5/6 around 3/2 + t*I
+  -- ρ is in a closed ball of radius 5/6 around 3/2 + t*Complex.I
   have h_ball : ρ ∈ Metric.closedBall (3/2 + t * Complex.I) (5/6) := h_mem.1
 
-  -- This means dist(ρ, 3/2 + t*I) ≤ 5/6
+  -- This means dist(ρ, 3/2 + t*Complex.I) ≤ 5/6
   have h_dist : dist ρ (3/2 + t * Complex.I) ≤ 5/6 := by
     rwa [Metric.mem_closedBall] at h_ball
 
@@ -2290,7 +2290,7 @@ lemma lem_Rerhotodeltarho {ρ : ℂ} :
   have h_im : 2 < |ρ.im| := by
     -- The imaginary part of ρ is close to t, so |ρ.im - t| ≤ 5/6
     have h_im_bound : |ρ.im - t| ≤ 5/6 := by
-      -- |ρ.im - t| ≤ ||ρ - (3/2 + t*I)||
+      -- |ρ.im - t| ≤ ||ρ - (3/2 + t*Complex.I)||
       have h_le_norm : |ρ.im - t| ≤ ‖ρ - (3/2 + t * Complex.I)‖ := by
         have : |(ρ - (3/2 + t * Complex.I)).im| ≤ ‖ρ - (3/2 + t * Complex.I)‖ :=
           Complex.abs_im_le_norm _
@@ -2443,7 +2443,7 @@ lemma lem_Ddt2dz :
     _ = 3 * deltaz z := by simp [deltaz, div_eq_mul_inv, mul_left_comm, mul_assoc]
 
 lemma lem_deltarhotodeltat (t : ℝ) (ht : |t| > 3) (ρ : ℂ) :
-    let c := (3/2 : ℂ) + I * t
+    let c := (3/2 : ℂ) + Complex.I * t
     ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta) → deltaz ρ ≥ (1/3) * deltaz_t t := by
   intro c hρK
   rcases hρK with ⟨hball, _hzero⟩
@@ -2461,7 +2461,7 @@ lemma lem_deltarhotodeltat (t : ℝ) (ht : |t| > 3) (ρ : ℂ) :
 
 -- lem_Rerhotodeltat: For ρ∈ K_ζ(5/6;c) we have Re(ρ) ≤ 1 - 3δ_t
 lemma lem_Rerhotodeltat (t : ℝ) (ht : |t| > 3) (ρ : ℂ) :
-    let c := (3/2 : ℂ) + I * t
+    let c := (3/2 : ℂ) + Complex.I * t
     ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta) → ρ.re ≤ 1 - 3 * deltaz_t t := by
   intros c h_rho_in
   -- Apply lem_Rerhotodeltarho to get Re(ρ) ≤ 1 - 9 * δ(ρ)
@@ -2485,7 +2485,7 @@ lemma lem_Rerhotodeltat (t : ℝ) (ht : |t| > 3) (ρ : ℂ) :
 
 -- lem_RezRerho: Re(z) - Re(ρ) ≥ 2δ_t
 lemma lem_RezRerho (t : ℝ) (ht : |t| > 3) (z ρ : ℂ) :
-    let c := (3/2 : ℂ) + I * t
+    let c := (3/2 : ℂ) + Complex.I * t
     ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta) →
     1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
     z.re - ρ.re ≥ 2 * deltaz_t t := by
@@ -2499,7 +2499,7 @@ lemma lem_RezRerho (t : ℝ) (ht : |t| > 3) (z ρ : ℂ) :
 
 -- lem_abszrhodelta: |z-ρ| ≥ 2δ_t
 lemma lem_abszrhodelta (t : ℝ) (ht : |t| > 3) (z ρ : ℂ) :
-    let c := (3/2 : ℂ) + I * t
+    let c := (3/2 : ℂ) + Complex.I * t
     ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta) →
     1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
     ‖z - ρ‖ ≥ 2 * deltaz_t t := by
@@ -2513,7 +2513,7 @@ lemma lem_abszrhodelta (t : ℝ) (ht : |t| > 3) (z ρ : ℂ) :
 
 -- lem_1abszrho: 1/|z-ρ| ≤ 1/(2δ_t)
 lemma lem_1abszrho (t : ℝ) (ht : |t| > 3) (z ρ : ℂ) :
-    let c := (3/2 : ℂ) + I * t
+    let c := (3/2 : ℂ) + Complex.I * t
     ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta) →
     1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
     1 / ‖z - ρ‖ ≤ 1 / (2 * deltaz_t t) := by
@@ -2529,7 +2529,7 @@ lemma lem_1abszrho (t : ℝ) (ht : |t| > 3) (z ρ : ℂ) :
   · exact lem_abszrhodelta t ht z ρ hρ hz
 
 lemma lem_finiteKzeta (t : ℝ) :
-    let c := (3/2 : ℂ) + I * t
+    let c := (3/2 : ℂ) + Complex.I * t
     (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite := by
   intro c
   have hK : IsCompact (Metric.closedBall c (5 / (6 : ℝ))) :=
@@ -2538,7 +2538,7 @@ lemma lem_finiteKzeta (t : ℝ) :
     (riemannZeta_zeros_finite_of_compact (Metric.closedBall c (5 / (6 : ℝ))) hK)
 
 lemma lem_triangle_ZFR (t : ℝ) (z : ℂ) :
-    let c := (3/2 : ℂ) + I * t
+    let c := (3/2 : ℂ) + Complex.I * t
     ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
     1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
     ‖(∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ))‖ ≤
@@ -2563,7 +2563,7 @@ lemma lem_triangle_ZFR (t : ℝ) (z : ℂ) :
 lemma lem_Zeta_Triangle_ZFR :
     ∃ C_1 : ℝ, C_1 > 1 ∧
     ∀ t : ℝ, |t| > 3 →
-      let c := (3/2 : ℂ) + I * t
+      let c := (3/2 : ℂ) + Complex.I * t
       ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
       ∀ z : ℂ, 1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
         ‖deriv riemannZeta z / riemannZeta z‖ ≤
@@ -2586,7 +2586,7 @@ lemma lem_Zeta_Triangle_ZFR :
 
 -- lem_sumK1abs: Sum bound
 lemma lem_sumK1abs (t : ℝ) (ht : |t| > 3) (z : ℂ) :
-    let c := (3/2 : ℂ) + I * t
+    let c := (3/2 : ℂ) + Complex.I * t
     ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
     1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
     (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖) ≤
@@ -3020,7 +3020,7 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
 
 lemma lem_sum_m_rho_zeta :
     ∃ C_2 > 1, ∀ (t : ℝ) (_ : |t| > 3),
-    let c := (3/2 : ℂ) + I * t;
+    let c := (3/2 : ℂ) + Complex.I * t;
     ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
       ∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) ≤ C_2 * Real.log |t| := by
   classical
@@ -3168,7 +3168,7 @@ lemma lem_sum_m_rho_zeta :
 
 lemma lem_sumKdeltatlogt :
   ∃ C_3 > 1, ∀ (t : ℝ) (_ : |t| > 3),
-  let c := (3/2 : ℂ) + I * t;
+  let c := (3/2 : ℂ) + Complex.I * t;
   ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
     ∀ z : ℂ, 1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
       (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖) ≤
@@ -3231,7 +3231,7 @@ private lemma log_add_two_lt_two_mul_log {t : ℝ} (ht : 3 < |t|) :
 
 lemma lem_sumKlogt2 :
   ∃ C_4 > 1, ∀ (t : ℝ) (_ : |t| > 3),
-  let c := (3/2 : ℂ) + I * t
+  let c := (3/2 : ℂ) + Complex.I * t
   ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
     ∀ z : ℂ, 1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
       (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖) ≤
@@ -3323,7 +3323,7 @@ lemma lem_logDerivZetalogt0 :
     intro t ht s hs
 
     -- Define the center and get finiteness
-    let c := (3/2 : ℂ) + I * t
+    let c := (3/2 : ℂ) + Complex.I * t
     have hfin := lem_finiteKzeta t
 
     -- Apply lem_Zeta_Triangle_ZFR
