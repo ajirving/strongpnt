@@ -365,7 +365,7 @@ lemma analyticOrderAt_pos_toNat_of_zero_of_analytic_not_eventually_zero {f : ℂ
   rfl
 
 lemma lem_Z1splitge (delta : ℝ) (hdelta_pos : delta > 0) (rho : ℂ)
-  (h_rho_in_zeroZ : rho ∈ zeroZ) (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint rho.im) :
+  (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint rho.im) :
     ∑ rho1 ∈ Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im), ((analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + rho.im * Complex.I) - rho1)).re ≥
 (1 / (((1 : ℂ) + delta + rho.im * Complex.I) - rho)).re := by
   -- Split off the rho term
@@ -373,13 +373,13 @@ lemma lem_Z1splitge (delta : ℝ) (hdelta_pos : delta > 0) (rho : ℂ)
   -- Show the first term ≥ (1/(...)).re
   have h_rho_ne_one : rho ≠ (1 : ℂ) := by
     intro h
-    exact riemannZeta_one_ne_zero (by simpa [h] using! h_rho_in_zeroZ)
+    exact riemannZeta_one_ne_zero (by simpa [h] using! h_rho_in_Zt.1)
   have hAnal : AnalyticAt ℂ riemannZeta rho := analyticAt_riemannZeta_of_ne_one h_rho_ne_one
   have hNotEv : ¬ (∀ᶠ z in nhds rho, riemannZeta z = 0) :=
     riemannZeta_not_eventually_zero_of_ne_one h_rho_ne_one
   have horder_nat : 1 ≤ analyticOrderNatAt riemannZeta rho :=
     analyticOrderAt_pos_toNat_of_zero_of_analytic_not_eventually_zero
-      hAnal (by simpa using! h_rho_in_zeroZ) hNotEv
+      hAnal (by simpa using! h_rho_in_Zt.1) hNotEv
   have ha_real : (1 : ℝ) ≤ (analyticOrderNatAt riemannZeta rho : ℝ) := by exact_mod_cast horder_nat
   have hz_nonneg : 0 ≤ (1 / (((1 : ℂ) + delta + rho.im * Complex.I) - rho)).re :=
     lem_Re1deltatge0 delta hdelta_pos rho.im rho h_rho_in_Zt
@@ -426,14 +426,14 @@ lemma lem_re_inv_one_plus_delta_minus_rho_real (delta : ℝ) (rho : ℂ) :
   exact lem_1delsigReal2 delta rho
 
 lemma lem_Z1splitge2 (delta : ℝ) (hdelta : delta > 0) (rho : ℂ)
-  (h_rho_in_zeroZ : rho ∈ zeroZ) (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint rho.im) :
+  (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint rho.im) :
     ∑ rho1 ∈ Set.Finite.toFinset (ZetaZerosNearPoint_finite rho.im),
         ((analyticOrderNatAt riemannZeta rho1 : ℂ) / ((1 : ℂ) + delta + rho.im * Complex.I - rho1)).re ≥
 1 / ((1 : ℝ) + delta - rho.re) := by
-  grw [lem_Z1splitge delta hdelta rho h_rho_in_zeroZ h_rho_in_Zt, lem_re_inv_one_plus_delta_minus_rho_real delta rho]
+  grw [lem_Z1splitge delta hdelta rho h_rho_in_Zt, lem_re_inv_one_plus_delta_minus_rho_real delta rho]
 
 lemma lem_Z1splitge3 (delta : ℝ) (hdelta : delta > 0) (sigma t : ℝ) (rho : ℂ)
-  (h_rho_eq : rho = sigma + t * Complex.I) (h_rho_in_zeroZ : rho ∈ zeroZ)
+  (h_rho_eq : rho = sigma + t * Complex.I)
   (h_rho_in_Zt : rho ∈ ZetaZerosNearPoint t) :
 (∑ rho1 ∈ Set.Finite.toFinset (ZetaZerosNearPoint_finite t), (analyticOrderNatAt riemannZeta rho1 : ℂ) / (((1 : ℂ) + delta + t * Complex.I) - rho1)).re ≥ 1 / ((1 : ℝ) + delta - sigma) := by
   rw [Complex.re_sum]
@@ -451,7 +451,7 @@ lemma lem_Z1splitge3 (delta : ℝ) (hdelta : delta > 0) (sigma t : ℝ) (rho : �
     exact h_rho_in_Zt
 
   -- Apply lem_Z1splitge2
-  have h_bound := lem_Z1splitge2 delta hdelta rho h_rho_in_zeroZ h_rho_in_Zt'
+  have h_bound := lem_Z1splitge2 delta hdelta rho h_rho_in_Zt'
 
   -- Since rho.im = t and rho.re = sigma, we can convert the bound
   convert h_bound using 1
@@ -510,7 +510,7 @@ lemma Z1bound :
       simpa [sigma, hs.2] using this
     -- Real-part of the complex sum equals Sre
     have h_sum_ge' :=
-      lem_Z1splitge3 delta hdelta.1 sigma t s h_rho_eq hs.1 hmem
+      lem_Z1splitge3 delta hdelta.1 sigma t s h_rho_eq hmem
     have h_sum_ge : Sre ≥ 1 / ((1 : ℝ) + delta - sigma) := by
       simpa [sp, S, Sre] using h_sum_ge'
     -- Chain inequalities: -(logDerivZeta sp).re ≤ C0*log - Sre ≤ C0*log - 1/(...)
