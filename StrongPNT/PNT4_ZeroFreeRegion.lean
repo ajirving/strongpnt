@@ -522,56 +522,18 @@ lemma zeta1zetaseriesxy (x y : ℝ) (hx : 1 < x) :
   apply zeta1zetaseries
   simpa
 
-lemma Zconverges1 (x y : ℝ) (hx : 1 < x) : riemannZeta (x + y * Complex.I) ≠ 0 := by
-  apply riemannZeta_ne_zero_of_one_lt_re
-  simpa
-
-lemma complex_re_of_real_add_imag (x y : ℝ) : (x + y * Complex.I).re = x := by
-  simp
-
-lemma vonMangoldt_LSeriesSummable (s : ℂ) (hs : 1 < s.re) : LSeriesSummable (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) s := by
-  -- Use the existing theorem ArithmeticFunction.LSeriesSummable_vonMangoldt
-  exact ArithmeticFunction.LSeriesSummable_vonMangoldt hs
-
-lemma LSeriesSummable_to_summable (f : ℕ → ℂ) (s : ℂ) (h : LSeriesSummable f s) : Summable (fun n => f n * (n : ℂ) ^ (-s)) := by
-  -- LSeries.term f s and the target function agree for n ≠ 0
-  have h_eq_nonzero : ∀ n : ℕ, n ≠ 0 → LSeries.term f s n = f n * (n : ℂ) ^ (-s) := by
-    intro n hn
-    rw [LSeries.term_of_ne_zero hn]
-    rw [div_eq_mul_inv, Complex.cpow_neg]
-  have h_cofinite : LSeries.term f s =ᶠ[Filter.cofinite] (fun n => f n * (n : ℂ) ^ (-s)) :=
-    Filter.eventually_cofinite.mpr <| (Set.finite_singleton (0 : ℕ)).subset
-      (fun n hn => by by_contra hn0; exact hn (h_eq_nonzero n hn0))
-  exact h.congr_cofinite h_cofinite
-
 lemma ReZconverges1 (x y : ℝ) (hx : 1 < x) :
 Summable (fun n => ((ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) (-(x + y * Complex.I))).re) := by
-  -- Apply Lemma Zconverge1 (ensures zeta function is non-zero, so logDerivZeta is well-defined)
-  have h_nonzero : riemannZeta (x + y * Complex.I) ≠ 0 := Zconverges1 x y hx
-
-  -- Use the fact that the von Mangoldt L-series is summable for Re(s) > 1
   have h_re_gt_one : 1 < (x + y * Complex.I).re := by
-    rw [complex_re_of_real_add_imag]
-    exact hx
-
-  -- The von Mangoldt L-series is summable
-  have h_L_summable : LSeriesSummable (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) (x + y * Complex.I) :=
-    vonMangoldt_LSeriesSummable (x + y * Complex.I) h_re_gt_one
-
-  -- Convert L-series summability to summability of our terms
-  have h_summable : Summable (fun n => (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I))) :=
-    LSeriesSummable_to_summable (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) (x + y * Complex.I) h_L_summable
-
-  -- If a complex function is summable, then its real part is summable
-  have h_hasSum : HasSum (fun n => (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I))) (∑' n, (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I))) :=
-    h_summable.hasSum
-
-  -- Use Complex.hasSum_re to get HasSum for real parts
-  have h_hasSum_re : HasSum (fun n => ((ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I))).re) (∑' n, (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I))).re :=
-    Complex.hasSum_re h_hasSum
-
-  -- Convert HasSum to Summable
-  exact h_hasSum_re.summable
+    simpa
+  have h_L_summable := ArithmeticFunction.LSeriesSummable_vonMangoldt h_re_gt_one
+  unfold LSeriesSummable LSeries.term at h_L_summable
+  apply summable_complex_then_summable_real_part
+  convert h_L_summable using 2
+  split_ifs with h
+  · simp [h]
+  congr
+  rw [Complex.cpow_eq_pow, Complex.cpow_neg]
 
 lemma lem_nxy (n : ℕ) (hn : n ≥ 1) (x y : ℝ) :
     Complex.cpow (n : ℂ) (-(x + y * Complex.I)) = Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * Complex.I)) := by
@@ -599,63 +561,19 @@ lemma lem_zeta1zetaseriesxy2 (x y : ℝ) (hx : 1 < x) :
     -- Rearrange multiplication: (a * b) * c = a * (b * c)
     ring
 
-lemma complex_add_re_ofReal_mul_I (x y : ℝ) : (x + y * Complex.I).re = x := by
-  simp
-
-lemma LSeriesSummable_to_explicit_summable (x y : ℝ) (_hx : 1 < x) : LSeriesSummable (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) (x + y * Complex.I) → Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * Complex.I))) := by
-  intro h_summable
-
-  -- vonMangoldt(0) = 0, so we can use LSeries.term_def₀
-  have h_vm_zero : (ArithmeticFunction.vonMangoldt 0 : ℂ) = 0 := by
-    simp
-
-  -- Show the functions are pointwise equal
-  have h_eq : ∀ n : ℕ, LSeries.term (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) (x + y * Complex.I) n =
-    (ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * Complex.I)) := by
-    intro n
-    -- Use LSeries.term_def₀ since vonMangoldt(0) = 0
-    rw [LSeries.term_def₀ h_vm_zero]
-    -- Now we have vonMangoldt(n) * (n : ℂ) ^ (-(x + y * Complex.I))
-    -- Convert from ^ to cpow using Complex.cpow_eq_pow
-    rw [← Complex.cpow_eq_pow]
-    -- Now we have vonMangoldt(n) * cpow (n : ℂ) (-(x + y * Complex.I))
-    -- For n ≥ 1, use lem_nxy to split the exponent
-    by_cases hn : n = 0
-    · -- Case n = 0: both sides are 0
-      simp [hn]
-    · -- Case n ≠ 0: use lem_nxy to split
-      have hn_ge : n ≥ 1 := Nat.one_le_iff_ne_zero.mpr hn
-      rw [lem_nxy n hn_ge x y]
-      ring
-
-  -- LSeriesSummable means summability of the terms
-  have h_term_summable : Summable (fun n => LSeries.term (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) (x + y * Complex.I) n) := by
-    exact h_summable
-
-  -- Use the pointwise equality to transfer summability
-  convert h_term_summable using 1
-  ext n
-  exact (h_eq n).symm
-
 lemma Zseriesconverges1 (x y : ℝ) (hx : 1 < x) :
 Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow (n : ℂ) ((-x) : ℂ) * Complex.cpow (n : ℂ) (-(y * Complex.I))) := by
-  -- Use Zconverge1 to ensure riemannZeta doesn't vanish
-  have h_zeta_ne_zero := Zconverges1 x y hx
-
-  -- Use lem_zeta1zetaseriesxy2 to get the series representation
-  have h_series := lem_zeta1zetaseriesxy2 x y hx
-
   -- The series is exactly the von Mangoldt L-series at s = x + y * Complex.I
   -- Apply the von Mangoldt L-series summability result
   have h_re : 1 < (x + y * Complex.I).re := by
-    rw [complex_add_re_ofReal_mul_I]
-    exact hx
-
+    simpa
   have h_summable := ArithmeticFunction.LSeriesSummable_vonMangoldt h_re
-
-  -- Convert from LSeriesSummable to explicit Summable form
-  exact LSeriesSummable_to_explicit_summable x y hx h_summable
-
+  unfold LSeriesSummable LSeries.term at h_summable
+  convert h_summable using 2
+  split_ifs with h
+  · simp [h]
+  rw [mul_assoc, ← lem_nxy _ (by grind), Complex.cpow_eq_pow, Complex.cpow_neg]
+  field
 
 lemma lem_realnx (n : ℕ) (x : ℝ) (_hn : n ≥ 1) (_hx : x ≥ 1) :
     ArithmeticFunction.vonMangoldt n * (n : ℝ) ^ (-x) ≥ 0 := by
@@ -871,16 +789,9 @@ lemma Z0boundRe_const3 :
   -- Use Z0bound_const to get a bound on the norm, then unwind the real part of (1/δ : ℂ)
   rcases Z0bound_const with ⟨C, hCpos, hC⟩
   use C, hCpos
-  intro δ hδ
-  have h_re_le : (-logDerivZeta ((1 : ℂ) + δ) - (1 / (δ : ℂ))).re ≤ C :=
-    le_trans (Complex.re_le_norm _) (hC δ hδ)
-  have h_re_eq : (-logDerivZeta ((1 : ℂ) + δ) - (1 / (δ : ℂ))).re
-      = (-logDerivZeta ((1 : ℂ) + δ)).re - (1 / δ) := by
-    rw [Complex.sub_re]
-    congr 1
-    rw [Complex.div_re, Complex.one_re, Complex.ofReal_re, Complex.ofReal_im]
-    simp [Complex.normSq_ofReal]
-  rwa [h_re_eq] at h_re_le
+  peel hC with δ hδ hC
+  grw [← hC, ← Complex.re_le_norm]
+  simp
 
 lemma Z341bounds_const :
   ∃ C > 1, ∀ (δ : ℝ) (_ : δ > 0) (_ : δ < 1), ∀ t : ℝ, 2 < |t| → ∀ σ : ℝ,
@@ -896,62 +807,22 @@ lemma Z341bounds_const :
 
   -- Choose final constant
   let C := 3 * C0 + 4 * C1 + C2
-
-  have hC_gt_one : 1 < C := by
-    have h1 : 1 < C0 := hC0pos
-    have h2 : 3 < 3 * C0 := by linarith [mul_lt_mul_of_pos_left h1 (by norm_num : (0 : ℝ) < 3)]
-    have h3 : 0 < 4 * C1 := mul_pos (by norm_num) (lt_trans zero_lt_one hC1pos)
-    have h4 : 0 < C2 := lt_trans zero_lt_one hC2pos
-    linarith [h2, h3, h4]
-
-  use C
-  constructor
-  · exact hC_gt_one
+  refine ⟨C, (by linarith), ?_⟩
   · intro δ hδpos hδ1 t ht σ hσ
-
     -- Apply the bounds from the referenced lemmas directly
-    have hZ0_bound : (-logDerivZeta ((1 : ℂ) + δ)).re ≤ C0 + (1 / δ) := by
-      have := hZ0 δ hδpos
-      linarith
-
+    specialize hZ0 δ hδpos
+    have hZ0_bound : (-logDerivZeta ((1 : ℂ) + δ)).re ≤ C0 + (1 / δ) := by linarith
+    specialize hZ1 δ ⟨hδpos, hδ1⟩ t ht (σ + t * Complex.I) ⟨hσ, (by simp)⟩
     have hZ1_bound : (-logDerivZeta ((1 : ℂ) + δ + t * Complex.I)).re ≤ -(1 / (1 + δ - σ)) + C1 * Real.log (|t| + 2) := by
-      let s := σ + t * Complex.I
-      have hs_mem : s ∈ zeroZ := hσ
-      have hs_im : s.im = t := by simp [s]
-      have hs_re : s.re = σ := by simp [s]
-      have hδ_cond : 0 < δ ∧ δ < 1 := ⟨hδpos, hδ1⟩
-      have := hZ1 δ hδ_cond t ht s ⟨hs_mem, hs_im⟩
-      rw [hs_re] at this
-      exact this
-
-    have hZ2_bound : (-logDerivZeta ((1 : ℂ) + δ + (2 * t) * Complex.I)).re ≤ C2 * Real.log (|t| + 2) := by
-      have hδ_cond : 0 < δ ∧ δ < 1 := ⟨hδpos, hδ1⟩
-      exact hZ2 t ht δ hδ_cond
-
-    -- Show log(|t| + 2) ≥ 1 for constant absorption
-    have hlog_ge_one : 1 ≤ Real.log (|t| + 2) := by
-      have h1 : 2 < |t| := ht
-      have h2 : Real.exp 1 < 3 := by linarith [Real.exp_one_lt_d9]
-      have he_lt_t2 : Real.exp 1 < |t| + 2 := by linarith
-      have ht2_pos : 0 < |t| + 2 := by linarith [abs_nonneg t]
-      exact Real.le_log_iff_exp_le ht2_pos |>.mpr (le_of_lt he_lt_t2)
-
-    -- Apply the bounds and combine step by step
+      convert hZ1
+      simp
+    grw [hZ0_bound, hZ1_bound, hZ2 t ht δ ⟨hδpos, hδ1⟩]
     calc
-      3 * (-logDerivZeta ((1 : ℂ) + δ)).re + 4 * (-logDerivZeta ((1 : ℂ) + δ + t * Complex.I)).re + (-logDerivZeta ((1 : ℂ) + δ + (2 * t) * Complex.I)).re
-        ≤ 3 * (C0 + (1 / δ)) + 4 * (-(1 / (1 + δ - σ)) + C1 * Real.log (|t| + 2)) + C2 * Real.log (|t| + 2) := by
-          exact add_le_add (add_le_add (mul_le_mul_of_nonneg_left hZ0_bound (by norm_num)) (mul_le_mul_of_nonneg_left hZ1_bound (by norm_num))) hZ2_bound
-      _ = 3 * C0 + 3 / δ - 4 / (1 + δ - σ) + (4 * C1 + C2) * Real.log (|t| + 2) := by ring
-      _ = 3 / δ - 4 / (1 + δ - σ) + 3 * C0 + (4 * C1 + C2) * Real.log (|t| + 2) := by ring
       _ = 3 / δ - 4 / (1 + δ - σ) + ((4 * C1 + C2) * Real.log (|t| + 2) + 3 * C0) := by ring
       _ ≤ 3 / δ - 4 / (1 + δ - σ) + (4 * C1 + C2 + 3 * C0) * Real.log (|t| + 2) := by
-        -- Apply absorb_pos_constant_into_log with the right order of terms
-        have hC0_pos : 0 < C0 := lt_trans zero_lt_one hC0pos
-        have hC0_nonneg : 0 ≤ 3 * C0 := mul_nonneg (by norm_num) (le_of_lt hC0_pos)
-        have h_absorb := absorb_pos_constant_into_log (L := Real.log (|t| + 2)) (A := 4 * C1 + C2) (c := 3 * C0) hlog_ge_one hC0_nonneg
-        -- h_absorb : (4 * C1 + C2) * Real.log (|t| + 2) + 3 * C0 ≤ (4 * C1 + C2 + 3 * C0) * Real.log (|t| + 2)
         gcongr
-      _ = 3 / δ - 4 / (1 + δ - σ) + (3 * C0 + 4 * C1 + C2) * Real.log (|t| + 2) := by ring
+        refine absorb_pos_constant_into_log ?_ (by linarith)
+        exact Real.le_log_iff_exp_le (by linarith)|>.mpr (by linarith [Real.exp_one_lt_three])
       _ = 3 / δ - 4 / (1 + δ - σ) + C * Real.log (|t| + 2) := by ring
 
 
@@ -1080,28 +951,11 @@ lemma Z341pos (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
   exact lem_seriespos t delta hdelta
 
 
-lemma log_abs_add_two_pos (t : ℝ) : 0 < Real.log (|t| + 2) := by
-  -- First, note that |t| ≥ 0, hence |t| + 2 ≥ 2 > 1
-  have h0 : 0 ≤ |t| + 2 := by
-    have h' : 0 ≤ |t| := abs_nonneg t
-    linarith
-  have hge : (2 : ℝ) ≤ |t| + 2 := by
-    have h' : 0 ≤ |t| := abs_nonneg t
-    linarith
-  have hgt : 1 < |t| + 2 := lt_of_lt_of_le (by norm_num : (1 : ℝ) < 2) hge
-  -- Apply the positivity criterion for log on nonnegative reals
-  exact (Real.log_pos_iff h0).2 hgt
-
 lemma pos_delta_from_C_L {C L : ℝ} (hC : 0 < C) (hL : 0 < L) : 0 < 1 / (2 * C * L) := by
-  have hCL : 0 < C * L := mul_pos hC hL
-  have h2 : 0 < (2 : ℝ) := by norm_num
-  have hpos : 0 < 2 * C * L := by
-    have : 0 < 2 * (C * L) := mul_pos h2 hCL
-    simpa [mul_assoc] using this
-  exact one_div_pos.mpr hpos
+  positivity
 
 lemma log_abs_two_pos (t : ℝ) : 0 < Real.log (|t| + 2) := by
-  simpa using log_abs_add_two_pos t
+  exact Real.log_pos (by grind)
 
 lemma two_C_log_pos {C t : ℝ} (hC : 0 < C) : 0 < 2 * C * Real.log (|t| + 2) := by
   have hL : 0 < Real.log (|t| + 2) := log_abs_two_pos t
@@ -1111,12 +965,8 @@ lemma two_C_log_pos {C t : ℝ} (hC : 0 < C) : 0 < 2 * C * Real.log (|t| + 2) :=
   simpa [mul_comm, mul_left_comm, mul_assoc] using this
 
 lemma rhs_eval_of_inv (C L δ : ℝ) (h : 1 / δ = 2 * C * L) : 3 / δ + C * L = 7 * C * L := by
-  calc
-    3 / δ + C * L
-        = 3 * (1 / δ) + C * L := by field
-    _   = 3 * (2 * C * L) + C * L := by simp [h]
-    _   = 6 * C * L + C * L := by ring
-    _   = 7 * C * L := by ring
+  rw [← mul_one_div, h]
+  ring
 
 lemma lem341tsC :
     ∃ C > 1, ∀ s : ℂ,
