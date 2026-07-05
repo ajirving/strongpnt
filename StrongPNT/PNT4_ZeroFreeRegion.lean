@@ -502,25 +502,16 @@ lemma absorb_pos_constant_into_log {L A c : ℝ} (hL : 1 ≤ L) (hc : 0 ≤ c) :
   gcongr
   exact le_mul_of_one_le_left hc hL
 
-lemma neg_logDeriv_zeta_eq_vonMangoldt_sum (s : ℂ) (hs : 1 < s.re) : -(deriv riemannZeta s / riemannZeta s) = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-s) := by
-  convert ArithmeticFunction.LSeries_vonMangoldt_eq_deriv_riemannZeta_div hs|>.symm using 1
+lemma zeta1zetaseriesxy (x y : ℝ) (hx : 1 < x) :
+    -logDerivZeta (x + y * Complex.I) = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℂ) * n ^ (-(x + y * Complex.I)) := by
+  unfold logDerivZeta
+  convert ArithmeticFunction.LSeries_vonMangoldt_eq_deriv_riemannZeta_div (by simpa : 1 < (x + y * Complex.I).re)|>.symm using 1
   · ring
   · simp only [LSeries, LSeries.term_def]
     refine tsum_congr fun n ↦ ?_
     split_ifs with h
     · simp [h]
     · rw [div_eq_mul_inv, Complex.cpow_neg]
-
-lemma zeta1zetaseries {s : ℂ} (hs : 1 < s.re) :
--logDerivZeta s = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-s) := by
-  unfold logDerivZeta
-  -- Goal: -(deriv riemannZeta s / riemannZeta s) = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-s)
-  exact neg_logDeriv_zeta_eq_vonMangoldt_sum s hs
-
-lemma zeta1zetaseriesxy (x y : ℝ) (hx : 1 < x) :
-    -logDerivZeta (x + y * Complex.I) = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I)) := by
-  apply zeta1zetaseries
-  simpa
 
 lemma ReZconverges1 (x y : ℝ) (hx : 1 < x) :
 Summable (fun n => ((ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I))).re) := by
