@@ -574,7 +574,7 @@ lemma lem_sumRealZ (x y : ℝ) (hx : 1 < x) :
   rw [lem_zeta1zetaseriesxy2 x y hx]
   exact Complex.re_tsum <| Zseriesconverges1 x y hx
 
-lemma complex_cpow_neg_real (n : ℕ) (x : ℝ) (_hn : n ≥ 1) : (n : ℂ) ^ ((-x) : ℂ) = Complex.ofReal ((n : ℝ) ^ (-x)) := by
+lemma complex_cpow_neg_real (n : ℕ) (x : ℝ) : (n : ℂ) ^ ((-x) : ℂ) = Complex.ofReal ((n : ℝ) ^ (-x)) := by
   -- Since n ≥ 1, we have 0 ≤ (n : ℝ)
   have h_nonneg : 0 ≤ (n : ℝ) := Nat.cast_nonneg n
   -- Apply Complex.ofReal_cpow in reverse direction
@@ -584,7 +584,7 @@ lemma complex_cpow_neg_real (n : ℕ) (x : ℝ) (_hn : n ≥ 1) : (n : ℂ) ^ ((
   -- Show (n : ℂ) = ((n : ℝ) : ℂ)
   simp
 
-lemma RealLambdaxy (n : ℕ) (x y : ℝ) (hn : n ≥ 1) (_hx : 1 < x) :
+lemma RealLambdaxy (n : ℕ) (x y : ℝ) :
     ((ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ ((-x) : ℂ) * (n : ℂ) ^ (-(y * Complex.I))).re =
 ((ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x)) * ((n : ℂ) ^ (-(y * Complex.I))).re := by
   -- Let b = ArithmeticFunction.vonMangoldt n * (n : ℝ) ^ (-x)
@@ -594,7 +594,7 @@ lemma RealLambdaxy (n : ℕ) (x y : ℝ) (hn : n ≥ 1) (_hx : 1 < x) :
   have h1 : (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ ((-x) : ℂ) = (b : ℂ) := by
     -- Use the added lemma complex_cpow_neg_real
     have h_real_pow : (n : ℂ) ^ ((-x) : ℂ) = Complex.ofReal ((n : ℝ) ^ (-x)) := by
-      exact complex_cpow_neg_real n x hn
+      exact complex_cpow_neg_real n x
 
     rw [h_real_pow]
     rw [← Complex.ofReal_mul]
@@ -615,8 +615,7 @@ lemma ReZseriesRen (x y : ℝ) (hx : 1 < x) :
   ext n
   by_cases h : n = 0
   · simp [h]
-  · have hn : n ≥ 1 := Nat.one_le_iff_ne_zero.mpr h
-    exact RealLambdaxy n x y hn hx
+  · exact RealLambdaxy n x y
 
 lemma Rezeta1zetaseries (x y : ℝ) (hx : 1 < x) :
     (-logDerivZeta (x + y * Complex.I)).re = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x) * Real.cos (y * Real.log (n : ℝ)) := by
@@ -632,7 +631,7 @@ lemma Rezeta1zetaseries (x y : ℝ) (hx : 1 < x) :
     -- Show -(y * Complex.I) = -y * Complex.I
     simp
 
-lemma complex_vonMangoldt_real_part_eq (n : ℕ) (x y : ℝ) (hn : n ≥ 1) (hx : 1 < x) :
+lemma complex_vonMangoldt_real_part_eq (n : ℕ) (x y : ℝ) (hn : n ≥ 1) :
 ((ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I))).re =
 (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x) * Real.cos (y * Real.log (n : ℝ)) := by
   -- Step 1: Use lem_nxy to split the complex power
@@ -642,7 +641,7 @@ lemma complex_vonMangoldt_real_part_eq (n : ℕ) (x y : ℝ) (hn : n ≥ 1) (hx 
   rw [← mul_assoc]
 
   -- Step 3: Use RealLambdaxy to connect the product form to real terms
-  rw [RealLambdaxy n x y hn hx]
+  rw [RealLambdaxy n x y]
 
   -- Step 4: handle Complex.I sign for lem_eacosalog3
   have h_I : -(y * Complex.I) = -y * Complex.I := by
@@ -667,7 +666,7 @@ lemma Rezetaseries_convergence (x y : ℝ) (hx : 1 < x) :
     by_cases h : n = 0
     · simp [h]
     · have hn : n ≥ 1 := Nat.one_le_iff_ne_zero.mpr h
-      exact complex_vonMangoldt_real_part_eq n x y hn hx
+      exact complex_vonMangoldt_real_part_eq n x y hn
 
   -- Apply the pointwise equality to transfer summability
   have h3 : (fun n => ((ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I))).re) =
