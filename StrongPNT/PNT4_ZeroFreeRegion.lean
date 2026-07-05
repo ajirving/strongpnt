@@ -1092,111 +1092,20 @@ lemma Z0bound_const :
     ‖ -logDerivZeta ((1 : ℂ) + δ) - (1 / (δ : ℂ))‖ ≤ C := by
   -- Small-delta uniform bound from big-O near 0+
   rcases uniform_bound_Z0_complex with ⟨δ0, hδ0pos, C0, hC0nonneg, hsmall⟩
-  -- Middle interval [a,1]
-  let a : ℝ := min δ0 1
-  have ha_pos : 0 < a := lt_min_iff.2 ⟨hδ0pos, zero_lt_one⟩
-  have ha_le_one : a ≤ 1 := min_le_right _ _
-  rcases bounded_on_compact_interval a 1 ha_pos ha_le_one with ⟨Cmid, hCmid_nonneg, hmid⟩
-  -- Large-delta constant via Dirichlet series at x = 2
-  let C2 : ℝ := ∑' n, (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(2 : ℝ))
-  have hC2_nonneg : 0 ≤ C2 := by
-    have hnn : ∀ n, 0 ≤ (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(2 : ℝ)) :=
-      vonMangoldt_rpow_nonneg 2
-    exact tsum_nonneg hnn
-  -- Final constant: strictly greater than 1 and dominates all partial constants
-  let C : ℝ := 2 + C0 + Cmid + C2
-  have hCgt1 : 1 < C := by
-    have : 2 ≤ 2 + C0 + Cmid + C2 := by linarith [hC0nonneg, hCmid_nonneg, hC2_nonneg]
-    linarith
-  refine ⟨C, hCgt1, ?_⟩
-  intro δ hδpos
-  by_cases hlt : δ < δ0
-  · -- Small δ: use hsmall and enlarge to C
-    have hbound : ‖-logDerivZeta ((1 : ℂ) + δ) - (1 / (δ : ℂ))‖ ≤ C0 :=
-      hsmall δ hδpos hlt
-    -- C ≥ C0
-    have hC0_le_C : C0 ≤ C := by linarith
-    exact le_trans hbound hC0_le_C
-  · -- δ ≥ δ0
-    have hge : δ0 ≤ δ := le_of_not_gt hlt
-    rcases le_total δ 1 with hδle1 | hδge1
-    · -- Middle interval: a ≤ δ ≤ 1
-      have ha_le_δ : a ≤ δ := le_trans (min_le_left δ0 1) hge
-      have hbound : ‖-logDerivZeta ((1 : ℂ) + δ) - (1 / (δ : ℂ))‖ ≤ Cmid :=
-        hmid δ ha_le_δ hδle1
-      -- C ≥ Cmid
-      have hCmid_le_C : Cmid ≤ C := by linarith
-      exact le_trans hbound hCmid_le_C
-    · -- Large δ: bound ‖-ζ'/ζ(1+δ)‖ by C2 and add 1/δ ≤ 1
-      -- Set x = 1 + δ
-      let x : ℝ := 1 + δ
-      have hx1 : 1 < x := by
-        have : 0 < δ := hδpos
-        have : 1 < 1 + δ := lt_add_of_pos_right 1 this
-        exact this
-      -- equality for norm via Dirichlet series (at real x)
-      have h_norm_eq_abs_real : ‖-logDerivZeta (x : ℂ)‖
-            = |∑' n, (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x)| :=
-        norm_negLogDerivZeta_real_eq_abs_tsum_vonMangoldt x hx1
-      -- Identify (1:ℂ)+δ with (x : ℂ)
-      have eqArg : ((1 : ℂ) + δ) = (x : ℂ) := by simp [x]
-      -- Convert the equality to our argument
-      have h_norm_eq_abs : ‖-logDerivZeta ((1 : ℂ) + δ)‖
-            = |∑' n, (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x)| := by
-        simpa [eqArg] using h_norm_eq_abs_real
-      -- Define the real sum S
-      let S : ℝ := ∑' n, (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x)
-      have hsum_nonneg : 0 ≤ S := by
-        change 0 ≤ ∑' n, (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x)
-        exact tsum_nonneg (vonMangoldt_rpow_nonneg x)
-      -- From equality with |S| and nonnegativity, bound the norm by S
-      have h_norm_le_sum : ‖-logDerivZeta ((1 : ℂ) + δ)‖ ≤ S := by
-        have : ‖-logDerivZeta ((1 : ℂ) + δ)‖ = |S| := h_norm_eq_abs
-        have : |S| = S := abs_of_nonneg hsum_nonneg
-        exact le_of_eq (h_norm_eq_abs.trans this)
-      -- Compare S with C2 using termwise monotonicity from x ≥ 2
-      have hx_ge_two : 2 ≤ x := by
-        -- since δ ≥ 1 in this branch
-        have : 1 ≤ δ := hδge1
-        have : 2 ≤ 1 + δ := by linarith
-        exact this
-      -- Show pointwise inequality for the summands
-      have h_le_2 : ∀ n, (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x)
-                          ≤ (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(2 : ℝ)) := by
-        intro n
-        by_cases h0 : n = 0
-        · simp [h0]
-        · have hn : 1 ≤ n := Nat.one_le_iff_ne_zero.mpr h0
-          have hn' : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
-          have hrpow : (n : ℝ) ^ (-x) ≤ (n : ℝ) ^ (-(2 : ℝ)) :=
-            rpow_neg_antitone hn' hx_ge_two
-          have hΛ_nonneg : 0 ≤ (ArithmeticFunction.vonMangoldt n : ℝ) :=
-            ArithmeticFunction.vonMangoldt_nonneg
-          exact mul_le_mul_of_nonneg_left hrpow hΛ_nonneg
-      -- Summability of both series
-      have h_summ_x : Summable (fun n => (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x)) := by
-        exact Rezetaseries0 x hx1
-      have h_summ_2 : Summable (fun n => (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(2 : ℝ))) :=
-        Rezetaseries0 2 (by norm_num)
-      have hsum_le : S ≤ C2 := by
-        -- use the general tsum comparison lemma
-        have h_nonneg_x : ∀ n, 0 ≤ (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x) :=
-          vonMangoldt_rpow_nonneg x
-        exact tsum_le_of_nonneg_of_le h_summ_x h_summ_2 h_nonneg_x h_le_2
-      -- Combine to bound the norm by C2
-      have h_norm_le_C2 : ‖-logDerivZeta ((1 : ℂ) + δ)‖ ≤ C2 :=
-        le_trans h_norm_le_sum hsum_le
-      -- Now bound the target by triangle inequality and 1/δ ≤ 1
-      have h_one_div_le : ‖(1 : ℂ) / (δ : ℂ)‖ ≤ 1 := norm_one_div_coe_real_le_one_of_one_le hδge1
-      have htriangle : ‖-logDerivZeta ((1 : ℂ) + δ) - (1 / (δ : ℂ))‖
-                        ≤ ‖-logDerivZeta ((1 : ℂ) + δ)‖ + ‖(1 : ℂ) / (δ : ℂ)‖ :=
-        norm_sub_le _ _
-      have hlarge_bound : ‖-logDerivZeta ((1 : ℂ) + δ) - (1 / (δ : ℂ))‖ ≤ C2 + 1 := by
-        refine le_trans htriangle ?_
-        exact add_le_add h_norm_le_C2 h_one_div_le
-      -- Enlarge to C
-      have hC2_le_C : C2 + 1 ≤ C := by linarith
-      exact le_trans hlarge_bound hC2_le_C
+  have large : ∀ δ ≥ δ0, ‖logDerivZeta (1 + δ)‖ ≤ ‖logDerivZeta (1 + δ0)‖ := by
+    intro δ hδ
+    convert dlog_riemannZeta_bdd_on_vertical_lines_generalized (1 + δ0) (1 + δ) 0 (by linarith) (by linarith) using 1
+      <;> simp [logDerivZeta]
+  have: ∀ δ ≥ δ0, ‖-logDerivZeta (1 + δ) - 1 / δ‖ ≤ ‖logDerivZeta (1 + δ0)‖  + 1 / δ0 := by
+    intro δ hδ
+    grw [norm_sub_le]
+    gcongr
+    · rw [norm_neg]
+      exact large _ hδ
+    · simp only [one_div, norm_inv, Complex.norm_real, Real.norm_eq_abs]
+      rw [abs_of_nonneg (by linarith)]
+      gcongr
+  exact ⟨max 2 (max C0 (‖logDerivZeta (1 + ↑δ0)‖ + 1 / δ0)), (by grind), (by grind)⟩
 
 /-- There exists a constant `C > 0` such that for all `δ > 0`,
 `Re(-logDerivZeta (1 + δ)) - 1/δ ≤ C`. -/
