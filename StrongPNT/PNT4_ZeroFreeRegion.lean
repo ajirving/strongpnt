@@ -575,7 +575,7 @@ Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℂ) * Complex.cpow
   rw [mul_assoc, ← lem_nxy _ (by grind), Complex.cpow_eq_pow, Complex.cpow_neg]
   field
 
-lemma lem_realnx (n : ℕ) (x : ℝ) (_hn : n ≥ 1) (_hx : x ≥ 1) :
+lemma lem_realnx (n : ℕ) (x : ℝ) :
     ArithmeticFunction.vonMangoldt n * (n : ℝ) ^ (-x) ≥ 0 := by
   apply mul_nonneg
   · -- Show ArithmeticFunction.vonMangoldt n ≥ 0
@@ -922,17 +922,15 @@ lemma lem_341series2 (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
   rw [Z341series t delta hdelta]
   exact lem341series t delta hdelta
 
-lemma lem_Lambda_pos_trig_sum (n : ℕ) (delta : ℝ) (t : ℝ) (hn : n ≥ 1) (hdelta : delta > 0) :
+lemma lem_Lambda_pos_trig_sum (n : ℕ) (delta : ℝ) (t : ℝ) (hn : n ≥ 1) :
     0 ≤ (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * (3 + 4 * Real.cos (t * Real.log (n : ℝ)) + Real.cos (2 * t * Real.log (n : ℝ))) := by
   apply mul_nonneg
   · -- Show ArithmeticFunction.vonMangoldt n * (n : ℝ) ^ (-(1 + delta)) ≥ 0
-    apply lem_realnx n (1 + delta) hn
-    -- Show 1 + delta ≥ 1
-    linarith [hdelta]
+    apply lem_realnx n (1 + delta)
   · -- Show 3 + 4 * Real.cos (t * Real.log (n : ℝ)) + Real.cos (2 * t * Real.log (n : ℝ)) ≥ 0
     exact lem_postriglogn n hn t
 
-lemma lem_seriespos (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
+lemma lem_seriespos (t : ℝ) (delta : ℝ) :
     0 ≤ ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * (3 + 4 * Real.cos (t * Real.log (n : ℝ)) + Real.cos (2 * t * Real.log (n : ℝ))) := by
   apply tsum_nonneg
   intro n
@@ -941,14 +939,14 @@ lemma lem_seriespos (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
     simp [h]
   · -- Case n ≠ 0: apply lem_Lambda_pos_trig_sum
     have hn : n ≥ 1 := Nat.one_le_iff_ne_zero.mpr h
-    exact lem_Lambda_pos_trig_sum n delta t hn hdelta
+    exact lem_Lambda_pos_trig_sum n delta t hn
 
 lemma Z341pos (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
     0 ≤ 3 * (-logDerivZeta ((1 : ℂ) + delta)).re +
         4 * (-logDerivZeta ((1 : ℂ) + delta + t * Complex.I)).re +
         (-logDerivZeta ((1 : ℂ) + delta + (2 * t) * Complex.I)).re := by
   rw [lem_341series2 t delta hdelta]
-  exact lem_seriespos t delta hdelta
+  exact lem_seriespos t delta
 
 
 lemma pos_delta_from_C_L {C L : ℝ} (hC : 0 < C) (hL : 0 < L) : 0 < 1 / (2 * C * L) := by
