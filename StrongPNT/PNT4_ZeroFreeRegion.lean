@@ -566,26 +566,13 @@ Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ 
 
 lemma lem_realnx (n : ℕ) (x : ℝ) :
     ArithmeticFunction.vonMangoldt n * (n : ℝ) ^ (-x) ≥ 0 := by
-  apply mul_nonneg
-  · -- Show ArithmeticFunction.vonMangoldt n ≥ 0
-    exact ArithmeticFunction.vonMangoldt_nonneg
-  · -- Show (n : ℝ) ^ (-x) ≥ 0
-    apply Real.rpow_nonneg
-    -- Show 0 ≤ (n : ℝ)
-    exact Nat.cast_nonneg n
-
-lemma sumRealLambda (x y : ℝ) (hx : 1 < x) :
-    (∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ ((-x) : ℂ) * (n : ℂ) ^ (-(y * Complex.I))).re =
-    ∑' (n : ℕ), ((ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ ((-x) : ℂ) * (n : ℂ) ^ (-(y * Complex.I))).re := by
-  apply Complex.re_tsum
-  exact Zseriesconverges1 x y hx
+  exact mul_nonneg (by simp) (Real.rpow_nonneg (by grind) _)
 
 lemma lem_sumRealZ (x y : ℝ) (hx : 1 < x) :
     (-logDerivZeta (x + y * Complex.I)).re = ∑' (n : ℕ), ((ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ ((-x) : ℂ) * (n : ℂ) ^ (-(y * Complex.I))).re := by
   -- Apply lem_zeta1zetaseriesxy2 and then take real part
   rw [lem_zeta1zetaseriesxy2 x y hx]
-  -- Apply sumRealLambda to move .re inside the sum
-  exact sumRealLambda x y hx
+  exact Complex.re_tsum <| Zseriesconverges1 x y hx
 
 lemma complex_cpow_neg_real (n : ℕ) (x : ℝ) (_hn : n ≥ 1) : (n : ℂ) ^ ((-x) : ℂ) = Complex.ofReal ((n : ℝ) ^ (-x)) := by
   -- Since n ≥ 1, we have 0 ≤ (n : ℝ)
