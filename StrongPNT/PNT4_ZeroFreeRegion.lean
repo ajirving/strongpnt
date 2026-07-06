@@ -514,12 +514,11 @@ lemma zeta1zetaseriesxy (x y : ℝ) (hx : 1 < x) :
     · rw [div_eq_mul_inv, Complex.cpow_neg]
 
 lemma ReZconverges1 (x y : ℝ) (hx : 1 < x) :
-Summable (fun n => ((ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I))).re) := by
+Summable (fun n => ((ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I)))) := by
   have h_re_gt_one : 1 < (x + y * Complex.I).re := by
     simpa
   have h_L_summable := ArithmeticFunction.LSeriesSummable_vonMangoldt h_re_gt_one
   unfold LSeriesSummable LSeries.term at h_L_summable
-  apply summable_complex_then_summable_real_part
   convert h_L_summable using 2
   split_ifs with h
   · simp [h]
@@ -563,17 +562,7 @@ lemma complex_vonMangoldt_real_part_eq (n : ℕ) (x y : ℝ) (hn : n ≥ 1) :
 
 lemma Rezeta1zetaseries (x y : ℝ) (hx : 1 < x) :
     (-logDerivZeta (x + y * Complex.I)).re = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x) * Real.cos (y * Real.log (n : ℝ)) := by
-  rw [zeta1zetaseriesxy x y hx, Complex.re_tsum]
-  swap
-  · have h_re_gt_one : 1 < (x + y * Complex.I).re := by
-      simpa
-    have h_L_summable := ArithmeticFunction.LSeriesSummable_vonMangoldt h_re_gt_one
-    unfold LSeriesSummable LSeries.term at h_L_summable
-    convert h_L_summable using 2
-    split_ifs with h
-    · simp [h]
-    rw [Complex.cpow_neg]
-    field
+  rw [zeta1zetaseriesxy x y hx, Complex.re_tsum (ReZconverges1 _ _ hx)]
   congr
   ext n
   by_cases h : n = 0
@@ -582,7 +571,7 @@ lemma Rezeta1zetaseries (x y : ℝ) (hx : 1 < x) :
 
 lemma Rezetaseries_convergence (x y : ℝ) (hx : 1 < x) :
     Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x) * Real.cos (y * Real.log (n : ℝ))) := by
-  have h1 := ReZconverges1 x y hx
+  have h1 := summable_complex_then_summable_real_part _ <| ReZconverges1 x y hx
   convert h1 with n
   by_cases h : n = 0
   · simp [h]
