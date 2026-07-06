@@ -532,10 +532,6 @@ lemma lem_nxy (n : ℕ) (hn : n ≥ 1) (x y : ℝ) :
   rw [h]
   exact Complex.cpow_add _ _ (by norm_cast; linarith)
 
-lemma lem_realnx (n : ℕ) (x : ℝ) :
-    ArithmeticFunction.vonMangoldt n * (n : ℝ) ^ (-x) ≥ 0 := by
-  exact mul_nonneg (by simp) (Real.rpow_nonneg (by grind) _)
-
 lemma RealLambdaxy (n : ℕ) (x y : ℝ) :
     ((ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ ((-x) : ℂ) * (n : ℂ) ^ (-(y * Complex.I))).re =
 ((ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x)) * ((n : ℂ) ^ (-(y * Complex.I))).re := by
@@ -784,11 +780,7 @@ lemma lem_341series2 (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
 
 lemma lem_Lambda_pos_trig_sum (n : ℕ) (delta : ℝ) (t : ℝ) (hn : n ≥ 1) :
     0 ≤ (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * (3 + 4 * Real.cos (t * Real.log (n : ℝ)) + Real.cos (2 * t * Real.log (n : ℝ))) := by
-  apply mul_nonneg
-  · -- Show ArithmeticFunction.vonMangoldt n * (n : ℝ) ^ (-(1 + delta)) ≥ 0
-    apply lem_realnx n (1 + delta)
-  · -- Show 3 + 4 * Real.cos (t * Real.log (n : ℝ)) + Real.cos (2 * t * Real.log (n : ℝ)) ≥ 0
-    exact lem_postriglogn n hn t
+  exact mul_nonneg (mul_nonneg (by simp) (Real.rpow_nonneg (by grind) _)) (lem_postriglogn n hn t)
 
 lemma lem_seriespos (t : ℝ) (delta : ℝ) :
     0 ≤ ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * (3 + 4 * Real.cos (t * Real.log (n : ℝ)) + Real.cos (2 * t * Real.log (n : ℝ))) := by
