@@ -525,36 +525,21 @@ Summable (fun n => ((ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x 
   congr
   rw [Complex.cpow_neg]
 
-lemma lem_nxy (n : ℕ) (hn : n ≥ 1) (x y : ℝ) :
-    (n : ℂ) ^ (-(x + y * Complex.I)) = (n : ℂ) ^ ((-x) : ℂ) * (n : ℂ) ^ (-(y * Complex.I)) := by
-  -- Rewrite -(x + y * Complex.I) as (-x) + (-(y * Complex.I))
-  have h : -(x + y * Complex.I) = (-x : ℂ) + (-(y * Complex.I)) := by ring
-  rw [h]
-  exact Complex.cpow_add _ _ (by norm_cast; linarith)
-
 lemma RealLambdaxy (n : ℕ) (x y : ℝ) :
     ((ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ ((-x) : ℂ) * (n : ℂ) ^ (-(y * Complex.I))).re =
 ((ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x)) * ((n : ℂ) ^ (-(y * Complex.I))).re := by
-  -- Let b = ArithmeticFunction.vonMangoldt n * (n : ℝ) ^ (-x)
-  let b := ArithmeticFunction.vonMangoldt n * (n : ℝ) ^ (-x)
-
-  -- The key step: show that (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ ((-x) : ℂ) = (b : ℂ)
-  have h1 : (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ ((-x) : ℂ) = (b : ℂ) := by
-    have h_real_pow : (n : ℂ) ^ ((-x) : ℂ) = Complex.ofReal ((n : ℝ) ^ (-x)) := by
-      rw [Complex.ofReal_cpow (by grind)]
-      norm_cast
-    rw [h_real_pow]
-    rw [← Complex.ofReal_mul]
-  have h2 : (ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ ((-x) : ℂ) * (n : ℂ) ^ (-(y * Complex.I)) =
-           ((ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ ((-x) : ℂ)) * (n : ℂ) ^ (-(y * Complex.I)) := by
-    rw [mul_assoc]
-  rw [h2, h1]
-  simp [b]
+  rw [mul_assoc, Complex.re_ofReal_mul]
+  have h_real_pow : (n : ℂ) ^ ((-x) : ℂ) = Complex.ofReal ((n : ℝ) ^ (-x)) := by
+    rw [Complex.ofReal_cpow (by grind)]
+    norm_cast
+  rw [h_real_pow, Complex.re_ofReal_mul, ← mul_assoc]
 
 lemma complex_vonMangoldt_real_part_eq (n : ℕ) (x y : ℝ) (hn : n ≥ 1) :
 ((ArithmeticFunction.vonMangoldt n : ℂ) * (n : ℂ) ^ (-(x + y * Complex.I))).re =
 (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x) * Real.cos (y * Real.log (n : ℝ)) := by
-  rw [lem_nxy n hn x y, ← mul_assoc, RealLambdaxy n x y, ← neg_mul, lem_eacosalog3 n hn y]
+  rw [(by ring : -(x + y * Complex.I) = (-x) + -(y * Complex.I)),
+    Complex.cpow_add _ _ (by norm_cast; grind), ← mul_assoc, RealLambdaxy n x y, ← neg_mul,
+    lem_eacosalog3 n hn y]
 
 lemma Rezeta1zetaseries (x y : ℝ) (hx : 1 < x) :
     (-logDerivZeta (x + y * Complex.I)).re = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x) * Real.cos (y * Real.log (n : ℝ)) := by
@@ -577,10 +562,6 @@ lemma Rezetaseries2t (x t : ℝ) (hx : 1 < x) :
     Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x) * Real.cos (2 * t * Real.log (n : ℝ))) := by
   -- Apply Rezetaseries_convergence with y = 2 * t
   exact Rezetaseries_convergence x (2 * t) hx
-
-lemma lem_cost0 (n : ℕ) (_hn : n ≥ 1) (t : ℝ) (ht : t = 0) : Real.cos (t * Real.log (n : ℝ)) = 1 := by
-  rw [ht]
-  simp
 
 lemma Rezetaseries0 (x : ℝ) (hx : 1 < x) :
     Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-x)) := by
@@ -684,90 +665,15 @@ lemma Z341bounds_const :
 
 lemma Rezeta1zetaseries1 (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
     (-logDerivZeta ((1 : ℂ) + delta + t * Complex.I)).re = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (t * Real.log (n : ℝ)) := by
-  -- Apply Rezeta1zetaseries with x = 1 + delta and y = t
-  have h1 : 1 < 1 + delta := by linarith [hdelta]
-  convert Rezeta1zetaseries (1 + delta) t h1
-  -- Show that the complex expressions are equal
-  simp [Complex.ofReal_add]
+  exact_mod_cast Rezeta1zetaseries (1 + delta) t (by linarith)
 
 lemma Rezeta1zetaseries2 (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
     (-logDerivZeta ((1 : ℂ) + delta + (2 * t) * Complex.I)).re = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (2 * t * Real.log (n : ℝ)) := by
-  -- Apply Rezeta1zetaseries with x = 1 + delta and y = 2 * t
-  have h1 : 1 < 1 + delta := by linarith [hdelta]
-  -- Rewrite the left side to match the pattern exactly, ensuring real arithmetic
-  have h2 : (1 : ℂ) + delta + (2 * t) * Complex.I = (1 + delta : ℝ) + ((2 * t) : ℝ) * Complex.I := by
-    simp [Complex.ofReal_add, Complex.ofReal_one, Complex.ofReal_mul]
-  rw [h2]
-  exact Rezeta1zetaseries (1 + delta) (2 * t) h1
+  exact_mod_cast Rezeta1zetaseries (1 + delta) (2 * t) (by linarith)
 
 lemma Rezeta1zetaseries0 (delta : ℝ) (hdelta : delta > 0) :
     (-logDerivZeta ((1 : ℂ) + delta)).re = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) := by
-  -- Start with Rezeta1zetaseries1 with t = 0
-  have h_series : (-logDerivZeta ((1 : ℂ) + delta + 0 * Complex.I)).re =
-                  ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (0 * Real.log (n : ℝ)) :=
-    Rezeta1zetaseries1 0 delta hdelta
-
-  -- Simplify the LHS: (1 : ℂ) + delta + 0 * Complex.I = (1 : ℂ) + delta
-  have h_lhs : (-logDerivZeta ((1 : ℂ) + delta + 0 * Complex.I)).re = (-logDerivZeta ((1 : ℂ) + delta)).re := by
-    congr 2
-    simp
-
-  -- Simplify the RHS using lem_cost0: cos(0 * log n) = 1
-  have h_rhs : ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (0 * Real.log (n : ℝ)) =
-               ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) := by
-    congr 1
-    funext n
-    by_cases h : n = 0
-    · simp [h]
-    · have hn : n ≥ 1 := Nat.one_le_iff_ne_zero.mpr h
-      rw [lem_cost0 n hn 0 rfl, mul_one]
-
-  -- Combine the results
-  rw [← h_lhs, h_series, h_rhs]
-
-lemma Z341series (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
-    (3 * (-logDerivZeta ((1 : ℂ) + delta)).re +
-     4 * (-logDerivZeta ((1 : ℂ) + delta + t * Complex.I)).re +
-     (-logDerivZeta ((1 : ℂ) + delta + (2 * t) * Complex.I)).re)
-    =
-    (3 * ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) +
-     4 * ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (t * Real.log (n : ℝ)) +
-     ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (2 * t * Real.log (n : ℝ))) := by
-  rw [Rezeta1zetaseries0 delta hdelta, Rezeta1zetaseries1 t delta hdelta, Rezeta1zetaseries2 t delta hdelta]
-
-
-lemma lem341series (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
-    (3 * ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)))
-    + (4 * ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (t * Real.log (n : ℝ)))
-    + (∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (2 * t * Real.log (n : ℝ)))
-    = ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * (3 + 4 * Real.cos (t * Real.log (n : ℝ)) + Real.cos (2 * t * Real.log (n : ℝ))) := by
-  -- First establish that 1 < 1 + delta
-  have h1 : 1 < 1 + delta := by linarith [hdelta]
-
-  -- Apply the convergence results from the context
-  have h2 : Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta))) :=
-    Rezetaseries0 (1 + delta) h1
-
-  have h3 : Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (t * Real.log (n : ℝ))) :=
-    Rezetaseries_convergence (1 + delta) t h1
-
-  have h4 : Summable (fun n : ℕ => (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * Real.cos (2 * t * Real.log (n : ℝ))) :=
-    Rezetaseries2t (1 + delta) t h1
-
-  -- Use scalar multiplication properties of tsum (in reverse direction)
-  rw [← Summable.tsum_mul_left 3 h2]
-  rw [← Summable.tsum_mul_left 4 h3]
-
-  -- Use additivity of tsum
-  rw [← Summable.tsum_add (Summable.mul_left 3 h2) (Summable.mul_left 4 h3)]
-  rw [← Summable.tsum_add]
-  -- Factor out common terms
-  · congr 1
-    ext n
-    ring
-  -- Apply the final summability result
-  · exact Summable.add (Summable.mul_left 3 h2) (Summable.mul_left 4 h3)
-  · exact h4
+  convert Rezeta1zetaseries1 0 delta hdelta using 3 <;> simp
 
 lemma lem_341series2 (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
     (3 * (-logDerivZeta ((1 : ℂ) + delta)).re +
@@ -775,31 +681,27 @@ lemma lem_341series2 (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
      (-logDerivZeta ((1 : ℂ) + delta + (2 * t) * Complex.I)).re)
     =
     ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * (3 + 4 * Real.cos (t * Real.log (n : ℝ)) + Real.cos (2 * t * Real.log (n : ℝ))) := by
-  rw [Z341series t delta hdelta]
-  exact lem341series t delta hdelta
-
-lemma lem_Lambda_pos_trig_sum (n : ℕ) (delta : ℝ) (t : ℝ) (hn : n ≥ 1) :
-    0 ≤ (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * (3 + 4 * Real.cos (t * Real.log (n : ℝ)) + Real.cos (2 * t * Real.log (n : ℝ))) := by
-  exact mul_nonneg (mul_nonneg (by simp) (Real.rpow_nonneg (by grind) _)) (lem_postriglogn n hn t)
-
-lemma lem_seriespos (t : ℝ) (delta : ℝ) :
-    0 ≤ ∑' (n : ℕ), (ArithmeticFunction.vonMangoldt n : ℝ) * (n : ℝ) ^ (-(1 + delta)) * (3 + 4 * Real.cos (t * Real.log (n : ℝ)) + Real.cos (2 * t * Real.log (n : ℝ))) := by
-  apply tsum_nonneg
-  intro n
-  by_cases h : n = 0
-  · -- Case n = 0: von Mangoldt function is 0, so the term is 0
-    simp [h]
-  · -- Case n ≠ 0: apply lem_Lambda_pos_trig_sum
-    have hn : n ≥ 1 := Nat.one_le_iff_ne_zero.mpr h
-    exact lem_Lambda_pos_trig_sum n delta t hn
+  rw [Rezeta1zetaseries0 delta hdelta, Rezeta1zetaseries1 t delta hdelta, Rezeta1zetaseries2 t delta hdelta]
+  have h1 : 1 < 1 + delta := by linarith [hdelta]
+  have h2 := Rezetaseries0 (1 + delta) h1
+  have h3 := Rezetaseries_convergence (1 + delta) t h1
+  have h4 := Rezetaseries2t (1 + delta) t h1
+  rw [← Summable.tsum_mul_left 3 h2, ← Summable.tsum_mul_left 4 h3,
+    ← Summable.tsum_add (Summable.mul_left 3 h2) (Summable.mul_left 4 h3), ← Summable.tsum_add _ h4]
+  · congr 1
+    ext n
+    ring
+  · exact Summable.add (Summable.mul_left 3 h2) (Summable.mul_left 4 h3)
 
 lemma Z341pos (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
     0 ≤ 3 * (-logDerivZeta ((1 : ℂ) + delta)).re +
         4 * (-logDerivZeta ((1 : ℂ) + delta + t * Complex.I)).re +
         (-logDerivZeta ((1 : ℂ) + delta + (2 * t) * Complex.I)).re := by
   rw [lem_341series2 t delta hdelta]
-  exact lem_seriespos t delta
-
+  refine  tsum_nonneg fun n ↦ ?_
+  by_cases hn : n = 0
+  · simp [hn]
+  · exact mul_nonneg (mul_nonneg (by simp) (Real.rpow_nonneg (by grind) _)) (lem_postriglogn n (by grind) t)
 
 lemma pos_delta_from_C_L {C L : ℝ} (hC : 0 < C) (hL : 0 < L) : 0 < 1 / (2 * C * L) := by
   positivity
@@ -941,32 +843,7 @@ lemma lem341tsC2 :
   simpa [ha, hb] using hres
 
 lemma simplify_4_7_2 (C L : ℝ) : 4 / (7 * C * L) - 1 / (2 * C * L) = 1 / (14 * C * L) := by
-  -- Regroup the products in the denominators
-  have h1 : (4 : ℝ) / (7 * (C * L)) = (4 : ℝ) / (7 : ℝ) / (C * L) := by
-    simpa using (div_mul_eq_div_div (a := (4 : ℝ)) (b := (7 : ℝ)) (c := C * L))
-  have h2 : (1 : ℝ) / (2 * (C * L)) = (1 : ℝ) / (2 : ℝ) / (C * L) := by
-    simpa using (div_mul_eq_div_div (a := (1 : ℝ)) (b := (2 : ℝ)) (c := C * L))
-  -- Compute the scalar difference (4/7 - 1/2) = 1/14
-  have h3' : ((4 : ℝ) / (7 : ℝ)) - (2 : ℝ)⁻¹ = (14 : ℝ)⁻¹ := by
-    have h3 : ((4 : ℝ) / (7 : ℝ)) - ((1 : ℝ) / (2 : ℝ)) = (1 : ℝ) / (14 : ℝ) := by
-      norm_num
-    simpa [one_div] using h3
-  calc
-    4 / (7 * C * L) - 1 / (2 * C * L)
-        = (4 : ℝ) / (7 * (C * L)) - (1 : ℝ) / (2 * (C * L)) := by
-          simp [mul_assoc]
-    _ = (4 : ℝ) / (7 : ℝ) / (C * L) - (1 : ℝ) / (2 : ℝ) / (C * L) := by
-          simp [h1, h2]
-    _ = (((4 : ℝ) / (7 : ℝ)) - ((1 : ℝ) / (2 : ℝ))) / (C * L) := by
-          simpa using (sub_div (a := ((4 : ℝ) / (7 : ℝ))) (b := ((1 : ℝ) / (2 : ℝ))) (c := C * L)).symm
-    _ = (((4 : ℝ) / (7 : ℝ)) - (2 : ℝ)⁻¹) / (C * L) := by
-          simp [one_div]
-    _ = (14 : ℝ)⁻¹ / (C * L) := by
-          simp [h3']
-    _ = 1 / (14 * (C * L)) := by
-          simpa [mul_comm, mul_left_comm, mul_assoc, one_div] using
-            (div_mul_eq_div_div (a := (1 : ℝ)) (b := (14 : ℝ)) (c := C * L)).symm
-    _ = 1 / (14 * C * L) := by simp [mul_assoc]
+  field
 
 lemma fraction_diff_lower_bound (C L a : ℝ) : 4 / (7 * C * L) ≤ a + 1 / (2 * C * L) → 1 / (14 * C * L) ≤ a := by
   intro h
