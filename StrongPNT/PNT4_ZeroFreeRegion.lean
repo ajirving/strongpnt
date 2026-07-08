@@ -5,60 +5,9 @@ import Mathlib.NumberTheory.LSeries.ZetaZeros
 
 def ZetaZerosNearPoint (t : ℝ) : Set ℂ := { ρ : ℂ | ρ ∈ riemannZetaZeros ∧ ‖ρ - ((3/2 : ℂ) + t * Complex.I)‖ ≤ (5/6 : ℝ) }
 
-private lemma riemannZeta_correction_differentiable :
-    Differentiable ℂ (Function.update (fun s : ℂ => (s - 1) * riemannZeta s) 1 1) := by
-  let H : ℂ → ℂ := Function.update (fun s : ℂ => (s - 1) * riemannZeta s) 1 1
-  change Differentiable ℂ H
-  -- Show differentiability everywhere by splitting on s = 1.
-  intro s
-  rcases eq_or_ne s 1 with rfl | hs
-  · -- differentiable at 1 via removable singularity: differentiable on punctured nhds + continuity
-    refine (Complex.analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt ?_ ?_).differentiableAt
-    · -- differentiable on punctured nhds around 1
-      filter_upwards [self_mem_nhdsWithin] with t ht
-      -- On t ≠ 1, H agrees with (t-1)*ζ t; prove differentiableAt via congr
-      have hdiff : DifferentiableAt ℂ (fun u : ℂ => (u - 1) * riemannZeta u) t := by
-        have h2 : DifferentiableAt ℂ riemannZeta t :=
-          (differentiableAt_riemannZeta ht)
-        fun_prop (disch := assumption)
-      apply DifferentiableAt.congr_of_eventuallyEq hdiff
-      filter_upwards [eventually_ne_nhds ht] with u hu using by
-        simp [H, Function.update_of_ne hu]
-    · -- continuity of H at 1 from the known residue/limit lemma
-      simpa [H, continuousAt_update_same] using riemannZeta_residue_one
-  · -- s ≠ 1: H agrees with (s-1)ζ(s), hence differentiable
-    have hdiff : DifferentiableAt ℂ (fun u : ℂ => (u - 1) * riemannZeta u) s := by
-      have h2 : DifferentiableAt ℂ riemannZeta s :=
-        (differentiableAt_riemannZeta hs)
-      fun_prop (disch := assumption)
-    apply DifferentiableAt.congr_of_eventuallyEq hdiff
-    filter_upwards [eventually_ne_nhds hs] with u hu using by
-      simp [H, Function.update_of_ne hu]
-
 lemma ZetaZerosNearPoint_finite (t : ℝ) : Set.Finite (ZetaZerosNearPoint t) := by
-  -- Center and radius of the disk
-  let c : ℂ := (3/2 : ℂ) + t * Complex.I
-  let R : ℝ := (5/6 : ℝ)
-  have hRpos : 0 < R := by norm_num
-  -- Define H(s) = (s - 1) * ζ(s) with the removable singularity at s = 1 filled in by setting H(1) = 1.
-  -- This H is differentiable (entire). We'll use g(z) = H (z + c).
-  let H : ℂ → ℂ := Function.update (fun s : ℂ => (s - 1) * riemannZeta s) 1 1
-  have hH_diff : Differentiable ℂ H := riemannZeta_correction_differentiable
-  apply (MeromorphicOn.divisor H (Metric.closedBall c R)).finiteSupport (isCompact_closedBall ..)|>.subset
-  intro z hz
-  have := Complex.analyticOnNhd_univ_iff_differentiable.mpr hH_diff
-  simp_all only [ZetaZerosNearPoint, Set.mem_setOf_eq, Function.mem_support, ne_eq]
-  rw [MeromorphicOn.AnalyticOnNhd.divisor_apply (this.mono (Set.subset_univ _)) (by simp_all [c, R, dist_eq_norm_sub])]
-  simp_all only [WithTop.untop₀_eq_zero, ENat.map_natCast_eq_zero, ENat.map_eq_top_iff, not_or,
-    analyticOrderAt_ne_zero, Set.mem_univ, this z, true_and]
-  constructor
-  · simp_all only [mem_riemannZetaZeros, H]
-    by_cases! h : z = 1
-    · simp [h, riemannZeta_one_ne_zero] at hz
-    · simp_all
-  · apply this.analyticOrderAt_ne_top_of_isPreconnected isPreconnected_univ (x := 1) (Set.mem_univ _) (Set.mem_univ _)
-    have :=  (this 1 (Set.mem_univ _)).analyticOrderAt_eq_zero.mpr (by simp [H])
-    simp [this]
+  exact (isCompact_closedBall ((3/2 : ℂ) + t * Complex.I) (5/6)).inter_riemannZetaZeros_finite
+    |>.subset fun z hz ↦ (by simp_all [ZetaZerosNearPoint, dist_eq_norm_sub])
 
 
 lemma lem_sigmage1 (sigma t : ℝ) (hsigma : sigma > 1) : riemannZeta (sigma + t * Complex.I) ≠ 0 := by
@@ -702,19 +651,6 @@ lemma Z341pos (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
   · simp [hn]
   · exact mul_nonneg (mul_nonneg (by simp) (Real.rpow_nonneg (by grind) _)) (lem_postriglogn n (by grind) t)
 
-lemma pos_delta_from_C_L {C L : ℝ} (hC : 0 < C) (hL : 0 < L) : 0 < 1 / (2 * C * L) := by
-  positivity
-
-lemma log_abs_two_pos (t : ℝ) : 0 < Real.log (|t| + 2) := by
-  exact Real.log_pos (by grind)
-
-lemma two_C_log_pos {C t : ℝ} (hC : 0 < C) : 0 < 2 * C * Real.log (|t| + 2) := by
-  have hL : 0 < Real.log (|t| + 2) := log_abs_two_pos t
-  have h2 : 0 < (2 : ℝ) := by norm_num
-  have hCL : 0 < C * Real.log (|t| + 2) := mul_pos hC hL
-  have : 0 < 2 * (C * Real.log (|t| + 2)) := mul_pos h2 hCL
-  simpa [mul_comm, mul_left_comm, mul_assoc] using this
-
 lemma rhs_eval_of_inv (C L δ : ℝ) (h : 1 / δ = 2 * C * L) : 3 / δ + C * L = 7 * C * L := by
   rw [← mul_one_div, h]
   ring
@@ -731,12 +667,12 @@ lemma lem341tsC :
 
   -- Define L = log(|s.im| + 2) and δ = 1/(2CL)
   let L : ℝ := Real.log (|s.im| + 2)
-  have hLpos : 0 < L := log_abs_two_pos (s.im)
+  have hLpos : 0 < L := Real.log_pos (by grind)
   let δ : ℝ := 1 / (2 * C * L)
 
   -- Show δ > 0
-  have hCpos_weak : 0 < C := lt_trans zero_lt_one hCpos
-  have hδpos : 0 < δ := pos_delta_from_C_L hCpos_weak hLpos
+  have hCpos_weak : 0 < C := by linarith
+  have hδpos : 0 < δ := by positivity
 
   -- Show δ < 1: need 1 < 2*C*L
   have hδlt : δ < 1 := by
@@ -765,9 +701,9 @@ lemma lem341tsC :
         _ > 1 := by norm_num
     -- Therefore δ = 1/(2*C*L) < 1
     simp only [δ]
-    rw [div_lt_one_iff]
-    left
-    exact ⟨two_C_log_pos hCpos_weak, h2CL_gt_1⟩
+    rw [div_lt_one]
+    · exact h2CL_gt_1
+    · linarith
 
   -- Apply Z341bounds_const
   have hmem : (s.re + s.im * Complex.I) ∈ riemannZetaZeros := by
