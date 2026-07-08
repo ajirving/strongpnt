@@ -1,10 +1,9 @@
 import StrongPNT.PNT3_RiemannZeta
 import StrongPNT.Z0
 import Mathlib.Analysis.Meromorphic.Divisor
+import Mathlib.NumberTheory.LSeries.ZetaZeros
 
-def zeroZ : Set ℂ := {s : ℂ | riemannZeta s = 0}
-
-def ZetaZerosNearPoint (t : ℝ) : Set ℂ := { ρ : ℂ | ρ ∈ zeroZ ∧ ‖ρ - ((3/2 : ℂ) + t * Complex.I)‖ ≤ (5/6 : ℝ) }
+def ZetaZerosNearPoint (t : ℝ) : Set ℂ := { ρ : ℂ | ρ ∈ riemannZetaZeros ∧ ‖ρ - ((3/2 : ℂ) + t * Complex.I)‖ ≤ (5/6 : ℝ) }
 
 private lemma riemannZeta_correction_differentiable :
     Differentiable ℂ (Function.update (fun s : ℂ => (s - 1) * riemannZeta s) 1 1) := by
@@ -53,7 +52,7 @@ lemma ZetaZerosNearPoint_finite (t : ℝ) : Set.Finite (ZetaZerosNearPoint t) :=
   simp_all only [WithTop.untop₀_eq_zero, ENat.map_natCast_eq_zero, ENat.map_eq_top_iff, not_or,
     analyticOrderAt_ne_zero, Set.mem_univ, this z, true_and]
   constructor
-  · simp_all only [zeroZ, Set.mem_setOf_eq, H]
+  · simp_all only [mem_riemannZetaZeros, H]
     by_cases! h : z = 1
     · simp [h, riemannZeta_one_ne_zero] at hz
     · simp_all
@@ -73,7 +72,7 @@ lemma lem_sigmale1 (sigma1 t1 : ℝ) : riemannZeta (sigma1 + t1 * Complex.I) = 0
 
 lemma lem_sigmale1Zt (t : ℝ) (rho1 : ℂ) (h_rho1_in_Zt : rho1 ∈ ZetaZerosNearPoint t) : rho1.re ≤ 1 := by
   apply lem_sigmale1 rho1.re rho1.im
-  simp_all [ZetaZerosNearPoint, zeroZ]
+  simp_all [ZetaZerosNearPoint, mem_riemannZetaZeros]
 
 lemma complex_abs_of_real (x : ℝ) : ‖(x : ℂ)‖ = |x| := by
   rw [Complex.norm_real, Real.norm_eq_abs]
@@ -82,7 +81,7 @@ lemma complex_abs_real_cast (r : ℝ) : ‖(r : ℂ)‖ = |r| := Complex.norm_re
 
 lemma zerosetKfRc_eq_ZetaZerosNearPoint (t : ℝ) :
   zerosetKfRc (5/6 : ℝ) ((3/2 : ℂ) + t * Complex.I) riemannZeta = ZetaZerosNearPoint t := by
-  ext ρ; constructor <;>   simp +contextual [zerosetKfRc, ZetaZerosNearPoint, zeroZ, dist_eq_norm_sub]
+  ext ρ; constructor <;>   simp +contextual [zerosetKfRc, ZetaZerosNearPoint, mem_riemannZetaZeros, dist_eq_norm_sub]
 
 lemma s_notin_ZetaZerosNearPoint (δ t : ℝ) (hδ_pos : 0 < δ) :
   ((1 : ℂ) + δ + t * Complex.I) ∉ ZetaZerosNearPoint t := by
@@ -422,7 +421,7 @@ lemma Z1bound :
   ∃ C > 1,
     ∀ (delta : ℝ), (0 < delta ∧ delta < 1) →
       ∀ t : ℝ, 2 < |t| →
-        ∀ s : ℂ, s ∈ zeroZ ∧ s.im = t →
+        ∀ s : ℂ, s ∈ riemannZetaZeros ∧ s.im = t →
           (-(logDerivZeta ((1 : ℂ) + delta + t * Complex.I))).re
             ≤ - (1 / (1 + delta - s.re)) + C * Real.log (|t| + 2) := by
   obtain ⟨C0, hC0gt1, hExp⟩ := lem_explicit1RealReal
@@ -632,7 +631,7 @@ lemma Z0boundRe_const3 :
 
 lemma Z341bounds_const :
   ∃ C > 1, ∀ (δ : ℝ) (_ : δ > 0) (_ : δ < 1), ∀ t : ℝ, 2 < |t| → ∀ σ : ℝ,
-    (σ + t * Complex.I) ∈ zeroZ →
+    (σ + t * Complex.I) ∈ riemannZetaZeros →
       3 * (-logDerivZeta ((1 : ℂ) + δ)).re
     + 4 * (-logDerivZeta ((1 : ℂ) + δ + t * Complex.I)).re
     +     (-logDerivZeta ((1 : ℂ) + δ + (2 * t) * Complex.I)).re
@@ -722,7 +721,7 @@ lemma rhs_eval_of_inv (C L δ : ℝ) (h : 1 / δ = 2 * C * L) : 3 / δ + C * L =
 
 lemma lem341tsC :
     ∃ C > 1, ∀ s : ℂ,
-        (s ∈ zeroZ ∧ 0 < s.re ∧ s.re < 1) →
+        (s ∈ riemannZetaZeros ∧ 0 < s.re ∧ s.re < 1) →
           2 < |s.im| →
     4 / (1 - s.re + 1 / (2 * C * Real.log (|s.im| + 2))) ≤ 7 * C * Real.log (|s.im| + 2) := by
   -- Get the constant C from Z341bounds_const
@@ -771,7 +770,7 @@ lemma lem341tsC :
     exact ⟨two_C_log_pos hCpos_weak, h2CL_gt_1⟩
 
   -- Apply Z341bounds_const
-  have hmem : (s.re + s.im * Complex.I) ∈ zeroZ := by
+  have hmem : (s.re + s.im * Complex.I) ∈ riemannZetaZeros := by
     simpa [Complex.re_add_im] using hs.1
   have hupper := hbound δ hδpos hδlt (s.im) hTim (s.re) hmem
 
@@ -802,7 +801,7 @@ lemma lem341tsC :
 
 lemma lem341tsC2 :
     ∃ C > 1, ∀ s : ℂ,
-        (s ∈ zeroZ ∧ 0 < s.re ∧ s.re < 1) →
+        (s ∈ riemannZetaZeros ∧ 0 < s.re ∧ s.re < 1) →
           2 < |s.im| →
           1 - s.re + 1 / (2 * C * Real.log (|s.im| + 2)) ≥ 4 / (7 * C * Real.log (|s.im| + 2)) := by
   -- Obtain the constant and bound from lem341tsC
@@ -858,7 +857,7 @@ lemma fraction_diff_lower_bound (C L a : ℝ) : 4 / (7 * C * L) ≤ a + 1 / (2 *
 
 lemma lem341tsC3 :
     ∃ C > 1, ∀ s : ℂ,
-        (s ∈ zeroZ ∧ 0 < s.re ∧ s.re < 1) →
+        (s ∈ riemannZetaZeros ∧ 0 < s.re ∧ s.re < 1) →
           2 < |s.im| →
     1 - s.re ≥ 1 / (14 * C * Real.log (|s.im| + 2)) := by
   obtain ⟨C, hCpos, hT⟩ := lem341tsC2
@@ -878,7 +877,7 @@ lemma lem341tsC3 :
 
 lemma zerofree :
     ∃ c, c > 0 ∧ c < 1 ∧ ∀ s : ℂ,
-        (s ∈ zeroZ ∧ 0 < s.re ∧ s.re < 1) →
+        (s ∈ riemannZetaZeros ∧ 0 < s.re ∧ s.re < 1) →
           2 < |s.im| → s.re ≤ 1 - c / (Real.log (|s.im| + 2)) := by
   -- Obtain the inequality from lem341tsC3
   rcases lem341tsC3 with ⟨C0, hC0pos, hT⟩
@@ -1216,7 +1215,7 @@ lemma lem_ZFRdelta :
     exact lt_trans this hre
   -- Suppose for contradiction that ζ z = 0
   by_contra hzero
-  have hzmem : z ∈ zeroZ := by simpa [zeroZ] using hzero
+  have hzmem : z ∈ riemannZetaZeros := by simpa [mem_riemannZetaZeros] using hzero
   -- Apply the zero-free region inequality with the chosen constant
   have hprop := (Classical.choose_spec zerofree).2.2
   have hbound : z.re ≤ 1 - zerofree_constant / Real.log (|z.im| + 2) :=
@@ -3007,8 +3006,8 @@ lemma ZetaZeroFree_p :
     -- Contradiction with zero location bound
     let s : ℂ := Complex.mk σ t
     have hs_zero : riemannZeta s = 0 := by simpa [s, Complex.mk_eq_add_mul_I] using hzero
-    have hs_in_zeroZ : s ∈ zeroZ := by simpa [zeroZ] using hs_zero
-    have hpre : s ∈ zeroZ ∧ 0 < s.re ∧ s.re < 1 := by
+    have hs_in_zeroZ : s ∈ riemannZetaZeros := by simpa [mem_riemannZetaZeros] using hs_zero
+    have hpre : s ∈ riemannZetaZeros ∧ 0 < s.re ∧ s.re < 1 := by
       refine ⟨hs_in_zeroZ, ?_, ?_⟩
       · simpa [s] using hσ_pos
       · simpa [s] using hσ_lt_one
