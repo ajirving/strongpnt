@@ -651,10 +651,6 @@ lemma Z341pos (t : ℝ) (delta : ℝ) (hdelta : delta > 0) :
   · simp [hn]
   · exact mul_nonneg (mul_nonneg (by simp) (Real.rpow_nonneg (by grind) _)) (lem_postriglogn n (by grind) t)
 
-lemma rhs_eval_of_inv (C L δ : ℝ) (h : 1 / δ = 2 * C * L) : 3 / δ + C * L = 7 * C * L := by
-  rw [← mul_one_div, h]
-  ring
-
 lemma lem341tsC :
     ∃ C > 1, ∀ s : ℂ,
         (s ∈ riemannZetaZeros ∧ 0 < s.re ∧ s.re < 1) →
@@ -687,53 +683,12 @@ lemma lem341tsC :
       linarith [hlog5_gt_1, hL_gt_log5]
     -- Now 2*C*L > 2*1*1 = 2 > 1 since C > 1 and L > 1
     have h2CL_gt_1 : 1 < 2 * C * L := by
-      -- Since C > 1 and L > 1, we have C*L > 1*1 = 1, so 2*C*L > 2*1 = 2 > 1
-      have hCL_gt_1 : 1 < C * L := by
-        calc C * L
-          > 1 * L := by exact mul_lt_mul_of_pos_right hCpos hLpos
-          _ = L := by simp
-          _ > 1 := hL_gt_1
-      have h2_pos : (0 : ℝ) < 2 := by norm_num
-      calc 2 * C * L
-        = 2 * (C * L) := by ring
-        _ > 2 * 1 := by exact mul_lt_mul_of_pos_left hCL_gt_1 h2_pos
-        _ = 2 := by simp
-        _ > 1 := by norm_num
+      bound
     -- Therefore δ = 1/(2*C*L) < 1
-    simp only [δ]
-    rw [div_lt_one]
-    · exact h2CL_gt_1
-    · linarith
+    rwa [div_lt_one (by linarith)]
+  specialize hbound δ hδpos hδlt (s.im) hTim (s.re) (by simp_all)
+  grind [Z341pos (s.im) δ hδpos]
 
-  -- Apply Z341bounds_const
-  have hmem : (s.re + s.im * Complex.I) ∈ riemannZetaZeros := by
-    simpa [Complex.re_add_im] using hs.1
-  have hupper := hbound δ hδpos hδlt (s.im) hTim (s.re) hmem
-
-  -- Apply Z341pos for non-negativity
-  have hpos := Z341pos (s.im) δ hδpos
-
-  -- Combine: 0 ≤ LHS ≤ RHS, so rearranging gives the desired inequality
-  have hRHS_nonneg : 0 ≤ 3 / δ - 4 / (1 + δ - s.re) + C * L := le_trans hpos hupper
-  have hineq1 : 4 / (1 + δ - s.re) ≤ 3 / δ + C * L := by linarith [hRHS_nonneg]
-
-  -- Rewrite denominator: 1 + δ - s.re = 1 - s.re + δ
-  have hineq2 : 4 / (1 - s.re + δ) ≤ 3 / δ + C * L := by
-    convert hineq1 using 2
-    ring
-
-  -- Substitute δ = 1/(2CL) and use rhs_eval_of_inv
-  have hinv : 1 / δ = 2 * C * L := by
-    simp only [δ, one_div, inv_inv]
-
-  have hrhs_eval : 3 / δ + C * L = 7 * C * L := rhs_eval_of_inv C L δ hinv
-
-  have hfinal : 4 / (1 - s.re + δ) ≤ 7 * C * L := by
-    rw [← hrhs_eval]
-    exact hineq2
-
-  -- The goal is exactly what we have with L and δ substituted
-  convert hfinal
 
 lemma lem341tsC2 :
     ∃ C > 1, ∀ s : ℂ,
@@ -743,53 +698,17 @@ lemma lem341tsC2 :
   -- Obtain the constant and bound from lem341tsC
   rcases lem341tsC with ⟨C, hCpos, hT⟩
   refine ⟨C, hCpos, ?_⟩
-  intro s hs hTs
-  -- Define a and b to flip the inequality 4/a ≤ b into 4/b ≤ a
-  set a := 1 - s.re + 1 / (2 * C * Real.log (|s.im| + 2)) with ha
-  set b := 7 * C * Real.log (|s.im| + 2) with hb
-  have hineq : 4 / a ≤ b := by
-    simpa [ha, hb] using hT s hs hTs
-  -- Show b &gt; 0
-  have h_abs_nonneg : 0 ≤ |s.im| := abs_nonneg _
-  have h_two_le : (2 : ℝ) ≤ |s.im| + 2 := by
-    linarith
-  have h_one_lt : (1 : ℝ) < |s.im| + 2 := lt_of_lt_of_le one_lt_two h_two_le
-  have hx0 : 0 ≤ |s.im| + 2 := by linarith [h_abs_nonneg]
-  have hlogpos : 0 < Real.log (|s.im| + 2) := (Real.log_pos_iff hx0).2 h_one_lt
-  have h7pos : 0 < (7 : ℝ) := by exact_mod_cast (by decide : (0 : ℕ) < 7)
-  have hbpos : 0 < b := by
-    have h7Cpos : 0 < 7 * C := by linarith
-    exact mul_pos h7Cpos hlogpos
-  -- Show a &gt; 0
-  rcases hs with ⟨_, hRepos, hRelt⟩
-  have h1 : 0 < 1 - s.re := sub_pos.mpr hRelt
-  have h2pos : 0 < (2 : ℝ) := lt_trans zero_lt_one one_lt_two
-  have h2Cpos : 0 < (2 : ℝ) * C := by linarith
-  have hdenpos : 0 < 2 * C * Real.log (|s.im| + 2) := mul_pos h2Cpos hlogpos
-  have hinvpos : 0 < 1 / (2 * C * Real.log (|s.im| + 2)) := one_div_pos.mpr hdenpos
-  have hapos : 0 < a := by
-    have := add_pos h1 hinvpos
-    simpa [ha] using this
-  -- Flip 4/a ≤ b to 4/b ≤ a via cross-multiplication
-  have hres : 4 / b ≤ a := by
-    rw [div_le_iff₀ hapos] at hineq
-    rw [div_le_iff₀ hbpos, mul_comm]
-    exact hineq
-  simpa [ha, hb] using hres
-
-lemma simplify_4_7_2 (C L : ℝ) : 4 / (7 * C * L) - 1 / (2 * C * L) = 1 / (14 * C * L) := by
-  field
+  peel hT with  s hs hTs hT
+  refine (div_le_comm₀ ?_ (mul_pos (by positivity) (Real.log_pos (by linarith)))).mp hT
+  refine add_pos (by linarith) (one_div_pos.mpr ?_)
+  exact mul_pos (by positivity) (Real.log_pos (by linarith))
 
 lemma fraction_diff_lower_bound (C L a : ℝ) : 4 / (7 * C * L) ≤ a + 1 / (2 * C * L) → 1 / (14 * C * L) ≤ a := by
   intro h
-  have h' : 4 / (7 * C * L) - 1 / (2 * C * L) ≤ a := (sub_le_iff_le_add).mpr h
-  have hdiff : 1 / (14 * C * L) = 4 / (7 * C * L) - 1 / (2 * C * L) := by
-    symm
-    exact simplify_4_7_2 C L
   calc
     1 / (14 * C * L)
-        = 4 / (7 * C * L) - 1 / (2 * C * L) := hdiff
-    _ ≤ a := h'
+        = 4 / (7 * C * L) - 1 / (2 * C * L) := by field
+    _ ≤ a := by linarith
 
 lemma lem341tsC3 :
     ∃ C > 1, ∀ s : ℂ,
@@ -798,12 +717,11 @@ lemma lem341tsC3 :
     1 - s.re ≥ 1 / (14 * C * Real.log (|s.im| + 2)) := by
   obtain ⟨C, hCpos, hT⟩ := lem341tsC2
   refine ⟨C, hCpos, ?_⟩
-  intro s hs hTle
-  have h := hT s hs hTle
+  peel hT with  s hs hTle hT
   -- Convert the inequality to the form required by fraction_diff_lower_bound
   have h' : 4 / (7 * C * Real.log (|s.im| + 2)) ≤
       (1 - s.re) + 1 / (2 * C * Real.log (|s.im| + 2)) := by
-    simpa [ge_iff_le, add_comm, add_left_comm, add_assoc] using h
+    simpa [ge_iff_le, add_comm, add_left_comm, add_assoc] using hT
   -- Apply the algebraic rearrangement lemma
   have h'' := fraction_diff_lower_bound C (Real.log (|s.im| + 2)) (1 - s.re) h'
   -- Conclude
@@ -817,40 +735,11 @@ lemma zerofree :
           2 < |s.im| → s.re ≤ 1 - c / (Real.log (|s.im| + 2)) := by
   -- Obtain the inequality from lem341tsC3
   rcases lem341tsC3 with ⟨C0, hC0pos, hT⟩
-  -- Define the final constant C := 1 / (14 * C0)
-  set C : ℝ := 1 / (14 * C0) with hCdef
-  -- Show C > 0
-  have h14pos : 0 < (14 : ℝ) := by norm_num
-  have hC0pos' : 0 < C0 := lt_trans zero_lt_one hC0pos
-  have hCpos : 0 < C := by
-    have hdenpos : 0 < 14 * C0 := mul_pos h14pos hC0pos'
-    exact one_div_pos.mpr hdenpos
-  -- Show C < 1: Since C0 > 1, we have 14 * C0 > 14 > 1, so C = 1/(14*C0) < 1
-  have hClt1 : C < 1 := by
-    have h14C0_pos : 0 < 14 * C0 := mul_pos h14pos hC0pos'
-    have h14C0_gt_1 : 1 < 14 * C0 := by
-      have h14_gt_1 : (1 : ℝ) < 14 := by norm_num
-      calc
-        (1 : ℝ) = 1 * 1 := by ring
-        _ < 14 * 1 := by exact mul_lt_mul_of_pos_right h14_gt_1 zero_lt_one
-        _ < 14 * C0 := by exact mul_lt_mul_of_pos_left hC0pos h14pos
-    rw [hCdef]
-    rw [div_lt_one_iff]
-    left
-    exact ⟨h14C0_pos, h14C0_gt_1⟩
-  -- Provide constants and prove the desired bound
-  refine ⟨C, hCpos, hClt1, ?_⟩
-  intro s hs hTle
-  -- Let L denote the logarithm term
-  set L := Real.log (|s.im| + 2) with hLdef
-  -- From lem341tsC3 we have: 1 / (14 * C0 * L) ≤ 1 - s.re
-  have hb0 := hT s hs hTle
-  -- Rewrite the bound to match C / L on the left
-  have hb' : C / L ≤ 1 - s.re := by
-    simpa [hLdef, hCdef, one_div, div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using hb0
-  -- Rearranging gives the desired inequality
-  have : s.re ≤ 1 - C / L := by linarith
-  simpa [hLdef] using this
+  refine ⟨1 / (14 * C0), (by positivity), (by bound), ?__⟩
+  peel hT with s hs hsi hT
+  suffices 1 / (14 * C0) / Real.log (|s.im| + 2) ≤ 1 - s.re by linarith
+  convert hT.le using 1
+  ring
 
 -- The constant a from the zerofree lemma
 noncomputable def zerofree_constant : ℝ := Classical.choose zerofree
@@ -873,85 +762,19 @@ lemma lem_delta19 :
   have h_complex : ∀ z : ℂ, |z.im| > 2 → (0 < deltaz z ∧ deltaz z < 1/9) := by
     intro z hz
     constructor
-    · -- Show 0 < deltaz z
-      have h_num_pos : 0 < zerofree_constant / 20 := by
-        exact div_pos zerofree_constant_pos (by norm_num)
-      have h_den_pos : 0 < Real.log (|z.im| + 2) := by
-        have h_gt_one : (1 : ℝ) < |z.im| + 2 := by
-          have h_nonneg : (0 : ℝ) ≤ |z.im| := abs_nonneg _
-          linarith [hz]
-        exact Real.log_pos h_gt_one
-      unfold deltaz
-      exact div_pos h_num_pos h_den_pos
+    · exact div_pos (div_pos zerofree_constant_pos (by norm_num)) (by bound)
     · -- Show deltaz z < 1/9
-      -- First establish the key bounds
-      have h_den_ge_half : (1/2 : ℝ) ≤ Real.log (|z.im| + 2) := by
-        -- log(|z.im| + 2) ≥ log(2) ≥ 1/2
-        have h_den_ge_log2 : Real.log 2 ≤ Real.log (|z.im| + 2) := by
-          have h_pos : 0 < |z.im| + 2 := by linarith [abs_nonneg (z.im)]
-          have h_le : (2 : ℝ) ≤ |z.im| + 2 := by linarith [abs_nonneg (z.im)]
-          exact Real.log_le_log (by norm_num) h_le
-        -- Show log 2 ≥ 1/2 using exp(1/2) ≤ 2
-        have h_log2_ge_half : (1/2 : ℝ) ≤ Real.log 2 := by
-          have h_exp_half_le_two : Real.exp (1/2) ≤ 2 := by
-            -- exp(1/2)^2 = exp(1) < 3 < 4 = 2^2, so exp(1/2) < 2
-            have h_exp_one_lt_three : Real.exp 1 < 3 := by linarith[Real.exp_one_lt_d9]
-            have h_exp_sq : (Real.exp (1/2))^2 = Real.exp 1 := by
-              rw [pow_two, ← Real.exp_add]; norm_num
-            have h_exp_sq_lt_four : (Real.exp (1/2))^2 < 4 := by
-              rw [h_exp_sq]; linarith [h_exp_one_lt_three]
-            -- Use sq_lt_sq to get exp(1/2) < 2
-            have h_exp_pos : 0 ≤ Real.exp (1/2) := le_of_lt (Real.exp_pos _)
-            have h_two_pos : 0 ≤ (2 : ℝ) := by norm_num
-            have h_four_eq : (2 : ℝ)^2 = 4 := by norm_num
-            rw [← h_four_eq] at h_exp_sq_lt_four
-            have h_lt_abs := (sq_lt_sq).mp h_exp_sq_lt_four
-            rw [abs_of_nonneg h_exp_pos, abs_of_nonneg h_two_pos] at h_lt_abs
-            exact le_of_lt h_lt_abs
-          exact (Real.le_log_iff_exp_le (by norm_num : 0 < (2 : ℝ))).mpr h_exp_half_le_two
-        exact le_trans h_log2_ge_half h_den_ge_log2
-      -- Now get the bound on the reciprocal
-      have h_inv_le_two : 1 / Real.log (|z.im| + 2) ≤ 2 := by
-        have h_pos_half : 0 < (1/2 : ℝ) := by norm_num
-        have h_ineq := one_div_le_one_div_of_le h_pos_half h_den_ge_half
-        convert! h_ineq using 1
-        norm_num
-      -- Now bound deltaz z
-      have h_bound : deltaz z ≤ zerofree_constant / 10 := by
-        unfold deltaz
-        -- deltaz z = (zerofree_constant / 20) / Real.log (|z.im| + 2)
-        --          = (zerofree_constant / 20) * (1 / Real.log (|z.im| + 2))
-        rw [div_eq_mul_inv]
-        -- Now multiply the inequality 1 / Real.log (|z.im| + 2) ≤ 2 by zerofree_constant / 20
-        have h_num_nonneg : 0 ≤ zerofree_constant / 20 := by
-          exact le_of_lt (div_pos zerofree_constant_pos (by norm_num))
-        have h_mul_ineq := mul_le_mul_of_nonneg_left h_inv_le_two h_num_nonneg
-        convert! h_mul_ineq using 1
-        -- Show zerofree_constant / 20 * 2 = zerofree_constant / 10
-        · field
-        ring
-      -- Final bound: zerofree_constant / 10 < 1/10 < 1/9
-      have h_lt_tenth : zerofree_constant / 10 < 1 / 10 := by
-        exact div_lt_div_of_pos_right zerofree_constant_lt_one (by norm_num)
-      have h_tenth_lt_ninth : (1 : ℝ) / 10 < 1 / 9 := by norm_num
-      exact lt_trans (lt_of_le_of_lt h_bound h_lt_tenth) h_tenth_lt_ninth
-
+      unfold deltaz
+      grw [zerofree_constant_lt_one]
+      · suffices Real.log (|z.im| + 2) ≥ 1 / 2 by
+          grw [this]
+          norm_num
+        trans Real.log 2
+        · gcongr; linarith
+        · linarith [Real.log_two_gt_d9]
+      · bound
   -- Now construct the main result
-  constructor
-  · exact h_complex
-  · -- For real t
-    intro t ht
-    -- Use deltaz_t t = deltaz (t * Complex.I) and |(t * Complex.I).im| = |t|
-    have h_eq : deltaz_t t = deltaz (t * Complex.I) := rfl
-    rw [h_eq]
-    have h_im_eq : |(t * Complex.I).im| = |t| := by simp
-    rw [← h_im_eq] at ht
-    exact h_complex (t * Complex.I) ht
-
-lemma closedBall_compact_complex (c : ℂ) (r : ℝ) :
-    IsCompact (Metric.closedBall c r) := by
-  -- Complex numbers form a proper space where all closed balls are compact
-  exact ProperSpace.isCompact_closedBall c r
+  refine ⟨h_complex, fun t ht ↦ h_complex _ (by simpa)⟩
 
 lemma riemannZeta_no_zeros_accumulate_at_one :
   ∀ Z : Set ℂ, (∀ z ∈ Z, riemannZeta z = 0) → ¬AccPt 1 (Filter.principal Z) := by
@@ -1582,7 +1405,7 @@ lemma lem_finiteKzeta (t : ℝ) :
     (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite := by
   intro c
   have hK : IsCompact (Metric.closedBall c (5 / (6 : ℝ))) :=
-    closedBall_compact_complex c (5 / (6 : ℝ))
+    isCompact_closedBall ..
   simpa [zerosetKfRc] using
     (riemannZeta_zeros_finite_of_compact (Metric.closedBall c (5 / (6 : ℝ))) hK)
 
