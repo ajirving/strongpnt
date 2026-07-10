@@ -73,18 +73,16 @@ lemma lem_HardMMP (R B : ℝ) (hR : R > 0)
   simp_all
 
 
-def I := Complex.I
-
 lemma cauchy_formula_deriv {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ}
     (hfdiff : DifferentiableOn ℂ f (Metric.ball 0 R_analytic))
     (h_r_z_lt_r_int : r_z < r_int)
     (h_r_int_lt_R_analytic : r_int < R_analytic)
     {z : ℂ} (hz : z ∈ Metric.closedBall 0 r_z) :
-deriv f z = (1 / (2 * Real.pi * I)) • ∮ w in C(0, r_int), (w - z)⁻¹ ^ 2 • f w := by
+deriv f z = (1 / (2 * Real.pi * Complex.I)) • ∮ w in C(0, r_int), (w - z)⁻¹ ^ 2 • f w := by
   rw [← Complex.two_pi_I_inv_smul_circleIntegral_sub_sq_inv_smul_of_differentiable Metric.isOpen_ball
     (Metric.closedBall_subset_ball h_r_int_lt_R_analytic) hfdiff
     (Metric.closedBall_subset_ball h_r_z_lt_r_int hz)]
-  simp [I]
+  simp
 
 lemma lem_f_prime_bound {f : ℂ → ℂ} {M R_analytic r_z r_int : ℝ}
     (hM_pos : 0 < M)
@@ -97,7 +95,7 @@ lemma lem_f_prime_bound {f : ℂ → ℂ} {M R_analytic r_z r_int : ℝ}
     (hRe_f_le_M : ∀ w ∈ Metric.closedBall 0 R_analytic, (f w).re ≤ M)
     {z : ℂ} (hz : z ∈ Metric.closedBall 0 r_z) :
 norm (deriv f z) ≤ (2 * r_int ^ 2 * M) / ((R_analytic - r_int) * (r_int - r_z) ^ 2) := by
-  rw [cauchy_formula_deriv (analytic.differentiableOn.mono Metric.ball_subset_closedBall) h_r_z_lt_r_int h_r_int_lt_R_analytic hz, one_div, I]
+  rw [cauchy_formula_deriv (analytic.differentiableOn.mono Metric.ball_subset_closedBall) h_r_z_lt_r_int h_r_int_lt_R_analytic hz, one_div]
   grw [circleIntegral.norm_two_pi_i_inv_smul_integral_le_of_norm_le_const (by linarith) (C := 2 * M * r_int / ((R_analytic - r_int) * (r_int - r_z) ^ 2))]
   · exact le_of_eq (by ring)
   · intro z' hz'

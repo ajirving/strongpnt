@@ -173,12 +173,12 @@ lemma lem_zetaUppBd (z : ℂ) (hz_re : z.re ∈ Ico (1 / 2 : ℝ) (3 : ℝ)) (hz
 /-- Lemma: Final zeta upper bound with shift. -/
 lemma lem_zetaUppBound :
     ∀ t : ℝ, ∀ s : ℂ, ‖s‖ ≤ (1 : ℝ) → (2 : ℝ) < |t| →
-      ‖riemannZeta (s + (3/2 : ℝ) + I * t)‖ < (10 : ℝ) + 2 * |t| := by
+      ‖riemannZeta (s + (3/2 : ℝ) + Complex.I * t)‖ < (10 : ℝ) + 2 * |t| := by
   intro t s hs ht
-  set z := s + (3/2 : ℝ) + I * t with hz_def
+  set z := s + (3/2 : ℝ) + Complex.I * t with hz_def
   -- Apply lem_zfroms_conditions to get conditions on z
   have hz_cond : z.re ∈ Ico (1/2 : ℝ) (3 : ℝ) ∧ (1 : ℝ) ≤ |z.im| := by
-    simp [hz_def, I, -one_div]
+    simp [hz_def, -one_div]
     have re_bound := Complex.abs_re_le_norm s|>.trans hs
     have im_bound := Complex.abs_im_le_norm s|>.trans hs
     grind
@@ -186,7 +186,7 @@ lemma lem_zetaUppBound :
   have h_bound : ‖riemannZeta z‖ < (8 : ℝ) + 2 * |z.im| :=
     lem_zetaUppBd z hz_cond.1 hz_cond.2
   have h_im_bound : |z.im| ≤ 1 + |t| := by
-    simp only [hz_def, Complex.ofReal_div, Complex.ofReal_ofNat, I, Complex.add_im,
+    simp only [hz_def, Complex.ofReal_div, Complex.ofReal_ofNat, Complex.add_im,
       Complex.div_ofNat_im, Complex.im_ofNat, zero_div, add_zero, Complex.mul_im, Complex.I_re,
       Complex.ofReal_im, mul_zero, Complex.I_im, Complex.ofReal_re, one_mul, zero_add]
     grw [abs_add_le]
@@ -207,30 +207,30 @@ lemma zetaanalOnnot1 : AnalyticOnNhd ℂ riemannZeta {s : ℂ | s ≠ 1} := by
   exact DifferentiableOn.analyticOnNhd (fun s hs ↦ (differentiableAt_riemannZeta (by simp_all)).differentiableWithinAt)  isOpen_compl_singleton
 
 lemma D1cinTt_pre (t : ℝ) (ht : |t| > 1) :
-    ∀ s ∈ closedBall (3/2 + I * t : ℂ) 1, s ≠ 1 := by
+    ∀ s ∈ closedBall (3/2 + Complex.I * t : ℂ) 1, s ≠ 1 := by
   intro s hs h
   simp only [h, mem_closedBall, Complex.dist_eq] at hs
-  have := le_trans (Complex.abs_im_le_norm (1 - (3 / 2 + I * ↑t))) hs
-  simp [I] at this
+  have := le_trans (Complex.abs_im_le_norm (1 - (3 / 2 + Complex.I * ↑t))) hs
+  simp at this
   linarith
 
 -- Lemma 10: D1cinTt
 lemma D1cinTt (t : ℝ) (ht : |t| > 1) :
-    closedBall (3/2 + I * t : ℂ) 1 ⊆ {s : ℂ | s ≠ 1} := by
+    closedBall (3/2 + Complex.I * t : ℂ) 1 ⊆ {s : ℂ | s ≠ 1} := by
   -- This follows directly from D1cinTt_pre
   exact fun s hs => D1cinTt_pre t ht s hs
 
 -- Lemma 11: zetaanalOnD1c
 lemma zetaanalOnD1c (t : ℝ) (ht : |t| > 1) :
-    AnalyticOnNhd ℂ riemannZeta (closedBall (3/2 + I * t : ℂ) 1) := by
+    AnalyticOnNhd ℂ riemannZeta (closedBall (3/2 + Complex.I * t : ℂ) 1) := by
   apply zetaanalOnnot1.mono
   exact D1cinTt t ht
 
 
 -- Lemma 13: zetacnot0
-lemma zetacnot0 (t : ℝ) : riemannZeta (3/2 + I * t) ≠ 0 := by
+lemma zetacnot0 (t : ℝ) : riemannZeta (3/2 + Complex.I * t) ≠ 0 := by
   apply riemannZeta_ne_zero_of_one_lt_re
-  simp [I]
+  simp
   norm_num
 
 -- Lemma: fc_analytic_normalized
@@ -395,7 +395,7 @@ lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
     (r1 r R1 R : ℝ)
     (hr1_pos : 0 < r1) (hr1_lt_r : r1 < r)
     (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1) :
-    let c := (3/2 : ℂ) + I * t
+    let c := (3/2 : ℂ) + Complex.I * t
     ∀ B > 1, (∀ z ∈ closedBall c R, ‖riemannZeta z‖ < B) →
     ∀ (hfin : (zerosetKfRc R1 c riemannZeta).Finite),
     ∀ z ∈ closedBall c r1 \ zerosetKfRc R1 c riemannZeta,
@@ -466,22 +466,22 @@ lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
   simpa [logDerivZeta] using hineq2
 
 
-lemma zeta32lower : ∃ a > 0, ∀ t : ℝ, ‖riemannZeta (3/2 + I * t)‖ ≥ a := by
+lemma zeta32lower : ∃ a > 0, ∀ t : ℝ, ‖riemannZeta (3/2 + Complex.I * t)‖ ≥ a := by
   rcases zeta_low_332 with ⟨a, ha_pos, hbound⟩
   refine ⟨a, ha_pos, ?_⟩
   intro t
-  simpa [I, mul_comm] using (hbound t)
+  simpa [mul_comm] using (hbound t)
 
 -- Lemma 17: zeta32lower_log
 lemma zeta32lower_log : ∃ A > 1, ∀ t : ℝ,
-    Real.log (1 / ‖riemannZeta (3/2 + I * t)‖) ≤ A := by
+    Real.log (1 / ‖riemannZeta (3/2 + Complex.I * t)‖) ≤ A := by
   obtain ⟨a, ha_pos, hbound⟩ := zeta32lower
   refine ⟨max (2 : ℝ) (Real.log (1 / a)), ?_, ?_⟩
   · have h1 : (1 : ℝ) < 2 := by norm_num
     have h2 : (2 : ℝ) ≤ max (2 : ℝ) (Real.log (1 / a)) := by exact le_max_left _ _
     exact lt_of_lt_of_le h1 h2
   · intro t
-    set x := ‖riemannZeta (3/2 + I * t)‖ with hx
+    set x := ‖riemannZeta (3/2 + Complex.I * t)‖ with hx
     have hax : a ≤ x := by
       simpa [hx] using (hbound t)
     have hxpos : 0 < x := lt_of_lt_of_le ha_pos hax
@@ -502,7 +502,7 @@ lemma zeta32upper_pre : ∃ b > 1, ∀ t : ℝ, ∀ s : ℂ, ‖s‖ ≤ 1 → (
   refine ⟨(12 : ℝ), by norm_num, ?_⟩
   intro t s hs ht
   have hlt : ‖riemannZeta (s + 3/2 + Complex.I * t)‖ < (10 : ℝ) + 2 * |t| := by
-    simpa [I] using (lem_zetaUppBound t s hs ht)
+    simpa using (lem_zetaUppBound t s hs ht)
   have honele : (1 : ℝ) ≤ |t| := by
     have : (1 : ℝ) < |t| := lt_trans (by norm_num) ht
     exact le_of_lt this
@@ -517,7 +517,7 @@ lemma zeta32upper_pre : ∃ b > 1, ∀ t : ℝ, ∀ s : ℂ, ‖s‖ ≤ 1 → (
 
 -- Lemma 19: zeta32upper
 lemma zeta32upper : ∃ b > 1, ∀ t : ℝ, |t| > 2 →
-  let c := (3/2 : ℂ) + I * t
+  let c := (3/2 : ℂ) + Complex.I * t
   ∀ s ∈ closedBall c 1, ‖riemannZeta s‖ < b * |t| := by
   -- Use zeta32upper_pre to get the bound
   obtain ⟨b, hb_gt, hbound⟩ := zeta32upper_pre
@@ -530,8 +530,8 @@ lemma zeta32upper : ∃ b > 1, ∀ t : ℝ, |t| > 2 →
   have hs_pre_bound : ‖s_pre‖ ≤ 1 := by
     rw [hs_pre_def]
     rwa [Complex.dist_eq] at hs
-  -- Now s = s_pre + c = s_pre + 3/2 + I * t
-  have hs_eq : s = s_pre + 3/2 + I * t := by
+  -- Now s = s_pre + c = s_pre + 3/2 + Complex.I * t
+  have hs_eq : s = s_pre + 3/2 + Complex.I * t := by
     rw [hs_pre_def]
     ring
   -- Apply zeta32upper_pre
@@ -546,7 +546,7 @@ lemma Zeta1_Zeta_Expand :
     (r1 r R1 R : ℝ)
     (_ : 0 < r1) (_ : r1 < r)
     (_ : 0 < r) (_ : r < R1) (_ : 0 < R1) (_ : R1 < R) (_ : R < 1),
-    let c := (3/2 : ℂ) + I * t;
+    let c := (3/2 : ℂ) + Complex.I * t;
     ∀ (hfin : (zerosetKfRc R1 c riemannZeta).Finite),
     ∀ z ∈ closedBall c r1 \ zerosetKfRc R1 c riemannZeta,
     ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
@@ -573,11 +573,11 @@ lemma Zeta1_Zeta_Expand :
     _ < b * |t| := mul_lt_mul_of_pos_left ht hb_pos
 
   -- Apply zeta32upper to get bound on |ζ| in the ball
-  have hbound_ball : ∀ s ∈ closedBall (3/2 + I * t) R, ‖riemannZeta s‖ < b * |t| := by
-    have hsubset : closedBall (3/2 + I * t) R ⊆ closedBall (3/2 + I * t) 1 :=
+  have hbound_ball : ∀ s ∈ closedBall (3/2 + Complex.I * t) R, ‖riemannZeta s‖ < b * |t| := by
+    have hsubset : closedBall (3/2 + Complex.I * t) R ⊆ closedBall (3/2 + Complex.I * t) 1 :=
       Metric.closedBall_subset_closedBall (le_of_lt hR_lt_1)
     intro s hs
-    have hs1 : s ∈ closedBall (3/2 + I * t) 1 := hsubset hs
+    have hs1 : s ∈ closedBall (3/2 + Complex.I * t) 1 := hsubset hs
     have ht2 : |t| > 2 := by linarith [ht]
     specialize hb t ht2
     exact hb s hs1
@@ -586,8 +586,8 @@ lemma Zeta1_Zeta_Expand :
   have hexp := hexp_lemma (b * |t|) hBgt1 hbound_ball hfin z hz
 
   -- Use properties of ζ at c and bounds from zeta32lower_log
-  have hζne : riemannZeta (3/2 + I * t) ≠ 0 := zetacnot0 t
-  have hζpos : (0 : ℝ) < ‖riemannZeta (3/2 + I * t)‖ := norm_pos_iff.mpr hζne
+  have hζne : riemannZeta (3/2 + Complex.I * t) ≠ 0 := zetacnot0 t
+  have hζpos : (0 : ℝ) < ‖riemannZeta (3/2 + Complex.I * t)‖ := norm_pos_iff.mpr hζne
 
   have hBpos : (0 : ℝ) < b * |t| := mul_pos (by linarith [hbgt1]) htpos
   have hBne : b * |t| ≠ 0 := ne_of_gt hBpos
@@ -595,14 +595,14 @@ lemma Zeta1_Zeta_Expand :
   have hbne : b ≠ 0 := ne_of_gt (by linarith [hbgt1])
 
   -- Key logarithmic bound using zeta32lower_log
-  have hlog_bound : Real.log (b * |t| / ‖riemannZeta (3/2 + I * t)‖) ≤
+  have hlog_bound : Real.log (b * |t| / ‖riemannZeta (3/2 + Complex.I * t)‖) ≤
                     Real.log |t| + Real.log b + A := by
     rw [Real.log_div hBne (ne_of_gt hζpos)]
     rw [Real.log_mul hbne htne]
     -- Apply zeta32lower_log bound
     have hA_bound := hA t
-    have : -Real.log ‖riemannZeta (3/2 + I * t)‖ ≤ A := by
-      have eq_neg : Real.log (1 / ‖riemannZeta (3/2 + I * t)‖) = -Real.log ‖riemannZeta (3/2 + I * t)‖ := by
+    have : -Real.log ‖riemannZeta (3/2 + Complex.I * t)‖ ≤ A := by
+      have eq_neg : Real.log (1 / ‖riemannZeta (3/2 + Complex.I * t)‖) = -Real.log ‖riemannZeta (3/2 + Complex.I * t)‖ := by
         rw [Real.log_div (by norm_num) (ne_of_gt hζpos)]
         simp
       rw [← eq_neg]
@@ -646,7 +646,7 @@ lemma Zeta1_Zeta_Expand :
   calc ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
       ((analyticOrderNatAt riemannZeta ρ) : ℂ) / (z - ρ)‖
       ≤ (16 * r^2 / ((r - r1)^3) +
-          1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log (b * |t| / ‖riemannZeta (3/2 + I * t)‖) := hexp
+          1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log (b * |t| / ‖riemannZeta (3/2 + Complex.I * t)‖) := hexp
     _ ≤ (16 * r^2 / ((r - r1)^3) +
           1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * (Real.log |t| + Real.log b + A) := by
       exact mul_le_mul_of_nonneg_left hlog_bound hcoeff_nonneg
@@ -658,7 +658,7 @@ lemma Zeta1_Zeta_Expansion
     (hr1_pos : 0 < r1) (hr1_lt_r : r1 < r) (hr_lt_R1 : r < 5 / (6 : ℝ)) :
     ∃ C > 1,
     ∀ (t : ℝ) (_ : |t| > 2),
-    let c := (3/2 : ℂ) + I * t;
+    let c := (3/2 : ℂ) + Complex.I * t;
     ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
     ∀ z ∈ closedBall c r1 \ zerosetKfRc (5 / (6 : ℝ)) c riemannZeta,
     ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
