@@ -1265,10 +1265,6 @@ lemma logDeriv_def_as_frac {f : ℂ → ℂ} {z : ℂ} :
     logDeriv f z = deriv f z / f z := by
   simp [logDeriv]
 
-def ball_containment {r R1 : ℝ} (_hr_pos : 0 < r) (hr_lt_R1 : r < R1) (z : ℂ) (hz : z ∈ Metric.closedBall 0 r) : z ∈ Metric.closedBall 0 R1 := by
-  simp at *
-  linarith
-
 theorem in_r_minus_kf {R1 r : ℝ} {f : ℂ → ℂ}
   (hr_pos : 0 < r)
   (hr_lt_R1 : r < R1)
@@ -1277,7 +1273,8 @@ theorem in_r_minus_kf {R1 r : ℝ} {f : ℂ → ℂ}
    z ∈ Metric.closedBall 0 R1 \ zerosetKfR R1 f := by
   obtain ⟨h1, h2⟩ := hz
   have : z ∈ Metric.closedBall 0 R1 := by
-    apply ball_containment hr_pos hr_lt_R1 z h1
+    simp_all
+    linarith
   constructor <;> assumption
 
 -- Lemma 22: Lf_deriv_step1
