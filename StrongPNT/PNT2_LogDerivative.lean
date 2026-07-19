@@ -1266,7 +1266,6 @@ lemma logDeriv_def_as_frac {f : ℂ → ℂ} {z : ℂ} :
   simp [logDeriv]
 
 theorem in_r_minus_kf {R1 r : ℝ} {f : ℂ → ℂ}
-  (hr_pos : 0 < r)
   (hr_lt_R1 : r < R1)
   (z : ℂ)
   (hz : z ∈ Metric.closedBall 0 r \ zerosetKfR R1 f) :
@@ -1296,7 +1295,7 @@ lemma Lf_deriv_step1 (hR1_pos : 0 < R1) (h_f_analytic : AnalyticOnNhd ℂ f (clo
   have hLf :=
   --
     (Lf_deriv_is_logBf_deriv hR1_lt_R hR1_pos (fun z hz ↦ h_f_analytic z (closedBall_subset_closedBall (by linarith) hz)) ne_top
-      z (in_r_minus_kf hr_pos hr_lt_R1 _ hz)).symm
+      z (in_r_minus_kf hr_lt_R1 _ hz)).symm
   -- Expand logDeriv of Bf into sum
   have hsum :
       logDeriv (fun w ↦
@@ -1306,12 +1305,12 @@ lemma Lf_deriv_step1 (hR1_pos : 0 < R1) (h_f_analytic : AnalyticOnNhd ℂ f (clo
             ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
     have h :=
       (logDeriv_Bf_is_sum (R := R) (R1 := R1) (f := f)
-        h_finite_zeros hR1_lt_R hR1_pos h_f_analytic z (in_r_minus_kf hr_pos hr_lt_R1 _ hz))
+        h_finite_zeros hR1_lt_R hR1_pos h_f_analytic z (in_r_minus_kf hr_lt_R1 _ hz))
     simpa using h
   -- Turn logDeriv f into deriv f / f using differentiability and nonvanishing
   obtain ⟨hf_ne, hfdiff⟩ :=
     f_diff_nonzero_outside_Kf (R1 := R1) (f := f)
-      h_f_analytic z (in_r_minus_kf hr_pos hr_lt_R1 _ hz)
+      h_f_analytic z (in_r_minus_kf hr_lt_R1 _ hz)
   have hfrac : logDeriv f z = deriv f z / f z :=
     logDeriv_def_as_frac (f := f) (z := z)
   -- Combine
@@ -1417,7 +1416,7 @@ lemma Lf_deriv_step2 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
   have h1 :=
     Lf_deriv_step1 h_finite_zeros hR1_pos h_f_analytic hr_pos hr_lt_R1 hR1_lt_R h_f_zero Lf h_Lf z hz
   have hsum :=
-    logDeriv_prod_is_sum_mul (R:=R) (R1:=R1) (f:=f) hR1_pos hR1_lt_R h_finite_zeros z (in_r_minus_kf hr_pos hr_lt_R1 _ hz)
+    logDeriv_prod_is_sum_mul (R:=R) (R1:=R1) (f:=f) hR1_pos hR1_lt_R h_finite_zeros z (in_r_minus_kf hr_lt_R1 _ hz)
   have h2 := congrArg (fun t => deriv f z / f z + t) hsum
   exact h1.trans h2
 
@@ -1568,7 +1567,7 @@ lemma Lf_deriv_step3 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
   apply Finset.sum_congr rfl
   intro ρ hρ
   congr 1
-  exact logDeriv_Blaschke_is_diff_frac hR1_pos hR1_lt_R h_f_zero h_finite_zeros ρ hρ z (in_r_minus_kf hr_pos hr_lt_R1 _ hz)
+  exact logDeriv_Blaschke_is_diff_frac hR1_pos hR1_lt_R h_f_zero h_finite_zeros ρ hρ z (in_r_minus_kf hr_lt_R1 _ hz)
 
 -- Lemma 36: sum_rearranged
 lemma sum_rearranged {R R1 : ℝ} {f : ℂ → ℂ}
