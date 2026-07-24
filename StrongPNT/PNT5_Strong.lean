@@ -1736,15 +1736,14 @@ theorem Strong_PNT : ∃ c > 0,
     + ‖I₃ ν ε T X σ₁‖ + ‖I₄ ν ε X σ₁ σ₂‖) + ‖I₅ ν ε X σ₂‖ := by
     unfold ψ_ε_of_X
     rw [SmoothedChebyshevPull1 ε_pos ε_lt_one X X_gt_3 (T := T) (by linarith)
-      σ₁pos σ₁_lt_one holo1_compat ν_supp ν_nonneg ν_massOne ContDiff1ν]
-    rw [SmoothedChebyshevPull2 ε_pos ε_lt_one X X_gt_3 (T := T) (by linarith)
+      σ₁pos σ₁_lt_one holo1_compat ν_supp ν_nonneg ν_massOne ContDiff1ν,
+      SmoothedChebyshevPull2 ε_pos ε_lt_one X X_gt_3 (T := T) (by linarith)
       σ₂_pos σ₁_lt_one σ₂_lt_σ₁ holo1_compat holo2a ν_supp ν_nonneg ν_massOne ContDiff1ν]
     ring_nf
     grw [norm_add_le, norm_add_le, norm_add_le, norm_add_le, norm_add_le, norm_sub_le, norm_add_le, norm_sub_le]
     rw [I9I1 (by linarith), I8I2 (by linarith), I7I3 (by linarith), I6I4 (by linarith)]
-    simp
-    ring_nf
-    rfl
+    simp only [norm_neg, RCLike.norm_conj]
+    exact le_of_eq (by ring)
   specialize h_main ε ⟨ε_pos, ε_lt_ε_main⟩
   have main : ‖𝓜 (fun x ↦ (Smooth1 ν ε x : ℂ)) 1 * X - X‖ ≤ C_main * ε * X := by
     nth_rewrite 2 [← one_mul X]
