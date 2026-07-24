@@ -1423,19 +1423,12 @@ theorem Strong_PNT : ∃ c > 0,
   obtain ⟨c₂, c₂pos, hc₂⟩ := I2Bound ν_supp ContDiff1ν zeta_bnd C_bnd_pos A_in_Ioc
   obtain ⟨c₃, c₃pos, hc₃⟩ := I3Bound ν_supp ContDiff1ν zeta_bnd C_bnd_pos A_in_Ioc
   obtain ⟨c₅, c₅pos, hc₅⟩ := I5Bound ν_supp ContDiff1ν holo2  ⟨σ₂_pos, σ₂_lt_one⟩
-  obtain ⟨c₇, c₇pos, hc₇⟩ := I7Bound ν_supp ContDiff1ν zeta_bnd C_bnd_pos A_in_Ioc
-  obtain ⟨c₈, c₈pos, hc₈⟩ := I8Bound ν_supp ContDiff1ν zeta_bnd C_bnd_pos A_in_Ioc
-  obtain ⟨c₉, c₉pos, hc₉⟩ := I9Bound ν_supp ContDiff1ν ν_nonneg ν_massOne
-
   obtain ⟨c₄, c₄pos, Tlb₄, Tlb₄bnd, hc₄⟩ := I4Bound ν_supp ContDiff1ν
     holo2 ⟨σ₂_pos, σ₂_lt_one⟩ A_in_Ioc
 
-  obtain ⟨c₆, c₆pos, Tlb₆, Tlb₆bnd, hc₆⟩ := I6Bound ν_supp ContDiff1ν
-    holo2 ⟨σ₂_pos, σ₂_lt_one⟩ A_in_Ioc
-
   let C' := c_close + C_main
-  let C'' := c₁ + c₂ + c₈ + c₉
-  let C''' := c₃ + c₄ + c₆ + c₇
+  let C'' := 2 *(c₁ + c₂)
+  let C''' := 2 * (c₃ + c₄)
 
 
   let c : ℝ := A ^ ((1 : ℝ) / 2) / 4
@@ -1498,9 +1491,6 @@ theorem Strong_PNT : ∃ c > 0,
 
   have eventually_T_gt_Tlb₄ : ∀ᶠ (x : ℝ) in atTop, Tlb₄ < Tx x := by
     exact Tx_to_inf.eventually_gt_atTop _
-  have eventually_T_gt_Tlb₆ : ∀ᶠ (x : ℝ) in atTop, Tlb₆ < Tx x := by
-    exact Tx_to_inf.eventually_gt_atTop _
-
   have eventually_σ₂_lt_σ₁ : ∀ᶠ (x : ℝ) in atTop, σ₂ < 1 - A / (Real.log (Tx x)) := by
     --have' := (tendsto_order.mp ?_).1
     apply (tendsto_order.mp ?_).1
@@ -1800,13 +1790,13 @@ theorem Strong_PNT : ∃ c > 0,
 
 
   filter_upwards [eventually_gt_atTop 3, eventually_εx_lt_one, eventually_2_lt,
-    eventually_T_gt_3, eventually_T_gt_Tlb₄, eventually_T_gt_Tlb₆,
+    eventually_T_gt_3, eventually_T_gt_Tlb₄,
       eventually_σ₂_lt_σ₁, eventually_ε_lt_ε_main, event_logX_ge, event_1, event_2,
-      event_3, event_4] with X X_gt_3 ε_lt_one ε_X T_gt_3 T_gt_Tlb₄ T_gt_Tlb₆
+      event_3, event_4] with X X_gt_3 ε_lt_one ε_X T_gt_3 T_gt_Tlb₄
       σ₂_lt_σ₁ ε_lt_ε_main logX_ge event_1 event_2 event_3 event_4
 
   clear eventually_εx_lt_one eventually_2_lt eventually_T_gt_3 eventually_T_gt_Tlb₄
-    eventually_T_gt_Tlb₆ eventually_σ₂_lt_σ₁ eventually_ε_lt_ε_main event_logX_ge zeta_bnd
+    eventually_σ₂_lt_σ₁ eventually_ε_lt_ε_main event_logX_ge zeta_bnd
     -- ν_nonneg ν_massOne ContDiff1ν ν_supp
 
   let ε : ℝ := εx X
@@ -1851,19 +1841,19 @@ theorem Strong_PNT : ∃ c > 0,
       left
       norm_cast
       linarith
-  have ψ_ε_diff : ‖ψ_ε_of_X - 𝓜 (fun x ↦ (Smooth1 ν ε x : ℂ)) 1 * X‖ ≤ ‖I₁ ν ε X T‖ + ‖I₂ ν ε T X σ₁‖
-    + ‖I₃ ν ε T X σ₁‖ + ‖I₄ ν ε X σ₁ σ₂‖ + ‖I₅ ν ε X σ₂‖ + ‖I₆ ν ε X σ₁ σ₂‖ + ‖I₇ ν ε T X σ₁‖
-    + ‖I₈ ν ε T X σ₁‖ + ‖I₉ ν ε X T‖ := by
+  have ψ_ε_diff : ‖ψ_ε_of_X - 𝓜 (fun x ↦ (Smooth1 ν ε x : ℂ)) 1 * X‖ ≤ 2 * (‖I₁ ν ε X T‖ + ‖I₂ ν ε T X σ₁‖
+    + ‖I₃ ν ε T X σ₁‖ + ‖I₄ ν ε X σ₁ σ₂‖) + ‖I₅ ν ε X σ₂‖ := by
     unfold ψ_ε_of_X
     rw [SmoothedChebyshevPull1 ε_pos ε_lt_one X X_gt_3 (T := T) (by linarith)
       σ₁pos σ₁_lt_one holo1_compat ν_supp ν_nonneg ν_massOne ContDiff1ν]
     rw [SmoothedChebyshevPull2 ε_pos ε_lt_one X X_gt_3 (T := T) (by linarith)
       σ₂_pos σ₁_lt_one σ₂_lt_σ₁ holo1_compat holo2a ν_supp ν_nonneg ν_massOne ContDiff1ν]
     ring_nf
-    iterate 5
-      apply le_trans (by apply norm_add_le)
-      gcongr
-    grw [norm_sub_le, norm_add_le, norm_sub_le]
+    grw [norm_add_le, norm_add_le, norm_add_le, norm_add_le, norm_add_le, norm_sub_le, norm_add_le, norm_sub_le]
+    rw [I9I1 (by linarith), I8I2 (by linarith), I7I3 (by linarith), I6I4 (by linarith)]
+    simp
+    ring_nf
+    rfl
   specialize h_main ε ⟨ε_pos, ε_lt_ε_main⟩
   have main : ‖𝓜 (fun x ↦ (Smooth1 ν ε x : ℂ)) 1 * X - X‖ ≤ C_main * ε * X := by
     nth_rewrite 2 [← one_mul X]
@@ -1875,11 +1865,7 @@ theorem Strong_PNT : ∃ c > 0,
   specialize hc₂ X X_gt_3 ε_pos ε_lt_one T_gt_3
   specialize hc₃ X X_gt_3 ε_pos ε_lt_one T_gt_3
   specialize hc₅ X X_gt_3 ε_pos ε_lt_one
-  specialize hc₇ X X_gt_3 ε_pos ε_lt_one T_gt_3
-  specialize hc₈ X X_gt_3 ε_pos ε_lt_one T_gt_3
-  specialize hc₉ ε_pos ε_lt_one X X_gt_3 T_gt_3
   specialize hc₄ X X_gt_3 ε_pos ε_lt_one T_gt_Tlb₄
-  specialize hc₆ X X_gt_3 ε_pos ε_lt_one T_gt_Tlb₆
 
   clear ν_nonneg ν_massOne ContDiff1ν ν_supp holo2
 
@@ -1888,29 +1874,18 @@ theorem Strong_PNT : ∃ c > 0,
       gcongr
     linarith
 
-  have C''bnd : c₁ * X * Real.log X / (ε * T) + c₂ * X / (ε * T) + c₈ * X / (ε * T)
-    + c₉ * X * Real.log X / (ε * T) ≤ C'' * X * Real.log X / (ε * T) := by
+  have C''bnd : 2 * (c₁ * X * Real.log X / (ε * T) + c₂ * X / (ε * T)) ≤ C'' * X * Real.log X / (ε * T) := by
     unfold C''
-    rw [(by ring : (c₁ + c₂ + c₈ + c₉) * X * Real.log X / (ε * T)
-      = c₁ * X * Real.log X / (ε * T) + c₂ * X * Real.log X / (ε * T)
-        + c₈ * X * Real.log X / (ε * T) + c₉ * X * Real.log X / (ε * T))]
+    rw [(by ring : 2 * (c₁ + c₂) * X * Real.log X / (ε * T)
+      = 2 * (c₁ * X * Real.log X / (ε * T) + c₂ * X * Real.log X / (ε * T)))]
     have : c₂ * X / (ε * T) * 1 ≤ c₂ * X / (ε * T) * Real.log X := by
       gcongr
     have : c₂ * X / (ε * T) ≤ c₂ * X * Real.log X / (ε * T) := by
       ring_nf at this ⊢
       linarith
     grw [this]
-    have : c₈ * X / (ε * T) * 1 ≤ c₈ * X / (ε * T) * Real.log X := by
-      gcongr
-    have : c₈ * X / (ε * T) ≤ c₈ * X * Real.log X / (ε * T) := by
-      ring_nf at this ⊢
-      linarith
-    grw [this]
-
-  have C'''bnd : c₃ * X * X ^ (-A / Real.log T) / ε
-                    + c₄ * X * X ^ (-A / Real.log T) / ε
-                    + c₆ * X * X ^ (-A / Real.log T) / ε
-                    + c₇ * X * X ^ (-A / Real.log T) / ε
+  have C'''bnd : 2 * (c₃ * X * X ^ (-A / Real.log T) / ε
+                    + c₄ * X * X ^ (-A / Real.log T) / ε)
                   ≤ C''' * X * X ^ (-A / Real.log T) / ε := by
     apply le_of_eq
     ring
@@ -1928,18 +1903,13 @@ theorem Strong_PNT : ∃ c > 0,
     _         = ‖ψ X - ψ_ε_of_X‖ + ‖𝓜 (fun x ↦ (Smooth1 ν ε x : ℂ)) 1 * X - X‖
                   + ‖ψ_ε_of_X - 𝓜 (fun x ↦ (Smooth1 ν ε x : ℂ)) 1 * X‖ := by ring
     _         ≤ ‖ψ X - ψ_ε_of_X‖ + ‖𝓜 (fun x ↦ (Smooth1 ν ε x : ℂ)) 1 * X - X‖
-                  + (‖I₁ ν ε X T‖ + ‖I₂ ν ε T X σ₁‖ + ‖I₃ ν ε T X σ₁‖ + ‖I₄ ν ε X σ₁ σ₂‖
-                  + ‖I₅ ν ε X σ₂‖ + ‖I₆ ν ε X σ₁ σ₂‖ + ‖I₇ ν ε T X σ₁‖ + ‖I₈ ν ε T X σ₁‖
-                  + ‖I₉ ν ε X T‖) := by gcongr
+                  + (2 * (‖I₁ ν ε X T‖ + ‖I₂ ν ε T X σ₁‖ + ‖I₃ ν ε T X σ₁‖ + ‖I₄ ν ε X σ₁ σ₂‖)
+                  + ‖I₅ ν ε X σ₂‖) := by gcongr
     _         ≤ c_close * ε * X * Real.log X + C_main * ε * X
-                  + (c₁ * X * Real.log X / (ε * T) + c₂ * X / (ε * T)
+                  + (2 * (c₁ * X * Real.log X / (ε * T) + c₂ * X / (ε * T)
                   + c₃ * X * X ^ (-A / Real.log T) / ε
-                  + c₄ * X * X ^ (-A / Real.log T) / ε
-                  + c₅ * X ^ σ₂ / ε
-                  + c₆ * X * X ^ (-A / Real.log T) / ε
-                  + c₇ * X * X ^ (-A / Real.log T) / ε
-                  + c₈ * X / (ε * T)
-                  + c₉ * X * Real.log X / (ε * T)) := by
+                  + c₄ * X * X ^ (-A / Real.log T) / ε)
+                  + c₅ * X ^ σ₂ / ε) := by
       gcongr
       · convert! h_close using 1
         rw [← norm_neg]
@@ -1960,13 +1930,9 @@ theorem Strong_PNT : ∃ c > 0,
 
 
     _         =  (c_close * ε * X * Real.log X + C_main * ε * X)
-                  + ((c₁ * X * Real.log X / (ε * T) + c₂ * X / (ε * T)
-                  + c₈ * X / (ε * T)
-                  + c₉ * X * Real.log X / (ε * T))
-                  + (c₃ * X * X ^ (-A / Real.log T) / ε
-                  + c₄ * X * X ^ (-A / Real.log T) / ε
-                  + c₆ * X * X ^ (-A / Real.log T) / ε
-                  + c₇ * X * X ^ (-A / Real.log T) / ε)
+                  + (2 * (c₁ * X * Real.log X / (ε * T) + c₂ * X / (ε * T))
+                  + 2 * (c₃ * X * X ^ (-A / Real.log T) / ε
+                  + c₄ * X * X ^ (-A / Real.log T) / ε)
                   + c₅ * X ^ σ₂ / ε
                   ) := by ring
     _         ≤ C' * ε * X * Real.log X
