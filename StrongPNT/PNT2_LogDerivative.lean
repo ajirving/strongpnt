@@ -53,15 +53,7 @@ lemma lem_denomAnalAt (S : Finset ℂ) (n : ℂ → ℕ)
     AnalyticAt ℂ (fun z => ∏ s ∈ S, (z - s) ^ (n s)) w ∧
     (∏ s ∈ S, (w - s) ^ (n s)) ≠ 0 := by
   constructor
-  · -- First part: AnalyticAt
-    -- Use Finset.analyticAt_prod
-    let f : ℂ → ℂ → ℂ := fun s z => (z - s) ^ (n s)
-    have h_each_analytic : ∀ s ∈ S, AnalyticAt ℂ (f s) w := by
-      intro s hs
-      fun_prop
-    convert! S.analyticAt_prod h_each_analytic using 1
-    ext
-    simp [f]
+  · fun_prop
   · -- Second part: nonzero product
     apply Finset.prod_ne_zero_iff.mpr fun s hs ↦ pow_ne_zero _ ?_
     grind
