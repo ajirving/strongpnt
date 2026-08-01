@@ -79,12 +79,7 @@ lemma lem_prod_no_sigma1
     ∏ ρ ∈ h_finite_zeros.toFinset, (z - ρ) ^ analyticOrderNatAt f ρ =
     (z - σ) ^ analyticOrderNatAt f σ *
     ∏ ρ ∈ (h_finite_zeros.toFinset.erase σ), (z - ρ) ^ analyticOrderNatAt f ρ := by
-  classical
-  have hmem : σ ∈ h_finite_zeros.toFinset :=
-    (Set.Finite.mem_toFinset (hs := h_finite_zeros)).2 hσ
-  simpa using
-    (Finset.mul_prod_erase (s := h_finite_zeros.toFinset)
-      (f := fun ρ => (z - ρ) ^ analyticOrderNatAt f ρ) (a := σ) hmem).symm
+  exact Finset.mul_prod_erase _ _ (h_finite_zeros.mem_toFinset.2 hσ)|>.symm
 
 lemma lem_Cf_at_sigma
     {R1 : ℝ}
@@ -141,8 +136,7 @@ lemma lem_Cf_analytic {R R1 : ℝ} {f : ℂ → ℂ} (h_f_analytic : AnalyticOnN
   by_cases h : z ∈ zerosetKfR R1 f
   · obtain ⟨g, hg1, hg2⟩ := lem_Cf_at_sigma h_finite_zeros z h (h_f_analytic z hz)
     apply analyticAt_congr hg2|>.mpr
-    apply lem_h_ratio_anal
-    exact hg1
+    exact lem_h_ratio_anal h_finite_zeros _ _ hg1
   · have h_ratio_analytic : AnalyticAt ℂ (fun w => f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ analyticOrderNatAt f ρ) z := by
       apply lem_ratioAnalAt z f (h_f_analytic _ hz)
       intro h_z_in_finset
@@ -303,10 +297,7 @@ lemma lem_mod_Bf_prod_mod (R R1 : ℝ)
   ‖Bf R R1 f z‖ =
     ‖f z‖ * ∏ ρ ∈ h_finite_zeros.toFinset,
       ‖(((R : ℂ) - z * star ρ / (R : ℂ)) / (z - ρ))‖ ^ analyticOrderNatAt f ρ := by
-  -- Apply lem_mod_Bf_is_prod_mod to get the first form (use hz that z ∉ zeroset)
-  have h1 := lem_mod_Bf_is_prod_mod R R1 f h_finite_zeros z hz
-  rw [h1]
-  -- Now use lem_abs_pow to transform each term in the product
+  rw [lem_mod_Bf_is_prod_mod R R1 f h_finite_zeros z hz]
   congr 2
   ext ρ
   rw [norm_pow]
@@ -328,25 +319,6 @@ lemma lem_mod_Bf_at_0 (R R1 : ℝ)
   congr 1
   simp only [zero_mul, zero_div, sub_zero, zero_sub]
 
-theorem lem_mod_Bf_at_0_eval (R R1 : ℝ)
-    (hR1_pos : 0 < R1)
-    (hR1_lt_R : R1 < R)
-    (f : ℂ → ℂ)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
-    (h_finite_zeros : (zerosetKfR R1 f).Finite) :
-    ‖Bf R R1 f 0‖ =
-    ‖f 0‖ * ∏ ρ ∈ h_finite_zeros.toFinset,
-      (R / ‖ρ‖) ^ analyticOrderNatAt f ρ := by
-  -- Start with lem_mod_Bf_at_0
-  rw [lem_mod_Bf_at_0 R R1 f h_f_nonzero_at_zero h_finite_zeros]
-  -- Now we need to show the products are equal
-  congr 1
-  -- Use Finset.prod_congr to show the products are equal
-  apply Finset.prod_congr rfl
-  intro ρ hρ
-  simp only [Complex.norm_div, Complex.norm_real, Real.norm_eq_abs, norm_neg]
-  rw [abs_of_nonneg (by linarith)]
-
 theorem lem_mod_Bf_at_0_as_ratio (R R1 : ℝ)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
@@ -356,7 +328,11 @@ theorem lem_mod_Bf_at_0_as_ratio (R R1 : ℝ)
     ‖Bf R R1 f 0‖ =
     ‖f 0‖ * ∏ ρ ∈ h_finite_zeros.toFinset,
       (R / ‖ρ‖) ^ analyticOrderNatAt f ρ := by
-  exact lem_mod_Bf_at_0_eval R R1 hR1_pos hR1_lt_R f h_f_nonzero_at_zero h_finite_zeros
+  rw [lem_mod_Bf_at_0 R R1 f h_f_nonzero_at_zero h_finite_zeros]
+  congr 1
+  refine Finset.prod_congr rfl fun ρ hρ ↦ ?_
+  simp only [Complex.norm_div, Complex.norm_real, Real.norm_eq_abs, norm_neg]
+  rw [abs_of_nonneg (by linarith)]
 
 lemma lem_mod_lower_bound_1 (R R1 : ℝ) (hR1_pos : 0 < R1)
 (hR1_lt_R : R1 < R) (f : ℂ → ℂ)
@@ -416,7 +392,6 @@ theorem lem_Bf_is_analytic (R R1 : ℝ)
     (f : ℂ → ℂ)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R)) :
     AnalyticOnNhd ℂ (Bf R R1 f)  (Metric.closedBall (0 : ℂ) R) := by
-  -- By definition of AnalyticOnNhd
   intro z hz
   by_cases h_finite_zeros : (zerosetKfR R1 f).Finite
   swap
@@ -425,7 +400,6 @@ theorem lem_Bf_is_analytic (R R1 : ℝ)
   have h_product : AnalyticAt ℂ (fun w => ∏ ρ ∈ h_finite_zeros.toFinset,
       ((R : ℂ) - star ρ * w / (R : ℂ)) ^ analyticOrderNatAt f ρ) z := by
     fun_prop
-  -- Now handle two cases: z is in the finite zero set or not
   unfold Bf
   simp only [h_finite_zeros, ↓reduceDIte, RCLike.star_def]
   exact (lem_Cf_analytic h_f_analytic hz).mul h_product
@@ -526,12 +500,11 @@ lemma lem_Bf_bounded_on_boundary (B R R1 : ℝ)
   simpa [h_eq] using hf_le_B z hz_le
 
 lemma mem_closedBall_of_norm_le {z : ℂ} {R : ℝ} (hz : ‖z‖ ≤ R) : z ∈ Metric.closedBall (0 : ℂ) R := by
-  have : dist z (0 : ℂ) ≤ R := by simpa [Complex.dist_eq, sub_zero] using hz
-  simpa [Metric.closedBall] using this
+  simp_all
 
 lemma closure_ball_eq_closedBall_center (R : ℝ) (hR : 0 < R) :
   closure (Metric.ball (0 : ℂ) R) = Metric.closedBall (0 : ℂ) R := by
-  simpa using (closure_ball (x := (0 : ℂ)) (r := R) (ne_of_gt hR))
+  exact closure_ball _ (by linarith)
 
 lemma lem_max_mod_principle_for_Bf (B R : ℝ) (hB : 1 < B) (hR_pos : 0 < R)
     (fB : ℂ → ℂ)
