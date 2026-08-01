@@ -24,11 +24,6 @@ lemma trailingCoeff_def {f : ℂ → ℂ} {z : ℂ} (h1 : AnalyticAt ℂ f z)
   simp_rw [← zpow_natCast] at hg3
   rw [hg1.meromorphicTrailingCoeffAt_of_ne_zero_of_eq_nhdsNE hg2 (eventually_nhdsWithin_of_eventually_nhds hg3)]
 
-lemma trailingCoeff_ne_zero {f : ℂ → ℂ} {z : ℂ} (h1 : AnalyticAt ℂ f z)
-    (h2 : analyticOrderAt f z ≠ ⊤) : meromorphicTrailingCoeffAt f z ≠ 0 := by
-  obtain ⟨_, _, _, hg3, _⟩ := trailingCoeff_def h1 h2
-  rwa [hg3]
-
 lemma order_ne_top {f : ℂ → ℂ} {r : ℝ} {z : ℂ} (hf : AnalyticOnNhd ℂ f (closedBall 0 r)) (hr : 0 ≤ r)
     (ne : ∃ z' ∈ closedBall (0 : ℂ) r, f z' ≠ 0) (hz : z ∈ closedBall 0 r) :
     analyticOrderAt f z ≠ ⊤ := by
@@ -256,7 +251,10 @@ lemma lem_Cf_nonzero_on_K
     have hσ_ne_ρ : σ ≠ ρ := hρ_ne_σ.symm
     exact pow_ne_zero _ (sub_ne_zero.mpr hσ_ne_ρ)
   simp only [Cf, h_finite_zeros, ↓reduceDIte, hσ, ne_eq, div_eq_zero_iff, hden, or_false]
-  exact trailingCoeff_ne_zero hfσ ne_top
+  apply hfσ.meromorphicAt.meromorphicTrailingCoeffAt_ne_zero
+  rw [hfσ.meromorphicOrderAt_eq]
+  simp_all
+
 
 lemma lem_Cf_never_zero
     {R1 : ℝ}
