@@ -459,30 +459,9 @@ theorem lem_Bf_is_analytic (R R1 : ℝ)
   swap
   · unfold Bf
     simp [h_finite_zeros, analyticAt_const]
-  -- First show the finite Blaschke product factor is analytic at z
-  have h_blaschke_linear : ∀ ρ ∈ h_finite_zeros.toFinset,
-    AnalyticAt ℂ (fun w => (R : ℂ) - star ρ * w / (R : ℂ)) z := by
-    intro ρ hρ
-    -- rewrite as constant + constant * w
-    have h_eq : (fun w : ℂ => (R : ℂ) - star ρ * w / (R : ℂ)) =
-                (fun w : ℂ => (R : ℂ) + (-(star ρ) / (R : ℂ)) * w) := by
-      funext w
-      field_simp
-      ring
-    rw [h_eq]
-    exact analyticAt_const.add (analyticAt_const.mul analyticAt_id)
-
-  have h_powers : ∀ ρ ∈ h_finite_zeros.toFinset,
-    AnalyticAt ℂ (fun w => ((R : ℂ) - star ρ * w / (R : ℂ)) ^ analyticOrderNatAt f ρ) z := by
-    intro ρ hρ
-    exact (h_blaschke_linear ρ hρ).fun_pow _
-
   have h_product : AnalyticAt ℂ (fun w => ∏ ρ ∈ h_finite_zeros.toFinset,
       ((R : ℂ) - star ρ * w / (R : ℂ)) ^ analyticOrderNatAt f ρ) z := by
-    apply Finset.analyticAt_fun_prod
-    intro ρ hρ
-    apply h_powers
-    exact hρ
+    fun_prop
   -- Now handle two cases: z is in the finite zero set or not
   unfold Bf
   simp only [h_finite_zeros, ↓reduceDIte, RCLike.star_def]
