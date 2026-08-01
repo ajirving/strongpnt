@@ -13,27 +13,19 @@ open Filter Metric Set Bornology Function
 
 /-! ### The quotient `Cf` (no core wrapper) -/
 
-open Classical in
-noncomputable def trailingCoeff (f : ℂ → ℂ) (z : ℂ) : ℂ :=
-    if h1 : AnalyticAt ℂ f z then
-    if h2 : analyticOrderAt f z ≠ ⊤ then
-      (h1.analyticOrderAt_ne_top.mp h2).choose z
-    else
-      0
-  else
-    0
-
+open scoped Topology in
 lemma trailingCoeff_def {f : ℂ → ℂ} {z : ℂ} (h1 : AnalyticAt ℂ f z)
     (h2 : analyticOrderAt f z ≠ ⊤) :
-    ∃ g : ℂ → ℂ, AnalyticAt ℂ g z ∧ g z ≠ 0 ∧ trailingCoeff f z = g z
+    ∃ g : ℂ → ℂ, AnalyticAt ℂ g z ∧ g z ≠ 0 ∧ meromorphicTrailingCoeffAt f z = g z
     ∧ f =ᶠ[nhds z] fun z_1 ↦ (z_1 - z) ^ analyticOrderNatAt f z * g z_1 := by
   obtain ⟨hg1, hg2, hg3⟩ := (h1.analyticOrderAt_ne_top.mp h2).choose_spec
   set g := (h1.analyticOrderAt_ne_top.mp h2).choose
   refine ⟨g, hg1, hg2, ?_, (by simpa)⟩
-  simp [trailingCoeff, h1, h2, g]
+  simp_rw [← zpow_natCast] at hg3
+  rw [hg1.meromorphicTrailingCoeffAt_of_ne_zero_of_eq_nhdsNE hg2 (eventually_nhdsWithin_of_eventually_nhds hg3)]
 
 lemma trailingCoeff_ne_zero {f : ℂ → ℂ} {z : ℂ} (h1 : AnalyticAt ℂ f z)
-    (h2 : analyticOrderAt f z ≠ ⊤) : trailingCoeff f z ≠ 0 := by
+    (h2 : analyticOrderAt f z ≠ ⊤) : meromorphicTrailingCoeffAt f z ≠ 0 := by
   obtain ⟨_, _, _, hg3, _⟩ := trailingCoeff_def h1 h2
   rwa [hg3]
 
@@ -53,7 +45,7 @@ noncomputable def Cf
     (z : ℂ) : ℂ :=
 if h_finite_zeros : (zerosetKfR R1 f).Finite then
     if _ : z ∈ zerosetKfR R1 f then
-      trailingCoeff f z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase z), (z - ρ) ^ analyticOrderNatAt f ρ
+      meromorphicTrailingCoeffAt f z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase z), (z - ρ) ^ analyticOrderNatAt f ρ
     else
       f z / ∏ ρ ∈ h_finite_zeros.toFinset, (z - ρ) ^ analyticOrderNatAt f ρ
   else
@@ -142,7 +134,6 @@ lemma lem_prod_no_sigma1
     (Finset.mul_prod_erase (s := h_finite_zeros.toFinset)
       (f := fun ρ => (z - ρ) ^ analyticOrderNatAt f ρ) (a := σ) hmem).symm
 
-
 lemma lem_Cf_at_sigma
     {R1 : ℝ}
     {f : ℂ → ℂ}
@@ -154,9 +145,10 @@ lemma lem_Cf_at_sigma
   by_cases top : analyticOrderAt f σ = ⊤
   · refine ⟨0, analyticAt_const, ?_⟩
     have f_eq_zero := analyticOrderAt_eq_top.mp top
-    have trailing_eq_zero : ∀ᶠ (z : ℂ) in nhds σ, trailingCoeff f z = 0 := by
+    have trailing_eq_zero : ∀ᶠ (z : ℂ) in nhds σ, meromorphicTrailingCoeffAt f z = 0 := by
       filter_upwards [eventually_eventually_nhds.mpr f_eq_zero] with z eq_zero
-      simp [trailingCoeff, analyticOrderAt_eq_top.mpr eq_zero]
+      apply MeromorphicAt.meromorphicTrailingCoeffAt_of_order_eq_top
+      exact meromorphicOrderAt_eq_top_iff.mpr <| eventually_nhdsWithin_of_eventually_nhds eq_zero
     filter_upwards [f_eq_zero, trailing_eq_zero] with z f_eq_zero trailing_eq_zero
     simp [Cf, trailing_eq_zero, f_eq_zero, h_finite_zeros]
   obtain ⟨g, hg1, hg2, hg3, hg4⟩ := trailingCoeff_def hfσ top
