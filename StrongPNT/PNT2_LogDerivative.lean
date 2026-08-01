@@ -69,42 +69,6 @@ lemma lem_ratioAnalAt (w : ℂ)
 
 /-! ### Cf lemmas (renamed to use `Cf` directly) -/
 
-lemma lem_Cf_analytic_off_K
-    {R R1 : ℝ}
-    {f : ℂ → ℂ}
-    {h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R)}
-    (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R \ zerosetKfR R1 f) :
-    AnalyticAt ℂ (Cf R1 f) z := by
-  by_cases h_finite_zeros : (zerosetKfR R1 f).Finite
-  swap
-  · unfold Cf
-    simp [h_finite_zeros, analyticAt_const]
-  have h_ratio_analytic : AnalyticAt ℂ (fun w => f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ analyticOrderNatAt f ρ) z := by
-    apply lem_ratioAnalAt z f
-    · apply h_f_analytic _ hz.1
-    · -- Show z ∉ ↑h_finite_zeros.toFinset
-      intro h_z_in_finset
-      have h_z_in_zeros : z ∈ zerosetKfR R1 f := h_finite_zeros.mem_toFinset.mp h_z_in_finset
-      exact hz.2 h_z_in_zeros
-
-  -- Show that the ratio function equals Cf in a neighborhood of z
-  have h_eventually_eq : (fun w => f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ analyticOrderNatAt f ρ) =ᶠ[𝓝 z]
-    (fun w => Cf R1 f w) := by
-    -- Since the zero set is finite, its complement is open
-    have hz_not_in : z ∉ zerosetKfR R1 f := hz.2
-    have h_open : IsOpen (Set.compl (zerosetKfR R1 f)) := h_finite_zeros.isClosed.isOpen_compl
-    apply Filter.eventually_of_mem (h_open.mem_nhds hz_not_in)
-    intro w hw_not_in_compl
-    -- Convert from membership in complement to non-membership
-    have hw_not_in_zeros : w ∉ zerosetKfR R1 f := hw_not_in_compl
-    -- Since w ∉ zerosetKfR R1, Cf w uses the else branch
-    change f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ analyticOrderNatAt f ρ =
-         Cf R1 f w
-    -- Apply the definition of Cf using dif_neg for dependent if-then-else
-    simp [Cf, h_finite_zeros, hw_not_in_zeros]
-
-  -- Transfer analyticity
-  exact h_ratio_analytic.congr h_eventually_eq
 
 
 lemma lem_prod_no_sigma1
@@ -167,19 +131,35 @@ lemma lem_h_ratio_anal
       simp [Finset.mem_erase])
   exact hg_analytic.div hden.1 hden.2
 
-lemma lem_Cf_analytic_at_K
-    {R1 : ℝ}
-    {f : ℂ → ℂ}
-    (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 f) (hfσ : AnalyticAt ℂ f σ) :
-    AnalyticAt ℂ (Cf R1 f)  σ := by
+lemma lem_Cf_analytic {R R1 : ℝ} {f : ℂ → ℂ} (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
+    {z : ℂ} (hz : z ∈ Metric.closedBall (0 : ℂ) R) :
+    AnalyticAt ℂ (Cf R1 f) z := by
   by_cases h_finite_zeros : (zerosetKfR R1 f).Finite
   swap
   · unfold Cf
     simp [h_finite_zeros, analyticAt_const]
-  obtain ⟨g, hg1, hg2⟩ := lem_Cf_at_sigma h_finite_zeros σ hσ hfσ
-  apply analyticAt_congr hg2|>.mpr
-  apply lem_h_ratio_anal
-  exact hg1
+  by_cases h : z ∈ zerosetKfR R1 f
+  · obtain ⟨g, hg1, hg2⟩ := lem_Cf_at_sigma h_finite_zeros z h (h_f_analytic z hz)
+    apply analyticAt_congr hg2|>.mpr
+    apply lem_h_ratio_anal
+    exact hg1
+  · have h_ratio_analytic : AnalyticAt ℂ (fun w => f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ analyticOrderNatAt f ρ) z := by
+      apply lem_ratioAnalAt z f (h_f_analytic _ hz)
+      intro h_z_in_finset
+      have h_z_in_zeros : z ∈ zerosetKfR R1 f := h_finite_zeros.mem_toFinset.mp h_z_in_finset
+      exact h h_z_in_zeros
+    refine h_ratio_analytic.congr ?_
+    have h_open : IsOpen (Set.compl (zerosetKfR R1 f)) := h_finite_zeros.isClosed.isOpen_compl
+    apply Filter.eventually_of_mem (h_open.mem_nhds h)
+    intro w hw_not_in_compl
+    -- Convert from membership in complement to non-membership
+    have hw_not_in_zeros : w ∉ zerosetKfR R1 f := hw_not_in_compl
+    -- Since w ∉ zerosetKfR R1, Cf w uses the else branch
+    change f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ analyticOrderNatAt f ρ =
+         Cf R1 f w
+    -- Apply the definition of Cf using dif_neg for dependent if-then-else
+    simp [Cf, h_finite_zeros, hw_not_in_zeros]
+
 
 lemma lem_f_nonzero_off_K
     {R1 : ℝ}
@@ -448,19 +428,7 @@ theorem lem_Bf_is_analytic (R R1 : ℝ)
   -- Now handle two cases: z is in the finite zero set or not
   unfold Bf
   simp only [h_finite_zeros, ↓reduceDIte, RCLike.star_def]
-  by_cases hz_in : z ∈ zerosetKfR R1 f
-  · -- z is a zero: use the local factor specification to get analyticity of Cf at σ
-    have h_cf_at_sigma := @lem_Cf_analytic_at_K R1 f z hz_in (h_f_analytic z ?_)
-    -- Multiply analytic functions to get analyticity of Bf = Cf * product
-    · exact AnalyticAt.fun_mul h_cf_at_sigma h_product
-    · exact closedBall_subset_closedBall (by linarith) hz
-  · -- z is not a zero: Cf is analytic off the zero set
-    have hz_in_compl : z ∈ Metric.closedBall (0 : ℂ) R \ zerosetKfR R1 f := by
-      constructor
-      · exact hz
-      · exact hz_in
-    have h_cf_off := @lem_Cf_analytic_off_K R R1 f h_f_analytic z hz_in_compl
-    exact AnalyticAt.fun_mul h_cf_off h_product
+  exact (lem_Cf_analytic h_f_analytic hz).mul h_product
 
 lemma complex_mul_star_eq_norm_sq (z : ℂ) : z * star z = (‖z‖ ^ 2 : ℂ) := by
   -- Use the fact that star = conj for complex numbers
