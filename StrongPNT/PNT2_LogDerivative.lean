@@ -13,11 +13,12 @@ open Filter Metric Set Bornology Function
 
 /-! ### The quotient `Cf` (no core wrapper) -/
 
-open scoped Topology in
+open scoped Topology
+
 lemma trailingCoeff_def {f : ℂ → ℂ} {z : ℂ} (h1 : AnalyticAt ℂ f z)
     (h2 : analyticOrderAt f z ≠ ⊤) :
     ∃ g : ℂ → ℂ, AnalyticAt ℂ g z ∧ g z ≠ 0 ∧ meromorphicTrailingCoeffAt f z = g z
-    ∧ f =ᶠ[nhds z] fun z_1 ↦ (z_1 - z) ^ analyticOrderNatAt f z * g z_1 := by
+    ∧ f =ᶠ[𝓝 z] fun z_1 ↦ (z_1 - z) ^ analyticOrderNatAt f z * g z_1 := by
   obtain ⟨hg1, hg2, hg3⟩ := (h1.analyticOrderAt_ne_top.mp h2).choose_spec
   set g := (h1.analyticOrderAt_ne_top.mp h2).choose
   refine ⟨g, hg1, hg2, ?_, (by simpa)⟩
@@ -87,7 +88,7 @@ lemma lem_Cf_analytic_off_K
       exact hz.2 h_z_in_zeros
 
   -- Show that the ratio function equals Cf in a neighborhood of z
-  have h_eventually_eq : (fun w => f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ analyticOrderNatAt f ρ) =ᶠ[nhds z]
+  have h_eventually_eq : (fun w => f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ analyticOrderNatAt f ρ) =ᶠ[𝓝 z]
     (fun w => Cf R1 f w) := by
     -- Since the zero set is finite, its complement is open
     have hz_not_in : z ∉ zerosetKfR R1 f := hz.2
@@ -1144,7 +1145,7 @@ lemma prod_num_mul_inv_den_eq_prod_ratio_fun_mem
           simpa using hpow_div.symm
 
 lemma logDeriv_congr_of_eventuallyEq {f g : ℂ → ℂ} {z : ℂ}
-  (hfg : f =ᶠ[nhds z] g) : logDeriv f z = logDeriv g z := by
+  (hfg : f =ᶠ[𝓝 z] g) : logDeriv f z = logDeriv g z := by
   unfold logDeriv
   simp only [Pi.div_apply]
   rw [hfg.deriv_eq, hfg.eq_of_nhds]
@@ -1179,7 +1180,7 @@ lemma logDeriv_Bf_is_sum (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
   have hU_mem : Sᶜ ∈ nhds z := hU_open.mem_nhds hzU
   have h_ev :
       (fun w ↦ Bf R R1 f w)
-        =ᶠ[nhds z]
+        =ᶠ[𝓝 z]
       (fun w ↦ f w * RatProd w) := by
     refine Filter.eventually_of_mem hU_mem ?_
     intro w hwU
