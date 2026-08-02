@@ -182,65 +182,21 @@ noncomputable def Bf
   else
     1
 
-theorem lem_R_div_mod_rho_ge_R_over_R1 (R R1 : ℝ) (hR1_pos : 0 < R1)
-(hR1_lt_R : R1 < R) (f : ℂ → ℂ)
-    (h_f_nonzero_at_zero : f 0 ≠ 0) (ρ : ℂ)
-    (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 f) :
-    R / norm ρ ≥ (R/R1 : ℝ) := by
-  gcongr
-  · linarith
-  · apply norm_pos_iff.mpr
-    intro h
-    simp_all [zerosetKfR]
-  · simp_all [zerosetKfR]
-
-lemma lem_mod_Bf_is_prod_mod (R R1 : ℝ)
+lemma lem_mod_Bf_prod_mod (R R1 : ℝ)
     (f : ℂ → ℂ)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (z : ℂ)
     (hz : z ∉ zerosetKfR R1 f) :
-  ‖Bf R R1 f  z‖ =
+  ‖Bf R R1 f z‖ =
     ‖f z‖ * ∏ ρ ∈ h_finite_zeros.toFinset,
-      ‖(((R : ℂ) - z * star ρ / (R : ℂ)) / (z - ρ)) ^ analyticOrderNatAt f ρ‖ := by
+      ‖(((R : ℂ) - z * star ρ / (R : ℂ)) / (z - ρ))‖ ^ analyticOrderNatAt f ρ := by
   simp only [Bf, h_finite_zeros, ↓reduceDIte, norm_mul, norm_prod]
   simp only [Cf, hz, ↓reduceDIte, h_finite_zeros, norm_div, norm_prod]
   rw [div_mul_eq_mul_div, mul_div_assoc, ← Finset.prod_div_distrib]
   congr 2
   ext ρ
-  rw [← norm_div, ← div_pow]
-  congr 2
-  ring
-
-
-lemma lem_mod_Bf_prod_mod (R R1 : ℝ)
-    (f : ℂ → ℂ)
-    (h_finite_zeros : (zerosetKfR R1 f).Finite)
-  (z : ℂ)
-  (hz : z ∉ zerosetKfR R1 f) :
-  ‖Bf R R1 f z‖ =
-    ‖f z‖ * ∏ ρ ∈ h_finite_zeros.toFinset,
-      ‖(((R : ℂ) - z * star ρ / (R : ℂ)) / (z - ρ))‖ ^ analyticOrderNatAt f ρ := by
-  rw [lem_mod_Bf_is_prod_mod R R1 f h_finite_zeros z hz]
-  congr 2
-  ext ρ
-  rw [norm_pow]
-
-lemma lem_mod_Bf_at_0 (R R1 : ℝ)
-    (f : ℂ → ℂ)
-    (h_f_nonzero_at_zero : f 0 ≠ 0)
-    (h_finite_zeros : (zerosetKfR R1 f).Finite) :
-    ‖Bf R R1 f 0‖ =
-    ‖f 0‖ * ∏ ρ ∈ h_finite_zeros.toFinset,
-      ‖((R : ℂ) / (-ρ))‖ ^ analyticOrderNatAt f ρ := by
-
-  have hz0 : 0 ∉ zerosetKfR R1 f := by
-    simp_all [zerosetKfR]
-  rw [lem_mod_Bf_prod_mod R R1 f h_finite_zeros 0 hz0]
-  -- Now simplify: when z = 0, we have ((R - 0 * star ρ / R) / (0 - ρ)) = R / (-ρ)
-  congr 2
-  ext ρ
-  congr 1
-  simp only [zero_mul, zero_div, sub_zero, zero_sub]
+  rw [← norm_div, ← norm_div, ← norm_pow, div_pow]
+  ring_nf
 
 theorem lem_mod_Bf_at_0_as_ratio (R R1 : ℝ)
     (hR1_pos : 0 < R1)
@@ -251,19 +207,11 @@ theorem lem_mod_Bf_at_0_as_ratio (R R1 : ℝ)
     ‖Bf R R1 f 0‖ =
     ‖f 0‖ * ∏ ρ ∈ h_finite_zeros.toFinset,
       (R / ‖ρ‖) ^ analyticOrderNatAt f ρ := by
-  rw [lem_mod_Bf_at_0 R R1 f h_f_nonzero_at_zero h_finite_zeros]
-  congr 1
-  refine Finset.prod_congr rfl fun ρ hρ ↦ ?_
-  simp only [Complex.norm_div, Complex.norm_real, Real.norm_eq_abs, norm_neg]
-  rw [abs_of_nonneg (by linarith)]
+  rw [lem_mod_Bf_prod_mod R R1 f h_finite_zeros 0 (by simp_all [zerosetKfR])]
+  congr 2
+  ext
+  simp [div_pow, abs_of_nonneg (by linarith : 0 ≤ R)]
 
-lemma lem_mod_lower_bound_1 (R R1 : ℝ) (hR1_pos : 0 < R1)
-(hR1_lt_R : R1 < R) (f : ℂ → ℂ)
-    (h_finite_zeros : (zerosetKfR R1 f).Finite) :
-    ∏ ρ ∈ h_finite_zeros.toFinset,
-      (R/R1 : ℝ) ^ analyticOrderNatAt f ρ ≥ 1 := by
-  refine Finset.one_le_prod fun z hz ↦ one_le_pow₀ ?_
-  exact one_le_div hR1_pos|>.mpr hR1_lt_R.le
 
 theorem lem_mod_Bf_at_0_ge_1 (R R1 : ℝ) (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
@@ -271,45 +219,12 @@ theorem lem_mod_Bf_at_0_ge_1 (R R1 : ℝ) (hR1_pos : 0 < R1)
     (hf0_eq_one : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     ‖Bf R R1 f 0‖ ≥ 1 := by
-  -- First derive f 0 ≠ 0 from f 0 = 1
-  have R_over_R1_nonneg : 1 < R / R1 := by exact (one_lt_div hR1_pos).mpr hR1_lt_R
-  have R_over_R1_nonneg : 0 ≤ R / R1 := by linarith
-  have h_f_nonzero_at_zero : f 0 ≠ 0 := by
-    rw [hf0_eq_one]; norm_num
-  -- Use lem_mod_Bf_at_0_as_ratio to express ‖Bf ... 0‖ as a product
-  rw [lem_mod_Bf_at_0_as_ratio R R1 hR1_pos hR1_lt_R f h_f_nonzero_at_zero h_finite_zeros]
-  -- Since f 0 = 1, we have ‖f 0‖ = 1
+  rw [lem_mod_Bf_at_0_as_ratio R R1 hR1_pos hR1_lt_R f (by simp_all) h_finite_zeros]
   rw [hf0_eq_one, norm_one, one_mul]
-  -- Show that the product ∏ (R / ‖ρ‖)^n ≥ ∏ (3/2)^n
-  have h_prod_ge : ∏ ρ ∈ h_finite_zeros.toFinset, (R / ‖ρ‖) ^ analyticOrderNatAt f ρ ≥
-                   ∏ ρ ∈ h_finite_zeros.toFinset, (R/R1 : ℝ) ^ analyticOrderNatAt f ρ := by
-    apply Finset.prod_le_prod
-    -- Show (3/2)^n ≥ 0
-    · intro ρ hρ
-      apply pow_nonneg
-      apply R_over_R1_nonneg
-    -- Show (R / ‖ρ‖)^n ≥ (3/2)^n for each ρ
-    · intro ρ hρ
-      have h_ρ_in_zeros : ρ ∈ zerosetKfR R1 f := by
-        exact (Set.Finite.mem_toFinset h_finite_zeros).mp hρ
-      -- We have R / norm ρ ≥ 3/2, and ‖ρ‖ = norm ρ
-      have h_ratio_ge : R / ‖ρ‖ ≥ (R/R1 : ℝ) := by
-        -- norm is defined as ‖z‖, so they are equal
-        have h_norm_abs_eq : ‖ρ‖ = norm ρ := by rfl
-        rw [h_norm_abs_eq]
-        exact lem_R_div_mod_rho_ge_R_over_R1 R R1 hR1_pos hR1_lt_R f h_f_nonzero_at_zero ρ h_ρ_in_zeros
-
-      -- Use power monotonicity: if a ≥ b > 0, then a^n ≥ b^n
-      have h_3_2_pos : (1 : ℝ) < (R/R1 : ℝ) := by exact (one_lt_div hR1_pos).mpr hR1_lt_R
-      have h_3_2_pos : (0 : ℝ) < (R/R1 : ℝ) := by linarith
-      have h_ratio_pos : (0 : ℝ) ≤ R / ‖ρ‖ := by
-        linarith [h_ratio_ge]
-      exact pow_le_pow_left₀ R_over_R1_nonneg h_ratio_ge (analyticOrderNatAt f ρ)
-  -- Use lem_mod_lower_bound_1: the (3/2)^n product is ≥ 1
-  have h_3_2_prod_ge_1 : ∏ ρ ∈ h_finite_zeros.toFinset, (R/R1 : ℝ) ^ analyticOrderNatAt f ρ ≥ 1 :=
-    lem_mod_lower_bound_1 R R1 hR1_pos hR1_lt_R f h_finite_zeros
-  -- Combine: 1 ≤ (3/2)^n product ≤ (R/‖ρ‖)^n product
-  exact le_trans h_3_2_prod_ge_1 h_prod_ge
+  refine Finset.one_le_prod fun ρ hρ ↦ one_le_pow₀ ?_
+  simp only [zerosetKfR, mem_closedBall, dist_zero_right, Finite.mem_toFinset, mem_setOf_eq] at hρ
+  refine one_le_div ?_|>.mpr (hρ.1.trans hR1_lt_R.le)
+  exact norm_pos_iff.mpr fun h ↦ (by simp_all)
 
 theorem lem_Bf_is_analytic (R R1 : ℝ)
     (f : ℂ → ℂ)
