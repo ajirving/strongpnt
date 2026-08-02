@@ -139,9 +139,7 @@ lemma lem_Cf_analytic {R R1 : ℝ} {f : ℂ → ℂ} (h_f_analytic : AnalyticOnN
     exact lem_h_ratio_anal h_finite_zeros _ _ hg1
   · have h_ratio_analytic : AnalyticAt ℂ (fun w => f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ analyticOrderNatAt f ρ) z := by
       apply lem_ratioAnalAt z f (h_f_analytic _ hz)
-      intro h_z_in_finset
-      have h_z_in_zeros : z ∈ zerosetKfR R1 f := h_finite_zeros.mem_toFinset.mp h_z_in_finset
-      exact h h_z_in_zeros
+      simp_all
     refine h_ratio_analytic.congr ?_
     have h_open : IsOpen (Set.compl (zerosetKfR R1 f)) := h_finite_zeros.isClosed.isOpen_compl
     apply Filter.eventually_of_mem (h_open.mem_nhds h)
@@ -204,26 +202,13 @@ lemma lem_mod_Bf_is_prod_mod (R R1 : ℝ)
   ‖Bf R R1 f  z‖ =
     ‖f z‖ * ∏ ρ ∈ h_finite_zeros.toFinset,
       ‖(((R : ℂ) - z * star ρ / (R : ℂ)) / (z - ρ)) ^ analyticOrderNatAt f ρ‖ := by
-  -- Use definition of Bf: Bf z = Cf z * ∏ ρ, ((R - star ρ * z / R)^{m_ρ})
-  simp only [Bf, h_finite_zeros, ↓reduceDIte]
-  rw [norm_mul, norm_prod]
-  -- When z ∉ zerosetKfR R1, we have Cf z = f z / ∏ ρ, (z - ρ)^{m_ρ} by definition
-  have hCf : Cf R1 f z =
-    f z / ∏ ρ ∈ h_finite_zeros.toFinset, (z - ρ) ^ analyticOrderNatAt f ρ := by
-    simp [Cf, hz, h_finite_zeros]
-  rw [hCf, norm_div, norm_prod]
-  -- Rearrange: (‖f z‖ / ∏‖(z-ρ)^{m_ρ}‖) * ∏‖(R - star ρ * z / R)^{m_ρ}‖
-  rw [div_mul_eq_mul_div]
-  -- Use properties of products to combine: ‖f z‖ * (∏‖(R - star ρ * z / R)^{m_ρ}‖ / ∏‖(z-ρ)^{m_ρ}‖)
-  rw [mul_div_assoc]
-  -- Use Finset.prod_div_distrib: ∏(a/b) = (∏a)/(∏b)
-  rw [← Finset.prod_div_distrib]
+  simp only [Bf, h_finite_zeros, ↓reduceDIte, norm_mul, norm_prod]
+  simp only [Cf, hz, ↓reduceDIte, h_finite_zeros, norm_div, norm_prod]
+  rw [div_mul_eq_mul_div, mul_div_assoc, ← Finset.prod_div_distrib]
   congr 2
   ext ρ
-  -- Show ‖a^n‖ / ‖b^n‖ = ‖(a/b)^n‖
   rw [← norm_div, ← div_pow]
   congr 2
-  -- Show star ρ * z = z * star ρ by commutativity
   ring
 
 
