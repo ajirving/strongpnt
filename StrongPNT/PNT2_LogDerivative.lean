@@ -275,29 +275,21 @@ lemma lem_Bf_bounded_on_boundary (B R R1 : ℝ)
   rw [lem_mod_Bf_eq_mod_f_on_boundary R R1 (by linarith) hR1_lt_R f h_finite_zeros z hz]
   exact hf_le_B _ hz.le
 
-lemma closure_ball_eq_closedBall_center (R : ℝ) (hR : 0 < R) :
-  closure (Metric.ball (0 : ℂ) R) = Metric.closedBall (0 : ℂ) R := by
-  exact closure_ball _ (by linarith)
-
 lemma lem_max_mod_principle_for_Bf (B R : ℝ) (hB : 1 < B) (hR_pos : 0 < R)
     (fB : ℂ → ℂ)
     (h_analytic : AnalyticOnNhd ℂ fB (Metric.closedBall (0 : ℂ) R))
     (h_bd_boundary : ∀ z : ℂ, ‖z‖ = R → ‖fB z‖ ≤ B)
     (z : ℂ) (hz : ‖z‖ ≤ R) : ‖fB z‖ ≤ B := by
-  have hB0 : 0 ≤ B := by linarith
-  -- Convert analytic assumption to the form required by Hard MMP
-  have h_an_on_closure : AnalyticOn ℂ fB (closure (ballDR R)) := by
-    simpa [ballDR, closure_ball_eq_closedBall_center R hR_pos] using h_analytic.analyticOn
-  -- Apply Hard maximum modulus principle on the closed ball of radius R
-  have h_le :=
-    lem_HardMMP R B hR_pos fB h_an_on_closure (by
-      intro z hzR; exact h_bd_boundary z hzR)
-  -- It remains to see that z belongs to the closure of the open ball of radius R
-  have hz_cl : z ∈ closure (ballDR R) := by
-    have hz_closed : z ∈ Metric.closedBall (0 : ℂ) R := by simp_all
-    simpa [ballDR, closure_ball_eq_closedBall_center R hR_pos] using hz_closed
-  exact h_le z hz_cl
-
+  refine Complex.norm_le_of_forall_mem_frontier_norm_le (Metric.isBounded_ball (x := 0) (r := R)) ?_ (fun z hz ↦ ?_) ?_
+  · apply DifferentiableOn.diffContOnCl
+    apply AnalyticOnNhd.differentiableOn
+    convert h_analytic
+    exact closure_ball _ (by linarith)
+  · apply h_bd_boundary
+    rw [frontier_ball _ (by linarith)] at hz
+    simp_all
+  · rw [closure_ball _ (by linarith)]
+    simp_all
 
 lemma lem_Bf_bounded_in_disk_from_boundary (B R R1 : ℝ)
     (hB : 1 < B)
