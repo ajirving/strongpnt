@@ -13,7 +13,7 @@ open Filter Metric Set Bornology Function
 
 /-! ### The quotient `Cf` (no core wrapper) -/
 
-open scoped Topology
+open scoped Topology ComplexConjugate
 
 lemma trailingCoeff_def {f : ℂ → ℂ} {z : ℂ} (h1 : AnalyticAt ℂ f z)
     (h2 : analyticOrderAt f z ≠ ⊤) :
@@ -178,7 +178,7 @@ noncomputable def Bf
   if h_finite_zeros : (zerosetKfR R1 f).Finite then
     Cf R1 f z *
     ∏ ρ ∈ h_finite_zeros.toFinset,
-      ((R : ℂ) - star ρ * z / (R : ℂ)) ^ analyticOrderNatAt f ρ
+      ((R : ℂ) - conj ρ * z / (R : ℂ)) ^ analyticOrderNatAt f ρ
   else
     1
 
@@ -189,7 +189,7 @@ lemma lem_mod_Bf_prod_mod (R R1 : ℝ)
     (hz : z ∉ zerosetKfR R1 f) :
   ‖Bf R R1 f z‖ =
     ‖f z‖ * ∏ ρ ∈ h_finite_zeros.toFinset,
-      ‖(((R : ℂ) - z * star ρ / (R : ℂ)) / (z - ρ))‖ ^ analyticOrderNatAt f ρ := by
+      ‖(((R : ℂ) - z * conj ρ / (R : ℂ)) / (z - ρ))‖ ^ analyticOrderNatAt f ρ := by
   simp only [Bf, h_finite_zeros, ↓reduceDIte, norm_mul, norm_prod]
   simp only [Cf, hz, ↓reduceDIte, h_finite_zeros, norm_div, norm_prod]
   rw [div_mul_eq_mul_div, mul_div_assoc, ← Finset.prod_div_distrib]
@@ -236,17 +236,11 @@ theorem lem_Bf_is_analytic (R R1 : ℝ)
   · unfold Bf
     simp [h_finite_zeros, analyticAt_const]
   have h_product : AnalyticAt ℂ (fun w => ∏ ρ ∈ h_finite_zeros.toFinset,
-      ((R : ℂ) - star ρ * w / (R : ℂ)) ^ analyticOrderNatAt f ρ) z := by
+      ((R : ℂ) - conj ρ * w / (R : ℂ)) ^ analyticOrderNatAt f ρ) z := by
     fun_prop
   unfold Bf
-  simp only [h_finite_zeros, ↓reduceDIte, RCLike.star_def]
+  simp only [h_finite_zeros, ↓reduceDIte]
   exact (lem_Cf_analytic h_f_analytic hz).mul h_product
-
-lemma complex_mul_star_eq_norm_sq (z : ℂ) : z * star z = (‖z‖ ^ 2 : ℂ) := by
-  -- Use the fact that star = conj for complex numbers
-  rw [Complex.star_def]
-  -- Now use Complex.mul_conj': z * conj z = ‖z‖ ^ 2
-  exact Complex.mul_conj' z
 
 lemma lem_mod_Bf_eq_mod_f_on_boundary (R R1 : ℝ)
     (hR1_pos : 0 < R1)
@@ -267,7 +261,7 @@ lemma lem_mod_Bf_eq_mod_f_on_boundary (R R1 : ℝ)
   rw [lem_mod_Bf_prod_mod R R1 f h_finite_zeros z hz_not_in]
 
   -- Show each Blaschke factor has norm 1 when |z| = R
-  have h_each_factor_one : ∀ ρ ∈ h_finite_zeros.toFinset, ‖(((R : ℂ) - z * star ρ / (R : ℂ)) / (z - ρ))‖ = 1 := by
+  have h_each_factor_one : ∀ ρ ∈ h_finite_zeros.toFinset, ‖(((R : ℂ) - z * conj ρ / (R : ℂ)) / (z - ρ))‖ = 1 := by
     intro ρ hρ
 
     -- First, we need z ≠ ρ (if z = ρ, we get a contradiction since |z| = R > R1 but ρ ∈ ball(0, R1))
@@ -284,22 +278,16 @@ lemma lem_mod_Bf_eq_mod_f_on_boundary (R R1 : ℝ)
 
     -- Now prove the Blaschke factor has norm 1
     rw [Complex.norm_div]
-
-    -- Use z * star z = ‖z‖² = R² when |z| = R
-    have z_conj_eq : z * star z = (R ^ 2 : ℂ) := by
-      rw [complex_mul_star_eq_norm_sq z, hz, pow_two]
-
-    -- Rewrite numerator: R - z * star ρ / R = (R² - z * star ρ) / R
-    have num_rewrite : (R : ℂ) - z * star ρ / (R : ℂ) = ((R : ℂ)^2 - z * star ρ) / (R : ℂ) := by
+    have z_conj_eq : z * conj z = (R ^ 2 : ℂ) := by
+      rw [Complex.mul_conj', hz, pow_two]
+    have num_rewrite : (R : ℂ) - z * conj ρ / (R : ℂ) = ((R : ℂ)^2 - z * conj ρ) / (R : ℂ) := by
       field [ne_of_gt hR1_pos]
     rw [num_rewrite, Complex.norm_div]
-
-    -- Key step: R² - z * star ρ = z * star(z - ρ) using z * star z = R²
-    have factor_eq : (R : ℂ)^2 - z * star ρ = z * star (z - ρ) := by
-      rw [← z_conj_eq, star_sub]
+    have factor_eq : (R : ℂ)^2 - z * conj ρ = z * conj (z - ρ) := by
+      rw [← z_conj_eq, map_sub]
       ring
 
-    rw [factor_eq, Complex.norm_mul, norm_star, ←hz]
+    rw [factor_eq, Complex.norm_mul, Complex.norm_conj, hz]
     field_simp
 
     have h_denom_ne_zero : R * ‖z - ρ‖ ≠ 0 := by
@@ -309,13 +297,13 @@ lemma lem_mod_Bf_eq_mod_f_on_boundary (R R1 : ℝ)
       -- Prove the norm is not zero
       · simp [sub_ne_zero, z_ne_rho]
     -- field_simp can now use this fact to solve the goal.
-    rw [Complex.norm_real, norm_norm, hz]
+    rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by linarith)]
     field_simp [h_denom_ne_zero]
     exact div_self h_denom_ne_zero
 
 
   -- Apply this to show the product equals 1
-  have h_prod_one : ∏ ρ ∈ h_finite_zeros.toFinset, ‖(((R : ℂ) - z * star ρ / (R : ℂ)) / (z - ρ))‖ ^ analyticOrderNatAt f ρ = 1 := by
+  have h_prod_one : ∏ ρ ∈ h_finite_zeros.toFinset, ‖(((R : ℂ) - z * conj ρ / (R : ℂ)) / (z - ρ))‖ ^ analyticOrderNatAt f ρ = 1 := by
     -- Each factor equals 1, and 1^n = 1
     rw [← Finset.prod_congr rfl (fun ρ hρ => by rw [h_each_factor_one ρ hρ, one_pow])]
     rw [Finset.prod_const_one]
@@ -448,7 +436,7 @@ lemma lem_Bf_eq_prod_Cf
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     ∀ z, Bf R R1 f z =
       (∏ ρ ∈ h_finite_zeros.toFinset,
-        ((R : ℂ) - star ρ * z / (R : ℂ)) ^ analyticOrderNatAt f ρ) *
+        ((R : ℂ) - conj ρ * z / (R : ℂ)) ^ analyticOrderNatAt f ρ) *
       (Cf R1 f z) := by
   intro z
   simp [Bf, h_finite_zeros]
@@ -462,7 +450,7 @@ lemma lem_num_prod_never_zero_all
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1,
       (∏ ρ ∈ h_finite_zeros.toFinset,
-        ((R : ℂ) - star ρ * z / (R : ℂ)) ^ analyticOrderNatAt f ρ) ≠ 0 := by
+        ((R : ℂ) - conj ρ * z / (R : ℂ)) ^ analyticOrderNatAt f ρ) ≠ 0 := by
   intro z hz
   apply Finset.prod_ne_zero_iff.mpr
   intro ρ hρ
@@ -490,20 +478,18 @@ lemma lem_num_prod_never_zero_all
     linarith [h2]
 
   -- Show factor is nonzero by proving positive norm
-  suffices h : (0 : ℝ) < ‖(R : ℂ) - star ρ * z / (R : ℂ)‖ by
+  suffices h : (0 : ℝ) < ‖(R : ℂ) - conj ρ * z / (R : ℂ)‖ by
     exact norm_pos_iff.mp h
 
   -- Use reverse triangle inequality: |a - b| ≥ |a| - |b|
-  have triangle_ineq : ‖(R : ℂ) - star ρ * z / (R : ℂ)‖ ≥ ‖(R : ℂ)‖ - ‖star ρ * z / (R : ℂ)‖ :=
+  have triangle_ineq : ‖(R : ℂ) - conj ρ * z / (R : ℂ)‖ ≥ ‖(R : ℂ)‖ - ‖conj ρ * z / (R : ℂ)‖ :=
     norm_sub_norm_le _ _
 
   -- Simplify ‖(R : ℂ)‖ = R
   have R_norm_eq : ‖(R : ℂ)‖ = R := by
     rw [Complex.norm_of_nonneg (le_of_lt hR_pos)]
-
-  -- Bound the product term: ‖star ρ * z / (R : ℂ)‖ ≤ R1 * R1 / R
-  have product_bound : ‖star ρ * z / (R : ℂ)‖ ≤ R1 * R1 / R := by
-    rw [norm_div, norm_mul, norm_star, R_norm_eq]
+  have product_bound : ‖conj ρ * z / (R : ℂ)‖ ≤ R1 * R1 / R := by
+    rw [norm_div, norm_mul, Complex.norm_conj, R_norm_eq]
     -- We need to show ‖ρ‖ * ‖z‖ / R ≤ R1 * R1 / R
     -- This is equivalent to ‖ρ‖ * ‖z‖ ≤ R1 * R1
     have mult_bound : ‖ρ‖ * ‖z‖ ≤ R1 * R1 := by
@@ -704,16 +690,16 @@ lemma blaschke_num_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) :
     ∀ ρ ∈ zerosetKfR R1 f,
     ∀ z ∈ Metric.closedBall (0 : ℂ) R,
-    R - (star ρ) * z / R ≠ 0 ∧ DifferentiableAt ℂ (fun w ↦ R - (star ρ) * w / R) z := by
+    R - (conj ρ) * z / R ≠ 0 ∧ DifferentiableAt ℂ (fun w ↦ R - (conj ρ) * w / R) z := by
   intro ρ hρ z hz
   constructor
   · intro hzero
     have hRne : (R : ℂ) ≠ 0 := by
       simpa using (Complex.ofReal_ne_zero.mpr (ne_of_gt (hR1_pos.trans hR1_lt_R)))
     -- From the equation R - conj(ρ) * z / R = 0, deduce conj(ρ) * z = R^2
-    have heq : (R : ℂ) = (star ρ) * z / (R : ℂ) := sub_eq_zero.mp hzero
+    have heq : (R : ℂ) = (conj ρ) * z / (R : ℂ) := sub_eq_zero.mp hzero
     have hmul := congrArg (fun t : ℂ => t * (R : ℂ)) heq
-    have heq_mul : (R : ℂ) * (R : ℂ) = (star ρ) * z := by
+    have heq_mul : (R : ℂ) * (R : ℂ) = (conj ρ) * z := by
       -- simplify the right-hand side
       simpa [div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc, hRne] using hmul
     -- Take norms and simplify
@@ -752,8 +738,8 @@ lemma blaschke_frac_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) :
     ∀ ρ ∈ zerosetKfR R1 f,
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
-    (R - (star ρ) * z / R) / (z - ρ) ≠ 0 ∧
-    DifferentiableAt ℂ (fun w ↦ (R - (star ρ) * w / R) / (w - ρ)) z := by
+    (R - (conj ρ) * z / R) / (z - ρ) ≠ 0 ∧
+    DifferentiableAt ℂ (fun w ↦ (R - (conj ρ) * w / R) / (w - ρ)) z := by
   intro ρ hρ z hz
   -- Denominator: nonvanishing and differentiable
   have hden := z_minus_rho_diff_nonzero (R1:=R1) (f:=f) ρ hρ z hz
@@ -773,12 +759,12 @@ lemma blaschke_frac_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
     have hz_le_R : dist z (0 : ℂ) ≤ R := le_trans hz_dist_le_small (le_of_lt hR1_lt_R)
     simpa [Metric.mem_closedBall] using hz_le_R
   have hnum := blaschke_num_diff_nonzero (R:=R) (R1:=R1) (f:=f) hR1_pos hR1_lt_R ρ hρ z hz_ballR
-  have hnum_ne : R - (star ρ) * z / R ≠ 0 := hnum.1
-  have hnum_diff : DifferentiableAt ℂ (fun w ↦ R - (star ρ) * w / R) z := hnum.2
+  have hnum_ne : R - (conj ρ) * z / R ≠ 0 := hnum.1
+  have hnum_diff : DifferentiableAt ℂ (fun w ↦ R - (conj ρ) * w / R) z := hnum.2
   -- Conclude
   refine And.intro ?_ ?_
   · intro h
-    have h' : (R - (star ρ) * z / R) * (z - ρ)⁻¹ = 0 := by
+    have h' : (R - (conj ρ) * z / R) * (z - ρ)⁻¹ = 0 := by
       simpa [div_eq_mul_inv] using h
     rcases mul_eq_zero.mp h' with hnum0 | hinv0
     · exact hnum_ne hnum0
@@ -790,8 +776,8 @@ lemma blaschke_pow_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) :
     ∀ ρ ∈ zerosetKfR R1 f,
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
-    ((R - (star ρ) * z / R) / (z - ρ)) ^ analyticOrderNatAt f ρ ≠ 0 ∧
-    DifferentiableAt ℂ (fun w ↦ ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
+    ((R - (conj ρ) * z / R) / (z - ρ)) ^ analyticOrderNatAt f ρ ≠ 0 ∧
+    DifferentiableAt ℂ (fun w ↦ ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
   intro ρ hρ z hz
   have hfrac :=
     blaschke_frac_diff_nonzero (R := R) (R1 := R1) (f := f) hR1_pos hR1_lt_R
@@ -806,15 +792,15 @@ lemma blaschke_prod_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R)
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
-    (∏ ρ ∈ h_finite_zeros.toFinset, ((R - (star ρ) * z / R) / (z - ρ)) ^ analyticOrderNatAt f ρ) ≠ 0 ∧
+    (∏ ρ ∈ h_finite_zeros.toFinset, ((R - (conj ρ) * z / R) / (z - ρ)) ^ analyticOrderNatAt f ρ) ≠ 0 ∧
     DifferentiableAt ℂ (fun w ↦ ∏ ρ ∈ h_finite_zeros.toFinset,
-                        ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
+                        ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
   intro z hz
   classical
   constructor
   · -- non-vanishing of the product
     have hne_each : ∀ ρ ∈ h_finite_zeros.toFinset,
-        ((R - (star ρ) * z / R) / (z - ρ)) ^ analyticOrderNatAt f ρ ≠ 0 := by
+        ((R - (conj ρ) * z / R) / (z - ρ)) ^ analyticOrderNatAt f ρ ≠ 0 := by
       intro ρ hρ
       have hρ' : ρ ∈ zerosetKfR R1 f :=
         (h_finite_zeros.mem_toFinset).1 hρ
@@ -826,7 +812,7 @@ lemma blaschke_prod_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
   · -- differentiability of the product
     have hdiff_each : ∀ ρ ∈ h_finite_zeros.toFinset,
         DifferentiableAt ℂ
-          (fun w ↦ ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
+          (fun w ↦ ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
       intro ρ hρ
       have hρ' : ρ ∈ zerosetKfR R1 f :=
         (h_finite_zeros.mem_toFinset).1 hρ
@@ -837,14 +823,14 @@ lemma blaschke_prod_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
     -- Use DifferentiableAt.finset_prod and identify the function
     have hdiff :=
       (DifferentiableAt.finsetProd (u := h_finite_zeros.toFinset)
-        (f := fun ρ => fun w ↦ ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ)
+        (f := fun ρ => fun w ↦ ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ)
         (x := z) hdiff_each)
     have hfun_eq :
         (fun w ↦ ∏ ρ ∈ h_finite_zeros.toFinset,
-            ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ)
+            ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ)
         =
         (∏ ρ ∈ h_finite_zeros.toFinset,
-            (fun w ↦ ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ)) := by
+            (fun w ↦ ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ)) := by
       funext w
       simp [Finset.prod_apply]
     exact hfun_eq.symm ▸ hdiff
@@ -876,9 +862,9 @@ lemma logDeriv_fprod_is_sum {R R1 : ℝ} {f : ℂ → ℂ}
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     logDeriv (fun w ↦ f w * ∏ ρ ∈ h_finite_zeros.toFinset,
-             ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z =
+             ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z =
     logDeriv f z + logDeriv (fun w ↦ ∏ ρ ∈ h_finite_zeros.toFinset,
-                            ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
+                            ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
   intro z hz
   have hf' := f_diff_nonzero_outside_Kf (R1:=R1) (f:=f) h_f_analytic z hz
   rcases hf' with ⟨hf_ne, hf_diff⟩
@@ -939,16 +925,16 @@ lemma logDeriv_Bf_is_sum (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
       logDeriv
         (fun w ↦
           ∏ ρ ∈ h_finite_zeros.toFinset,
-            ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
+            ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
   classical
   intro z hz
   -- Abbreviations
   set K : Finset ℂ := h_finite_zeros.toFinset
   -- Define denominator and numerator products and the ratio product
   let A : ℂ → ℂ := fun w => ∏ ρ ∈ K, (w - ρ) ^ analyticOrderNatAt f ρ
-  let BN : ℂ → ℂ := fun w => ∏ ρ ∈ K, (R - (star ρ) * w / R) ^ analyticOrderNatAt f ρ
+  let BN : ℂ → ℂ := fun w => ∏ ρ ∈ K, (R - (conj ρ) * w / R) ^ analyticOrderNatAt f ρ
   let RatProd : ℂ → ℂ :=
-    fun w => ∏ ρ ∈ K, ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ
+    fun w => ∏ ρ ∈ K, ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ
   -- Establish: Bf is eventually equal to f times the product of ratios near z
   set S : Set ℂ := zerosetKfR R1 f
   have hS_fin : S.Finite := h_finite_zeros
@@ -980,7 +966,7 @@ lemma logDeriv_Bf_is_sum (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
     have h_eq2 :=
       prod_num_mul_inv_den_eq_prod_ratio_fun_mem
         (K := K)
-        (N := fun ρ w ↦ (R - (star ρ) * w / R))
+        (N := fun ρ w ↦ (R - (conj ρ) * w / R))
         (D := fun ρ w ↦ (w - ρ))
         (m := fun ρ ↦ analyticOrderNatAt f ρ)
     have h_eq2_w : BN w * (A w)⁻¹ = RatProd w := by
@@ -1024,7 +1010,7 @@ lemma Lf_deriv_step1 (hR1_pos : 0 < R1) (h_f_analytic : AnalyticOnNhd ℂ f (clo
     ∀ z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f,
     deriv Lf z =
     deriv f z / f z + logDeriv (fun w ↦ ∏ ρ ∈ h_finite_zeros.toFinset,
-                                ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
+                                ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
   have ne_top : ∀ z ∈ closedBall 0 R1, analyticOrderAt f z ≠ ⊤ := by
     refine fun z hz ↦ order_ne_top h_f_analytic (by linarith) ⟨0, (by simp; linarith), (by simp_all)⟩ (closedBall_subset_closedBall (by linarith) hz)
   intro z hz
@@ -1043,7 +1029,7 @@ lemma Lf_deriv_step1 (hR1_pos : 0 < R1) (h_f_analytic : AnalyticOnNhd ℂ f (clo
         Bf R R1 f           w) z =
       logDeriv f z +
         logDeriv (fun w ↦ ∏ ρ ∈ h_finite_zeros.toFinset,
-            ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
+            ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
     have h :=
       (logDeriv_Bf_is_sum (R := R) (R1 := R1) (f := f)
         h_finite_zeros hR1_lt_R hR1_pos h_f_analytic z (in_r_minus_kf hr_lt_R1 _ hz))
@@ -1073,10 +1059,10 @@ lemma Lf_deriv_step1 (hR1_pos : 0 < R1) (h_f_analytic : AnalyticOnNhd ℂ f (clo
               w) z := hLf_eq_logDerivBf
     _ = logDeriv f z +
           logDeriv (fun w ↦ ∏ ρ ∈ h_finite_zeros.toFinset,
-              ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := hsum
+              ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := hsum
     _ = deriv f z / f z +
           logDeriv (fun w ↦ ∏ ρ ∈ h_finite_zeros.toFinset,
-              ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
+              ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
             simp [hfrac]
 
 -- Lemma 23: logDeriv_prod_is_sum
@@ -1085,19 +1071,19 @@ lemma logDeriv_prod_is_sum {R R1 : ℝ} {f : ℂ → ℂ}
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     logDeriv (fun w ↦ ∏ ρ ∈ h_finite_zeros.toFinset,
-             ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z =
+             ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z =
     ∑ ρ ∈ h_finite_zeros.toFinset, logDeriv (fun w ↦
-              ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
+              ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
   intro z hz
   have hdiff : ∀ ρ ∈ h_finite_zeros.toFinset,
-      DifferentiableAt ℂ (fun w ↦ ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
+      DifferentiableAt ℂ (fun w ↦ ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
     intro ρ hρ
     have hρmem : ρ ∈ zerosetKfR R1 f :=
       (h_finite_zeros.mem_toFinset).mp hρ
     have h := blaschke_pow_diff_nonzero (R:=R) (R1:=R1) (f:=f) hR1_pos hR1_lt_R ρ hρmem z hz
     exact h.2
   have hne : ∀ ρ ∈ h_finite_zeros.toFinset,
-      ((R - (star ρ) * z / R) / (z - ρ)) ^ analyticOrderNatAt f ρ ≠ 0 := by
+      ((R - (conj ρ) * z / R) / (z - ρ)) ^ analyticOrderNatAt f ρ ≠ 0 := by
     intro ρ hρ
     have hρmem : ρ ∈ zerosetKfR R1 f :=
       (h_finite_zeros.mem_toFinset).mp hρ
@@ -1111,8 +1097,8 @@ lemma logDeriv_power_is_mul {R R1 : ℝ} {f : ℂ → ℂ}
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     ∀ ρ ∈ h_finite_zeros.toFinset,
-    logDeriv (fun w ↦ ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z =
-    analyticOrderNatAt f ρ * logDeriv (fun w ↦ (R - (star ρ) * w / R) / (w - ρ)) z := by
+    logDeriv (fun w ↦ ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z =
+    analyticOrderNatAt f ρ * logDeriv (fun w ↦ (R - (conj ρ) * w / R) / (w - ρ)) z := by
   intro z hz ρ hρFin
   have hρmem : ρ ∈ zerosetKfR R1 f := by
     simpa using (h_finite_zeros.mem_toFinset.mp hρFin)
@@ -1128,9 +1114,9 @@ lemma logDeriv_prod_is_sum_mul {R R1 : ℝ} {f : ℂ → ℂ}
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     logDeriv (fun w ↦ ∏ ρ ∈ h_finite_zeros.toFinset,
-             ((R - (star ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z =
+             ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z =
     ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ *
-                                    logDeriv (fun w ↦ (R - (star ρ) * w / R) / (w - ρ)) z := by
+                                    logDeriv (fun w ↦ (R - (conj ρ) * w / R) / (w - ρ)) z := by
   intro z hz
   classical
   have hsum :=
@@ -1151,7 +1137,7 @@ lemma Lf_deriv_step2 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     ∀ z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f,
     deriv Lf z =
     deriv f z / f z + ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ *
-                                                       logDeriv (fun w ↦ (R - (star ρ) * w / R) / (w - ρ)) z := by
+                                                       logDeriv (fun w ↦ (R - (conj ρ) * w / R) / (w - ρ)) z := by
   intro z hz
   classical
   have h1 :=
@@ -1167,8 +1153,8 @@ lemma logDeriv_Blaschke_is_diff {R R1 : ℝ} {f : ℂ → ℂ}
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     ∀ ρ ∈ h_finite_zeros.toFinset,
-    logDeriv (fun w ↦ (R - (star ρ) * w / R) / (w - ρ)) z =
-    logDeriv (fun w ↦ R - (star ρ) * w / R) z - logDeriv (fun w ↦ w - ρ) z := by
+    logDeriv (fun w ↦ (R - (conj ρ) * w / R) / (w - ρ)) z =
+    logDeriv (fun w ↦ R - (conj ρ) * w / R) z - logDeriv (fun w ↦ w - ρ) z := by
   intro z hz ρ hρ
   have hρ_set : ρ ∈ zerosetKfR R1 f := by
     exact (Set.Finite.mem_toFinset (hs := h_finite_zeros) (a := ρ)).mp hρ
@@ -1207,10 +1193,10 @@ lemma logDeriv_denominator {ρ : ℂ} {z : ℂ} :
 
 -- Lemma 30: logDeriv_numerator_pre
 lemma logDeriv_numerator_pre {R : ℝ} {ρ : ℂ} {z : ℂ} :
-    logDeriv (fun w ↦ R - (star ρ) * w / R) z = -(star ρ) / R / (R - (star ρ) * z / R) := by
+    logDeriv (fun w ↦ R - (conj ρ) * w / R) z = -(conj ρ) / R / (R - (conj ρ) * z / R) := by
   classical
   -- Put the function in the linear form b + a * w
-  let a : ℂ := -(star ρ) / (R : ℂ)
+  let a : ℂ := -(conj ρ) / (R : ℂ)
   let b : ℂ := (R : ℂ)
   -- Compute the derivative of b + a * w
   have hderiv_add : deriv (fun w : ℂ => b + a * w) z =
@@ -1220,38 +1206,29 @@ lemma logDeriv_numerator_pre {R : ℝ} {ρ : ℂ} {z : ℂ} :
   simp [logDeriv, sub_eq_add_neg, div_eq_mul_inv,
          mul_comm, mul_left_comm, mul_assoc, add_comm]
 
-lemma star_ne_zero_of_ne_zero {ρ : ℂ} (hρ : ρ ≠ 0) : star ρ ≠ 0 := by
-  -- Use that conjugation preserves (and reflects) zero over ℂ
-  -- This is true in any star semiring: star x = 0 ↔ x = 0
-  -- We use the forward direction: if star ρ = 0 then ρ = 0, contradicting hρ
-  intro h
-  -- apply the equivalence star_eq_zero.mp
-  have : ρ = 0 := (star_eq_zero).1 h
-  exact hρ this
-
 lemma field_identity_general {K : Type*} [Field K] {a b c : K} (ha : a ≠ 0) (hb : b ≠ 0) : (-(b/a)) / (a - c*b/a) = (1 : K) / (c - a^2/b) := by
   -- Multiply numerator and denominator by -a/b
   field_simp
   rw [← div_neg]
   ring
 
-lemma complex_identity_from_field {R : ℝ} {ρ z : ℂ} (hR : R ≠ 0) (hρ : ρ ≠ 0) (hden : (R : ℂ) - (star ρ) * z / R ≠ 0) : (-(star ρ) / (R:ℂ)) / ((R:ℂ) - (star ρ) * z / R) = (1 : ℂ) / (z - (R:ℂ)^2 / (star ρ)) := by
+lemma complex_identity_from_field {R : ℝ} {ρ z : ℂ} (hR : R ≠ 0) (hρ : ρ ≠ 0) (hden : (R : ℂ) - (conj ρ) * z / R ≠ 0) : (-(conj ρ) / (R:ℂ)) / ((R:ℂ) - (conj ρ) * z / R) = (1 : ℂ) / (z - (R:ℂ)^2 / (conj ρ)) := by
   have ha : (R : ℂ) ≠ 0 := by simpa using (Complex.ofReal_ne_zero.mpr hR)
-  have hb : star ρ ≠ 0 := star_ne_zero_of_ne_zero hρ
-  have hden' : (R : ℂ) - z * (star ρ) / (R : ℂ) ≠ 0 := by
+  have hb : conj ρ ≠ 0 := by simpa
+  have hden' : (R : ℂ) - z * (conj ρ) / (R : ℂ) ≠ 0 := by
     simpa [mul_comm, mul_left_comm, mul_assoc, div_eq_mul_inv] using hden
-  have h := field_identity_general (K := ℂ) (a := (R : ℂ)) (b := star ρ) (c := z) ha hb
+  have h := field_identity_general (K := ℂ) (a := (R : ℂ)) (b := conj ρ) (c := z) ha hb
   simpa [mul_comm, mul_left_comm, mul_assoc, div_eq_mul_inv] using h
 
-lemma logDeriv_numerator_rearranged {R : ℝ} {ρ z : ℂ} (hR : R ≠ 0) (hrho : ρ ≠ 0) (h_denom_ne_zero : (R : ℂ) - (star ρ) * z / R ≠ 0) : -(star ρ) / R / ((R : ℂ) - (star ρ) * z / R) = 1 / (z - (R : ℂ)^2 / (star ρ)) := by
+lemma logDeriv_numerator_rearranged {R : ℝ} {ρ z : ℂ} (hR : R ≠ 0) (hrho : ρ ≠ 0) (h_denom_ne_zero : (R : ℂ) - (conj ρ) * z / R ≠ 0) : -(conj ρ) / R / ((R : ℂ) - (conj ρ) * z / R) = 1 / (z - (R : ℂ)^2 / (conj ρ)) := by
   simpa using (complex_identity_from_field (R:=R) (ρ:=ρ) (z:=z) (hR:=hR) (hρ:=hrho) (hden:=h_denom_ne_zero))
 
 -- Lemma 32: logDeriv_numerator
 lemma logDeriv_numerator {R : ℝ} {ρ : ℂ} {z : ℂ}
     (hR : R ≠ 0)
     (hrho : ρ ≠ 0)
-    (h_denom_ne_zero : (R : ℂ) - (star ρ) * z / R ≠ 0) :
-    logDeriv (fun w ↦ R - (star ρ) * w / R) z = 1 / (z - R^2 / (star ρ)) := by
+    (h_denom_ne_zero : (R : ℂ) - (conj ρ) * z / R ≠ 0) :
+    logDeriv (fun w ↦ R - (conj ρ) * w / R) z = 1 / (z - R^2 / (conj ρ)) := by
   rw [logDeriv_numerator_pre, logDeriv_numerator_rearranged]
   <;> assumption
 
@@ -1260,12 +1237,11 @@ lemma logDeriv_Blaschke_is_diff_frac {R R1 : ℝ} {f : ℂ → ℂ}
      (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     ∀ ρ ∈ h_finite_zeros.toFinset,
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f , logDeriv (fun w ↦ (R - (star ρ) * w / R) / (w - ρ)) z =
-         1 / (z - R^2 / (star ρ)) - 1 / (z - ρ) := by
+    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f , logDeriv (fun w ↦ (R - (conj ρ) * w / R) / (w - ρ)) z =
+         1 / (z - R^2 / (conj ρ)) - 1 / (z - ρ) := by
   intro ρ hρ z hz
   -- Apply the division rule for logDeriv using logDeriv_Blaschke_is_diff
   have h_div := logDeriv_Blaschke_is_diff (R := R) (R1 := R1) (f := f) hR1_pos hR1_lt_R h_finite_zeros z hz ρ hρ
-  -- Evaluate logDeriv(R - (star ρ) * w / R) using logDeriv_numerator
   have hρ_mem : ρ ∈ zerosetKfR R1 f := by
     exact (h_finite_zeros.mem_toFinset).mp hρ
   have hρ_ne_zero : ρ ≠ 0 := by
@@ -1274,8 +1250,7 @@ lemma logDeriv_Blaschke_is_diff_frac {R R1 : ℝ} {f : ℂ → ℂ}
     have : f 0 = 0 := by simpa [h_eq] using hρ_mem.2
     exact (zero_ne_one : (0 : ℂ) ≠ 1) (this.symm.trans h_f_zero)
   have hR_ne_zero : R ≠ 0 := ne_of_gt (hR1_pos.trans hR1_lt_R)
-  have h_denom_ne_zero : (R : ℂ) - (star ρ) * z / R ≠ 0 := by
-    -- This follows from blaschke_num_diff_nonzero
+  have h_denom_ne_zero : (R : ℂ) - (conj ρ) * z / R ≠ 0 := by
     have hz_ball : z ∈ Metric.closedBall (0 : ℂ) R := by
       have hle : R1 < R := hR1_lt_R
       apply Metric.closedBall_subset_closedBall (le_of_lt hle)
@@ -1300,7 +1275,7 @@ lemma Lf_deriv_step3 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     (h_Lf : isLf Lf f r R R1) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f,
     deriv Lf z =
-    deriv f z / f z + ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ * (1 / (z - R^2 / (star ρ)) - 1 / (z - ρ)) := by
+    deriv f z / f z + ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ * (1 / (z - R^2 / (conj ρ)) - 1 / (z - ρ)) := by
   intro z hz
   -- Assuming Lf_deriv_step2 is also corrected to remove B
   rw [Lf_deriv_step2 h_finite_zeros hr_pos hr_lt_R1 hR1_lt_R hR1_pos h_f_analytic h_f_zero Lf h_Lf z hz]
@@ -1315,8 +1290,8 @@ lemma sum_rearranged {R R1 : ℝ} {f : ℂ → ℂ}
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f,
     ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ *
-                                    (1 / (z - R^2 / (star ρ)) - 1 / (z - ρ)) =
-    ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (star ρ)) -
+                                    (1 / (z - R^2 / (conj ρ)) - 1 / (z - ρ)) =
+    ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (conj ρ)) -
     ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - ρ) := by
   intro z hz
   rw [← Finset.sum_sub_distrib]
@@ -1334,7 +1309,7 @@ lemma Lf_deriv_final_formula (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1
     ∀ z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f,
     deriv Lf z =
     deriv f z / f z - ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - ρ) +
-                      ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (star ρ)) := by
+                      ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (conj ρ)) := by
   intro z hz
   -- Apply Lf_deriv_step3 with the corrected, simpler signature
   rw [Lf_deriv_step3 h_finite_zeros hr_pos hr_lt_R1 hR1_lt_R hR1_pos h_f_analytic h_f_zero Lf h_Lf z hz]
@@ -1353,7 +1328,7 @@ lemma rearrange_Lf_deriv (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R
     ∀ z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f,
     deriv f z / f z - ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - ρ) =
     deriv Lf z -
-    ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (star ρ)) := by
+    ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (conj ρ)) := by
   intro z hz
   -- The call to Lf_deriv_final_formula is now simpler as it no longer needs hB
   have h_final := Lf_deriv_final_formula h_finite_zeros hr_pos hr_lt_R1 hR1_lt_R hR1_pos h_f_analytic h_f_zero Lf h_Lf z hz
@@ -1370,7 +1345,7 @@ lemma target_inequality_setup (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R
     ∀ z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f,
   ‖deriv f z / f z - ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - ρ)‖ ≤
   ‖deriv Lf z‖ +
-  ‖∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (star ρ))‖ := by
+  ‖∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (conj ρ))‖ := by
   intro z hz
   have hrearr := rearrange_Lf_deriv h_finite_zeros hr_pos hr_lt_R1 hR1_lt_R hR1_pos h_f_analytic h_f_zero Lf h_Lf z hz
   -- The rest of the proof is a direct application of the triangle inequality.
@@ -1381,18 +1356,13 @@ lemma target_inequality_setup (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R
 
 -- Additional bound lemmas
 
-lemma norm_Rsq_div_conj (R : ℝ) (ρ : ℂ) (hρ : ρ ≠ 0) : ‖((R^2 : ℂ) / (star ρ))‖ = (R^2 : ℝ) / ‖ρ‖ := by
-  have hb : star ρ ≠ 0 := by
-    intro h
-    have h' := congrArg star h
-    -- star (star ρ) = 0, hence ρ = 0
-    have : ρ = 0 := by simpa [star_star] using h'
-    exact hρ this
+lemma norm_Rsq_div_conj (R : ℝ) (ρ : ℂ) (hρ : ρ ≠ 0) : ‖((R^2 : ℂ) / (conj ρ))‖ = (R^2 : ℝ) / ‖ρ‖ := by
+  have hb : conj ρ ≠ 0 := by simpa
   have hnormR : ‖(R^2 : ℂ)‖ = (R^2 : ℝ) := by
     simp
   calc
-    ‖((R^2 : ℂ) / (star ρ))‖
-        = ‖(R^2 : ℂ)‖ / ‖star ρ‖ := norm_div _ _
+    ‖((R^2 : ℂ) / (conj ρ))‖
+        = ‖(R^2 : ℂ)‖ / ‖conj ρ‖ := norm_div _ _
     _ = (R^2 : ℝ) / ‖ρ‖ := by
       simp [hnormR]
 
@@ -1436,7 +1406,7 @@ lemma lem_sum_bound_step2 {R R1 : ℝ} {f : ℂ → ℂ}
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
       (∑ ρ ∈ h_finite_zeros.toFinset,
-          (analyticOrderNatAt f ρ : ℝ) / ‖z - (R^2 : ℂ) / (star ρ)‖)
+          (analyticOrderNatAt f ρ : ℝ) / ‖z - (R^2 : ℂ) / (conj ρ)‖)
         ≤ (1/(R^2/R1 - R1)) *
           (∑ ρ ∈ h_finite_zeros.toFinset, (analyticOrderNatAt f ρ : ℝ)) := by
   classical
@@ -1452,7 +1422,7 @@ lemma lem_sum_bound_step2 {R R1 : ℝ} {f : ℂ → ℂ}
     exact (Iff.mp hiff) hρ
   -- Termwise bound and then sum
   have hsum_le :
-      (∑ ρ ∈ S, (analyticOrderNatAt f ρ : ℝ) / ‖z - (R^2 : ℂ) / (star ρ)‖)
+      (∑ ρ ∈ S, (analyticOrderNatAt f ρ : ℝ) / ‖z - (R^2 : ℂ) / (conj ρ)‖)
         ≤ ∑ ρ ∈ S, (1/(R^2/R1 - R1)) * (analyticOrderNatAt f ρ : ℝ) := by
     refine Finset.sum_le_sum ?termwise
     intro ρ hρS
@@ -1462,23 +1432,22 @@ lemma lem_sum_bound_step2 {R R1 : ℝ} {f : ℂ → ℂ}
         (f := f) h_f_zero hρmem
     have hρ_norm : ‖ρ‖ ≤ R1 := mem_zerosetKfR_norm_le (R1 := R1)
       (f := f) hρmem
-    have hpt : 1 / ‖z - (R^2 : ℂ) / (star ρ)‖ ≤ 1/(R^2/R1 - R1) := by
+    have hpt : 1 / ‖z - (R^2 : ℂ) / (conj ρ)‖ ≤ 1/(R^2/R1 - R1) := by
       -- Use triangle inequality and norms
-      have h_Rsq_norm : ‖((R^2 : ℂ) / (star ρ))‖ = (R^2 : ℝ) / ‖ρ‖ :=
+      have h_Rsq_norm : ‖((R^2 : ℂ) / (conj ρ))‖ = (R^2 : ℝ) / ‖ρ‖ :=
         norm_Rsq_div_conj R ρ hρ_ne
-      have h_lower_bound : ‖z - (R^2 : ℂ) / (star ρ)‖ ≥ ‖((R^2 : ℂ) / (star ρ))‖ - ‖z‖ :=
-        norm_sub_ge_norm_sub z ((R^2 : ℂ) / (star ρ))
-      -- Since ‖ρ‖ ≤ R1 and ‖ρ‖ > 0, we have ‖((R^2 : ℂ) / (star ρ))‖ ≥ R^2/R1
+      have h_lower_bound : ‖z - (R^2 : ℂ) / (conj ρ)‖ ≥ ‖((R^2 : ℂ) / (conj ρ))‖ - ‖z‖ :=
+        norm_sub_ge_norm_sub z ((R^2 : ℂ) / (conj ρ))
       have hρ_pos : 0 < ‖ρ‖ := by
         simpa [norm_pos_iff] using hρ_ne
-      have h_Rsq_bound : R^2/R1 ≤ ‖((R^2 : ℂ) / (star ρ))‖ := by
+      have h_Rsq_bound : R^2/R1 ≤ ‖((R^2 : ℂ) / (conj ρ))‖ := by
         rw [h_Rsq_norm]
         exact div_le_div_of_nonneg_left (sq_nonneg R) hρ_pos hρ_norm
-      have h_combined : R^2/R1 - R1 ≤ ‖z - (R^2 : ℂ) / (star ρ)‖ := by
+      have h_combined : R^2/R1 - R1 ≤ ‖z - (R^2 : ℂ) / (conj ρ)‖ := by
         calc R^2/R1 - R1
-        _ ≤ ‖((R^2 : ℂ) / (star ρ))‖ - R1 := by linarith [h_Rsq_bound]
-        _ ≤ ‖((R^2 : ℂ) / (star ρ))‖ - ‖z‖ := by linarith [hz_norm]
-        _ ≤ ‖z - (R^2 : ℂ) / (star ρ)‖ := h_lower_bound
+        _ ≤ ‖((R^2 : ℂ) / (conj ρ))‖ - R1 := by linarith [h_Rsq_bound]
+        _ ≤ ‖((R^2 : ℂ) / (conj ρ))‖ - ‖z‖ := by linarith [hz_norm]
+        _ ≤ ‖z - (R^2 : ℂ) / (conj ρ)‖ := h_lower_bound
       have h_pos_denom : 0 < R^2/R1 - R1 := by
         have h_R_pos : 0 < R := by linarith [hR1_pos, hR1_lt_R]
         have h_Rsq_pos : 0 < R^2 := sq_pos_of_pos h_R_pos
@@ -1491,10 +1460,10 @@ lemma lem_sum_bound_step2 {R R1 : ℝ} {f : ℂ → ℂ}
             · linarith [hR1_lt_R]
             · linarith [hR1_pos, hR1_lt_R]
           · exact hR1_pos
-      have h_pos_norm : 0 < ‖z - (R^2 : ℂ) / (star ρ)‖ := by
+      have h_pos_norm : 0 < ‖z - (R^2 : ℂ) / (conj ρ)‖ := by
         apply lt_of_lt_of_le h_pos_denom h_combined
       -- Use the basic inequality: if 0 < a ≤ b then 1/b ≤ 1/a
-      have h_reciprocal : 1 / ‖z - (R^2 : ℂ) / (star ρ)‖ ≤ 1 / (R^2/R1 - R1) := by
+      have h_reciprocal : 1 / ‖z - (R^2 : ℂ) / (conj ρ)‖ ≤ 1 / (R^2/R1 - R1) := by
         apply div_le_div_of_nonneg_left
         · norm_num
         · exact h_pos_denom
@@ -1531,15 +1500,15 @@ lemma final_sum_bound {R R1 B : ℝ} {f : ℂ → ℂ}
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
     (h_f_bounded : ∀ z ∈ Metric.closedBall (0 : ℂ) R, ‖f z‖ ≤ B) :
     ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
-    ‖∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (star ρ))‖ ≤
+    ‖∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (conj ρ))‖ ≤
     1/((R^2/R1 - R1) * Real.log (R/R1)) * Real.log B := by
   intro z hz
   -- Step 1: Use triangle inequality (norm_sum_le)
-  have h_norm_bound := norm_sum_le h_finite_zeros.toFinset (fun ρ => analyticOrderNatAt f ρ / (z - R^2 / (star ρ)))
+  have h_norm_bound := norm_sum_le h_finite_zeros.toFinset (fun ρ => analyticOrderNatAt f ρ / (z - R^2 / (conj ρ)))
 
   -- Step 2: Simplify norm of each term
-  have h_sum_eq : ∑ ρ ∈ h_finite_zeros.toFinset, ‖analyticOrderNatAt f ρ / (z - R^2 / (star ρ))‖ =
-    ∑ ρ ∈ h_finite_zeros.toFinset, (analyticOrderNatAt f ρ : ℝ) / ‖z - R^2 / (star ρ)‖ := by
+  have h_sum_eq : ∑ ρ ∈ h_finite_zeros.toFinset, ‖analyticOrderNatAt f ρ / (z - R^2 / (conj ρ))‖ =
+    ∑ ρ ∈ h_finite_zeros.toFinset, (analyticOrderNatAt f ρ : ℝ) / ‖z - R^2 / (conj ρ)‖ := by
     apply Finset.sum_congr rfl
     intro ρ hρ
     rw [norm_div, Complex.norm_natCast]
@@ -1562,9 +1531,9 @@ lemma final_sum_bound {R R1 B : ℝ} {f : ℂ → ℂ}
     exact ⟨hR1_pos, hR1_lt_R⟩
   have h_log_pos : 0 < Real.log (R/R1) := Real.log_pos h_ratio_gt_one
 
-  calc ‖∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (star ρ))‖
-    ≤ ∑ ρ ∈ h_finite_zeros.toFinset, ‖analyticOrderNatAt f ρ / (z - R^2 / (star ρ))‖ := h_norm_bound
-    _ = ∑ ρ ∈ h_finite_zeros.toFinset, (analyticOrderNatAt f ρ : ℝ) / ‖z - R^2 / (star ρ)‖ := h_sum_eq
+  calc ‖∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (conj ρ))‖
+    ≤ ∑ ρ ∈ h_finite_zeros.toFinset, ‖analyticOrderNatAt f ρ / (z - R^2 / (conj ρ))‖ := h_norm_bound
+    _ = ∑ ρ ∈ h_finite_zeros.toFinset, (analyticOrderNatAt f ρ : ℝ) / ‖z - R^2 / (conj ρ)‖ := h_sum_eq
     _ ≤ (1/(R^2/R1 - R1)) * (∑ ρ ∈ h_finite_zeros.toFinset, (analyticOrderNatAt f ρ : ℝ)) := h_step2
     _ ≤ (1/(R^2/R1 - R1)) * ((1/Real.log (R/R1)) * Real.log B) := by
               apply mul_le_mul_of_nonneg_left h_sum_bound (div_nonneg zero_le_one (le_of_lt h_pos))
