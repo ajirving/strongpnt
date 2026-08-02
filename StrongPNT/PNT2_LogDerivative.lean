@@ -351,13 +351,6 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
 variable {R R1 r B : ℝ} {f : ℂ → ℂ}
 variable (h_finite_zeros : (zerosetKfR R1 f).Finite)
 
-lemma Bf_is_analytic_on_disk
-    (R R1 : ℝ)
-    (f : ℂ → ℂ)
-    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R)) :
-    AnalyticOnNhd ℂ (Bf R R1 f ) (Metric.closedBall (0 : ℂ) R) :=
-    lem_Bf_is_analytic R R1 f h_f_analytic
-
 lemma lem_Bf_eq_prod_Cf
     (R R1 : ℝ)
     (f : ℂ → ℂ)
@@ -1472,7 +1465,7 @@ lemma Lf_exists (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
     ∃ Lf : ℂ → ℂ, isLf Lf f r R R1 := by
   let B_f := Bf R R1 f
   have h_Bf_analytic : AnalyticOnNhd ℂ B_f (Metric.closedBall (0 : ℂ) R) :=
-    Bf_is_analytic_on_disk R R1 f <| h_f_analytic.mono (by gcongr)
+    lem_Bf_is_analytic R R1 f <| h_f_analytic.mono (by gcongr)
   have h_Bf_ne_zero : ∀ w ∈ Metric.closedBall (0 : ℂ) R1, B_f w ≠ 0 := by
     intro w hw
     refine Bf_never_zero R R1 hR1_pos hR1_lt_R f (fun z hz ↦ ?_) (fun z hz ↦ ?_) w hw
