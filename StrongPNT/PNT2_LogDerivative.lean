@@ -442,12 +442,11 @@ lemma apply_BC_to_Lf
 -- Lemma 6: Lf_deriv_is_logBf_deriv
 lemma Lf_deriv_is_logBf_deriv (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
     (h_f_analytic : ∀ z ∈ closedBall 0 R1, AnalyticAt ℂ f z)
-    (ne_top : ∀ z ∈ closedBall 0 R1, analyticOrderAt f z ≠ ⊤) :
-    ∀ z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
+    (ne_top : ∀ z ∈ closedBall 0 R1, analyticOrderAt f z ≠ ⊤)
+    (z : ℂ) :
       logDeriv (fun w ↦ Bf R R1 f w /
                            Bf R R1 f 0) z =
       logDeriv (fun w ↦ Bf R R1 f w) z := by
-  intro z _
   -- Rewrite the division as multiplication by inverse
   have h_eq : (fun w ↦ Bf R R1 f w /
                        Bf R R1 f 0) =
@@ -827,7 +826,7 @@ lemma Lf_deriv_step1 (hR1_pos : 0 < R1) (h_f_analytic : AnalyticOnNhd ℂ f (clo
   have hLf :=
   --
     (Lf_deriv_is_logBf_deriv hR1_lt_R hR1_pos (fun z hz ↦ h_f_analytic z (closedBall_subset_closedBall (by linarith) hz)) ne_top
-      z (in_r_minus_kf hr_lt_R1 _ hz)).symm
+      z).symm
   -- Expand logDeriv of Bf into sum
   have hsum :
       logDeriv (fun w ↦
