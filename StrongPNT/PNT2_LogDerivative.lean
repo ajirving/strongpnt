@@ -246,87 +246,34 @@ lemma lem_mod_Bf_eq_mod_f_on_boundary (R R1 : ℝ)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
-    (h_finite_zeros : (zerosetKfR R1 f).Finite) :
-    ∀ z : ℂ, ‖z‖ = R →
+    (h_finite_zeros : (zerosetKfR R1 f).Finite)
+    (z : ℂ) (hz : ‖z‖ = R) :
       ‖Bf R R1 f z‖ = ‖f z‖ := by
-  intro z hz
-  -- Use the factorization from lem_mod_Bf_prod_mod; first show z ∉ zerosetKfR
-  have hz_not_in : z ∉ zerosetKfR R1 f := by
-    intro h_in
-    -- h_in says z ∈ closedBall (0, R1), so ‖z‖ ≤ R1
-    have h_norm_le_R1 : ‖z‖ ≤ R1 := by simpa [sub_zero] using (h_in.1 : z ∈ Metric.closedBall (0 : ℂ) R1)
-    -- hz gives ‖z‖ = R, and R1 < R, contradiction
-    have h_norm_eq_R : ‖z‖ = R := by simpa using hz
-    linarith [h_norm_le_R1, h_norm_eq_R, hR1_lt_R]
-  rw [lem_mod_Bf_prod_mod R R1 f h_finite_zeros z hz_not_in]
-
-  -- Show each Blaschke factor has norm 1 when |z| = R
-  have h_each_factor_one : ∀ ρ ∈ h_finite_zeros.toFinset, ‖(((R : ℂ) - z * conj ρ / (R : ℂ)) / (z - ρ))‖ = 1 := by
-    intro ρ hρ
-
-    -- First, we need z ≠ ρ (if z = ρ, we get a contradiction since |z| = R > R1 but ρ ∈ ball(0, R1))
-    have z_ne_rho : z ≠ ρ := by
-      intro h_eq
-      have rho_in_zeros : ρ ∈ zerosetKfR R1 f := (Set.Finite.mem_toFinset h_finite_zeros).mp hρ
-      have rho_bound : ‖ρ‖ ≤ R1 := by
-        have h_in_ball : ρ ∈ Metric.closedBall (0 : ℂ) R1 := rho_in_zeros.1
-        rw [Metric.mem_closedBall, Complex.dist_eq] at h_in_ball
-        simpa using h_in_ball
-      have R1_lt_R : R1 < R := by linarith
-      rw [← h_eq, hz] at rho_bound
-      linarith [R1_lt_R]
-
-    -- Now prove the Blaschke factor has norm 1
-    rw [Complex.norm_div]
-    have z_conj_eq : z * conj z = (R ^ 2 : ℂ) := by
-      rw [Complex.mul_conj', hz, pow_two]
-    have num_rewrite : (R : ℂ) - z * conj ρ / (R : ℂ) = ((R : ℂ)^2 - z * conj ρ) / (R : ℂ) := by
-      field [ne_of_gt hR1_pos]
-    rw [num_rewrite, Complex.norm_div]
-    have factor_eq : (R : ℂ)^2 - z * conj ρ = z * conj (z - ρ) := by
-      rw [← z_conj_eq, map_sub]
-      ring
-
-    rw [factor_eq, Complex.norm_mul, Complex.norm_conj, hz]
-    field_simp
-
-    have h_denom_ne_zero : R * ‖z - ρ‖ ≠ 0 := by
-      apply mul_ne_zero
-      -- Prove R is not zero
-      · linarith [hR1_pos, hR1_lt_R]
-      -- Prove the norm is not zero
-      · simp [sub_ne_zero, z_ne_rho]
-    -- field_simp can now use this fact to solve the goal.
-    rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by linarith)]
-    field_simp [h_denom_ne_zero]
-    exact div_self h_denom_ne_zero
-
-
-  -- Apply this to show the product equals 1
-  have h_prod_one : ∏ ρ ∈ h_finite_zeros.toFinset, ‖(((R : ℂ) - z * conj ρ / (R : ℂ)) / (z - ρ))‖ ^ analyticOrderNatAt f ρ = 1 := by
-    -- Each factor equals 1, and 1^n = 1
-    rw [← Finset.prod_congr rfl (fun ρ hρ => by rw [h_each_factor_one ρ hρ, one_pow])]
-    rw [Finset.prod_const_one]
-
-  rw [h_prod_one, mul_one]
-
+  rw [lem_mod_Bf_prod_mod R R1 f h_finite_zeros z (by simp_all [zerosetKfR])]
+  suffices ∀ ρ ∈ h_finite_zeros.toFinset, ‖(((R : ℂ) - z * conj ρ / (R : ℂ)) / (z - ρ))‖ ^ analyticOrderNatAt f ρ = 1 by
+    rw [Finset.prod_congr rfl this, Finset.prod_const_one, mul_one]
+  intro ρ hρ
+  convert one_pow _
+  have z_ne_rho : z ≠ ρ := by
+    intro h_eq
+    simp_all [zerosetKfR]
+    linarith
+  rw [(by field : R - z * conj ρ / R = ((R : ℂ)^2 - z * conj ρ) / R)]
+  rw [← hz, ← Complex.mul_conj', ← mul_sub, ← map_sub]
+  simp only [Complex.norm_div, Complex.norm_mul, Complex.norm_real, norm_norm, Complex.norm_conj]
+  rw [div_div, div_self]
+  exact mul_ne_zero (by linarith) (norm_ne_zero_iff.mpr (by grind))
 
 lemma lem_Bf_bounded_on_boundary (B R R1 : ℝ)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
-    ∀ z : ℂ, ‖z‖ = R →
+    (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B)
+    (z : ℂ) (hz : ‖z‖ = R) :
       ‖Bf R R1 f z‖ ≤ B := by
-  intro z hz
-  have hz_le : ‖z‖ ≤ R := le_of_eq hz
-  have h_eq :=
-    lem_mod_Bf_eq_mod_f_on_boundary R R1 (by linarith) hR1_lt_R f h_finite_zeros z hz
-  simpa [h_eq] using hf_le_B z hz_le
-
-lemma mem_closedBall_of_norm_le {z : ℂ} {R : ℝ} (hz : ‖z‖ ≤ R) : z ∈ Metric.closedBall (0 : ℂ) R := by
-  simp_all
+  rw [lem_mod_Bf_eq_mod_f_on_boundary R R1 (by linarith) hR1_lt_R f h_finite_zeros z hz]
+  exact hf_le_B _ hz.le
 
 lemma closure_ball_eq_closedBall_center (R : ℝ) (hR : 0 < R) :
   closure (Metric.ball (0 : ℂ) R) = Metric.closedBall (0 : ℂ) R := by
@@ -335,11 +282,9 @@ lemma closure_ball_eq_closedBall_center (R : ℝ) (hR : 0 < R) :
 lemma lem_max_mod_principle_for_Bf (B R : ℝ) (hB : 1 < B) (hR_pos : 0 < R)
     (fB : ℂ → ℂ)
     (h_analytic : AnalyticOnNhd ℂ fB (Metric.closedBall (0 : ℂ) R))
-  (h_bd_boundary : ∀ z : ℂ, ‖z‖ = R → ‖fB z‖ ≤ B) :
-  ∀ z : ℂ, ‖z‖ ≤ R → ‖fB z‖ ≤ B := by
-  intro z hz
-  -- Prepare nonnegativity of B
-  have hB0 : 0 ≤ B := le_of_lt (lt_trans zero_lt_one hB)
+    (h_bd_boundary : ∀ z : ℂ, ‖z‖ = R → ‖fB z‖ ≤ B)
+    (z : ℂ) (hz : ‖z‖ ≤ R) : ‖fB z‖ ≤ B := by
+  have hB0 : 0 ≤ B := by linarith
   -- Convert analytic assumption to the form required by Hard MMP
   have h_an_on_closure : AnalyticOn ℂ fB (closure (ballDR R)) := by
     simpa [ballDR, closure_ball_eq_closedBall_center R hR_pos] using h_analytic.analyticOn
@@ -349,7 +294,7 @@ lemma lem_max_mod_principle_for_Bf (B R : ℝ) (hB : 1 < B) (hR_pos : 0 < R)
       intro z hzR; exact h_bd_boundary z hzR)
   -- It remains to see that z belongs to the closure of the open ball of radius R
   have hz_cl : z ∈ closure (ballDR R) := by
-    have hz_closed : z ∈ Metric.closedBall (0 : ℂ) R := mem_closedBall_of_norm_le hz
+    have hz_closed : z ∈ Metric.closedBall (0 : ℂ) R := by simp_all
     simpa [ballDR, closure_ball_eq_closedBall_center R hR_pos] using hz_closed
   exact h_le z hz_cl
 
