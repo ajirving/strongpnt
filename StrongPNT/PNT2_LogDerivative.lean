@@ -354,12 +354,11 @@ variable (h_finite_zeros : (zerosetKfR R1 f).Finite)
 lemma lem_Bf_eq_prod_Cf
     (R R1 : ℝ)
     (f : ℂ → ℂ)
-    (h_finite_zeros : (zerosetKfR R1 f).Finite) :
-    ∀ z, Bf R R1 f z =
+    (h_finite_zeros : (zerosetKfR R1 f).Finite)
+    (z : ℂ) : Bf R R1 f z =
       (∏ ρ ∈ h_finite_zeros.toFinset,
         ((R : ℂ) - conj ρ * z / (R : ℂ)) ^ analyticOrderNatAt f ρ) *
       (Cf R1 f z) := by
-  intro z
   simp [Bf, h_finite_zeros]
   ring
 
