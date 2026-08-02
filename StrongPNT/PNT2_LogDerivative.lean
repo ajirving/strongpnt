@@ -275,7 +275,7 @@ lemma lem_Bf_bounded_on_boundary (B R R1 : ℝ)
   rw [lem_mod_Bf_eq_mod_f_on_boundary R R1 (by linarith) hR1_lt_R f h_finite_zeros z hz]
   exact hf_le_B _ hz.le
 
-lemma lem_max_mod_principle_for_Bf (B R : ℝ) (hB : 1 < B) (hR_pos : 0 < R)
+lemma lem_max_mod_principle_for_Bf (B R : ℝ) (hR_pos : 0 < R)
     (fB : ℂ → ℂ)
     (h_analytic : AnalyticOnNhd ℂ fB (Metric.closedBall (0 : ℂ) R))
     (h_bd_boundary : ∀ z : ℂ, ‖z‖ = R → ‖fB z‖ ≤ B)
@@ -292,7 +292,6 @@ lemma lem_max_mod_principle_for_Bf (B R : ℝ) (hB : 1 < B) (hR_pos : 0 < R)
     simp_all
 
 lemma lem_Bf_bounded_in_disk_from_boundary (B R R1 : ℝ)
-    (hB : 1 < B)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
@@ -302,12 +301,11 @@ lemma lem_Bf_bounded_in_disk_from_boundary (B R R1 : ℝ)
     ∀ z : ℂ, ‖z‖ ≤ R →
       ‖Bf R R1 f z‖ ≤ B := by
   have hA := lem_Bf_is_analytic R R1 f h_f_analytic
-  exact lem_max_mod_principle_for_Bf B R hB (by linarith)
+  exact lem_max_mod_principle_for_Bf B R (by linarith)
     (Bf R R1 f) hA h_bd_boundary
 
 
 lemma lem_Bf_bounded_in_disk_from_f (B R R1 : ℝ)
-    (hB : 1 < B)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
@@ -320,7 +318,7 @@ lemma lem_Bf_bounded_in_disk_from_f (B R R1 : ℝ)
   have h_bd_boundary : ∀ z : ℂ, ‖z‖ = R →
       ‖Bf R R1 f z‖ ≤ B :=
     lem_Bf_bounded_on_boundary B R R1 hR1_pos hR1_lt_R f h_finite_zeros hf_le_B
-  exact (lem_Bf_bounded_in_disk_from_boundary B R R1 hB hR1_pos hR1_lt_R f h_f_analytic h_bd_boundary) z hz
+  exact (lem_Bf_bounded_in_disk_from_boundary B R R1 hR1_pos hR1_lt_R f h_f_analytic h_bd_boundary) z hz
 
 
 lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
@@ -463,7 +461,6 @@ lemma Bf_never_zero
 
 lemma log_Bf_le_log_B3
     (B R R1 : ℝ)
-    (hB : 1 < B)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
@@ -481,7 +478,7 @@ lemma log_Bf_le_log_B3
     · exact fun z hz ↦ order_ne_top h_f_analytic (by linarith) ⟨0, (by simp; linarith), (by simp_all)⟩
         (closedBall_subset_closedBall (by linarith) hz)
     · simpa
-  · exact lem_Bf_bounded_in_disk_from_f B R R1 hB hR1_pos hR1_lt_R f h_f_analytic h_finite_zeros h_f_bound z (by linarith)
+  · exact lem_Bf_bounded_in_disk_from_f B R R1 hR1_pos hR1_lt_R f h_f_analytic h_finite_zeros h_f_bound z (by linarith)
 
 lemma log_Bf0_ge_0
     (R R1 : ℝ)
@@ -500,7 +497,6 @@ def isLf (Lf : ℂ → ℂ) (f : ℂ → ℂ) (r R R1 : ℝ) : Prop :=
 
 lemma re_Lf_le_log_B
     (B r R R1 : ℝ)
-    (hB : 1 < B)
     (hr_lt_R1 : r < R1)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
@@ -518,7 +514,7 @@ lemma re_Lf_le_log_B
   · -- Apply log_Bf_le_log_B3 and log_Bf0_ge_0
     -- derive the required bound ‖z‖ ≤ R1 from ‖z‖ ≤ r and r < R1
     have hz_apply_BC_to_Lfle_R1 : ‖z‖ ≤ R1 := by linarith [hz, hr_lt_R1]
-    have h1 := log_Bf_le_log_B3 B R R1 hB hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros h_f_bound z hz_apply_BC_to_Lfle_R1
+    have h1 := log_Bf_le_log_B3 B R R1 hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros h_f_bound z hz_apply_BC_to_Lfle_R1
     have h2 := log_Bf0_ge_0 R R1 hR1_pos hR1_lt_R f h_f_zero h_finite_zeros
     linarith
   · -- Show z is in the closed ball of radius r
@@ -560,7 +556,7 @@ lemma apply_BC_to_Lf
     intro w hw
     have hw' : norm w ≤ r := by
       simpa [Metric.mem_closedBall, dist_zero_right] using hw
-    exact re_Lf_le_log_B B r R R1 hB hr_lt_R1 hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros h_f_bound Lf hLf w hw'
+    exact re_Lf_le_log_B B r R R1 hr_lt_R1 hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros h_f_bound Lf hLf w hw'
   -- z ∈ closedBall 0 r1
   have hz' : z ∈ Metric.closedBall 0 r1 := by
     simpa [Metric.mem_closedBall, dist_zero_right] using hz
