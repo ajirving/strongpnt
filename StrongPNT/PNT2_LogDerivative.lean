@@ -297,13 +297,11 @@ lemma lem_Bf_bounded_in_disk_from_boundary (B R R1 : ℝ)
     (f : ℂ → ℂ)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
     (h_bd_boundary : ∀ z : ℂ, ‖z‖ = R →
-      ‖Bf R R1 f z‖ ≤ B) :
-    ∀ z : ℂ, ‖z‖ ≤ R →
+      ‖Bf R R1 f z‖ ≤ B)
+    (z : ℂ) (hz : ‖z‖ ≤ R) :
       ‖Bf R R1 f z‖ ≤ B := by
-  have hA := lem_Bf_is_analytic R R1 f h_f_analytic
   exact lem_max_mod_principle_for_Bf B R (by linarith)
-    (Bf R R1 f) hA h_bd_boundary
-
+    (Bf R R1 f) (lem_Bf_is_analytic R R1 f h_f_analytic) h_bd_boundary z hz
 
 lemma lem_Bf_bounded_in_disk_from_f (B R R1 : ℝ)
     (hR1_pos : 0 < R1)
@@ -311,15 +309,10 @@ lemma lem_Bf_bounded_in_disk_from_f (B R R1 : ℝ)
     (f : ℂ → ℂ)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
-    ∀ z : ℂ, ‖z‖ ≤ R →
+    (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B)
+    (z : ℂ) (hz : ‖z‖ ≤ R) :
       ‖Bf R R1 f z‖ ≤ B := by
-  intro z hz
-  have h_bd_boundary : ∀ z : ℂ, ‖z‖ = R →
-      ‖Bf R R1 f z‖ ≤ B :=
-    lem_Bf_bounded_on_boundary B R R1 hR1_pos hR1_lt_R f h_finite_zeros hf_le_B
-  exact (lem_Bf_bounded_in_disk_from_boundary B R R1 hR1_pos hR1_lt_R f h_f_analytic h_bd_boundary) z hz
-
+  exact lem_Bf_bounded_in_disk_from_boundary B R R1 hR1_pos hR1_lt_R f h_f_analytic (lem_Bf_bounded_on_boundary B R R1 hR1_pos hR1_lt_R f h_finite_zeros hf_le_B) z hz
 
 lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
     (hR1_pos : 0 < R1)
