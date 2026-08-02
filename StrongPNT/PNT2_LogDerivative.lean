@@ -127,7 +127,7 @@ lemma lem_h_ratio_anal
   exact hg_analytic.div hden.1 hden.2
 
 lemma lem_Cf_analytic {R R1 : ℝ} {f : ℂ → ℂ} (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
-    {z : ℂ} (hz : z ∈ Metric.closedBall (0 : ℂ) R) :
+    {z : ℂ} (hz : z ∈ closedBall (0 : ℂ) R) :
     AnalyticAt ℂ (Cf R1 f) z := by
   by_cases h_finite_zeros : (zerosetKfR R1 f).Finite
   swap
@@ -157,7 +157,7 @@ lemma lem_Cf_never_zero
     {f : ℂ → ℂ}
     (hf : AnalyticOnNhd ℂ f (closedBall 0 R1))
     (ne_top : ∀ z ∈ closedBall 0 R1, analyticOrderAt f z ≠ ⊤)
-    (z : ℂ) (hz : z ∈ Metric.closedBall (0 : ℂ) R1) :
+    (z : ℂ) (hz : z ∈ closedBall (0 : ℂ) R1) :
     Cf R1 f z ≠ 0 := by
   by_cases h_finite_zeros : (zerosetKfR R1 f).Finite
   swap
@@ -229,7 +229,7 @@ theorem lem_mod_Bf_at_0_ge_1 (R R1 : ℝ) (hR1_pos : 0 < R1)
 theorem lem_Bf_is_analytic (R R1 : ℝ)
     (f : ℂ → ℂ)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R)) :
-    AnalyticOnNhd ℂ (Bf R R1 f)  (Metric.closedBall (0 : ℂ) R) := by
+    AnalyticOnNhd ℂ (Bf R R1 f)  (closedBall (0 : ℂ) R) := by
   intro z hz
   by_cases h_finite_zeros : (zerosetKfR R1 f).Finite
   swap
@@ -277,10 +277,10 @@ lemma lem_Bf_bounded_on_boundary (B R R1 : ℝ)
 
 lemma lem_max_mod_principle_for_Bf (B R : ℝ) (hR_pos : 0 < R)
     (fB : ℂ → ℂ)
-    (h_analytic : AnalyticOnNhd ℂ fB (Metric.closedBall (0 : ℂ) R))
+    (h_analytic : AnalyticOnNhd ℂ fB (closedBall (0 : ℂ) R))
     (h_bd_boundary : ∀ z : ℂ, ‖z‖ = R → ‖fB z‖ ≤ B)
     (z : ℂ) (hz : ‖z‖ ≤ R) : ‖fB z‖ ≤ B := by
-  refine Complex.norm_le_of_forall_mem_frontier_norm_le (Metric.isBounded_ball (x := 0) (r := R)) ?_ (fun z hz ↦ ?_) ?_
+  refine Complex.norm_le_of_forall_mem_frontier_norm_le (isBounded_ball (x := 0) (r := R)) ?_ (fun z hz ↦ ?_) ?_
   · apply DifferentiableOn.diffContOnCl
     apply AnalyticOnNhd.differentiableOn
     convert h_analytic
@@ -368,7 +368,7 @@ lemma lem_num_prod_never_zero_all
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1,
+    ∀ z ∈ closedBall (0 : ℂ) R1,
       (∏ ρ ∈ h_finite_zeros.toFinset,
         ((R : ℂ) - conj ρ * z / (R : ℂ)) ^ analyticOrderNatAt f ρ) ≠ 0 := by
   intro z hz
@@ -382,7 +382,7 @@ lemma lem_num_prod_never_zero_all
   have hρ_bound : ‖ρ‖ ≤ R1 := by
     rw [zerosetKfR] at hρ_mem; simp only [mem_closedBall, dist_zero_right, mem_setOf_eq] at hρ_mem; exact hρ_mem.1
   have hz_bound : ‖z‖ ≤ R1 := by
-    rw [Metric.mem_closedBall, dist_zero_right] at hz; exact hz
+    simp_all
 
   -- Get R > 0
   have hR_pos : (0 : ℝ) < R := lt_trans hR1_pos hR1_lt_R
@@ -430,7 +430,7 @@ lemma Bf_never_zero
     (f : ℂ → ℂ)
     (hf : AnalyticOnNhd ℂ f (closedBall 0 R1))
     (ne_top : ∀ z ∈ closedBall 0 R1, analyticOrderAt f z ≠ ⊤) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1, Bf R R1 f z ≠ 0 := by
+    ∀ z ∈ closedBall (0 : ℂ) R1, Bf R R1 f z ≠ 0 := by
   intro z hz
   by_cases h_finite_zeros : (zerosetKfR R1 f).Finite
   swap
@@ -503,7 +503,7 @@ lemma re_Lf_le_log_B
     have h2 := log_Bf0_ge_0 R R1 hR1_pos hR1_lt_R f h_f_zero h_finite_zeros
     linarith
   · -- Show z is in the closed ball of radius r
-    exact Metric.mem_closedBall.mpr (by simpa [dist_zero_right] using hz)
+    simp_all
 
 lemma apply_BC_to_Lf
     (B r1 r R R1 : ℝ)
@@ -537,14 +537,14 @@ lemma apply_BC_to_Lf
   have hL0 : L 0 = 0 := by
     exact hLf.2.1
   -- Re L ≤ log B on the closed ball of radius r
-  have hre_L_le_M : ∀ w ∈ Metric.closedBall 0 r, (L w).re ≤ Real.log B := by
+  have hre_L_le_M : ∀ w ∈ closedBall 0 r, (L w).re ≤ Real.log B := by
     intro w hw
     have hw' : norm w ≤ r := by
-      simpa [Metric.mem_closedBall, dist_zero_right] using hw
+      simp_all
     exact re_Lf_le_log_B B r R R1 hr_lt_R1 hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros h_f_bound Lf hLf w hw'
   -- z ∈ closedBall 0 r1
-  have hz' : z ∈ Metric.closedBall 0 r1 := by
-    simpa [Metric.mem_closedBall, dist_zero_right] using hz
+  have hz' : z ∈ closedBall 0 r1 := by
+    simp_all
   -- Apply Borel–Carathéodory II
   have hBC :=
     borel_caratheodory_II hr_pos (Real.log_pos hB) hr1_pos hr1_lt_r h_analytic_nhd.analyticOn hL0 hre_L_le_M hz'
@@ -556,7 +556,7 @@ lemma apply_BC_to_Lf
 lemma Lf_deriv_is_logBf_deriv (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
     (h_f_analytic : ∀ z ∈ closedBall 0 R1, AnalyticAt ℂ f z)
     (ne_top : ∀ z ∈ closedBall 0 R1, analyticOrderAt f z ≠ ⊤) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
       logDeriv (fun w ↦ Bf R R1 f w /
                            Bf R R1 f 0) z =
       logDeriv (fun w ↦ Bf R R1 f w) z := by
@@ -571,7 +571,7 @@ lemma Lf_deriv_is_logBf_deriv (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
     ring
   rw [h_eq]
   -- Show that Bf ... 0 ≠ 0 using Bf_never_zero
-  have h0_in_ball : (0 : ℂ) ∈ Metric.closedBall (0 : ℂ) R1 := by
+  have h0_in_ball : (0 : ℂ) ∈ closedBall (0 : ℂ) R1 := by
     simp
     linarith
   have h_Bf0_ne_zero := Bf_never_zero R R1 hR1_pos hR1_lt_R f h_f_analytic ne_top 0 h0_in_ball
@@ -587,11 +587,11 @@ lemma Lf_deriv_is_logBf_deriv (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
 -- Lemma 12: z_minus_rho_diff_nonzero
 lemma z_minus_rho_diff_nonzero {R1 : ℝ} {f : ℂ → ℂ} :
     ∀ ρ ∈ zerosetKfR R1 f,
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     z - ρ ≠ 0 ∧ DifferentiableAt ℂ (fun w ↦ w - ρ) z := by
   intro ρ hρ z hz
   have hz_pair := (Set.mem_sdiff z).1 hz
-  have hz_ball : z ∈ Metric.closedBall (0 : ℂ) R1 := hz_pair.1
+  have hz_ball : z ∈ closedBall (0 : ℂ) R1 := hz_pair.1
   have hz_notK : z ∉ zerosetKfR R1 f := hz_pair.2
   -- Show z ≠ ρ hence z - ρ ≠ 0
   have hz_ne_rho : z ≠ ρ := by
@@ -607,7 +607,7 @@ lemma z_minus_rho_diff_nonzero {R1 : ℝ} {f : ℂ → ℂ} :
 lemma blaschke_num_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) :
     ∀ ρ ∈ zerosetKfR R1 f,
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R,
+    ∀ z ∈ closedBall (0 : ℂ) R,
     R - (conj ρ) * z / R ≠ 0 ∧ DifferentiableAt ℂ (fun w ↦ R - (conj ρ) * w / R) z := by
   intro ρ hρ z hz
   constructor
@@ -655,7 +655,7 @@ lemma blaschke_num_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
 lemma blaschke_frac_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) :
     ∀ ρ ∈ zerosetKfR R1 f,
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     (R - (conj ρ) * z / R) / (z - ρ) ≠ 0 ∧
     DifferentiableAt ℂ (fun w ↦ (R - (conj ρ) * w / R) / (w - ρ)) z := by
   intro ρ hρ z hz
@@ -664,16 +664,16 @@ lemma blaschke_frac_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
   have hden_ne : z - ρ ≠ 0 := hden.1
   have hden_diff : DifferentiableAt ℂ (fun w ↦ w - ρ) z := hden.2
   -- Extract membership in the smaller closed ball
-  have hz_in_small : z ∈ Metric.closedBall (0 : ℂ) R1 ∧
+  have hz_in_small : z ∈ closedBall (0 : ℂ) R1 ∧
       z ∉ zerosetKfR R1 f := by
     simpa [Set.mem_sdiff] using hz
-  have hz_small : z ∈ Metric.closedBall (0 : ℂ) R1 := hz_in_small.1
+  have hz_small : z ∈ closedBall (0 : ℂ) R1 := hz_in_small.1
   -- Show z ∈ closedBall 0 1 to use the numerator lemma
   have hz_dist_le_small : dist z (0 : ℂ) ≤ R1 := by
     simpa [Metric.mem_closedBall] using hz_small
   have hR1_le_R : R1 ≤ R := le_of_lt hR1_lt_R
   -- Numerator: nonvanishing and differentiable
-  have hz_ballR : z ∈ Metric.closedBall (0 : ℂ) R := by
+  have hz_ballR : z ∈ closedBall (0 : ℂ) R := by
     have hz_le_R : dist z (0 : ℂ) ≤ R := le_trans hz_dist_le_small (le_of_lt hR1_lt_R)
     simpa [Metric.mem_closedBall] using hz_le_R
   have hnum := blaschke_num_diff_nonzero (R:=R) (R1:=R1) (f:=f) hR1_pos hR1_lt_R ρ hρ z hz_ballR
@@ -693,7 +693,7 @@ lemma blaschke_frac_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
 lemma blaschke_pow_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) :
     ∀ ρ ∈ zerosetKfR R1 f,
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     ((R - (conj ρ) * z / R) / (z - ρ)) ^ analyticOrderNatAt f ρ ≠ 0 ∧
     DifferentiableAt ℂ (fun w ↦ ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
   intro ρ hρ z hz
@@ -709,7 +709,7 @@ lemma blaschke_pow_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
 lemma blaschke_prod_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R)
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     (∏ ρ ∈ h_finite_zeros.toFinset, ((R - (conj ρ) * z / R) / (z - ρ)) ^ analyticOrderNatAt f ρ) ≠ 0 ∧
     DifferentiableAt ℂ (fun w ↦ ∏ ρ ∈ h_finite_zeros.toFinset,
                         ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
@@ -756,14 +756,14 @@ lemma blaschke_prod_diff_nonzero {R R1 : ℝ} {f : ℂ → ℂ}
 -- Lemma 17: f_diff_nonzero_outside_Kf
 lemma f_diff_nonzero_outside_Kf {R1 : ℝ} {f : ℂ → ℂ}
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1)) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     f z ≠ 0 ∧ DifferentiableAt ℂ f z := by
   intro z hz
   -- unpack membership in the set difference
-  have hz' : z ∈ Metric.closedBall (0 : ℂ) R1 ∧
+  have hz' : z ∈ closedBall (0 : ℂ) R1 ∧
       z ∉ zerosetKfR R1 f := by
     simpa [Set.mem_sdiff] using hz
-  have hz_in_R1 : z ∈ Metric.closedBall (0 : ℂ) R1 := hz'.1
+  have hz_in_R1 : z ∈ closedBall (0 : ℂ) R1 := hz'.1
   have hz_notin : z ∉ zerosetKfR R1 f := hz'.2
   -- show f z ≠ 0
   have hz_nonzero : f z ≠ 0 := by
@@ -778,7 +778,7 @@ lemma logDeriv_fprod_is_sum {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1))
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     logDeriv (fun w ↦ f w * ∏ ρ ∈ h_finite_zeros.toFinset,
              ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z =
     logDeriv f z + logDeriv (fun w ↦ ∏ ρ ∈ h_finite_zeros.toFinset,
@@ -836,7 +836,7 @@ lemma logDeriv_congr_of_eventuallyEq {f g : ℂ → ℂ} {z : ℂ}
 lemma logDeriv_Bf_is_sum (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1))
 :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \
+    ∀ z ∈ closedBall (0 : ℂ) R1 \
           zerosetKfR R1 f,
     logDeriv (Bf R R1 f) z =
     logDeriv f z +
@@ -913,10 +913,10 @@ lemma logDeriv_def_as_frac {f : ℂ → ℂ} {z : ℂ} :
 theorem in_r_minus_kf {R1 r : ℝ} {f : ℂ → ℂ}
   (hr_lt_R1 : r < R1)
   (z : ℂ)
-  (hz : z ∈ Metric.closedBall 0 r \ zerosetKfR R1 f) :
-   z ∈ Metric.closedBall 0 R1 \ zerosetKfR R1 f := by
+  (hz : z ∈ closedBall 0 r \ zerosetKfR R1 f) :
+   z ∈ closedBall 0 R1 \ zerosetKfR R1 f := by
   obtain ⟨h1, h2⟩ := hz
-  have : z ∈ Metric.closedBall 0 R1 := by
+  have : z ∈ closedBall 0 R1 := by
     simp_all
     linarith
   constructor <;> assumption
@@ -925,7 +925,7 @@ theorem in_r_minus_kf {R1 r : ℝ} {f : ℂ → ℂ}
 lemma Lf_deriv_step1 (hR1_pos : 0 < R1) (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1)) (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (h_f_zero : f 0 = 1)
     (Lf : ℂ → ℂ)
     (h_Lf : isLf Lf f r R R1) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) r \ zerosetKfR R1 f,
     deriv Lf z =
     deriv f z / f z + logDeriv (fun w ↦ ∏ ρ ∈ h_finite_zeros.toFinset,
                                 ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z := by
@@ -933,9 +933,9 @@ lemma Lf_deriv_step1 (hR1_pos : 0 < R1) (h_f_analytic : AnalyticOnNhd ℂ f (clo
     refine fun z hz ↦ order_ne_top h_f_analytic (by linarith) ⟨0, (by simp; linarith), (by simp_all)⟩ (closedBall_subset_closedBall (by linarith) hz)
   intro z hz
   -- Extract closedBall membership
-  have hz' : z ∈ Metric.closedBall (0 : ℂ) r ∧ z ∉ zerosetKfR R1 f := by
+  have hz' : z ∈ closedBall (0 : ℂ) r ∧ z ∉ zerosetKfR R1 f := by
     simpa [Set.mem_sdiff] using hz
-  have hz_ball : z ∈ Metric.closedBall (0 : ℂ) r := hz'.1
+  have hz_ball : z ∈ closedBall (0 : ℂ) r := hz'.1
   -- From Lfderiv_is_logderivBf
   have hLf :=
   --
@@ -966,7 +966,7 @@ lemma Lf_deriv_step1 (hR1_pos : 0 < R1) (h_f_analytic : AnalyticOnNhd ℂ f (clo
         Bf R R1 f w) z := by
     -- Unfold Lf to use the derivative property from log_of_analytic
     -- and then rewrite deriv B / B as logDeriv B.
-    have hz_in_r : z ∈ Metric.closedBall (0 : ℂ) r := hz_ball
+    have hz_in_r : z ∈ closedBall (0 : ℂ) r := hz_ball
     exact h_Lf.2.2.1 z hz_in_r
   -- Chain the identities: deriv Lf = logDeriv Bf = logDeriv f + logDeriv(prod),
   -- then rewrite logDeriv f as deriv f / f.
@@ -987,7 +987,7 @@ lemma Lf_deriv_step1 (hR1_pos : 0 < R1) (h_f_analytic : AnalyticOnNhd ℂ f (clo
 lemma logDeriv_prod_is_sum {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R)
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     logDeriv (fun w ↦ ∏ ρ ∈ h_finite_zeros.toFinset,
              ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z =
     ∑ ρ ∈ h_finite_zeros.toFinset, logDeriv (fun w ↦
@@ -1013,7 +1013,7 @@ lemma logDeriv_prod_is_sum {R R1 : ℝ} {f : ℂ → ℂ}
 lemma logDeriv_power_is_mul {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R)
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     ∀ ρ ∈ h_finite_zeros.toFinset,
     logDeriv (fun w ↦ ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z =
     analyticOrderNatAt f ρ * logDeriv (fun w ↦ (R - (conj ρ) * w / R) / (w - ρ)) z := by
@@ -1030,7 +1030,7 @@ lemma logDeriv_power_is_mul {R R1 : ℝ} {f : ℂ → ℂ}
 lemma logDeriv_prod_is_sum_mul {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R)
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     logDeriv (fun w ↦ ∏ ρ ∈ h_finite_zeros.toFinset,
              ((R - (conj ρ) * w / R) / (w - ρ)) ^ analyticOrderNatAt f ρ) z =
     ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ *
@@ -1052,7 +1052,7 @@ lemma Lf_deriv_step2 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     (h_f_zero : f 0 = 1)
     (Lf : ℂ → ℂ)
     (h_Lf : isLf Lf f r R R1) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) r \ zerosetKfR R1 f,
     deriv Lf z =
     deriv f z / f z + ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ *
                                                        logDeriv (fun w ↦ (R - (conj ρ) * w / R) / (w - ρ)) z := by
@@ -1069,7 +1069,7 @@ lemma Lf_deriv_step2 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
 lemma logDeriv_Blaschke_is_diff {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R)
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     ∀ ρ ∈ h_finite_zeros.toFinset,
     logDeriv (fun w ↦ (R - (conj ρ) * w / R) / (w - ρ)) z =
     logDeriv (fun w ↦ R - (conj ρ) * w / R) z - logDeriv (fun w ↦ w - ρ) z := by
@@ -1081,12 +1081,12 @@ lemma logDeriv_Blaschke_is_diff {R R1 : ℝ} {f : ℂ → ℂ}
       ρ hρ_set z ⟨hz_in, hz_notin⟩
   rcases hden with ⟨hden_nz, hden_diff⟩
   have hz_le : ‖z‖ ≤ R1 := by
-    simpa [Metric.closedBall, dist_eq_norm] using hz_in
-  have hz_inR : z ∈ Metric.closedBall (0 : ℂ) R := by
+    simpa [closedBall, dist_eq_norm] using hz_in
+  have hz_inR : z ∈ closedBall (0 : ℂ) R := by
     have hz_le_R : ‖z‖ ≤ R := by
       calc ‖z‖ ≤ R1 := hz_le
       _ ≤  R := le_of_lt hR1_lt_R
-    simpa [Metric.closedBall, dist_eq_norm] using hz_le_R
+    simpa [closedBall, dist_eq_norm] using hz_le_R
   have hnum := blaschke_num_diff_nonzero hR1_pos hR1_lt_R
       ρ hρ_set z hz_inR
   rcases hnum with ⟨hnum_nz, hnum_diff⟩
@@ -1155,7 +1155,7 @@ lemma logDeriv_Blaschke_is_diff_frac {R R1 : ℝ} {f : ℂ → ℂ}
      (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
     ∀ ρ ∈ h_finite_zeros.toFinset,
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f , logDeriv (fun w ↦ (R - (conj ρ) * w / R) / (w - ρ)) z =
+    ∀ z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f , logDeriv (fun w ↦ (R - (conj ρ) * w / R) / (w - ρ)) z =
          1 / (z - R^2 / (conj ρ)) - 1 / (z - ρ) := by
   intro ρ hρ z hz
   -- Apply the division rule for logDeriv using logDeriv_Blaschke_is_diff
@@ -1169,9 +1169,9 @@ lemma logDeriv_Blaschke_is_diff_frac {R R1 : ℝ} {f : ℂ → ℂ}
     exact (zero_ne_one : (0 : ℂ) ≠ 1) (this.symm.trans h_f_zero)
   have hR_ne_zero : R ≠ 0 := ne_of_gt (hR1_pos.trans hR1_lt_R)
   have h_denom_ne_zero : (R : ℂ) - (conj ρ) * z / R ≠ 0 := by
-    have hz_ball : z ∈ Metric.closedBall (0 : ℂ) R := by
+    have hz_ball : z ∈ closedBall (0 : ℂ) R := by
       have hle : R1 < R := hR1_lt_R
-      apply Metric.closedBall_subset_closedBall (le_of_lt hle)
+      apply closedBall_subset_closedBall (le_of_lt hle)
       exact hz.1
     have h := blaschke_num_diff_nonzero hR1_pos hR1_lt_R ρ hρ_mem z hz_ball
     exact h.1
@@ -1191,7 +1191,7 @@ lemma Lf_deriv_step3 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     (h_f_zero : f 0 = 1)
     (Lf : ℂ → ℂ)
     (h_Lf : isLf Lf f r R R1) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) r \ zerosetKfR R1 f,
     deriv Lf z =
     deriv f z / f z + ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ * (1 / (z - R^2 / (conj ρ)) - 1 / (z - ρ)) := by
   intro z hz
@@ -1206,7 +1206,7 @@ lemma Lf_deriv_step3 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
 -- Lemma 36: sum_rearranged
 lemma sum_rearranged {R R1 : ℝ} {f : ℂ → ℂ}
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) r \ zerosetKfR R1 f,
     ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ *
                                     (1 / (z - R^2 / (conj ρ)) - 1 / (z - ρ)) =
     ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (conj ρ)) -
@@ -1224,7 +1224,7 @@ lemma Lf_deriv_final_formula (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1
     (h_f_zero : f 0 = 1)
     (Lf : ℂ → ℂ)
     (h_Lf : isLf Lf f r R R1) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) r \ zerosetKfR R1 f,
     deriv Lf z =
     deriv f z / f z - ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - ρ) +
                       ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (conj ρ)) := by
@@ -1243,7 +1243,7 @@ lemma rearrange_Lf_deriv (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R
     (h_f_zero : f 0 = 1)
     (Lf : ℂ → ℂ)
     (h_Lf : isLf Lf f r R R1) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) r \ zerosetKfR R1 f,
     deriv f z / f z - ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - ρ) =
     deriv Lf z -
     ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (conj ρ)) := by
@@ -1260,7 +1260,7 @@ lemma target_inequality_setup (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R
     (h_f_zero : f 0 = 1)
     (Lf : ℂ → ℂ)
     (h_Lf : isLf Lf f r R R1) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) r \ zerosetKfR R1 f,
   ‖deriv f z / f z - ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - ρ)‖ ≤
   ‖deriv Lf z‖ +
   ‖∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (conj ρ))‖ := by
@@ -1285,16 +1285,16 @@ lemma norm_Rsq_div_conj (R : ℝ) (ρ : ℂ) (hρ : ρ ≠ 0) : ‖((R^2 : ℂ) 
       simp [hnormR]
 
 lemma zerosetKfR_subset_closedBall {R1 : ℝ} {f : ℂ → ℂ} :
-  zerosetKfR R1 f ⊆ Metric.closedBall (0 : ℂ) R1 := by
+  zerosetKfR R1 f ⊆ closedBall (0 : ℂ) R1 := by
   intro ρ hρ
-  have hmem : ρ ∈ Metric.closedBall (0 : ℂ) R1 ∧ f ρ = 0 := by
+  have hmem : ρ ∈ closedBall (0 : ℂ) R1 ∧ f ρ = 0 := by
     simpa [zerosetKfR] using hρ
   exact hmem.left
 
 lemma mem_zerosetKfR_ne_zero_of_f0_eq_one {R1 : ℝ} {f : ℂ → ℂ}
   (hf0 : f 0 = 1) {ρ : ℂ} (hρ : ρ ∈ zerosetKfR R1 f) : ρ ≠ 0 := by
   intro hρ0
-  have hmem : ρ ∈ Metric.closedBall (0 : ℂ) R1 ∧ f ρ = 0 := by
+  have hmem : ρ ∈ closedBall (0 : ℂ) R1 ∧ f ρ = 0 := by
     simpa [zerosetKfR] using hρ
   have hzero : f 0 = 0 := by simpa [hρ0] using hmem.right
   have h10 : (1 : ℂ) ≠ 0 := one_ne_zero
@@ -1311,7 +1311,7 @@ lemma norm_sub_ge_norm_sub (x y : ℂ) : ‖x - y‖ ≥ ‖y‖ - ‖x‖ := by
 
 lemma mem_zerosetKfR_norm_le {R1 : ℝ} {f : ℂ → ℂ} {ρ : ℂ}
   (hρ : ρ ∈ zerosetKfR R1 f) : ‖ρ‖ ≤ R1 := by
-  have hmem : ρ ∈ Metric.closedBall (0 : ℂ) R1 :=
+  have hmem : ρ ∈ closedBall (0 : ℂ) R1 :=
     (zerosetKfR_subset_closedBall (R1 := R1) (f := f)) hρ
   have hdist : dist ρ (0 : ℂ) ≤ R1 := by
     simpa [Metric.mem_closedBall] using hmem
@@ -1322,7 +1322,7 @@ lemma lem_sum_bound_step2 {R R1 : ℝ} {f : ℂ → ℂ}
     (hR1_lt_R : R1 < R)
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
+    ∀ z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
       (∑ ρ ∈ h_finite_zeros.toFinset,
           (analyticOrderNatAt f ρ : ℝ) / ‖z - (R^2 : ℂ) / (conj ρ)‖)
         ≤ (1/(R^2/R1 - R1)) *
@@ -1416,8 +1416,8 @@ lemma final_sum_bound {R R1 B : ℝ} {f : ℂ → ℂ}
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (h_f_bounded : ∀ z ∈ Metric.closedBall (0 : ℂ) R, ‖f z‖ ≤ B) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
+    (h_f_bounded : ∀ z ∈ closedBall (0 : ℂ) R, ‖f z‖ ≤ B) :
+    ∀ z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f,
     ‖∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (conj ρ))‖ ≤
     1/((R^2/R1 - R1) * Real.log (R/R1)) * Real.log B := by
   intro z hz
@@ -1463,9 +1463,9 @@ lemma Lf_exists (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
     (h_f_zero : f 0 = 1) :
     ∃ Lf : ℂ → ℂ, isLf Lf f r R R1 := by
   let B_f := Bf R R1 f
-  have h_Bf_analytic : AnalyticOnNhd ℂ B_f (Metric.closedBall (0 : ℂ) R) :=
+  have h_Bf_analytic : AnalyticOnNhd ℂ B_f (closedBall (0 : ℂ) R) :=
     lem_Bf_is_analytic R R1 f <| h_f_analytic.mono (by gcongr)
-  have h_Bf_ne_zero : ∀ w ∈ Metric.closedBall (0 : ℂ) R1, B_f w ≠ 0 := by
+  have h_Bf_ne_zero : ∀ w ∈ closedBall (0 : ℂ) R1, B_f w ≠ 0 := by
     intro w hw
     refine Bf_never_zero R R1 hR1_pos hR1_lt_R f (fun z hz ↦ ?_) (fun z hz ↦ ?_) w hw
     · exact h_f_analytic z <| closedBall_subset_closedBall (by linarith) hz
@@ -1486,8 +1486,8 @@ lemma final_inequality
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (h_f_bounded : ∀ z ∈ Metric.closedBall (0 : ℂ) R, ‖f z‖ ≤ B) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r1 \ zerosetKfR R1 f,
+    (h_f_bounded : ∀ z ∈ closedBall (0 : ℂ) R, ‖f z‖ ≤ B) :
+    ∀ z ∈ closedBall (0 : ℂ) r1 \ zerosetKfR R1 f,
 
         ‖(deriv f z / f z
           - ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - ρ))‖
@@ -1499,9 +1499,9 @@ lemma final_inequality
   obtain ⟨Lf, h_Lf⟩ := Lf_exists hr_lt_R1 hR1_lt_R hR1_pos (h_f_analytic.mono (by gcongr)) h_f_zero
   intro z hz
   -- Lift z from r1-ball to r-ball (needed for target_inequality_setup)
-  have hz_in_r : z ∈ Metric.closedBall (0 : ℂ) r \ zerosetKfR R1 f := by
+  have hz_in_r : z ∈ closedBall (0 : ℂ) r \ zerosetKfR R1 f := by
     constructor
-    · apply Metric.closedBall_subset_closedBall (le_of_lt hr1_lt_r)
+    · apply closedBall_subset_closedBall (le_of_lt hr1_lt_r)
       exact hz.1
     · exact hz.2
 
@@ -1510,9 +1510,9 @@ lemma final_inequality
     target_inequality_setup h_finite_zeros hr_pos hr_lt_R1 hR1_lt_R hR1_pos (h_f_analytic.mono (by gcongr)) h_f_zero Lf h_Lf z hz_in_r
 
   -- Lift z from r1-ball to R1-ball (needed for final_sum_bound)
-  have hz_in_R1 : z ∈ Metric.closedBall (0 : ℂ) R1 \ zerosetKfR R1 f := by
+  have hz_in_R1 : z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f := by
     constructor
-    · exact Metric.closedBall_subset_closedBall (lt_trans hr1_lt_r hr_lt_R1).le hz.1
+    · exact closedBall_subset_closedBall (lt_trans hr1_lt_r hr_lt_R1).le hz.1
     · exact hz.2
 
   -- Apply final_sum_bound (from informal proof)
@@ -1555,8 +1555,8 @@ lemma final_ineq1
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
     (h_f_zero : f 0 = 1)
     (h_finite_zeros : (zerosetKfR R1 f).Finite)
-    (h_f_bounded : ∀ z ∈ Metric.closedBall (0 : ℂ) R, ‖f z‖ ≤ B) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) r1 \ zerosetKfR R1 f,
+    (h_f_bounded : ∀ z ∈ closedBall (0 : ℂ) R, ‖f z‖ ≤ B) :
+    ∀ z ∈ closedBall (0 : ℂ) r1 \ zerosetKfR R1 f,
     ‖(deriv f z / f z) - ∑ ρ ∈ h_finite_zeros.toFinset,
                  analyticOrderNatAt f ρ / (z - ρ)‖ ≤
     (16 * r^2 / ((r - r1)^3) +
