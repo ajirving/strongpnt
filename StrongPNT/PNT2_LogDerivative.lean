@@ -548,7 +548,7 @@ theorem in_r_minus_kf {R1 r : ℝ} {f : ℂ → ℂ}
   linarith
 
 -- Lemma 22: Lf_deriv_step1
-lemma Lf_deriv_step1 (hR1_pos : 0 < R1) (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1)) (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (h_f_zero : f 0 = 1)
+lemma Lf_deriv_step1 (hR1_pos : 0 < R1) (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1)) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     (Lf : ℂ → ℂ)
     (h_Lf : isLf Lf f r R R1)
     (z : ℂ) (hz : z ∈ closedBall (0 : ℂ) r \ zerosetKfR R1 f) :
@@ -620,10 +620,9 @@ lemma logDeriv_prod_is_sum_mul {R R1 : ℝ} {f : ℂ → ℂ}
     logDeriv_power_is_mul (R := R) (R1 := R1) (f := f) hR1_pos hR1_lt_R h_finite_zeros z hz ρ hρ
 
 -- Lemma 26: Lf_deriv_step2
-lemma Lf_deriv_step2 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
+lemma Lf_deriv_step2 (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     (hR1_pos : 0 < R1)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1))
-    (h_f_zero : f 0 = 1)
     (Lf : ℂ → ℂ)
     (h_Lf : isLf Lf f r R R1) :
     ∀ z ∈ closedBall (0 : ℂ) r \ zerosetKfR R1 f,
@@ -633,7 +632,7 @@ lemma Lf_deriv_step2 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
   intro z hz
   classical
   have h1 :=
-    Lf_deriv_step1 h_finite_zeros hR1_pos h_f_analytic hr_pos hr_lt_R1 hR1_lt_R h_f_zero Lf h_Lf z hz
+    Lf_deriv_step1 h_finite_zeros hR1_pos h_f_analytic  hr_lt_R1 hR1_lt_R Lf h_Lf z hz
   have hsum :=
     logDeriv_prod_is_sum_mul (R:=R) (R1:=R1) (f:=f) hR1_pos hR1_lt_R h_finite_zeros z (in_r_minus_kf hr_lt_R1 _ hz)
   have h2 := congrArg (fun t => deriv f z / f z + t) hsum
@@ -759,7 +758,7 @@ lemma logDeriv_Blaschke_is_diff_frac {R R1 : ℝ} {f : ℂ → ℂ}
   rw [h_div, h_num, h_den]
 
 -- Lemma 34: Lf_deriv_step3
-lemma Lf_deriv_step3 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
+lemma Lf_deriv_step3 (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     (hR1_pos : 0 < R1)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1))
     (h_f_zero : f 0 = 1)
@@ -770,7 +769,7 @@ lemma Lf_deriv_step3 (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     deriv f z / f z + ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ * (1 / (z - R^2 / (conj ρ)) - 1 / (z - ρ)) := by
   intro z hz
   -- Assuming Lf_deriv_step2 is also corrected to remove B
-  rw [Lf_deriv_step2 h_finite_zeros hr_pos hr_lt_R1 hR1_lt_R hR1_pos h_f_analytic h_f_zero Lf h_Lf z hz]
+  rw [Lf_deriv_step2 h_finite_zeros hr_lt_R1 hR1_lt_R hR1_pos h_f_analytic Lf h_Lf z hz]
   congr 1
   apply Finset.sum_congr rfl
   intro ρ hρ
@@ -792,7 +791,7 @@ lemma sum_rearranged {R R1 : ℝ} {f : ℂ → ℂ}
   rw [mul_sub, mul_one_div, mul_one_div]
 
 -- Lemma 37: Lf_deriv_final_formula
-lemma Lf_deriv_final_formula (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
+lemma Lf_deriv_final_formula (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     (hR1_pos : 0 < R1)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1))
     (h_f_zero : f 0 = 1)
@@ -804,14 +803,14 @@ lemma Lf_deriv_final_formula (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1
                       ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (conj ρ)) := by
   intro z hz
   -- Apply Lf_deriv_step3 with the corrected, simpler signature
-  rw [Lf_deriv_step3 h_finite_zeros hr_pos hr_lt_R1 hR1_lt_R hR1_pos h_f_analytic h_f_zero Lf h_Lf z hz]
+  rw [Lf_deriv_step3 h_finite_zeros hr_lt_R1 hR1_lt_R hR1_pos h_f_analytic h_f_zero Lf h_Lf z hz]
   -- Apply sum_rearranged with a simpler signature
   rw [sum_rearranged h_finite_zeros z hz]
   -- Rearrange terms
   ring
 
 -- Lemma 38: rearrange_Lf_deriv
-lemma rearrange_Lf_deriv (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
+lemma rearrange_Lf_deriv (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     (hR1_pos : 0 < R1)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1))
     (h_f_zero : f 0 = 1)
@@ -823,12 +822,12 @@ lemma rearrange_Lf_deriv (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R
     ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (conj ρ)) := by
   intro z hz
   -- The call to Lf_deriv_final_formula is now simpler as it no longer needs hB
-  have h_final := Lf_deriv_final_formula h_finite_zeros hr_pos hr_lt_R1 hR1_lt_R hR1_pos h_f_analytic h_f_zero Lf h_Lf z hz
+  have h_final := Lf_deriv_final_formula h_finite_zeros hr_lt_R1 hR1_lt_R hR1_pos h_f_analytic h_f_zero Lf h_Lf z hz
   rw [h_final]
   ring
 
 -- Lemma 40: target_inequality_setup
-lemma target_inequality_setup (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
+lemma target_inequality_setup (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     (hR1_pos : 0 < R1)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1))
     (h_f_zero : f 0 = 1)
@@ -839,7 +838,7 @@ lemma target_inequality_setup (hr_pos : 0 < r) (hr_lt_R1 : r < R1) (hR1_lt_R : R
   ‖deriv Lf z‖ +
   ‖∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - R^2 / (conj ρ))‖ := by
   intro z hz
-  have hrearr := rearrange_Lf_deriv h_finite_zeros hr_pos hr_lt_R1 hR1_lt_R hR1_pos h_f_analytic h_f_zero Lf h_Lf z hz
+  have hrearr := rearrange_Lf_deriv h_finite_zeros hr_lt_R1 hR1_lt_R hR1_pos h_f_analytic h_f_zero Lf h_Lf z hz
   -- The rest of the proof is a direct application of the triangle inequality.
   -- We want to show ‖A‖ ≤ ‖B‖ + ‖C‖, where hrearr gives A = B - C.
   rw [hrearr]
@@ -1081,7 +1080,7 @@ lemma final_inequality
 
   -- Apply target_inequality_setup (from informal proof)
   have hineq :=
-    target_inequality_setup h_finite_zeros hr_pos hr_lt_R1 hR1_lt_R hR1_pos (h_f_analytic.mono (by gcongr)) h_f_zero Lf h_Lf z hz_in_r
+    target_inequality_setup h_finite_zeros hr_lt_R1 hR1_lt_R hR1_pos (h_f_analytic.mono (by gcongr)) h_f_zero Lf h_Lf z hz_in_r
 
   -- Lift z from r1-ball to R1-ball (needed for final_sum_bound)
   have hz_in_R1 : z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 f := by
