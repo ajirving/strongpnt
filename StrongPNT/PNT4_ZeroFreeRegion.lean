@@ -781,17 +781,13 @@ lemma riemannZeta_zeros_finite_of_compact (K : Set ℂ) (hK : IsCompact K) :
   exact hK.inter_riemannZetaZeros_finite
 
 -- For z∈ℂ, if Re(z) > 1 - 9δ(z) then ζ(z)≠0
-lemma lem_ZFRdelta :
-  ∀ z : ℂ, 2 < |z.im| → z.re > 1 - 9 * deltaz z → riemannZeta z ≠ 0 := by
-  intro z him hre
-  by_cases h1 : 1 ≤ z.re
-  · -- In the half-plane Re z ≥ 1, ζ ≠ 0
-    simpa using riemannZeta_ne_zero_of_one_le_re h1
+lemma lem_ZFRdelta
+  (z : ℂ) (him : 2 < |z.im|) (hre : z.re > 1 - 9 * deltaz z) : riemannZeta z ≠ 0 := by
+  by_cases! h1 : 1 ≤ z.re
+  · exact riemannZeta_ne_zero_of_one_le_re h1
   -- Now assume Re z < 1
-  have hzlt1 : z.re < 1 := lt_of_not_ge h1
   -- From |Im z| > 2, get 0 < δ(z) and δ(z) < 1/9
-  have hgt : |z.im| > 2 := by simpa using him
-  have hδ := (lem_delta19).1 z hgt
+  have hδ := (lem_delta19).1 z him
   rcases hδ with ⟨hδ_pos, hδ_lt_19⟩
   -- Then 9 * δ(z) < 1, so 0 < 1 - 9 * δ(z) < z.re, hence 0 < z.re
   have h9δ_lt1 : 9 * deltaz z < 1 := by
@@ -801,81 +797,28 @@ lemma lem_ZFRdelta :
   have hzre_pos : 0 < z.re := by
     have : 0 < 1 - 9 * deltaz z := sub_pos.mpr h9δ_lt1
     exact lt_trans this hre
-  -- Suppose for contradiction that ζ z = 0
   by_contra hzero
   have hzmem : z ∈ riemannZetaZeros := by simpa [mem_riemannZetaZeros] using hzero
-  -- Apply the zero-free region inequality with the chosen constant
-  have hprop := (Classical.choose_spec zerofree).2.2
-  have hbound : z.re ≤ 1 - zerofree_constant / Real.log (|z.im| + 2) :=
-    hprop z ⟨hzmem, hzre_pos, hzlt1⟩ him
-  -- Let L = log(|Im z| + 2) and note L > 0
-  set L : ℝ := Real.log (|z.im| + 2) with hLdef
-  have hLpos : 0 < L := by
-    have hone_lt : (1 : ℝ) < |z.im| + 2 := by
-      have : (0 : ℝ) ≤ |z.im| := abs_nonneg _
-      linarith
-    have := Real.log_pos hone_lt
-    simpa [hLdef] using this
-  -- Compare 1 - c/L and 1 - 9 * δ(z)
-  have hb_le_a' : ((9 : ℝ) / 20) * (zerofree_constant / L) ≤ zerofree_constant / L := by
-    have hcoef_le1 : ((9 : ℝ) / 20) ≤ 1 := by norm_num
-    have ha_nonneg : 0 ≤ zerofree_constant / L := le_of_lt (div_pos zerofree_constant_pos hLpos)
-    have := mul_le_mul_of_nonneg_right hcoef_le1 ha_nonneg
-    simpa [one_mul] using this
-  have h9d_eq : 9 * deltaz z = ((9 : ℝ) / 20) * (zerofree_constant / L) := by
-    simp [deltaz, hLdef, div_eq_mul_inv, mul_left_comm, mul_assoc]
-  have hdelta_le : 9 * deltaz z ≤ zerofree_constant / L := by
-    simpa [h9d_eq] using hb_le_a'
-  have h_le_rhs : 1 - zerofree_constant / L ≤ 1 - 9 * deltaz z := by
-    have hneg := neg_le_neg hdelta_le
-    simpa [sub_eq_add_neg] using add_le_add_right hneg 1
-  -- Combine to contradict hre
-  have hle : z.re ≤ 1 - 9 * deltaz z := le_trans hbound h_le_rhs
-  have hcontr : z.re < z.re := lt_of_le_of_lt hle hre
-  exact (lt_irrefl (z.re)) hcontr
+  have hprop := (Classical.choose_spec zerofree).2.2 z ⟨hzmem, hzre_pos, h1⟩ him
+  unfold deltaz zerofree_constant at hre
+  grind
 
 -- lem_ZFRinD: For t∈ℝ with |t|>3, c=3/2+it and z=σ+it with 1-δ_t ≤ σ ≤ 3/2, we have z∈ D̄_{2/3}(c)
 
-lemma complex_sub_ofReal_I_real_eq_ofReal (z : ℂ) (a t : ℝ) (him : z.im = t) :
-  z - ((a : ℂ) + Complex.I * t) = ((z.re - a) : ℂ) := by
-  apply Complex.ext
-  · simp
-  · simp [him]
-
-lemma lem_ZFRinD (t : ℝ) (ht : |t| > 2) (z : ℂ) :
-    let c := (3/2 : ℂ) + Complex.I * t
-    1 - deltaz_t t ≤ Complex.re z ∧ Complex.re z ≤ 3/2 ∧ Complex.im z = t →
-    z ∈ Metric.closedBall c (2/3) := by
-  intro c h
-  rcases h with ⟨h_low, hrest⟩
-  rcases hrest with ⟨h_high, him⟩
-  have hsub : z - c = ((z.re - (3/2)) : ℂ) := by
-    simpa [c] using! complex_sub_ofReal_I_real_eq_ofReal z (3/2) t him
-  have h1 : dist z c = ‖((z.re - (3/2)) : ℂ)‖ := by
-    simp [dist_eq_norm, hsub]
-  have h2 : ‖((z.re - (3/2)) : ℂ)‖ = ‖z.re - (3/2)‖ := by
-    simpa using (Complex.norm_real (z.re - (3/2)))
-  have hdist_abs : dist z c = |z.re - (3/2)| := by
-    have h4 : dist z c = ‖z.re - (3/2)‖ := h1.trans h2
-    simpa [Real.norm_eq_abs] using h4
-  have hnonpos : z.re - (3/2) ≤ 0 := sub_nonpos_of_le h_high
-  have habs : |z.re - (3/2)| = 3/2 - z.re := by
-    have := abs_of_nonpos hnonpos
-    simpa [neg_sub] using this
-  have hdist_eq : dist z c = 3/2 - z.re := hdist_abs.trans habs
-  have h_le : dist z c ≤ 1/2 + deltaz_t t := by
-    calc
-      dist z c = 3/2 - z.re := hdist_eq
-      _ ≤ 3/2 - (1 - deltaz_t t) := by linarith
-      _ = 1/2 + deltaz_t t := by ring
-  have hδlt : deltaz_t t < 1/9 := (lem_delta19.2 t ht).2
-  have h12δ_lt : (1/2 : ℝ) + deltaz_t t < (1/2 : ℝ) + 1/9 := by
-    have := add_lt_add_right hδlt (1/2 : ℝ)
-    simpa [add_comm, add_left_comm, add_assoc] using this
-  have h123_lt : (1/2 : ℝ) + 1/9 < (2/3 : ℝ) := by norm_num
-  have h_lt : (1/2 : ℝ) + deltaz_t t < (2/3 : ℝ) := lt_trans h12δ_lt h123_lt
-  have hdist_le : dist z c ≤ 2/3 := le_trans h_le (le_of_lt h_lt)
-  exact (Metric.mem_closedBall).2 hdist_le
+lemma lem_ZFRinD (t : ℝ) (ht : |t| > 2) (z : ℂ)
+    (h : 1 - deltaz_t t ≤ Complex.re z ∧ Complex.re z ≤ 3 / 2 ∧ Complex.im z = t) :
+    z ∈ Metric.closedBall ((3/2 : ℂ) + Complex.I * t) (2/3) := by
+  rw [Metric.mem_closedBall,  dist_eq_norm_sub, ← Complex.re_add_im z]
+  calc
+  _ = ‖-3 / 2 + z.re‖ := by
+    simp [h.2.2]
+    ring_nf
+    norm_cast
+  _ = 3 / 2 - z.re := by
+    rw [Real.norm_eq_abs, abs_of_nonpos (by linarith)]
+    ring
+  _ ≤ _ := by
+    linarith [(lem_delta19.2 t ht).2]
 
 -- lem_ZFRnotK: For t∈ℝ with |t|>3, c=3/2+it and z=σ+it with 1-δ_t ≤ σ ≤ 3/2, we have z∉ K_ζ(5/6;c)
 lemma lem_ZFRnotK (t : ℝ) (ht : |t| > 2) (z : ℂ) :
