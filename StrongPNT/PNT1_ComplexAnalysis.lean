@@ -60,19 +60,6 @@ lemma lem_postriglogn (n : ℕ) (_hn : n ≥ 1) (t : ℝ) : 0 ≤ 3 + 4 * Real.c
   rw [mul_assoc]
   exact lem_postrig (t * Real.log (n : ℝ))
 
-def ballDR (R : ℝ) : Set ℂ := Metric.ball (0 : ℂ) R
-
--- First, the easy auxiliary lemmas:
-
-lemma lem_HardMMP (R B : ℝ) (hR : R > 0)
-  (h : ℂ → ℂ) (h_analytic : AnalyticOn ℂ h (closure (ballDR R)))
-  (h_boundary_bound : ∀ z : ℂ, norm z = R → norm (h z) ≤ B) :
-∀ w : ℂ, w ∈ closure (ballDR R) → norm (h w) ≤ B := by
-  apply Complex.norm_le_of_forall_mem_frontier_norm_le Metric.isBounded_ball h_analytic.differentiableOn.diffContOnCl
-  rw [frontier_ball _ (by linarith)]
-  simp_all
-
-
 lemma cauchy_formula_deriv {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ}
     (hfdiff : DifferentiableOn ℂ f (Metric.ball 0 R_analytic))
     (h_r_z_lt_r_int : r_z < r_int)
