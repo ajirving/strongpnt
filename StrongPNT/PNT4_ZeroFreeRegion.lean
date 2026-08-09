@@ -776,10 +776,6 @@ lemma lem_delta19 :
   -- Now construct the main result
   refine ⟨h_complex, fun t ht ↦ h_complex _ (by simpa)⟩
 
-lemma riemannZeta_zeros_finite_of_compact (K : Set ℂ) (hK : IsCompact K) :
-    {z ∈ K | riemannZeta z = 0}.Finite := by
-  exact hK.inter_riemannZetaZeros_finite
-
 -- For z∈ℂ, if Re(z) > 1 - 9δ(z) then ζ(z)≠0
 lemma lem_ZFRdelta
   (z : ℂ) (him : 2 < |z.im|) (hre : z.re > 1 - 9 * deltaz z) : riemannZeta z ≠ 0 := by
@@ -821,26 +817,13 @@ lemma lem_ZFRinD (t : ℝ) (ht : |t| > 2) (z : ℂ)
     linarith [(lem_delta19.2 t ht).2]
 
 -- lem_ZFRnotK: For t∈ℝ with |t|>3, c=3/2+it and z=σ+it with 1-δ_t ≤ σ ≤ 3/2, we have z∉ K_ζ(5/6;c)
-lemma lem_ZFRnotK (t : ℝ) (ht : |t| > 2) (z : ℂ) :
-    1 - deltaz_t t ≤ Complex.re z ∧ Complex.re z ≤ 3/2 ∧ Complex.im z = t →
+lemma lem_ZFRnotK (t : ℝ) (ht : |t| > 2) (z : ℂ)
+    (h : 1 - deltaz_t t ≤ Complex.re z ∧ Complex.re z ≤ 3 / 2 ∧ Complex.im z = t) :
     z ∉ zerosetKfRc (5/6) ((3/2 : ℂ) + Complex.I * t) riemannZeta := by
-  intro h
-
-  -- Extract the conjunction components
   obtain ⟨h_ge, h_le, h_im⟩ := h
-
   -- Key relationship: when z.im = t, we have deltaz z = deltaz_t t
   have h_delta_eq : deltaz z = deltaz_t t := by
-    rw [deltaz_t, deltaz]
-    -- Need to show the denominators are equal
-    congr 1
-    congr 1
-    -- Show |z.im| = |(t * Complex.I).im|
-    rw [h_im]
-    -- Now show |t| = |(t * Complex.I).im|
-    -- Since (t * Complex.I).im = t, this is |t| = |t|
-    simp only [Complex.mul_I_im, Complex.ofReal_re]
-
+    simp [deltaz, deltaz_t, h_im]
   -- Convert the deltaz_t bound to a deltaz bound
   have h_ge_delta : 1 - deltaz z ≤ Complex.re z := by
     rwa [← h_delta_eq] at h_ge
@@ -852,25 +835,8 @@ lemma lem_ZFRnotK (t : ℝ) (ht : |t| > 2) (z : ℂ) :
 
   have h_delta_pos : 0 < deltaz z := by
     exact (lem_delta19.1 z h_im_gt).1
+  simp_all [zerosetKfRc, lem_ZFRdelta z h_im_gt (by linarith)]
 
-  -- Since deltaz z > 0, we have deltaz z < 9 * deltaz z
-  have h_delta_lt_9delta : deltaz z < 9 * deltaz z := by
-    linarith [h_delta_pos]
-
-  -- Therefore Complex.re z > 1 - 9 * deltaz z
-  have h_strict : Complex.re z > 1 - 9 * deltaz z := by
-    linarith [h_ge_delta, h_delta_lt_9delta]
-
-  -- Apply the zero-free region lemma
-  have h_zeta_ne_zero : riemannZeta z ≠ 0 :=
-    lem_ZFRdelta z h_im_gt h_strict
-
-  -- Now prove z ∉ zerosetKfRc (5/6) c riemannZeta by contradiction
-  intro h_mem
-  -- By definition, z ∈ zerosetKfRc should imply riemannZeta z = 0
-  have h_zero : riemannZeta z = 0 := h_mem.2
-  -- This contradicts h_zeta_ne_zero
-  exact h_zeta_ne_zero h_zero
 
 -- lem_Zeta_Expansion_ZFR: Zeta expansion in the zero-free region
 lemma lem_Zeta_Expansion_ZFR :
@@ -901,300 +867,104 @@ lemma lem_Zeta_Expansion_ZFR :
     lem_ZFRinD t ht2 z hz
   have hz_not_in_K : z ∉ zerosetKfRc (5/6) ((3/2 : ℂ) + Complex.I * t) riemannZeta :=
     lem_ZFRnotK t ht2 z hz
-  have hz_in_diff : z ∈ Metric.closedBall ((3/2 : ℂ) + Complex.I * t) (2/3) \
-      zerosetKfRc (5/6) ((3/2 : ℂ) + Complex.I * t) riemannZeta :=
-    ⟨hz_in_ball, hz_not_in_K⟩
-  have h_expansion := hC_expansion t ht2 hfin z hz_in_diff
-  rw [show logDerivZeta z = deriv riemannZeta z / riemannZeta z from rfl] at h_expansion
-  exact h_expansion
+  exact hC_expansion t ht2 hfin z ⟨hz_in_ball, hz_not_in_K⟩
+
 
 -- lem_abszrhoReRe: For z,ρ∈ℂ we have |z-ρ| ≥ Re(z) - Re(ρ)
 lemma lem_abszrhoReRe (z ρ : ℂ) : ‖z - ρ‖ ≥ z.re - ρ.re := by
-  have h1 : (z - ρ).re ≤ ‖z - ρ‖ := Complex.re_le_norm (z - ρ)
-  have h2 : (z - ρ).re = z.re - ρ.re := Complex.sub_re z ρ
-  rw [← h2]
-  exact h1
+  rw [← Complex.sub_re]
+  exact Complex.re_le_norm _
 
 -- lem_Rerhotodeltarho: For ρ∈ K_ζ(5/6;c) we have Re(ρ) ≤ 1 - 9δ(ρ)
-lemma lem_Rerhotodeltarho {ρ : ℂ} :
-  ∀ t : ℝ, |t| > 3 → ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) (3/2+ t* Complex.I) riemannZeta) → ρ.re ≤ 1 - 9 * deltaz ρ := by
-  intro t ht h_mem
-  -- From ρ ∈ zerosetKfRc, we get riemannZeta ρ = 0
+lemma lem_Rerhotodeltarho {ρ : ℂ}
+  (t : ℝ) (ht : |t| > 3) (h_mem : ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) (3 / 2 + t * Complex.I) riemannZeta)) : ρ.re ≤ 1 - 9 * deltaz ρ := by
   have h_zero : riemannZeta ρ = 0 := h_mem.2
-
-  -- ρ is in a closed ball of radius 5/6 around 3/2 + t*Complex.I
-  have h_ball : ρ ∈ Metric.closedBall (3/2 + t * Complex.I) (5/6) := h_mem.1
-
-  -- This means dist(ρ, 3/2 + t*Complex.I) ≤ 5/6
-  have h_dist : dist ρ (3/2 + t * Complex.I) ≤ 5/6 := by
-    rwa [Metric.mem_closedBall] at h_ball
-
-  -- We need |ρ.im| > 2 to apply lem_ZFRdelta
-  have h_im : 2 < |ρ.im| := by
-    -- The imaginary part of ρ is close to t, so |ρ.im - t| ≤ 5/6
-    have h_im_bound : |ρ.im - t| ≤ 5/6 := by
-      -- |ρ.im - t| ≤ ||ρ - (3/2 + t*Complex.I)||
-      have h_le_norm : |ρ.im - t| ≤ ‖ρ - (3/2 + t * Complex.I)‖ := by
-        have : |(ρ - (3/2 + t * Complex.I)).im| ≤ ‖ρ - (3/2 + t * Complex.I)‖ :=
-          Complex.abs_im_le_norm _
-        have h_im_eq : (ρ - (3/2 + t * Complex.I)).im = ρ.im - t := by
-          simp
-        rwa [← h_im_eq]
-      rw [← Complex.dist_eq] at h_le_norm
-      linarith [h_le_norm, h_dist]
-
-    -- Apply triangle inequality: |t| - |ρ.im| ≤ |t - ρ.im| = |ρ.im - t|
-    have triangle := abs_sub_abs_le_abs_sub t ρ.im
-    -- This gives |t| - |ρ.im| ≤ |t - ρ.im|
-    -- Rewrite |t - ρ.im| = |ρ.im - t|
-    have eq_comm : |t - ρ.im| = |ρ.im - t| := abs_sub_comm t ρ.im
-    rw [eq_comm] at triangle
-    -- Now triangle : |t| - |ρ.im| ≤ |ρ.im - t|
-    -- Rearrange to get |ρ.im| ≥ |t| - |ρ.im - t|
-    have h_ge : |ρ.im| ≥ |t| - |ρ.im - t| := by linarith [triangle]
-
-    -- Since |t| > 3 and |ρ.im - t| ≤ 5/6, we get |ρ.im| ≥ 3 - 5/6 = 13/6 > 2
-    have : |ρ.im| ≥ |t| - 5/6 := by linarith [h_ge, h_im_bound]
-    have : |ρ.im| > 3 - 5/6 := by linarith [ht]
-    have h_calc : (3 : ℝ) - 5/6 = 13/6 := by norm_num
-    have h_gt2 : (13 : ℝ)/6 > 2 := by norm_num
-    rw [h_calc] at *
-    linarith [h_gt2]
-
-  -- Apply contrapositive of lem_ZFRdelta
-  -- lem_ZFRdelta: 2 < |z.im| → z.re > 1 - 9 * deltaz z → riemannZeta z ≠ 0
-  -- contrapositive: riemannZeta z = 0 → ¬(z.re > 1 - 9 * deltaz z)
-  have h_not_gt : ¬(ρ.re > 1 - 9 * deltaz ρ) := by
-    intro h_gt
-    have h_ne_zero := lem_ZFRdelta ρ h_im h_gt
-    exact h_ne_zero h_zero
-
-  exact le_of_not_gt h_not_gt
+  contrapose! h_zero
+  refine lem_ZFRdelta _ ?_ h_zero
+  have h_im_bound : |ρ.im - t| ≤ 5/6 := by
+    -- |ρ.im - t| ≤ ||ρ - (3/2 + t*Complex.I)||
+    have h_le_norm : |ρ.im - t| ≤ ‖ρ - (3/2 + t * Complex.I)‖ := by
+      have : |(ρ - (3/2 + t * Complex.I)).im| ≤ ‖ρ - (3/2 + t * Complex.I)‖ :=
+        Complex.abs_im_le_norm _
+      simp_all
+    rw [← Complex.dist_eq] at h_le_norm
+    exact h_le_norm.trans (by simp_all [zerosetKfRc])
+  have triangle := abs_sub_abs_le_abs_sub t ρ.im
+  have eq_comm : |t - ρ.im| = |ρ.im - t| := abs_sub_comm t ρ.im
+  linarith
 
 -- For t∈ℝ with |t|>3 and z∈ D̄_{2δ_t}(1-δ_t+it), we have |Im(z)| ≤ |t|+2δ_t
-lemma lem_DImt2d :
-  ∀ t : ℝ, |t| > 3 → ∀ z ∈ Metric.closedBall (3/2 + t * Complex.I) (5/6),
+lemma lem_DImt2d
+  (t : ℝ) (z : ℂ) (hz : z ∈ Metric.closedBall (3 / 2 + t * Complex.I) (5 / 6)) :
     |z.im| ≤ |t| + 5/6 := by
-  intro t ht z hz
-  -- z is in the closed ball, so ‖z - (3/2 + t * Complex.I)‖ ≤ 5/6
-  rw [Metric.mem_closedBall] at hz
-  -- The center has imaginary part t
-  have center_im : (3/2 + t * Complex.I).im = t := by simp
-  -- So (z - center).im = z.im - t
-  have diff_im : (z - (3/2 + t * Complex.I)).im = z.im - t := by
-    rw [Complex.sub_im, center_im]
-  -- We know |z.im - t| ≤ ‖z - center‖
+  rw [Metric.mem_closedBall, dist_eq_norm_sub] at hz
   have h1 : |z.im - t| ≤ ‖z - (3/2 + t * Complex.I)‖ := by
-    rw [← diff_im]
-    exact Complex.abs_im_le_norm _
-  -- Combining with the ball constraint
-  rw [dist_eq_norm_sub] at hz
-  have h2 : |z.im - t| ≤ 5/6 := le_trans h1 hz
-  -- Use triangle inequality: since z.im = (z.im - t) + t, we have |z.im| ≤ |z.im - t| + |t|
+    convert Complex.abs_im_le_norm _
+    simp
   have h3 : |z.im| ≤ |z.im - t| + |t| := by
     conv_lhs => rw [show z.im = (z.im - t) + t by ring]
     exact abs_add_le (z.im - t) t
   linarith
 
 -- For t∈ℝ with |t|>3 and z∈ D̄_{2δ_t}(1-δ_t+it), we have |Im(z)|+2 ≤ (|t|+2)²
-lemma lem_DIMt2 :
-  ∀ t : ℝ, |t| > 3 → ∀ z ∈ Metric.closedBall (3/2 + t * Complex.I) (5/6),
+lemma lem_DIMt2
+  (t : ℝ) (ht : |t| > 3) (z : ℂ) (hz : z ∈ Metric.closedBall (3 / 2 + t * Complex.I) (5 / 6)) :
     |z.im| + 2 ≤ (|t| + 2)^3 := by
-  intro t ht z hz
-  -- From the previous lemma, |z.im| ≤ |t| + 5/6
-  have h1' := lem_DImt2d t ht z hz
-  -- Add 2 to both sides and simplify
-  have h1a : |z.im| + 2 ≤ |t| + 17/6 := by
-    simpa [show |t| + 5/6 + 2 = |t| + 17/6 by ring] using add_le_add_left h1' 2
-  -- Bound |t| + 17/6 by |t| + 3
-  have h17le3 : |t| + 17/6 ≤ |t| + 3 := by
-    have : (17 : ℝ) / 6 ≤ 3 := by norm_num
-    gcongr
+  grw [lem_DImt2d t z hz]
   -- Show |t| + 3 ≤ (|t| + 2)^3 by expanding and using nonnegativity
-  have h_nonneg_poly : 0 ≤ |t|^3 + 6 * |t|^2 + 11 * |t| + 5 := by
-    have h0 : 0 ≤ |t|^3 := by exact pow_nonneg (abs_nonneg _) 3
-    have h1 : 0 ≤ 6 * |t|^2 := by
-      have : 0 ≤ (6 : ℝ) := by norm_num
-      exact mul_nonneg this (sq_nonneg _)
-    have h2 : 0 ≤ 11 * |t| := by
-      have : 0 ≤ (11 : ℝ) := by norm_num
-      exact mul_nonneg this (abs_nonneg _)
-    have h3 : 0 ≤ (5 : ℝ) := by norm_num
-    exact add_nonneg (add_nonneg (add_nonneg h0 h1) h2) h3
-  have h_add : |t| + 3 ≤ (|t| + 3) + (|t|^3 + 6 * |t|^2 + 11 * |t| + 5) := by
-    simpa using (le_add_of_nonneg_right (a := |t| + 3) h_nonneg_poly)
-  have h_expand : (|t| + 2)^3 = (|t| + 3) + (|t|^3 + 6 * |t|^2 + 11 * |t| + 5) := by
-    ring
-  have h3 : |t| + 3 ≤ (|t| + 2)^3 := by
-    simpa [h_expand] using h_add
-  -- Chain the inequalities
-  exact le_trans (le_trans h1a h17le3) h3
+  have h_nonneg_poly : 0 ≤ |t|^3 + 6 * |t|^2 + 11 * |t| + 5 := by positivity
+  linarith
 
 -- For t∈ℝ with |t|>3 and z∈ D̄_{2δ_t}(1-δ_t+it), we have log(|Im(z)|+2) ≤ 2log(|t|+2)
-lemma lem_DlogImlog :
-  ∀ t : ℝ, |t| > 3 → ∀ z ∈ Metric.closedBall (3/2 + t * Complex.I) (5/6),
+lemma lem_DlogImlog
+  (t : ℝ) (ht : |t| > 3) (z : ℂ) (hz : z ∈ Metric.closedBall (3 / 2 + t * Complex.I) (5 / 6)) :
     Real.log (|z.im| + 2) ≤ 3 * Real.log (|t| + 2) := by
-  intro t ht z hz
-  -- From lem_DIMt2 we have the key inequality on the arguments of the logs
-  have h1 : |z.im| + 2 ≤ (|t| + 2)^3 := lem_DIMt2 t ht z hz
-  -- Positivity of the left argument of log
-  have h2 : 0 < |z.im| + 2 := by
-    have : 0 ≤ |z.im| := abs_nonneg _
-    linarith
-  -- Monotonicity of log
-  have hlog := Real.log_le_log h2 h1
-  -- Rewrite the RHS using log_pow
-  simpa [Real.log_pow] using hlog
+  grw [lem_DIMt2 t ht z hz, Real.log_pow]
+  simp
 
 -- For t∈ℝ with |t|>3 and z∈ D̄_{2δ_t}(1-δ_t+it), we have 1/log(|t|+2) ≤ 2/log(|Im(z)|+2)
-lemma lem_D1logtlog :
-  ∀ t : ℝ, |t| > 3 → ∀ z ∈ Metric.closedBall (3/2 + t * Complex.I) (5/6),
+lemma lem_D1logtlog
+  (t : ℝ) (ht : |t| > 3) (z : ℂ) (hz : z ∈ Metric.closedBall (3 / 2 + t * Complex.I) (5 / 6)) :
     (1 : ℝ) / Real.log (|t| + 2) ≤ 3 / Real.log (|z.im| + 2) := by
-  intro t ht z hz
-  have h1 := lem_DlogImlog t ht z hz
-  -- We need log(|t| + 2) > 0 and log(|z.im| + 2) > 0
-  have ht_pos : |t| + 2 > 1 := by linarith [abs_nonneg t]
-  have hz_pos : |z.im| + 2 > 1 := by linarith [abs_nonneg z.im]
-  have log_t_pos : Real.log (|t| + 2) > 0 := Real.log_pos ht_pos
-  have log_z_pos : Real.log (|z.im| + 2) > 0 := Real.log_pos hz_pos
-  -- From h1: log(|z.im| + 2) ≤ 2 * log(|t| + 2)
-  -- We want: 1/log(|t| + 2) ≤ 2/log(|z.im| + 2)
-  -- Cross multiply: 1 * log(|z.im| + 2) ≤ 2 * log(|t| + 2)
-  rw [div_le_div_iff₀ log_t_pos log_z_pos]
-  simp only [one_mul]
-  exact h1
+  grw [lem_DlogImlog t ht z hz]
+  · field_simp; rfl
+  · exact Real.log_pos (by grind)
 
 -- For t∈ℝ with |t|>3 and z∈ D̄_{2δ_t}(1-δ_t+it), we have δ_t ≤ 2δ(z)
-lemma lem_Ddt2dz :
-  ∀ t : ℝ, |t| > 3 → ∀ z ∈ Metric.closedBall (3/2 + t * Complex.I) (5/6),
+lemma lem_Ddt2dz
+  (t : ℝ) (ht : |t| > 3) (z : ℂ) (hz : z ∈ Metric.closedBall (3 / 2 + t * Complex.I) (5 / 6)) :
     deltaz_t t ≤ 3 * deltaz z := by
-  intro t ht z hz
-  have h := lem_D1logtlog t ht z hz
-  have hpos : 0 ≤ zerofree_constant / 20 := by
-    have ha : 0 < zerofree_constant := zerofree_constant_pos
-    have h9 : 0 < (20 : ℝ) := by norm_num
-    exact div_nonneg (le_of_lt ha) (le_of_lt h9)
-  have h2 := mul_le_mul_of_nonneg_left h hpos
+  unfold deltaz_t deltaz
   calc
-    deltaz_t t
-        = (zerofree_constant / 20) / Real.log (|t| + 2) := by
-            simp [deltaz_t, deltaz]
     _ = (zerofree_constant / 20) * (1 / Real.log (|t| + 2)) := by simp [div_eq_mul_inv]
-    _ ≤ (zerofree_constant / 20) * (3 / Real.log (|z.im| + 2)) := h2
-    _ = 3 * ((zerofree_constant / 20) * (1 / Real.log (|z.im| + 2))) := by
-            field
-    _ = 3 * deltaz z := by simp [deltaz, div_eq_mul_inv, mul_left_comm, mul_assoc]
+    _ ≤ (zerofree_constant / 20) * (3 / Real.log (|z.im| + 2)) := by
+      grw [lem_D1logtlog t ht z hz]
+      exact div_nonneg zerofree_constant_pos.le (by norm_num)
+    _ = _ := by field
 
-lemma lem_deltarhotodeltat (t : ℝ) (ht : |t| > 3) (ρ : ℂ) :
-    ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta) →
+lemma lem_deltarhotodeltat (t : ℝ) (ht : |t| > 3) (ρ : ℂ)
+    (hρK : ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) ((3 / 2 : ℂ) + Complex.I * t) riemannZeta)) :
     deltaz ρ ≥ (1/3) * deltaz_t t := by
-  intro hρK
-  rcases hρK with ⟨hball, _hzero⟩
-  have hball' : ρ ∈ Metric.closedBall ((3/2 : ℂ) + t * Complex.I) (5/6) := by
-    simpa [mul_comm] using! hball
-  have hmain : deltaz_t t ≤ 3 * deltaz ρ := lem_Ddt2dz t ht ρ hball'
-  have hthird_nonneg : 0 ≤ (1/3 : ℝ) := by norm_num
-  have h_mul : (1/3 : ℝ) * deltaz_t t ≤ (1/3 : ℝ) * (3 * deltaz ρ) :=
-    mul_le_mul_of_nonneg_left hmain hthird_nonneg
-  have h_simplify : (1/3 : ℝ) * (3 * deltaz ρ) = deltaz ρ := by
-    ring
-  have : (1/3 : ℝ) * deltaz_t t ≤ deltaz ρ := by
-    simpa [h_simplify] using h_mul
-  simpa [mul_comm] using this
+  rw [mul_comm] at hρK
+  linarith [lem_Ddt2dz t ht ρ (by simp_all [zerosetKfRc])]
 
 -- lem_Rerhotodeltat: For ρ∈ K_ζ(5/6;c) we have Re(ρ) ≤ 1 - 3δ_t
-lemma lem_Rerhotodeltat (t : ℝ) (ht : |t| > 3) (ρ : ℂ) :
-    ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta) →
+lemma lem_Rerhotodeltat (t : ℝ) (ht : |t| > 3) (ρ : ℂ)
+    (h_rho_in : ρ ∈ zerosetKfRc (5 / (6 : ℝ)) ((3 / 2 : ℂ) + Complex.I * t) riemannZeta) :
     ρ.re ≤ 1 - 3 * deltaz_t t := by
-  intro h_rho_in
-  -- Apply lem_Rerhotodeltarho to get Re(ρ) ≤ 1 - 9 * δ(ρ)
-  have h1 : ρ.re ≤ 1 - 9 * deltaz ρ :=
-    lem_Rerhotodeltarho (ρ := ρ) t ht (by simpa [mul_comm] using! h_rho_in)
-  -- Apply lem_deltarhotodeltat to get δ(ρ) ≥ (1/3) * δ_t
-  have h2 : deltaz ρ ≥ (1/3) * deltaz_t t := lem_deltarhotodeltat t ht ρ h_rho_in
-  -- From h2, we get 9 * δ(ρ) ≥ 9 * (1/3) * δ_t = 3 * δ_t
-  have h3 : 9 * deltaz ρ ≥ 3 * deltaz_t t := by
-    calc
-      9 * deltaz ρ
-          ≥ 9 * ((1/3) * deltaz_t t) := by
-                exact mul_le_mul_of_nonneg_left h2 (by norm_num : (0 : ℝ) ≤ 9)
-      _ = 9 * (1/3) * deltaz_t t := by ring
-      _ = 3 * deltaz_t t := by norm_num
-  -- Therefore 1 - 9 * δ(ρ) ≤ 1 - 3 * δ_t
-  have h4 : 1 - 9 * deltaz ρ ≤ 1 - 3 * deltaz_t t := by
-    linarith [h3]
-  -- By transitivity: Re(ρ) ≤ 1 - 9 * δ(ρ) ≤ 1 - 3 * δ_t
-  exact le_trans h1 h4
-
--- lem_RezRerho: Re(z) - Re(ρ) ≥ 2δ_t
-lemma lem_RezRerho (t : ℝ) (ht : |t| > 3) (z ρ : ℂ) :
-    ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta) →
-    1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
-    z.re - ρ.re ≥ 2 * deltaz_t t := by
-  intro h_rho_mem h_z
-  -- Use lem_Rerhotodeltat to get upper bound on ρ.re
-  have h_rho_bound := lem_Rerhotodeltat t ht ρ h_rho_mem
-  -- Extract lower bound on z.re from hypothesis
-  have h_z_lower := h_z.1
-  -- Calculate: z.re - ρ.re ≥ (1 - deltaz_t t) - (1 - 3 * deltaz_t t) = 2 * deltaz_t t
-  linarith [h_z_lower, h_rho_bound]
-
--- lem_abszrhodelta: |z-ρ| ≥ 2δ_t
-lemma lem_abszrhodelta (t : ℝ) (ht : |t| > 3) (z ρ : ℂ) :
-    ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta) →
-    1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
-    ‖z - ρ‖ ≥ 2 * deltaz_t t := by
-  intro h_rho_in_K h_z_conditions
-  -- Use lem_RezRerho to get z.re - ρ.re ≥ 2 * deltaz_t t
-  have h1 : z.re - ρ.re ≥ 2 * deltaz_t t := (lem_RezRerho t ht z ρ) h_rho_in_K h_z_conditions
-  -- Use lem_abszrhoReRe to get ‖z - ρ‖ ≥ z.re - ρ.re
-  have h2 : ‖z - ρ‖ ≥ z.re - ρ.re := lem_abszrhoReRe z ρ
-  -- Combine by transitivity: 2 * deltaz_t t ≤ z.re - ρ.re ≤ ‖z - ρ‖
-  exact le_trans h1 h2
-
--- lem_1abszrho: 1/|z-ρ| ≤ 1/(2δ_t)
-lemma lem_1abszrho (t : ℝ) (ht : |t| > 3) (z ρ : ℂ) :
-    ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta) →
-    1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
-    1 / ‖z - ρ‖ ≤ 1 / (2 * deltaz_t t) := by
-  intro hρ hz
-  -- Apply one_div_le_one_div_of_le with the needed conditions
-  apply one_div_le_one_div_of_le
-  -- First need to prove 0 < 2 * deltaz_t t
-  · have h_delta_pos : 0 < deltaz_t t := by
-      have h_delta19 := lem_delta19
-      exact (h_delta19.2 t (by linarith [ht] : |t| > 2)).1
-    linarith [h_delta_pos]
-  -- Second need to prove 2 * deltaz_t t ≤ ‖z - ρ‖
-  · exact lem_abszrhodelta t ht z ρ hρ hz
+  linarith [lem_Rerhotodeltarho (ρ := ρ) t ht (by simpa [mul_comm] using! h_rho_in),
+    lem_deltarhotodeltat t ht ρ h_rho_in]
 
 lemma lem_finiteKzeta (t : ℝ) :
     (zerosetKfRc (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta).Finite := by
-  have hK : IsCompact (Metric.closedBall ((3/2 : ℂ) + Complex.I * t) (5 / (6 : ℝ))) :=
-    isCompact_closedBall ..
-  simpa [zerosetKfRc] using
-    (riemannZeta_zeros_finite_of_compact _ hK)
+  exact (isCompact_closedBall ..).inter_riemannZetaZeros_finite
 
-lemma lem_triangle_ZFR (t : ℝ) (z : ℂ) :
-    ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta).Finite),
-    1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
+lemma lem_triangle_ZFR (t : ℝ) (z : ℂ)
+    (hfin : (zerosetKfRc (5 / (6 : ℝ)) ((3 / 2 : ℂ) + Complex.I * t) riemannZeta).Finite) :
     ‖(∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ))‖ ≤
     (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖) := by
-  -- Introduce variables correctly: hfin (finiteness proof), hz_cond (conditions on z)
-  intro hfin hz_cond
-
-  -- Apply triangle inequality: ||∑ f_i|| ≤ ∑ ||f_i||
-  apply le_trans (norm_sum_le _ _)
-
-  -- Show each term satisfies the bound: ||m_ρ / (z-ρ)|| ≤ m_ρ / ||z-ρ||
-  apply Finset.sum_le_sum
-  intro ρ hρ
-
-  -- Apply norm_div
-  rw [norm_div]
-
-  -- The norm of a natural number cast to ℂ equals the real cast
-  rw [Complex.norm_natCast]
+  grw [norm_sum_le]
+  exact Finset.sum_le_sum fun ρ hρ ↦ (by simp)
 
 -- lem_Zeta_Triangle_ZFR: Triangle inequality bound for zeta'/zeta
 lemma lem_Zeta_Triangle_ZFR :
@@ -1207,50 +977,24 @@ lemma lem_Zeta_Triangle_ZFR :
         C_1 * Real.log |t| := by
   obtain ⟨C1, hC1, hbound⟩ := lem_Zeta_Expansion_ZFR
   refine ⟨C1, hC1, ?_⟩
-  intro t ht hfin z hz
-  -- Let S denote the finite sum over zeros
-  let S := (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ))
-  have hbound1 := hbound t ht hfin z hz
-  have htri : ‖deriv riemannZeta z / riemannZeta z‖ ≤ ‖(deriv riemannZeta z / riemannZeta z) - S‖ + ‖S‖ := by
-    have hn := norm_add_le ((deriv riemannZeta z / riemannZeta z) - S) S
-    have hrewrite : (deriv riemannZeta z / riemannZeta z) - S + S = (deriv riemannZeta z / riemannZeta z) := by
-      simp [sub_eq_add_neg]
-    simpa [S, hrewrite] using hn
-  have hsum := add_le_add_left hbound1 ‖S‖
-  have : ‖deriv riemannZeta z / riemannZeta z‖ ≤ C1 * Real.log |t| + ‖S‖ := le_trans htri hsum
-  simpa [S, add_comm] using this
+  peel hbound with  t ht hfin z hz hbound
+  grw [norm_le_norm_sub_add _ (∑ ρ ∈ hfin.toFinset, ↑(analyticOrderNatAt riemannZeta ρ) / (z - ρ)), hbound]
+  exact le_of_eq (by ring)
 
 -- lem_sumK1abs: Sum bound
-lemma lem_sumK1abs (t : ℝ) (ht : |t| > 3) (z : ℂ) :
-    ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta).Finite),
-    1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
+lemma lem_sumK1abs (t : ℝ) (ht : |t| > 3) (z : ℂ)
+    (hfin : (zerosetKfRc (5 / (6 : ℝ)) ((3 / 2 : ℂ) + Complex.I * t) riemannZeta).Finite)
+    (hzcond : 1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3 / 2 ∧ z.im = t) :
     (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖) ≤
     (1 / (2 * deltaz_t t)) * (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ)) := by
-  intro hfin hzcond
-  -- Pointwise bound using lem_1abszrho
-  have hptwise : ∀ ρ ∈ hfin.toFinset,
-      (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖ ≤
-      (1 / (2 * deltaz_t t)) * (analyticOrderNatAt riemannZeta ρ : ℝ) := by
-    intro ρ hρmem
-    have hρ_in : ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta) :=
-      (Set.Finite.mem_toFinset (hs := hfin)).1 hρmem
-    have hbase : 1 / ‖z - ρ‖ ≤ 1 / (2 * deltaz_t t) :=
-      lem_1abszrho t ht z ρ hρ_in hzcond
-    have hnonneg : 0 ≤ (analyticOrderNatAt riemannZeta ρ : ℝ) := by
-      exact_mod_cast (Nat.zero_le (analyticOrderNatAt riemannZeta ρ))
-    have := mul_le_mul_of_nonneg_left hbase hnonneg
-    simpa [div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using this
-  have hsum := Finset.sum_le_sum hptwise
-  -- Rewrite the right-hand side sum as a constant times the sum
-  have hrw :=
-    (Finset.mul_sum (s := hfin.toFinset)
-      (f := fun ρ => (analyticOrderNatAt riemannZeta ρ : ℝ))
-      (a := (1 / (2 * deltaz_t t))))
-  have hsum2 := hsum
-  -- Use the rewriting equality in the desired direction
-  rw [← hrw] at hsum2
-  -- Finish
-  simpa [div_eq_mul_inv] using hsum2
+  rw [Finset.mul_sum]
+  refine Finset.sum_le_sum fun ρ hρmem ↦ ?_
+  rw [← mul_one_div, mul_comm]
+  gcongr
+  · refine mul_pos (by norm_num) ?_
+    exact (lem_delta19.2 t (by linarith)).1
+  · linarith [lem_Rerhotodeltat t ht ρ (by simp_all),
+      lem_abszrhoReRe z ρ]
 
 lemma helper_analyticOnNhd_shift_div (f : ℂ → ℂ) (c : ℂ)
     (h : ∀ z ∈ Metric.closedBall c 1, AnalyticAt ℂ f z) :
@@ -1962,7 +1706,7 @@ lemma lem_logDerivZetalogt0 :
     have h_triangle := hC_1 t ht hfin s hs
 
     -- Apply lem_triangle_ZFR to bound the sum norm
-    have h_triangle_ineq := lem_triangle_ZFR t s hfin hs
+    have h_triangle_ineq := lem_triangle_ZFR t s hfin
 
     -- Apply lem_sumKlogt2 to bound the sum
     have h_sum_bound := hC_4 t ht hfin s hs
