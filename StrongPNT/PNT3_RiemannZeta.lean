@@ -198,10 +198,6 @@ open Metric Set Filter Asymptotics BigOperators
 
 noncomputable def logDerivZeta (s : ℂ) : ℂ := deriv riemannZeta s / riemannZeta s
 
--- Define the set of zeros in a ball centered at c
-def zerosetKfRc (R : ℝ) (c : ℂ) (f : ℂ → ℂ) : Set ℂ :=
-  {ρ : ℂ | ρ ∈ Metric.closedBall c R ∧ f ρ = 0}
-
 -- Lemma 7: zetaanalOnnot1
 lemma zetaanalOnnot1 : AnalyticOnNhd ℂ riemannZeta {s : ℂ | s ≠ 1} := by
   exact DifferentiableOn.analyticOnNhd (fun s hs ↦ (differentiableAt_riemannZeta (by simp_all)).differentiableWithinAt)  isOpen_compl_singleton
@@ -255,13 +251,13 @@ lemma fc_bound (B : ℝ) (R : ℝ) (c : ℂ) (f : ℂ → ℂ)
 
 -- Lemma: fc_zeros (relation between zeros of f_c and zeros of f)
 lemma fc_zeros (r : ℝ) (c : ℂ) (f : ℂ → ℂ) (h_nonzero : f c ≠ 0) :
-    (zerosetKfRc r (0 : ℂ) (fun z => f (z + c) / f c)) = (fun ρ => ρ - c) '' (zerosetKfRc r c f) := by
+    (zerosetKfR r (0 : ℂ) (fun z => f (z + c) / f c)) = (fun ρ => ρ - c) '' (zerosetKfR r c f) := by
   ext ρ'; constructor
   · intro hmem
     use ρ' + c
-    simp_all [zerosetKfRc]
+    simp_all [zerosetKfR]
   · intro him
-    simp_all [zerosetKfRc, Complex.dist_eq]
+    simp_all [zerosetKfR, Complex.dist_eq]
     rcases him with ⟨x, hx1, rfl⟩
     simp_all
 
@@ -313,21 +309,21 @@ lemma fc_m_order (c : ℂ) (f : ℂ → ℂ) (h_nonzero : f c ≠ 0)
 -- Lemma: DminusK (characterization of points in shifted domain minus shifted zeros)
 lemma DminusK (r1 : ℝ) (R1 : ℝ) (c : ℂ) (f : ℂ → ℂ)
     (h_nonzero : f c ≠ 0) :
-    ∀ z : ℂ, z ∈ closedBall (0 : ℂ) r1 \ zerosetKfRc R1 (0 : ℂ) (fun w => f (w + c) / f c) ↔
-             z + c ∈ closedBall c r1 \ zerosetKfRc R1 c f := by
+    ∀ z : ℂ, z ∈ closedBall (0 : ℂ) r1 \ zerosetKfR R1 (0 : ℂ) (fun w => f (w + c) / f c) ↔
+             z + c ∈ closedBall c r1 \ zerosetKfR R1 c f := by
   intro z
   constructor
-  · simp +contextual [zerosetKfRc]
-  · simp_all [zerosetKfRc]
+  · simp +contextual [zerosetKfR]
+  · simp_all [zerosetKfR]
 
 lemma shifted_zeros_correspondence (R1 : ℝ) (c z : ℂ)
     (f : ℂ → ℂ) (h_nonzero : f c ≠ 0)
-    (hfin_orig : (zerosetKfRc R1 c f).Finite)
-    (hfin_shift : (zerosetKfRc R1 (0 : ℂ) (fun u => f (u + c) / f c)).Finite) :
+    (hfin_orig : (zerosetKfR R1 c f).Finite)
+    (hfin_shift : (zerosetKfR R1 (0 : ℂ) (fun u => f (u + c) / f c)).Finite) :
     ∑ ρ ∈ hfin_orig.toFinset, (analyticOrderNatAt f ρ : ℂ) / (z - ρ) =
     ∑ ρ' ∈ hfin_shift.toFinset, ((analyticOrderNatAt (fun u => f (u + c) / f c) ρ') : ℂ) / ((z - c) - ρ') := by
   -- Use fc_zeros to establish the bijection between zero sets
-  have h_bij : (zerosetKfRc R1 (0 : ℂ) (fun u => f (u + c) / f c)) = (fun ρ => ρ - c) '' (zerosetKfRc R1 c f) :=
+  have h_bij : (zerosetKfR R1 (0 : ℂ) (fun u => f (u + c) / f c)) = (fun ρ => ρ - c) '' (zerosetKfR R1 c f) :=
     fc_zeros R1 c f h_nonzero
 
   -- Apply Finset.sum_bij with the bijection ρ ↦ ρ - c
@@ -355,7 +351,7 @@ lemma shifted_zeros_correspondence (R1 : ℝ) (c z : ℂ)
   · intro ρ hρ
     simp only [Set.Finite.mem_toFinset] at hρ
     -- Use fc_m_order to relate the analytic orders
-    have h_shift_mem : ρ - c ∈ zerosetKfRc R1 (0 : ℂ) (fun u => f (u + c) / f c) := by
+    have h_shift_mem : ρ - c ∈ zerosetKfR R1 (0 : ℂ) (fun u => f (u + c) / f c) := by
       rw [h_bij]
       use ρ, hρ
 
@@ -374,8 +370,8 @@ lemma final_ineq2
     (hR1_lt_R : R1 < R) (hR : R < 1)
     (c : ℂ) (f : ℂ → ℂ) (h_analytic : AnalyticOnNhd ℂ f (closedBall c 1)) (h_nonzero : f c ≠ 0)
     (h_bound : ∀ z ∈ closedBall c R, ‖f z‖ < B)
-    (hfin : (zerosetKfRc R1 (0 : ℂ) (fun z => f (z + c) / f c)).Finite) :
-    ∀ z ∈ closedBall (0 : ℂ) r1 \ zerosetKfRc R1 (0 : ℂ) (fun z => f (z + c) / f c),
+    (hfin : (zerosetKfR R1 (0 : ℂ) (fun z => f (z + c) / f c)).Finite) :
+    ∀ z ∈ closedBall (0 : ℂ) r1 \ zerosetKfR R1 (0 : ℂ) (fun z => f (z + c) / f c),
     ‖(deriv (fun z => f (z + c) / f c) z / (f (z + c) / f c)) - ∑ ρ ∈ hfin.toFinset,
       ((analyticOrderNatAt (fun w => f (w + c) / f c) ρ) : ℂ) / (z - ρ)‖ ≤ (16 * r^2 / ((r - r1)^3) +
     1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log (B / ‖f c‖) := by
@@ -397,8 +393,8 @@ lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
     (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1) :
     let c := (3/2 : ℂ) + Complex.I * t
     ∀ B > 1, (∀ z ∈ closedBall c R, ‖riemannZeta z‖ < B) →
-    ∀ (hfin : (zerosetKfRc R1 c riemannZeta).Finite),
-    ∀ z ∈ closedBall c r1 \ zerosetKfRc R1 c riemannZeta,
+    ∀ (hfin : (zerosetKfR R1 c riemannZeta).Finite),
+    ∀ z ∈ closedBall c r1 \ zerosetKfR R1 c riemannZeta,
     ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
       ((analyticOrderNatAt riemannZeta ρ) : ℂ) / (z - ρ)‖ ≤ (16 * r^2 / ((r - r1)^3) +
     1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log (B / ‖riemannZeta c‖) := by
@@ -410,19 +406,19 @@ lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
     simpa [c] using zetaanalOnD1c t ht1
   have hζ_c_ne : riemannZeta c ≠ 0 := by simpa [c] using zetacnot0 t
   -- Finite zero set for the shifted/normalized function g(u) = ζ(u+c)/ζ(c)
-  have hfin_shift : (zerosetKfRc R1 (0 : ℂ) (fun u => riemannZeta (u + c) / riemannZeta c)).Finite := by
+  have hfin_shift : (zerosetKfR R1 (0 : ℂ) (fun u => riemannZeta (u + c) / riemannZeta c)).Finite := by
     have h_bij := fc_zeros R1 c riemannZeta hζ_c_ne
-    have himg : ((fun ρ => ρ - c) '' (zerosetKfRc R1 c riemannZeta)).Finite := hfin.image _
+    have himg : ((fun ρ => ρ - c) '' (zerosetKfR R1 c riemannZeta)).Finite := hfin.image _
     simpa [h_bij] using himg
   -- Move the domain point to shifted coordinates z0 = z - c
-  have hz0mem : (z - c) ∈ closedBall (0 : ℂ) r1 \ zerosetKfRc R1 (0 : ℂ) (fun u => riemannZeta (u + c) / riemannZeta c) := by
+  have hz0mem : (z - c) ∈ closedBall (0 : ℂ) r1 \ zerosetKfR R1 (0 : ℂ) (fun u => riemannZeta (u + c) / riemannZeta c) := by
     have hiff := DminusK r1 R1 c riemannZeta hζ_c_ne (z - c)
     exact (hiff).mpr (by simpa [sub_add_cancel] using hzmem)
   -- Apply the shifted inequality (final_ineq2) to g at z0 = z - c
   have hineq0 :=
     (final_ineq2 B r1 r R R1 hr1_pos hr1_lt_r hr_lt_R1 hR1_lt_R hR_lt_1 c riemannZeta
       hζ_analytic hζ_c_ne h_bound hfin_shift) (z - c) hz0mem
-  -- Show ζ z ≠ 0 using z ∉ zerosetKfRc R1 c ζ
+  -- Show ζ z ≠ 0 using z ∉ zerosetKfR R1 c ζ
   rcases hzmem with ⟨hz_ball, hz_notin⟩
   have hr1_lt_R1' : r1 < R1 := lt_trans hr1_lt_r hr_lt_R1
   have hz_in_ball_R1 : z ∈ closedBall c R1 := by
@@ -547,8 +543,8 @@ lemma Zeta1_Zeta_Expand :
     (_ : 0 < r1) (_ : r1 < r)
     (_ : 0 < r) (_ : r < R1) (_ : 0 < R1) (_ : R1 < R) (_ : R < 1),
     let c := (3/2 : ℂ) + Complex.I * t;
-    ∀ (hfin : (zerosetKfRc R1 c riemannZeta).Finite),
-    ∀ z ∈ closedBall c r1 \ zerosetKfRc R1 c riemannZeta,
+    ∀ (hfin : (zerosetKfR R1 c riemannZeta).Finite),
+    ∀ z ∈ closedBall c r1 \ zerosetKfR R1 c riemannZeta,
     ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
       ((analyticOrderNatAt riemannZeta ρ) : ℂ) / (z - ρ)‖ ≤
       (16 * r^2 / ((r - r1)^3) +
@@ -659,8 +655,8 @@ lemma Zeta1_Zeta_Expansion
     ∃ C > 1,
     ∀ (t : ℝ) (_ : |t| > 2),
     let c := (3/2 : ℂ) + Complex.I * t;
-    ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) c riemannZeta).Finite),
-    ∀ z ∈ closedBall c r1 \ zerosetKfRc (5 / (6 : ℝ)) c riemannZeta,
+    ∀ (hfin : (zerosetKfR (5 / (6 : ℝ)) c riemannZeta).Finite),
+    ∀ z ∈ closedBall c r1 \ zerosetKfR (5 / (6 : ℝ)) c riemannZeta,
     ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
       (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ)‖ ≤
       C * (1 / (r - r1)^3 + 1) * Real.log |t| := by

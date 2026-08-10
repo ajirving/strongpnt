@@ -28,9 +28,9 @@ lemma complex_abs_of_real (x : ℝ) : ‖(x : ℂ)‖ = |x| := by
 
 lemma complex_abs_real_cast (r : ℝ) : ‖(r : ℂ)‖ = |r| := Complex.norm_real r
 
-lemma zerosetKfRc_eq_ZetaZerosNearPoint (t : ℝ) :
-  zerosetKfRc (5/6 : ℝ) ((3/2 : ℂ) + t * Complex.I) riemannZeta = ZetaZerosNearPoint t := by
-  ext ρ; constructor <;>   simp +contextual [zerosetKfRc, ZetaZerosNearPoint, mem_riemannZetaZeros, dist_eq_norm_sub]
+lemma zerosetKfR_eq_ZetaZerosNearPoint (t : ℝ) :
+  zerosetKfR (5/6 : ℝ) ((3/2 : ℂ) + t * Complex.I) riemannZeta = ZetaZerosNearPoint t := by
+  ext ρ; constructor <;>   simp +contextual [zerosetKfR, ZetaZerosNearPoint, mem_riemannZetaZeros, dist_eq_norm_sub]
 
 lemma s_notin_ZetaZerosNearPoint (δ t : ℝ) (hδ_pos : 0 < δ) :
   ((1 : ℂ) + δ + t * Complex.I) ∉ ZetaZerosNearPoint t := by
@@ -98,7 +98,7 @@ lemma lem_explicit1deltat :
     norm_num
   peel hc2 with t ht hc2
   intro δ hδ
-  have := zerosetKfRc_eq_ZetaZerosNearPoint t
+  have := zerosetKfR_eq_ZetaZerosNearPoint t
   rw [mul_comm] at this
   simp +contextual only [this] at hc2
   specialize hc2 (ZetaZerosNearPoint_finite t) (1 + δ + t * Complex.I)
@@ -819,7 +819,7 @@ lemma lem_ZFRinD (t : ℝ) (ht : |t| > 2) (z : ℂ)
 -- lem_ZFRnotK: For t∈ℝ with |t|>3, c=3/2+it and z=σ+it with 1-δ_t ≤ σ ≤ 3/2, we have z∉ K_ζ(5/6;c)
 lemma lem_ZFRnotK (t : ℝ) (ht : |t| > 2) (z : ℂ)
     (h : 1 - deltaz_t t ≤ Complex.re z ∧ Complex.re z ≤ 3 / 2 ∧ Complex.im z = t) :
-    z ∉ zerosetKfRc (5/6) ((3/2 : ℂ) + Complex.I * t) riemannZeta := by
+    z ∉ zerosetKfR (5/6) ((3/2 : ℂ) + Complex.I * t) riemannZeta := by
   obtain ⟨h_ge, h_le, h_im⟩ := h
   -- Key relationship: when z.im = t, we have deltaz z = deltaz_t t
   have h_delta_eq : deltaz z = deltaz_t t := by
@@ -835,14 +835,14 @@ lemma lem_ZFRnotK (t : ℝ) (ht : |t| > 2) (z : ℂ)
 
   have h_delta_pos : 0 < deltaz z := by
     exact (lem_delta19.1 z h_im_gt).1
-  simp_all [zerosetKfRc, lem_ZFRdelta z h_im_gt (by linarith)]
+  simp_all [zerosetKfR, lem_ZFRdelta z h_im_gt (by linarith)]
 
 
 -- lem_Zeta_Expansion_ZFR: Zeta expansion in the zero-free region
 lemma lem_Zeta_Expansion_ZFR :
     ∃ C_1 : ℝ, C_1 > 1 ∧
     ∀ t : ℝ, |t| > 3 →
-      ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta).Finite),
+      ∀ (hfin : (zerosetKfR (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta).Finite),
       ∀ z : ℂ, 1 - deltaz_t t ≤ Complex.re z ∧ Complex.re z ≤ 3/2 ∧ Complex.im z = t →
         ‖(deriv riemannZeta z / riemannZeta z) -
           (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ))‖
@@ -865,7 +865,7 @@ lemma lem_Zeta_Expansion_ZFR :
   have ht2 : |t| > 2 := by linarith
   have hz_in_ball : z ∈ Metric.closedBall ((3/2 : ℂ) + Complex.I * t) (2/3) :=
     lem_ZFRinD t ht2 z hz
-  have hz_not_in_K : z ∉ zerosetKfRc (5/6) ((3/2 : ℂ) + Complex.I * t) riemannZeta :=
+  have hz_not_in_K : z ∉ zerosetKfR (5/6) ((3/2 : ℂ) + Complex.I * t) riemannZeta :=
     lem_ZFRnotK t ht2 z hz
   exact hC_expansion t ht2 hfin z ⟨hz_in_ball, hz_not_in_K⟩
 
@@ -877,7 +877,7 @@ lemma lem_abszrhoReRe (z ρ : ℂ) : ‖z - ρ‖ ≥ z.re - ρ.re := by
 
 -- lem_Rerhotodeltarho: For ρ∈ K_ζ(5/6;c) we have Re(ρ) ≤ 1 - 9δ(ρ)
 lemma lem_Rerhotodeltarho {ρ : ℂ}
-  (t : ℝ) (ht : |t| > 3) (h_mem : ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) (3 / 2 + t * Complex.I) riemannZeta)) : ρ.re ≤ 1 - 9 * deltaz ρ := by
+  (t : ℝ) (ht : |t| > 3) (h_mem : ρ ∈ (zerosetKfR (5 / (6 : ℝ)) (3 / 2 + t * Complex.I) riemannZeta)) : ρ.re ≤ 1 - 9 * deltaz ρ := by
   have h_zero : riemannZeta ρ = 0 := h_mem.2
   contrapose! h_zero
   refine lem_ZFRdelta _ ?_ h_zero
@@ -888,7 +888,7 @@ lemma lem_Rerhotodeltarho {ρ : ℂ}
         Complex.abs_im_le_norm _
       simp_all
     rw [← Complex.dist_eq] at h_le_norm
-    exact h_le_norm.trans (by simp_all [zerosetKfRc])
+    exact h_le_norm.trans (by simp_all [zerosetKfR])
   have triangle := abs_sub_abs_le_abs_sub t ρ.im
   have eq_comm : |t - ρ.im| = |ρ.im - t| := abs_sub_comm t ρ.im
   linarith
@@ -943,24 +943,24 @@ lemma lem_Ddt2dz
     _ = _ := by field
 
 lemma lem_deltarhotodeltat (t : ℝ) (ht : |t| > 3) (ρ : ℂ)
-    (hρK : ρ ∈ (zerosetKfRc (5 / (6 : ℝ)) ((3 / 2 : ℂ) + Complex.I * t) riemannZeta)) :
+    (hρK : ρ ∈ (zerosetKfR (5 / (6 : ℝ)) ((3 / 2 : ℂ) + Complex.I * t) riemannZeta)) :
     deltaz ρ ≥ (1/3) * deltaz_t t := by
   rw [mul_comm] at hρK
-  linarith [lem_Ddt2dz t ht ρ (by simp_all [zerosetKfRc])]
+  linarith [lem_Ddt2dz t ht ρ (by simp_all [zerosetKfR])]
 
 -- lem_Rerhotodeltat: For ρ∈ K_ζ(5/6;c) we have Re(ρ) ≤ 1 - 3δ_t
 lemma lem_Rerhotodeltat (t : ℝ) (ht : |t| > 3) (ρ : ℂ)
-    (h_rho_in : ρ ∈ zerosetKfRc (5 / (6 : ℝ)) ((3 / 2 : ℂ) + Complex.I * t) riemannZeta) :
+    (h_rho_in : ρ ∈ zerosetKfR (5 / (6 : ℝ)) ((3 / 2 : ℂ) + Complex.I * t) riemannZeta) :
     ρ.re ≤ 1 - 3 * deltaz_t t := by
   linarith [lem_Rerhotodeltarho (ρ := ρ) t ht (by simpa [mul_comm] using! h_rho_in),
     lem_deltarhotodeltat t ht ρ h_rho_in]
 
 lemma lem_finiteKzeta (t : ℝ) :
-    (zerosetKfRc (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta).Finite := by
+    (zerosetKfR (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta).Finite := by
   exact (isCompact_closedBall ..).inter_riemannZetaZeros_finite
 
 lemma lem_triangle_ZFR (t : ℝ) (z : ℂ)
-    (hfin : (zerosetKfRc (5 / (6 : ℝ)) ((3 / 2 : ℂ) + Complex.I * t) riemannZeta).Finite) :
+    (hfin : (zerosetKfR (5 / (6 : ℝ)) ((3 / 2 : ℂ) + Complex.I * t) riemannZeta).Finite) :
     ‖(∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ))‖ ≤
     (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖) := by
   grw [norm_sum_le]
@@ -970,7 +970,7 @@ lemma lem_triangle_ZFR (t : ℝ) (z : ℂ)
 lemma lem_Zeta_Triangle_ZFR :
     ∃ C_1 : ℝ, C_1 > 1 ∧
     ∀ t : ℝ, |t| > 3 →
-      ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta).Finite),
+      ∀ (hfin : (zerosetKfR (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta).Finite),
       ∀ z : ℂ, 1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
         ‖deriv riemannZeta z / riemannZeta z‖ ≤
         ‖(∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ))‖ +
@@ -983,7 +983,7 @@ lemma lem_Zeta_Triangle_ZFR :
 
 -- lem_sumK1abs: Sum bound
 lemma lem_sumK1abs (t : ℝ) (ht : |t| > 3) (z : ℂ)
-    (hfin : (zerosetKfRc (5 / (6 : ℝ)) ((3 / 2 : ℂ) + Complex.I * t) riemannZeta).Finite)
+    (hfin : (zerosetKfR (5 / (6 : ℝ)) ((3 / 2 : ℂ) + Complex.I * t) riemannZeta).Finite)
     (hzcond : 1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3 / 2 ∧ z.im = t) :
     (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖) ≤
     (1 / (2 * deltaz_t t)) * (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ)) := by
@@ -1055,10 +1055,6 @@ lemma helper_g_zero_eq_one (f : ℂ → ℂ) (c : ℂ) (hc : f c ≠ 0) :
   (fun z => f (z + c) / f c) 0 = 1 := by
   simp [hc]
 
-lemma helper_zerosetKfR_eq_center0 (r : ℝ) (f : ℂ → ℂ) :
-  zerosetKfR r 0 f = zerosetKfRc r (0 : ℂ) f := by
-  ext ρ; simp [zerosetKfR, zerosetKfRc]
-
 lemma helper_apply_jensen_to_g
   (B R R1 : ℝ) (hB : 1 < B)
   (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
@@ -1073,7 +1069,7 @@ lemma helper_apply_jensen_to_g
 
 lemma helper_sum_f_equals_sum_g
   (r : ℝ) (c : ℂ) (f : ℂ → ℂ) (hc : f c ≠ 0)
-  (hfin : (zerosetKfRc r c f).Finite) :
+  (hfin : (zerosetKfR r c f).Finite) :
   (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt f ρ : ℝ))
   =
   (∑ ρ' ∈ ((hfin.image (fun ρ => ρ - c)).toFinset),
@@ -1086,9 +1082,9 @@ by
   let g' : ℂ → ℂ := fun z => f (z + c) / f c
 
   -- Relate the RHS indexing Finset to the image of S under φ
-  have himg : (φ '' zerosetKfRc r c f).Finite := hfin.image φ
+  have himg : (φ '' zerosetKfR r c f).Finite := hfin.image φ
   have h_img_toFinset : ((hfin.image φ).toFinset) = S.image φ := by
-    simpa [S] using (Set.Finite.toFinset_image (s := (zerosetKfRc r c f)) (f := φ)
+    simpa [S] using (Set.Finite.toFinset_image (s := (zerosetKfR r c f)) (f := φ)
       (hs := hfin) (h := himg))
 
   -- First, change the summand using equality of analytic orders at corresponding points
@@ -1098,7 +1094,7 @@ by
     apply Finset.sum_congr rfl
     intro ρ hρS
     -- ρ is in the zero set of f within the ball centered at c of radius r
-    have hρ_mem : ρ ∈ zerosetKfRc r c f :=
+    have hρ_mem : ρ ∈ zerosetKfR r c f :=
       (Set.Finite.mem_toFinset (hs := hfin)).1 hρS
     have hρ_ball : ρ ∈ Metric.closedBall c r := hρ_mem.1
     have hρ_fzero : f ρ = 0 := hρ_mem.2
@@ -1113,7 +1109,7 @@ by
       simpa [Metric.mem_closedBall] using this
     have hρ'_gzero : g' (φ ρ) = 0 := by
       simp [g', φ, hρ_fzero, sub_eq_add_neg, add_comm]
-    have hρ'_mem : (φ ρ) ∈ zerosetKfRc r (0 : ℂ) g' := ⟨hρ'_ball, hρ'_gzero⟩
+    have hρ'_mem : (φ ρ) ∈ zerosetKfR r (0 : ℂ) g' := ⟨hρ'_ball, hρ'_gzero⟩
     -- Apply fc_m_order to equate multiplicities
     have h_m_eq := fc_m_order c f hc (ρ' := φ ρ)
     -- (φ ρ) + c = ρ
@@ -1148,20 +1144,20 @@ by
 
 lemma helper_zero_set_shift_eq
   (r : ℝ) (c : ℂ) (f : ℂ → ℂ) (hc : f c ≠ 0) :
-  zerosetKfRc r (0 : ℂ) (fun z => f (z + c) / f c)
-  = (fun ρ => ρ - c) '' (zerosetKfRc r c f) := by
+  zerosetKfR r (0 : ℂ) (fun z => f (z + c) / f c)
+  = (fun ρ => ρ - c) '' (zerosetKfR r c f) := by
   simpa using fc_zeros r c f hc
 
 lemma helper_fin_zero_g_is_image
   (r : ℝ) (c : ℂ) (f : ℂ → ℂ) (hc : f c ≠ 0)
-  (hfin : (zerosetKfRc r c f).Finite) :
-  (zerosetKfRc r (0 : ℂ) (fun z => f (z + c) / f c)).Finite :=
+  (hfin : (zerosetKfR r c f).Finite) :
+  (zerosetKfR r (0 : ℂ) (fun z => f (z + c) / f c)).Finite :=
 by
   classical
-  have hset : zerosetKfRc r (0 : ℂ) (fun z => f (z + c) / f c)
-      = (fun ρ => ρ - c) '' (zerosetKfRc r c f) :=
+  have hset : zerosetKfR r (0 : ℂ) (fun z => f (z + c) / f c)
+      = (fun ρ => ρ - c) '' (zerosetKfR r c f) :=
     by simpa using fc_zeros r c f hc
-  have hfin_img : ((fun ρ => ρ - c) '' (zerosetKfRc r c f)).Finite := hfin.image _
+  have hfin_img : ((fun ρ => ρ - c) '' (zerosetKfR r c f)).Finite := hfin.image _
   simpa [hset] using hfin_img
 
 lemma helper_AnalyticOnNhd_to_pointwise {S : Set ℂ} {f : ℂ → ℂ}
@@ -1254,7 +1250,7 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
   (h_f_analytic : AnalyticOnNhd ℂ f (Metric.closedBall c 1))
   (h_f_nonzero_at_zero : f c ≠ 0)
   (hf_le_B : ∀ z ∈ Metric.closedBall c R, ‖f z‖ ≤ B)
-  (hfin : (zerosetKfRc R1 c f).Finite) :
+  (hfin : (zerosetKfR R1 c f).Finite) :
       ∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt f ρ : ℝ) ≤ Real.log (B / ‖f c‖) / Real.log (R / R1) := by
   classical
   -- Define the shifted function g(z) = f(z+c)/f(c)
@@ -1271,12 +1267,8 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
   have hg0_ne : g 0 ≠ 0 := by simp [hg0_one]
 
   -- Finiteness of zeros of g in radius R1 and set equalities
-  have hfin_g0 : (zerosetKfRc R1 (0 : ℂ) g).Finite :=
+  have hfin_g : (zerosetKfR R1 0 g).Finite :=
     helper_fin_zero_g_is_image R1 c f h_f_nonzero_at_zero hfin
-  have hZR_eq : zerosetKfR R1 0 g = zerosetKfRc R1 (0 : ℂ) g :=
-    helper_zerosetKfR_eq_center0 R1 g
-  have hfin_g : (zerosetKfR R1 0 g).Finite := by
-    simpa [hZR_eq] using hfin_g0
 
   -- Bound on g on the closed ball of radius R
   have h_bound_shift : ∀ z ∈ Metric.closedBall (0 : ℂ) R, ‖g z‖ ≤ B / ‖f c‖ :=
@@ -1307,13 +1299,8 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
 
   -- Equality of sets for g-zeros and the image of f-zeros
   have hST_g_img : zerosetKfR R1 0 g
-      = (fun ρ => ρ - c) '' (zerosetKfRc R1 c f) := by
-    have h1 : zerosetKfR R1 0 g = zerosetKfRc R1 (0 : ℂ) g :=
-      helper_zerosetKfR_eq_center0 R1 g
-    have h2 : zerosetKfRc R1 (0 : ℂ) g
-        = (fun ρ => ρ - c) '' (zerosetKfRc R1 c f) :=
-      helper_zero_set_shift_eq R1 c f h_f_nonzero_at_zero
-    simpa [h1] using h2
+      = (fun ρ => ρ - c) '' (zerosetKfR R1 c f) :=
+    helper_zero_set_shift_eq R1 c f h_f_nonzero_at_zero
 
   -- Now split into cases depending on whether B/‖f c‖ > 1 or = 1
   rcases lt_or_eq_of_le hBdiv_ge_one with hBdiv_gt_one | hBdiv_eq_one
@@ -1330,7 +1317,7 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
           = (∑ ρ ∈ (hfin.image (fun ρ => ρ - c)).toFinset, (analyticOrderNatAt g ρ : ℝ)) :=
       helper_sum_over_equal_finite_sets_orders (g := g)
         (S := zerosetKfR R1 0 g)
-        (T := (fun ρ => ρ - c) '' (zerosetKfRc R1 c f))
+        (T := (fun ρ => ρ - c) '' (zerosetKfR R1 c f))
         (hS := hfin_g) (hT := hfin.image (fun ρ => ρ - c)) (hST := hST_g_img)
     -- Combine bounds and equalities to obtain the desired inequality
     have :
@@ -1371,7 +1358,7 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
     have hsum_reindex :=
       helper_sum_over_equal_finite_sets_orders (g := g)
         (S := zerosetKfR R1 0 g)
-        (T := (fun ρ => ρ - c) '' (zerosetKfRc R1 c f))
+        (T := (fun ρ => ρ - c) '' (zerosetKfR R1 c f))
         (hS := hfin_g) (hT := hfin.image (fun ρ => ρ - c)) (hST := hST_g_img)
     have hsum_img_eq :
         (∑ ρ ∈ (hfin.image (fun ρ => ρ - c)).toFinset, (analyticOrderNatAt g ρ : ℝ))
@@ -1396,7 +1383,7 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
 
 lemma lem_sum_m_rho_zeta :
     ∃ C_2 > 1, ∀ (t : ℝ) (_ : |t| > 3),
-    ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta).Finite),
+    ∀ (hfin : (zerosetKfR (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta).Finite),
       ∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) ≤ C_2 * Real.log |t| := by
   classical
   -- Constants from auxiliary bounds
@@ -1544,7 +1531,7 @@ lemma lem_sum_m_rho_zeta :
 
 lemma lem_sumKdeltatlogt :
   ∃ C_3 > 1, ∀ (t : ℝ) (_ : |t| > 3),
-  ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta).Finite),
+  ∀ (hfin : (zerosetKfR (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta).Finite),
     ∀ z : ℂ, 1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
       (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖) ≤
       (C_3 / (deltaz_t t)) * Real.log |t| := by
@@ -1606,7 +1593,7 @@ private lemma log_add_two_lt_two_mul_log {t : ℝ} (ht : 3 < |t|) :
 
 lemma lem_sumKlogt2 :
   ∃ C_4 > 1, ∀ (t : ℝ) (_ : |t| > 3),
-  ∀ (hfin : (zerosetKfRc (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta).Finite),
+  ∀ (hfin : (zerosetKfR (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta).Finite),
     ∀ z : ℂ, 1 - deltaz_t t ≤ z.re ∧ z.re ≤ 3/2 ∧ z.im = t →
       (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖z - ρ‖) ≤
       C_4 * Real.log |t|^2 := by
