@@ -37,10 +37,11 @@ open Classical in
     use the local factor function `h_σ σ` in the numerator (so the expression extends analytically). -/
 noncomputable def Cf
     (R1 : ℝ)
+    (c : ℂ)
     (f : ℂ → ℂ)
     (z : ℂ) : ℂ :=
-if h_finite_zeros : (zerosetKfR R1 0 f).Finite then
-    if _ : z ∈ zerosetKfR R1 0 f then
+if h_finite_zeros : (zerosetKfR R1 c f).Finite then
+    if _ : z ∈ zerosetKfR R1 c f then
       meromorphicTrailingCoeffAt f z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase z), (z - ρ) ^ analyticOrderNatAt f ρ
     else
       f z / ∏ ρ ∈ h_finite_zeros.toFinset, (z - ρ) ^ analyticOrderNatAt f ρ
@@ -87,7 +88,7 @@ lemma lem_Cf_at_sigma
     (h_finite_zeros : (zerosetKfR R1 0 f).Finite)
     (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 0 f) (hfσ : AnalyticAt ℂ f σ) :
     ∃ g : ℂ → ℂ, AnalyticAt ℂ g σ ∧ ∀ᶠ z in nhds σ,
-      Cf R1 f z =
+      Cf R1 0 f z =
       g z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase σ), (z - ρ) ^ analyticOrderNatAt f ρ := by
   by_cases top : analyticOrderAt f σ = ⊤
   · refine ⟨0, analyticAt_const, ?_⟩
@@ -128,7 +129,7 @@ lemma lem_h_ratio_anal
 
 lemma lem_Cf_analytic {R R1 : ℝ} {f : ℂ → ℂ} (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
     {z : ℂ} (hz : z ∈ closedBall (0 : ℂ) R) :
-    AnalyticAt ℂ (Cf R1 f) z := by
+    AnalyticAt ℂ (Cf R1 0 f) z := by
   by_cases h_finite_zeros : (zerosetKfR R1 0 f).Finite
   swap
   · unfold Cf
@@ -148,7 +149,7 @@ lemma lem_Cf_analytic {R R1 : ℝ} {f : ℂ → ℂ} (h_f_analytic : AnalyticOnN
     have hw_not_in_zeros : w ∉ zerosetKfR R1 0 f := hw_not_in_compl
     -- Since w ∉ zerosetKfR R1, Cf w uses the else branch
     change f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ analyticOrderNatAt f ρ =
-         Cf R1 f w
+         Cf R1 0 f w
     -- Apply the definition of Cf using dif_neg for dependent if-then-else
     simp [Cf, h_finite_zeros, hw_not_in_zeros]
 
@@ -158,7 +159,7 @@ lemma lem_Cf_never_zero
     (hf : AnalyticOnNhd ℂ f (closedBall 0 R1))
     (ne_top : ∀ z ∈ closedBall 0 R1, analyticOrderAt f z ≠ ⊤)
     (z : ℂ) (hz : z ∈ closedBall (0 : ℂ) R1) :
-    Cf R1 f z ≠ 0 := by
+    Cf R1 0 f z ≠ 0 := by
   by_cases h_finite_zeros : (zerosetKfR R1 0 f).Finite
   swap
   · simp [Cf, h_finite_zeros]
@@ -176,7 +177,7 @@ noncomputable def Bf
     (f : ℂ → ℂ)
     (z : ℂ) : ℂ :=
   if h_finite_zeros : (zerosetKfR R1 0 f).Finite then
-    Cf R1 f z *
+    Cf R1 0 f z *
     ∏ ρ ∈ h_finite_zeros.toFinset,
       ((R : ℂ) - conj ρ * z / (R : ℂ)) ^ analyticOrderNatAt f ρ
   else
