@@ -25,8 +25,8 @@ lemma trailingCoeff_def {f : ℂ → ℂ} {z : ℂ} (h1 : AnalyticAt ℂ f z)
   simp_rw [← zpow_natCast] at hg3
   rw [hg1.meromorphicTrailingCoeffAt_of_ne_zero_of_eq_nhdsNE hg2 (eventually_nhdsWithin_of_eventually_nhds hg3)]
 
-lemma order_ne_top {f : ℂ → ℂ} {r : ℝ} {z : ℂ} (hf : AnalyticOnNhd ℂ f (closedBall 0 r)) (hr : 0 ≤ r)
-    (ne : ∃ z' ∈ closedBall (0 : ℂ) r, f z' ≠ 0) (hz : z ∈ closedBall 0 r) :
+lemma order_ne_top {f : ℂ → ℂ} {r : ℝ} {c : ℂ} {z : ℂ} (hf : AnalyticOnNhd ℂ f (closedBall c r)) (hr : 0 ≤ r)
+    (ne : ∃ z' ∈ closedBall c r, f z' ≠ 0) (hz : z ∈ closedBall c r) :
     analyticOrderAt f z ≠ ⊤ := by
   rcases ne with ⟨z', hz'⟩
   refine hf.analyticOrderAt_ne_top_of_isPreconnected (isConnected_closedBall hr).isPreconnected hz'.1 hz ?_
@@ -73,22 +73,22 @@ lemma lem_ratioAnalAt (w : ℂ)
 
 
 lemma lem_prod_no_sigma1
-    {R1 : ℝ}
+    {R1 : ℝ} {c : ℂ}
     {f : ℂ → ℂ}
-    (h_finite_zeros : (zerosetKfR R1 0 f).Finite)
-    (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 0 f) (z : ℂ) :
+    (h_finite_zeros : (zerosetKfR R1 c f).Finite)
+    (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 c f) (z : ℂ) :
     ∏ ρ ∈ h_finite_zeros.toFinset, (z - ρ) ^ analyticOrderNatAt f ρ =
     (z - σ) ^ analyticOrderNatAt f σ *
     ∏ ρ ∈ (h_finite_zeros.toFinset.erase σ), (z - ρ) ^ analyticOrderNatAt f ρ := by
   exact Finset.mul_prod_erase _ _ (h_finite_zeros.mem_toFinset.2 hσ)|>.symm
 
 lemma lem_Cf_at_sigma
-    {R1 : ℝ}
+    {R1 : ℝ} {c : ℂ}
     {f : ℂ → ℂ}
-    (h_finite_zeros : (zerosetKfR R1 0 f).Finite)
-    (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 0 f) (hfσ : AnalyticAt ℂ f σ) :
+    (h_finite_zeros : (zerosetKfR R1 c f).Finite)
+    (σ : ℂ) (hσ : σ ∈ zerosetKfR R1 c f) (hfσ : AnalyticAt ℂ f σ) :
     ∃ g : ℂ → ℂ, AnalyticAt ℂ g σ ∧ ∀ᶠ z in nhds σ,
-      Cf R1 0 f z =
+      Cf R1 c f z =
       g z / ∏ ρ ∈ (h_finite_zeros.toFinset.erase σ), (z - ρ) ^ analyticOrderNatAt f ρ := by
   by_cases top : analyticOrderAt f σ = ⊤
   · refine ⟨0, analyticAt_const, ?_⟩
@@ -107,16 +107,16 @@ lemma lem_Cf_at_sigma
   · have : f z ≠ 0 := by
       rw [f_eq]
       apply mul_ne_zero (pow_ne_zero _ (by grind)) ne_zero
-    have : z ∉ zerosetKfR R1 0 f := by
+    have : z ∉ zerosetKfR R1 c f := by
       simp [zerosetKfR, this]
     simp only [Cf, h_finite_zeros, ↓reduceDIte, this, f_eq]
     rw [lem_prod_no_sigma1 h_finite_zeros σ hσ, mul_div_mul_left]
     grind
 
 lemma lem_h_ratio_anal
-    {R1 : ℝ}
+    {R1 : ℝ} {c : ℂ}
     {f : ℂ → ℂ}
-    (h_finite_zeros : (zerosetKfR R1 0 f).Finite)
+    (h_finite_zeros : (zerosetKfR R1 c f).Finite)
     (σ : ℂ)
     (g : ℂ → ℂ) (hg_analytic : AnalyticAt ℂ g σ) :
     AnalyticAt ℂ
@@ -127,14 +127,14 @@ lemma lem_h_ratio_anal
       simp [Finset.mem_erase])
   exact hg_analytic.div hden.1 hden.2
 
-lemma lem_Cf_analytic {R R1 : ℝ} {f : ℂ → ℂ} (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
-    {z : ℂ} (hz : z ∈ closedBall (0 : ℂ) R) :
-    AnalyticAt ℂ (Cf R1 0 f) z := by
-  by_cases h_finite_zeros : (zerosetKfR R1 0 f).Finite
+lemma lem_Cf_analytic {R R1 : ℝ} {c : ℂ} {f : ℂ → ℂ} (h_f_analytic : AnalyticOnNhd ℂ f (closedBall c R))
+    {z : ℂ} (hz : z ∈ closedBall c R) :
+    AnalyticAt ℂ (Cf R1 c f) z := by
+  by_cases h_finite_zeros : (zerosetKfR R1 c f).Finite
   swap
   · unfold Cf
     simp [h_finite_zeros, analyticAt_const]
-  by_cases h : z ∈ zerosetKfR R1 0 f
+  by_cases h : z ∈ zerosetKfR R1 c f
   · obtain ⟨g, hg1, hg2⟩ := lem_Cf_at_sigma h_finite_zeros z h (h_f_analytic z hz)
     apply analyticAt_congr hg2|>.mpr
     exact lem_h_ratio_anal h_finite_zeros _ _ hg1
@@ -142,28 +142,28 @@ lemma lem_Cf_analytic {R R1 : ℝ} {f : ℂ → ℂ} (h_f_analytic : AnalyticOnN
       apply lem_ratioAnalAt z f (h_f_analytic _ hz)
       simp_all
     refine h_ratio_analytic.congr ?_
-    have h_open : IsOpen (Set.compl (zerosetKfR R1 0 f)) := h_finite_zeros.isClosed.isOpen_compl
+    have h_open : IsOpen (Set.compl (zerosetKfR R1 c f)) := h_finite_zeros.isClosed.isOpen_compl
     apply Filter.eventually_of_mem (h_open.mem_nhds h)
     intro w hw_not_in_compl
     -- Convert from membership in complement to non-membership
-    have hw_not_in_zeros : w ∉ zerosetKfR R1 0 f := hw_not_in_compl
+    have hw_not_in_zeros : w ∉ zerosetKfR R1 c f := hw_not_in_compl
     -- Since w ∉ zerosetKfR R1, Cf w uses the else branch
     change f w / ∏ ρ ∈ h_finite_zeros.toFinset, (w - ρ) ^ analyticOrderNatAt f ρ =
-         Cf R1 0 f w
+         Cf R1 c f w
     -- Apply the definition of Cf using dif_neg for dependent if-then-else
     simp [Cf, h_finite_zeros, hw_not_in_zeros]
 
 lemma lem_Cf_never_zero
-    {R1 : ℝ}
+    {R1 : ℝ} {c : ℂ}
     {f : ℂ → ℂ}
-    (hf : AnalyticOnNhd ℂ f (closedBall 0 R1))
-    (ne_top : ∀ z ∈ closedBall 0 R1, analyticOrderAt f z ≠ ⊤)
-    (z : ℂ) (hz : z ∈ closedBall (0 : ℂ) R1) :
-    Cf R1 0 f z ≠ 0 := by
-  by_cases h_finite_zeros : (zerosetKfR R1 0 f).Finite
+    (hf : AnalyticOnNhd ℂ f (closedBall c R1))
+    (ne_top : ∀ z ∈ closedBall c R1, analyticOrderAt f z ≠ ⊤)
+    (z : ℂ) (hz : z ∈ closedBall c R1) :
+    Cf R1 c f z ≠ 0 := by
+  by_cases h_finite_zeros : (zerosetKfR R1 c f).Finite
   swap
   · simp [Cf, h_finite_zeros]
-  by_cases h : z ∈ zerosetKfR R1 0 f <;> simp only [Cf, ↓reduceDIte, h, h_finite_zeros]
+  by_cases h : z ∈ zerosetKfR R1 c f <;> simp only [Cf, ↓reduceDIte, h, h_finite_zeros]
   · refine  div_ne_zero ?_ (Finset.prod_ne_zero_iff.mpr fun ρ hρ ↦ pow_ne_zero _ (by grind))
     apply (hf z hz).meromorphicAt.meromorphicTrailingCoeffAt_ne_zero
     rw [(hf z hz).meromorphicOrderAt_eq]
