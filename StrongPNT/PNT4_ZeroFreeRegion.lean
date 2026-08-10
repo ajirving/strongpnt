@@ -1056,7 +1056,7 @@ lemma helper_g_zero_eq_one (f : ℂ → ℂ) (c : ℂ) (hc : f c ≠ 0) :
   simp [hc]
 
 lemma helper_zerosetKfR_eq_center0 (r : ℝ) (f : ℂ → ℂ) :
-  zerosetKfR r f = zerosetKfRc r (0 : ℂ) f := by
+  zerosetKfR r 0 f = zerosetKfRc r (0 : ℂ) f := by
   ext ρ; simp [zerosetKfR, zerosetKfRc]
 
 lemma helper_apply_jensen_to_g
@@ -1065,7 +1065,7 @@ lemma helper_apply_jensen_to_g
   (g : ℂ → ℂ)
   (h_g_analytic : AnalyticOnNhd ℂ g (Metric.closedBall 0 1))
   (hg0_one : g 0 = 1)
-  (hfin_g : (zerosetKfR R1 g).Finite)
+  (hfin_g : (zerosetKfR R1 0 g).Finite)
   (hg_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖g z‖ ≤ B) :
   (∑ ρ ∈ hfin_g.toFinset, (analyticOrderNatAt g ρ : ℝ)) ≤ Real.log B / Real.log (R / R1) := by
   convert lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R       g (h_g_analytic.mono (Metric.closedBall_subset_closedBall hR_lt_1.le)) hg0_one hfin_g  hg_le_B
@@ -1273,9 +1273,9 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
   -- Finiteness of zeros of g in radius R1 and set equalities
   have hfin_g0 : (zerosetKfRc R1 (0 : ℂ) g).Finite :=
     helper_fin_zero_g_is_image R1 c f h_f_nonzero_at_zero hfin
-  have hZR_eq : zerosetKfR R1 g = zerosetKfRc R1 (0 : ℂ) g :=
+  have hZR_eq : zerosetKfR R1 0 g = zerosetKfRc R1 (0 : ℂ) g :=
     helper_zerosetKfR_eq_center0 R1 g
-  have hfin_g : (zerosetKfR R1 g).Finite := by
+  have hfin_g : (zerosetKfR R1 0 g).Finite := by
     simpa [hZR_eq] using hfin_g0
 
   -- Bound on g on the closed ball of radius R
@@ -1306,9 +1306,9 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
       (f := f) (hc := h_f_nonzero_at_zero) (hfin := hfin)
 
   -- Equality of sets for g-zeros and the image of f-zeros
-  have hST_g_img : zerosetKfR R1 g
+  have hST_g_img : zerosetKfR R1 0 g
       = (fun ρ => ρ - c) '' (zerosetKfRc R1 c f) := by
-    have h1 : zerosetKfR R1 g = zerosetKfRc R1 (0 : ℂ) g :=
+    have h1 : zerosetKfR R1 0 g = zerosetKfRc R1 (0 : ℂ) g :=
       helper_zerosetKfR_eq_center0 R1 g
     have h2 : zerosetKfRc R1 (0 : ℂ) g
         = (fun ρ => ρ - c) '' (zerosetKfRc R1 c f) :=
@@ -1329,7 +1329,7 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
         (∑ ρ ∈ hfin_g.toFinset, (analyticOrderNatAt g ρ : ℝ))
           = (∑ ρ ∈ (hfin.image (fun ρ => ρ - c)).toFinset, (analyticOrderNatAt g ρ : ℝ)) :=
       helper_sum_over_equal_finite_sets_orders (g := g)
-        (S := zerosetKfR R1 g)
+        (S := zerosetKfR R1 0 g)
         (T := (fun ρ => ρ - c) '' (zerosetKfRc R1 c f))
         (hS := hfin_g) (hT := hfin.image (fun ρ => ρ - c)) (hST := hST_g_img)
     -- Combine bounds and equalities to obtain the desired inequality
@@ -1349,7 +1349,7 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
     have g_nonzero_on_ball : ∀ z ∈ Metric.closedBall (0 : ℂ) R, g z ≠ 0 :=
       no_zero_of_bound_one_and_center_one R hR_lt_1 g h_g_analytic hg0_one hg_le_one
     -- zeroset within radius R1 is empty; hence the finite sum is zero
-    have hS_empty : zerosetKfR R1 g = (∅ : Set ℂ) := by
+    have hS_empty : zerosetKfR R1 0 g = (∅ : Set ℂ) := by
       ext z; constructor
       · intro hz
         rcases hz with ⟨hzball, hzzero⟩
@@ -1364,13 +1364,13 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
         (∑ ρ ∈ hfin_g.toFinset, (analyticOrderNatAt g ρ : ℝ)) = 0 := by
       have h :=
         helper_sum_over_equal_finite_sets_orders (g := g)
-          (S := zerosetKfR R1 g) (T := (∅ : Set ℂ))
+          (S := zerosetKfR R1 0 g) (T := (∅ : Set ℂ))
           (hS := hfin_g) (hT := Set.finite_empty) (hST := hS_empty)
       simpa using h
     -- Transport zero sum to the image-of-f sum via equality of finite sets S = image set
     have hsum_reindex :=
       helper_sum_over_equal_finite_sets_orders (g := g)
-        (S := zerosetKfR R1 g)
+        (S := zerosetKfR R1 0 g)
         (T := (fun ρ => ρ - c) '' (zerosetKfRc R1 c f))
         (hS := hfin_g) (hT := hfin.image (fun ρ => ρ - c)) (hST := hST_g_img)
     have hsum_img_eq :
