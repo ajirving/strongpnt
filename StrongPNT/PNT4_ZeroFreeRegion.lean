@@ -1254,7 +1254,7 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
   (hR_lt_1 : R < 1)
   (f : ℂ → ℂ)
   (c : ℂ)
-  (h_f_analytic : ∀ z ∈ Metric.closedBall c 1, AnalyticAt ℂ f z)
+  (h_f_analytic : AnalyticOnNhd ℂ f (Metric.closedBall c 1))
   (h_f_nonzero_at_zero : f c ≠ 0)
   (hf_le_B : ∀ z ∈ Metric.closedBall c R, ‖f z‖ ≤ B)
   (hfin : (zerosetKfRc R1 c f).Finite) :
