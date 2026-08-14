@@ -226,62 +226,58 @@ theorem lem_mod_Bf_at_0_ge_1 (R R1 : ℝ) {c : ℂ} (hR1_pos : 0 < R1)
   refine one_le_div ?_|>.mpr (hρ.1.trans hR1_lt_R.le)
   exact norm_pos_iff.mpr fun h ↦ (by grind)
 
-theorem lem_Bf_is_analytic (R R1 : ℝ)
+theorem lem_Bf_is_analytic (R R1 : ℝ) {c : ℂ}
     (f : ℂ → ℂ)
-    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R)) :
-    AnalyticOnNhd ℂ (Bf R R1 0 f)  (closedBall (0 : ℂ) R) := by
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall c R)) :
+    AnalyticOnNhd ℂ (Bf R R1 c f) (closedBall c R) := by
   intro z hz
-  by_cases h_finite_zeros : (zerosetKfR R1 0 f).Finite
+  by_cases h_finite_zeros : (zerosetKfR R1 c f).Finite
   swap
   · unfold Bf
     simp [h_finite_zeros, analyticAt_const]
-  have h_product : AnalyticAt ℂ (fun w => ∏ ρ ∈ h_finite_zeros.toFinset,
-      ((R : ℂ) - conj ρ * w / (R : ℂ)) ^ analyticOrderNatAt f ρ) z := by
-    fun_prop
   unfold Bf
-  simp only [h_finite_zeros, ↓reduceDIte, sub_zero]
-  exact (lem_Cf_analytic h_f_analytic hz).mul h_product
+  simp only [h_finite_zeros, ↓reduceDIte]
+  exact (lem_Cf_analytic h_f_analytic hz).mul (by fun_prop)
 
-lemma lem_mod_Bf_eq_mod_f_on_boundary (R R1 : ℝ)
+lemma lem_mod_Bf_eq_mod_f_on_boundary (R R1 : ℝ) {c : ℂ}
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
-    (h_finite_zeros : (zerosetKfR R1 0 f).Finite)
-    (z : ℂ) (hz : ‖z‖ = R) :
-      ‖Bf R R1 0 f z‖ = ‖f z‖ := by
-  rw [lem_mod_Bf_prod_mod R R1 f h_finite_zeros z (by simp_all [zerosetKfR])]
-  simp only [sub_zero]
-  suffices ∀ ρ ∈ h_finite_zeros.toFinset, ‖(((R : ℂ) - z * conj ρ / (R : ℂ)) / (z - ρ))‖ ^ analyticOrderNatAt f ρ = 1 by
+    (h_finite_zeros : (zerosetKfR R1 c f).Finite)
+    (z : ℂ) (hz : ‖z - c‖ = R) :
+      ‖Bf R R1 c f z‖ = ‖f z‖ := by
+  rw [lem_mod_Bf_prod_mod R R1 f h_finite_zeros z (by simp_all [zerosetKfR, dist_eq_norm_sub])]
+  suffices ∀ ρ ∈ h_finite_zeros.toFinset, ‖(((R : ℂ) - (z - c) * conj (ρ - c) / (R : ℂ)) / (z - ρ))‖ ^ analyticOrderNatAt f ρ = 1 by
     rw [Finset.prod_congr rfl this, Finset.prod_const_one, mul_one]
   intro ρ hρ
   convert one_pow _
   have z_ne_rho : z ≠ ρ := by
     intro h_eq
-    simp_all [zerosetKfR]
+    simp_all [zerosetKfR, dist_eq_norm_sub]
     linarith
-  rw [(by field : R - z * conj ρ / R = ((R : ℂ)^2 - z * conj ρ) / R)]
-  rw [← hz, ← Complex.mul_conj', ← mul_sub, ← map_sub]
+  rw [(by field : R - (z - c)* conj (ρ - c)/ R = ((R : ℂ)^2 - (z - c)* conj (ρ - c)) / R)]
+  rw [← hz, ← Complex.mul_conj', ← mul_sub, ← map_sub, (by ring : z - c - (ρ - c) = z - ρ)]
   simp only [Complex.norm_div, Complex.norm_mul, Complex.norm_real, norm_norm, Complex.norm_conj]
   rw [div_div, div_self]
   exact mul_ne_zero (by linarith) (norm_ne_zero_iff.mpr (by grind))
 
-lemma lem_Bf_bounded_on_boundary (B R R1 : ℝ)
+lemma lem_Bf_bounded_on_boundary (B R R1 : ℝ) {c : ℂ}
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
-    (h_finite_zeros : (zerosetKfR R1 0 f).Finite)
-    (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B)
-    (z : ℂ) (hz : ‖z‖ = R) :
-      ‖Bf R R1 0 f z‖ ≤ B := by
+    (h_finite_zeros : (zerosetKfR R1 c f).Finite)
+    (hf_le_B : ∀ z : ℂ, ‖z - c‖ ≤ R → ‖f z‖ ≤ B)
+    (z : ℂ) (hz : ‖z - c‖ = R) :
+      ‖Bf R R1 c f z‖ ≤ B := by
   rw [lem_mod_Bf_eq_mod_f_on_boundary R R1 (by linarith) hR1_lt_R f h_finite_zeros z hz]
   exact hf_le_B _ hz.le
 
-lemma lem_max_mod_principle_for_Bf (B R : ℝ) (hR_pos : 0 < R)
+lemma lem_max_mod_principle_for_Bf (B R : ℝ) {c : ℂ} (hR_pos : 0 < R)
     (fB : ℂ → ℂ)
-    (h_analytic : AnalyticOnNhd ℂ fB (closedBall (0 : ℂ) R))
-    (h_bd_boundary : ∀ z : ℂ, ‖z‖ = R → ‖fB z‖ ≤ B)
-    (z : ℂ) (hz : ‖z‖ ≤ R) : ‖fB z‖ ≤ B := by
-  refine Complex.norm_le_of_forall_mem_frontier_norm_le (isBounded_ball (x := 0) (r := R)) ?_ (fun z hz ↦ ?_) ?_
+    (h_analytic : AnalyticOnNhd ℂ fB (closedBall c R))
+    (h_bd_boundary : ∀ z : ℂ, ‖z - c‖ = R → ‖fB z‖ ≤ B)
+    (z : ℂ) (hz : ‖z - c‖ ≤ R) : ‖fB z‖ ≤ B := by
+  refine Complex.norm_le_of_forall_mem_frontier_norm_le (isBounded_ball (x := c) (r := R)) ?_ (fun z hz ↦ ?_) ?_
   · apply DifferentiableOn.diffContOnCl
     apply AnalyticOnNhd.differentiableOn
     convert h_analytic
@@ -290,39 +286,39 @@ lemma lem_max_mod_principle_for_Bf (B R : ℝ) (hR_pos : 0 < R)
     rw [frontier_ball _ (by linarith)] at hz
     simp_all
   · rw [closure_ball _ (by linarith)]
-    simp_all
+    simp_all [dist_eq_norm_sub]
 
-lemma lem_Bf_bounded_in_disk_from_boundary (B R R1 : ℝ)
+lemma lem_Bf_bounded_in_disk_from_boundary (B R R1 : ℝ) {c : ℂ}
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
-    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
-    (h_bd_boundary : ∀ z : ℂ, ‖z‖ = R →
-      ‖Bf R R1 0 f z‖ ≤ B)
-    (z : ℂ) (hz : ‖z‖ ≤ R) :
-      ‖Bf R R1 0 f z‖ ≤ B := by
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall c R))
+    (h_bd_boundary : ∀ z : ℂ, ‖z- c‖ = R →
+      ‖Bf R R1 c f z‖ ≤ B)
+    (z : ℂ) (hz : ‖z - c‖ ≤ R) :
+      ‖Bf R R1 c f z‖ ≤ B := by
   exact lem_max_mod_principle_for_Bf B R (by linarith)
-    (Bf R R1 0 f) (lem_Bf_is_analytic R R1 f h_f_analytic) h_bd_boundary z hz
+    (Bf R R1 c f) (lem_Bf_is_analytic R R1 f h_f_analytic) h_bd_boundary z hz
 
-lemma lem_Bf_bounded_in_disk_from_f (B R R1 : ℝ)
+lemma lem_Bf_bounded_in_disk_from_f (B R R1 : ℝ) {c : ℂ}
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
-    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
-    (h_finite_zeros : (zerosetKfR R1 0 f).Finite)
-    (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B)
-    (z : ℂ) (hz : ‖z‖ ≤ R) :
-      ‖Bf R R1 0 f z‖ ≤ B := by
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall c R))
+    (h_finite_zeros : (zerosetKfR R1 c f).Finite)
+    (hf_le_B : ∀ z : ℂ, ‖z - c‖ ≤ R → ‖f z‖ ≤ B)
+    (z : ℂ) (hz : ‖z - c‖ ≤ R) :
+      ‖Bf R R1 c f z‖ ≤ B := by
   exact lem_Bf_bounded_in_disk_from_boundary B R R1 hR1_pos hR1_lt_R f h_f_analytic (lem_Bf_bounded_on_boundary B R R1 hR1_pos hR1_lt_R f h_finite_zeros hf_le_B) z hz
 
-lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
+lemma lem_sum_m_rho_bound (B R R1 : ℝ) {c : ℂ} (hB : 1 < B)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
-    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
-    (hf0_eq_one : f 0 = 1)
-    (h_finite_zeros : (zerosetKfR R1 0 f).Finite)
-    (hf_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B) :
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall c R))
+    (hf0_eq_one : f c = 1)
+    (h_finite_zeros : (zerosetKfR R1 c f).Finite)
+    (hf_le_B : ∀ z : ℂ, ‖z- c‖ ≤ R → ‖f z‖ ≤ B) :
     (∑ ρ ∈ h_finite_zeros.toFinset, (analyticOrderNatAt f ρ : ℝ)) ≤ (1/Real.log (R/R1)) * Real.log B := by
   rw [← abs_of_nonneg (by linarith : 0 ≤ R)] at h_f_analytic
   convert  AnalyticOnNhd.sum_divisor_le (by grind : 0 < |R1|) (by grind) hB.le h_f_analytic (by grind) _ using 1
@@ -336,7 +332,7 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
       · rw [abs_of_nonneg (by linarith)]
         simp_all [zerosetKfR]
     · intro z hz
-      simp_all only [mem_support, MeromorphicOn.divisor_def, mem_closedBall, dist_zero_right, ne_eq,
+      simp_all only [mem_support, MeromorphicOn.divisor_def, mem_closedBall, ne_eq,
         ite_eq_right_iff, WithTop.untop₀_eq_zero, and_imp, Classical.not_imp, not_or, zerosetKfR,
         Finite.coe_toFinset, mem_setOf_eq]
       rw [abs_of_pos (by linarith)] at hz
@@ -346,10 +342,10 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) (hB : 1 < B)
   · simp_all; ring
   · intro z hz
     apply hf_le_B
-    simp_all only [mem_sphere_iff_norm, sub_zero]
+    simp_all only [mem_sphere_iff_norm]
     grind
 
-variable {R R1 r B : ℝ} {f : ℂ → ℂ}
+variable {R R1 r B : ℝ} {f : ℂ → ℂ} {c : ℂ}
 variable (h_finite_zeros : (zerosetKfR R1 0 f).Finite)
 
 lemma lem_num_prod_never_zero_all
@@ -357,16 +353,16 @@ lemma lem_num_prod_never_zero_all
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
-    (h_finite_zeros : (zerosetKfR R1 0 f).Finite)
-    (z : ℂ) (hz : z ∈ closedBall (0 : ℂ) R1) :
+    (h_finite_zeros : (zerosetKfR R1 c f).Finite)
+    (z : ℂ) (hz : z ∈ closedBall c R1) :
       (∏ ρ ∈ h_finite_zeros.toFinset,
-        ((R : ℂ) - conj ρ * z / (R : ℂ)) ^ analyticOrderNatAt f ρ) ≠ 0 := by
+        ((R : ℂ) - conj (ρ - c) * (z - c) / (R : ℂ)) ^ analyticOrderNatAt f ρ) ≠ 0 := by
   refine  Finset.prod_ne_zero_iff.mpr fun ρ hρ ↦ pow_ne_zero _ ?_
   apply norm_pos_iff.mp
   grw [norm_sub_norm_le _ _|>.ge]
   rw [Complex.norm_of_nonneg (by linarith), norm_div, norm_mul, Complex.norm_conj, Complex.norm_of_nonneg (by linarith)]
   have hR_pos : (0 : ℝ) < R := by linarith
-  grw [(by simp_all [zerosetKfR] : ‖ρ‖ ≤ R1), (by simp_all : ‖z‖ ≤ R1)]
+  grw [(by simp_all [zerosetKfR, dist_eq_norm_sub] : ‖ρ - c‖ ≤ R1), (by simp_all [dist_eq_norm_sub] : ‖z - c‖ ≤ R1)]
   have h1 : R1 * R1 < R * R := by gcongr
   have h2 : R1 * R1 / R < R := by
     rwa [div_lt_iff₀ hR_pos]
@@ -377,13 +373,13 @@ lemma Bf_never_zero
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
-    (hf : AnalyticOnNhd ℂ f (closedBall 0 R1))
-    (ne_top : ∀ z ∈ closedBall 0 R1, analyticOrderAt f z ≠ ⊤)
-    (z : ℂ) (hz : z ∈ closedBall (0 : ℂ) R1) : Bf R R1 0 f z ≠ 0 := by
-  by_cases h_finite_zeros : (zerosetKfR R1 0 f).Finite
+    (hf : AnalyticOnNhd ℂ f (closedBall c R1))
+    (ne_top : ∀ z ∈ closedBall c R1, analyticOrderAt f z ≠ ⊤)
+    (z : ℂ) (hz : z ∈ closedBall c R1) : Bf R R1 c f z ≠ 0 := by
+  by_cases h_finite_zeros : (zerosetKfR R1 c f).Finite
   swap
   · simp [Bf, h_finite_zeros]
-  simp only [Bf, h_finite_zeros, ↓reduceDIte, sub_zero]
+  simp only [Bf, h_finite_zeros, ↓reduceDIte]
   exact mul_ne_zero (lem_Cf_never_zero hf ne_top z hz) (lem_num_prod_never_zero_all R R1 hR1_pos hR1_lt_R f h_finite_zeros z hz)
 
 def isLf (Lf : ℂ → ℂ) (f : ℂ → ℂ) (r R R1 : ℝ) : Prop :=
@@ -414,7 +410,7 @@ lemma re_Lf_le_log_B
       · exact fun z hz ↦ order_ne_top h_f_analytic (by linarith) ⟨0, (by simp; linarith), (by simp_all)⟩
           (closedBall_subset_closedBall (by linarith) hz)
       · simp_all; linarith
-    · exact lem_Bf_bounded_in_disk_from_f B R R1 hR1_pos hR1_lt_R f h_f_analytic h_finite_zeros h_f_bound z (by linarith)
+    · exact lem_Bf_bounded_in_disk_from_f B R R1 hR1_pos hR1_lt_R f h_f_analytic h_finite_zeros (by simpa) z (by simp; linarith)
   suffices 0 ≤ Real.log ‖Bf R R1 0 f 0‖ by linarith
   exact Real.log_nonneg <| lem_mod_Bf_at_0_ge_1 R R1 hR1_pos hR1_lt_R f h_f_zero h_finite_zeros
 
@@ -677,7 +673,7 @@ lemma final_sum_bound {R R1 B : ℝ} {f : ℂ → ℂ}
   have h_f_bounded_alt : ∀ z : ℂ, ‖z‖ ≤ R → ‖f z‖ ≤ B := by
     intro w hw
     exact h_f_bounded w (Metric.mem_closedBall.mpr (by simpa [dist_eq_norm] using hw))
-  grw [lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros h_f_bounded_alt]
+  grw [lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros (by simpa)]
   · field_simp
     rfl
   · refine div_nonneg (by norm_num) ?_
