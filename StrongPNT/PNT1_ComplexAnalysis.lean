@@ -60,58 +60,70 @@ lemma lem_postriglogn (n : ℕ) (_hn : n ≥ 1) (t : ℝ) : 0 ≤ 3 + 4 * Real.c
   rw [mul_assoc]
   exact lem_postrig (t * Real.log (n : ℝ))
 
-lemma cauchy_formula_deriv {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ}
-    (hfdiff : DifferentiableOn ℂ f (Metric.ball 0 R_analytic))
+lemma cauchy_formula_deriv {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ} {c : ℂ}
+    (hfdiff : DifferentiableOn ℂ f (Metric.ball c R_analytic))
     (h_r_z_lt_r_int : r_z < r_int)
     (h_r_int_lt_R_analytic : r_int < R_analytic)
-    {z : ℂ} (hz : z ∈ Metric.closedBall 0 r_z) :
-deriv f z = (1 / (2 * Real.pi * Complex.I)) • ∮ w in C(0, r_int), (w - z)⁻¹ ^ 2 • f w := by
+    {z : ℂ} (hz : z ∈ Metric.closedBall c r_z) :
+deriv f z = (1 / (2 * Real.pi * Complex.I)) • ∮ w in C(c, r_int), (w - z)⁻¹ ^ 2 • f w := by
   rw [← Complex.two_pi_I_inv_smul_circleIntegral_sub_sq_inv_smul_of_differentiable Metric.isOpen_ball
     (Metric.closedBall_subset_ball h_r_int_lt_R_analytic) hfdiff
     (Metric.closedBall_subset_ball h_r_z_lt_r_int hz)]
   simp
 
-lemma lem_f_prime_bound {f : ℂ → ℂ} {M R_analytic r_z r_int : ℝ}
+open Metric in
+theorem borelCaratheodory_centre {f : ℂ → ℂ} {M R : ℝ} {z c : ℂ} (hM : 0 < M) (hf : DifferentiableOn ℂ f (ball c R))
+    (hf₁ : Set.MapsTo f (ball c R) {z | z.re ≤ M}) (hR : 0 < R) (hz : z ∈ ball c R)
+    (hf₂ : f c = 0) : ‖f z‖ ≤ 2 * M * ‖z - c‖ / (R - ‖z - c‖) := by
+  convert Complex.borelCaratheodory_zero (f := (fun z ↦ f (z + c))) (z := z - c) hM (fun z hz ↦ ?_)
+    (fun z hz ↦ (hf₁ (by simp_all)))   hR (by simp_all [dist_eq_norm_sub]) (by simp_all)
+  · simp
+  · rw [differentiableWithinAt_comp_add_right]
+    convert! hf (z + c) (by simp_all)
+    simp
+
+lemma lem_f_prime_bound {f : ℂ → ℂ} {M R_analytic r_z r_int : ℝ} {c : ℂ}
     (hM_pos : 0 < M)
     (hR_analytic_pos : 0 < R_analytic)
     (h_r_z_pos : 0 < r_z)
     (h_r_z_lt_r_int : r_z < r_int)
     (h_r_int_lt_R_analytic : r_int < R_analytic)
-    (analytic : AnalyticOn ℂ f (Metric.closedBall 0 R_analytic))
-    (hf0 : f 0 = 0)
-    (hRe_f_le_M : ∀ w ∈ Metric.closedBall 0 R_analytic, (f w).re ≤ M)
-    {z : ℂ} (hz : z ∈ Metric.closedBall 0 r_z) :
-norm (deriv f z) ≤ (2 * r_int ^ 2 * M) / ((R_analytic - r_int) * (r_int - r_z) ^ 2) := by
+    (analytic : AnalyticOn ℂ f (Metric.closedBall c R_analytic))
+    (hf0 : f c = 0)
+    (hRe_f_le_M : ∀ w ∈ Metric.closedBall c R_analytic, (f w).re ≤ M)
+    {z : ℂ} (hz : z ∈ Metric.closedBall c r_z) :
+    ‖deriv f z‖ ≤ (2 * r_int ^ 2 * M) / ((R_analytic - r_int) * (r_int - r_z) ^ 2) := by
   rw [cauchy_formula_deriv (analytic.differentiableOn.mono Metric.ball_subset_closedBall) h_r_z_lt_r_int h_r_int_lt_R_analytic hz, one_div]
   grw [circleIntegral.norm_two_pi_i_inv_smul_integral_le_of_norm_le_const (by linarith) (C := 2 * M * r_int / ((R_analytic - r_int) * (r_int - r_z) ^ 2))]
   · exact le_of_eq (by ring)
   · intro z' hz'
     rw [smul_eq_mul, norm_mul]
-    grw [Complex.borelCaratheodory_zero hM_pos 
+    grw [borelCaratheodory_centre hM_pos 
       (analytic.differentiableOn.mono Metric.ball_subset_closedBall) 
-      (fun z hz ↦ hRe_f_le_M _ (Metric.ball_subset_closedBall hz)) hR_analytic_pos (by simp_all) hf0]
+      (fun z hz ↦ hRe_f_le_M _ (Metric.ball_subset_closedBall hz)) hR_analytic_pos (by simp_all [dist_eq_norm_sub]) hf0]
     suffices ‖(z' - z)⁻¹ ^ 2‖ ≤ 1 / (r_int - r_z) ^ 2 by
-      simp only [mem_sphere_iff_norm, sub_zero] at hz'
+      simp only [mem_sphere_iff_norm] at hz'
       grw [this]
       · rw [hz']; exact le_of_eq (by field)
       · refine mul_nonneg (mul_nonneg ?_ ?_) (inv_nonneg.mpr ?_) <;> linarith
     rw [norm_pow, norm_inv, one_div, inv_pow]
     gcongr
-    · simp only [mem_sphere_iff_norm, sub_zero, Metric.mem_closedBall,
-      dist_zero_right] at hz' hz
+    · simp only [mem_sphere_iff_norm, dist_eq_norm_sub, Metric.mem_closedBall] at hz' hz
       rw [← hz']
-      exact le_trans (by linarith) (norm_sub_norm_le z' z)
+      have := norm_sub_norm_le (z' -c) (z - c)
+      simp at this
+      linarith
 
-theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ}
+theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ} {c : ℂ}
     (hR_pos : 0 < R)
     (hM_pos : 0 < M)
     (hr_pos : 0 < r)
     (hr_lt_R : r < R)
-    (analytic : AnalyticOn ℂ f (Metric.closedBall 0 R))
-    (hf0 : f 0 = 0)
-    (hRe_f_le_M : ∀ w ∈ Metric.closedBall 0 R, (f w).re ≤ M)
-    {z : ℂ} (hz : z ∈ Metric.closedBall 0 r) :
-norm (deriv f z) ≤ (16 * M * R ^ 2) / ((R - r) ^ 3) := by
+    (analytic : AnalyticOn ℂ f (Metric.closedBall c R))
+    (hf0 : f c = 0)
+    (hRe_f_le_M : ∀ w ∈ Metric.closedBall c R, (f w).re ≤ M)
+    {z : ℂ} (hz : z ∈ Metric.closedBall c r) :
+    ‖deriv f z‖ ≤ (16 * M * R ^ 2) / ((R - r) ^ 3) := by
   grw [lem_f_prime_bound (r_int := (r + R) / 2) hM_pos hR_pos hr_pos (by linarith)
     (by linarith) analytic hf0 hRe_f_le_M hz]
   calc

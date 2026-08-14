@@ -424,29 +424,29 @@ lemma apply_BC_to_Lf
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
-    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
-    (h_f_zero : f 0 = 1)
-    (h_finite_zeros : (zerosetKfR R1 0 f).Finite)
-    (h_f_bound : ∀ z, ‖z‖ ≤ R → ‖f z‖ ≤ B)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall c R))
+    (h_f_zero : f c = 1)
+    (h_finite_zeros : (zerosetKfR R1 c f).Finite)
+    (h_f_bound : ∀ z, ‖z - c‖ ≤ R → ‖f z‖ ≤ B)
     (Lf : ℂ → ℂ)
-    (hLf : isLf Lf f r R R1 0)
-    (z : ℂ) (hz : ‖z‖ ≤ r1) :
+    (hLf : isLf Lf f r R R1 c)
+    (z : ℂ) (hz : ‖z - c‖ ≤ r1) :
       ‖deriv Lf z‖ ≤
       (16 * Real.log B * r^2) / (r - r1)^3 := by
-  refine borel_caratheodory_II (by linarith) (Real.log_pos hB) hr1_pos hr1_lt_r hLf.1.analyticOn hLf.2.1 ?_ (by simp_all)
-  exact fun w hw ↦ re_Lf_le_log_B B r R R1 hr_lt_R1 hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros (by simpa) Lf hLf w (by simp_all)
+  refine borel_caratheodory_II (by linarith) (Real.log_pos hB) hr1_pos hr1_lt_r hLf.1.analyticOn hLf.2.1 ?_ (by simp_all [dist_eq_norm_sub])
+  exact fun w hw ↦ re_Lf_le_log_B B r R R1 hr_lt_R1 hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros (by simpa) Lf hLf w (by simp_all [dist_eq_norm_sub])
 
 -- Lemma 6: Lf_deriv_is_logBf_deriv
 lemma Lf_deriv_is_logBf_deriv (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
-    (h_f_analytic : ∀ z ∈ closedBall 0 R1, AnalyticAt ℂ f z)
-    (ne_top : ∀ z ∈ closedBall 0 R1, analyticOrderAt f z ≠ ⊤)
+    (h_f_analytic : ∀ z ∈ closedBall c R1, AnalyticAt ℂ f z)
+    (ne_top : ∀ z ∈ closedBall c R1, analyticOrderAt f z ≠ ⊤)
     (z : ℂ) :
-      logDeriv (fun w ↦ Bf R R1 0 f w /
-                           Bf R R1 0 f 0) z =
-      logDeriv (fun w ↦ Bf R R1 0 f w) z := by
+      logDeriv (fun w ↦ Bf R R1 c f w /
+                           Bf R R1 c f c) z =
+      logDeriv (fun w ↦ Bf R R1 c f w) z := by
   simp_rw [div_eq_mul_inv]
   refine logDeriv_mul_const z _ ?_
-  exact inv_ne_zero (Bf_never_zero R R1 hR1_pos hR1_lt_R f h_f_analytic ne_top 0 (by simp; linarith))
+  exact inv_ne_zero (Bf_never_zero R R1 hR1_pos hR1_lt_R f h_f_analytic ne_top c (by simp; linarith))
 
 -- Lemma 12: z_minus_rho_diff_nonzero
 lemma z_minus_rho_diff_nonzero {R1 : ℝ} {f : ℂ → ℂ}
@@ -730,6 +730,6 @@ lemma final_ineq1
   grw [apply_BC_to_Lf B r1 r R R1 hB hr1pos hr1_lt_r hr_lt_R1 hR1_pos hR1_lt_R f
     (h_f_analytic.mono (by gcongr)) h_f_zero h_finite_zeros
     (h_f_bound := fun w hw => h_f_bounded w (Metric.mem_closedBall.mpr (by simpa [dist_eq_norm] using hw)))
-    Lf h_Lf z hz_abs]
+    Lf h_Lf z (by simpa)]
   field_simp
   rfl
