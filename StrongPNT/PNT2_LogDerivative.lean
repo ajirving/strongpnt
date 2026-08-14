@@ -382,10 +382,10 @@ lemma Bf_never_zero
   simp only [Bf, h_finite_zeros, ↓reduceDIte]
   exact mul_ne_zero (lem_Cf_never_zero hf ne_top z hz) (lem_num_prod_never_zero_all R R1 hR1_pos hR1_lt_R f h_finite_zeros z hz)
 
-def isLf (Lf : ℂ → ℂ) (f : ℂ → ℂ) (r R R1 : ℝ) : Prop :=
-    AnalyticOnNhd ℂ Lf (closedBall 0 r) ∧ Lf 0 = 0 ∧
-    (∀ z ∈ closedBall (0 : ℂ) r, deriv Lf z = logDeriv (Bf R R1 0 f) z) ∧
-    ∀ z ∈ closedBall (0 : ℂ) r, (Lf z).re = Real.log (norm (Bf R R1 0 f z)) - Real.log (norm (Bf R R1 0 f 0))
+def isLf (Lf : ℂ → ℂ) (f : ℂ → ℂ) (r R R1 : ℝ) (c : ℂ) : Prop :=
+    AnalyticOnNhd ℂ Lf (closedBall c r) ∧ Lf c = 0 ∧
+    (∀ z ∈ closedBall c r, deriv Lf z = logDeriv (Bf R R1 c f) z) ∧
+    ∀ z ∈ closedBall c r, (Lf z).re = Real.log ‖Bf R R1 c f z‖ - Real.log ‖Bf R R1 c f c‖
 
 lemma re_Lf_le_log_B
     (B r R R1 : ℝ)
@@ -398,7 +398,7 @@ lemma re_Lf_le_log_B
     (h_finite_zeros : (zerosetKfR R1 0 f).Finite)
     (h_f_bound : ∀ z, ‖z‖ ≤ R → ‖f z‖ ≤ B)
     (Lf : ℂ → ℂ)
-    (hLf : isLf Lf f r R R1)
+    (hLf : isLf Lf f r R R1 0)
     (z : ℂ) (hz : ‖z‖ ≤ r) :
       Complex.re (Lf z) ≤ Real.log B := by
   rw [hLf.2.2.2 _ (by simp_all)]
@@ -429,7 +429,7 @@ lemma apply_BC_to_Lf
     (h_finite_zeros : (zerosetKfR R1 0 f).Finite)
     (h_f_bound : ∀ z, ‖z‖ ≤ R → ‖f z‖ ≤ B)
     (Lf : ℂ → ℂ)
-    (hLf : isLf Lf f r R R1)
+    (hLf : isLf Lf f r R R1 0)
     (z : ℂ) (hz : ‖z‖ ≤ r1) :
       ‖deriv Lf z‖ ≤
       (16 * Real.log B * r^2) / (r - r1)^3 := by
@@ -550,7 +550,7 @@ lemma Lf_deriv_step3 (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1))
     (h_f_zero : f 0 = 1)
     (Lf : ℂ → ℂ)
-    (h_Lf : isLf Lf f r R R1)
+    (h_Lf : isLf Lf f r R R1 0)
     (z : ℂ) (hz : z ∈ closedBall (0 : ℂ) r \ zerosetKfR R1 0 f) :
     deriv Lf z =
     deriv f z / f z + ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ * (1 / (z - R^2 / (conj ρ)) - 1 / (z - ρ)) := by
@@ -588,7 +588,7 @@ lemma rearrange_Lf_deriv (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1))
     (h_f_zero : f 0 = 1)
     (Lf : ℂ → ℂ)
-    (h_Lf : isLf Lf f r R R1)
+    (h_Lf : isLf Lf f r R R1 0)
     (z : ℂ) (hz : z ∈ closedBall (0 : ℂ) r \ zerosetKfR R1 0 f) :
     deriv f z / f z - ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - ρ) =
     deriv Lf z -
@@ -603,7 +603,7 @@ lemma target_inequality_setup (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R1))
     (h_f_zero : f 0 = 1)
     (Lf : ℂ → ℂ)
-    (h_Lf : isLf Lf f r R R1)
+    (h_Lf : isLf Lf f r R R1 0)
     (z : ℂ) (hz : z ∈ closedBall (0 : ℂ) r \ zerosetKfR R1 0 f) :
   ‖deriv f z / f z - ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - ρ)‖ ≤
   ‖deriv Lf z‖ +
@@ -683,7 +683,7 @@ lemma final_sum_bound {R R1 B : ℝ} {f : ℂ → ℂ}
 lemma Lf_exists (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
     (h_f_zero : f 0 = 1) :
-    ∃ Lf : ℂ → ℂ, isLf Lf f r R R1 := by
+    ∃ Lf : ℂ → ℂ, isLf Lf f r R R1 0 := by
   let B_f := Bf R R1 0 f
   have h_Bf_analytic : AnalyticOnNhd ℂ B_f (closedBall (0 : ℂ) R) :=
     lem_Bf_is_analytic R R1 f <| h_f_analytic.mono (by gcongr)
