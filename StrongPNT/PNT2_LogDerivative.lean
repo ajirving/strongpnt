@@ -393,25 +393,25 @@ lemma re_Lf_le_log_B
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
-    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
-    (h_f_zero : f 0 = 1)
-    (h_finite_zeros : (zerosetKfR R1 0 f).Finite)
-    (h_f_bound : ∀ z, ‖z‖ ≤ R → ‖f z‖ ≤ B)
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall c R))
+    (h_f_zero : f c = 1)
+    (h_finite_zeros : (zerosetKfR R1 c f).Finite)
+    (h_f_bound : ∀ z, ‖z - c‖ ≤ R → ‖f z‖ ≤ B)
     (Lf : ℂ → ℂ)
-    (hLf : isLf Lf f r R R1 0)
-    (z : ℂ) (hz : ‖z‖ ≤ r) :
+    (hLf : isLf Lf f r R R1 c)
+    (z : ℂ) (hz : ‖z - c‖ ≤ r) :
       Complex.re (Lf z) ≤ Real.log B := by
-  rw [hLf.2.2.2 _ (by simp_all)]
-  have : Real.log ‖Bf R R1 0 f z‖ ≤ Real.log B := by
+  rw [hLf.2.2.2 _ (by simp_all [dist_eq_norm_sub])]
+  have : Real.log ‖Bf R R1 c f z‖ ≤ Real.log B := by
     gcongr
     · refine norm_pos_iff.mpr ?_
       apply Bf_never_zero R R1 hR1_pos hR1_lt_R f
       · exact fun z hz ↦ h_f_analytic z (closedBall_subset_closedBall (by linarith) hz)
-      · exact fun z hz ↦ order_ne_top h_f_analytic (by linarith) ⟨0, (by simp; linarith), (by simp_all)⟩
+      · exact fun z hz ↦ order_ne_top h_f_analytic (by linarith) ⟨c, (by simp; linarith), (by simp_all)⟩
           (closedBall_subset_closedBall (by linarith) hz)
-      · simp_all; linarith
-    · exact lem_Bf_bounded_in_disk_from_f B R R1 hR1_pos hR1_lt_R f h_f_analytic h_finite_zeros (by simpa) z (by simp; linarith)
-  suffices 0 ≤ Real.log ‖Bf R R1 0 f 0‖ by linarith
+      · simp_all [dist_eq_norm_sub]; linarith
+    · exact lem_Bf_bounded_in_disk_from_f B R R1 hR1_pos hR1_lt_R f h_f_analytic h_finite_zeros (by simpa) z (by linarith)
+  suffices 0 ≤ Real.log ‖Bf R R1 c f c‖ by linarith
   exact Real.log_nonneg <| lem_mod_Bf_at_0_ge_1 R R1 hR1_pos hR1_lt_R f h_f_zero h_finite_zeros
 
 
@@ -434,7 +434,7 @@ lemma apply_BC_to_Lf
       ‖deriv Lf z‖ ≤
       (16 * Real.log B * r^2) / (r - r1)^3 := by
   refine borel_caratheodory_II (by linarith) (Real.log_pos hB) hr1_pos hr1_lt_r hLf.1.analyticOn hLf.2.1 ?_ (by simp_all)
-  exact fun w hw ↦ re_Lf_le_log_B B r R R1 hr_lt_R1 hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros h_f_bound Lf hLf w (by simp_all)
+  exact fun w hw ↦ re_Lf_le_log_B B r R R1 hr_lt_R1 hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros (by simpa) Lf hLf w (by simp_all)
 
 -- Lemma 6: Lf_deriv_is_logBf_deriv
 lemma Lf_deriv_is_logBf_deriv (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
