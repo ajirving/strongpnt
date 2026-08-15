@@ -685,23 +685,22 @@ lemma final_sum_bound {R R1 B : ℝ} {f : ℂ → ℂ}
     gcongr
 
 lemma Lf_exists (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
-    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
-    (h_f_zero : f 0 = 1) :
-    ∃ Lf : ℂ → ℂ, isLf Lf f r R R1 0 := by
-  let B_f := Bf R R1 0 f
-  have h_Bf_analytic : AnalyticOnNhd ℂ B_f (closedBall (0 : ℂ) R) :=
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall c R))
+    (h_f_zero : f c = 1) :
+    ∃ Lf : ℂ → ℂ, isLf Lf f r R R1 c := by
+  let B_f := Bf R R1 c f
+  have h_Bf_analytic : AnalyticOnNhd ℂ B_f (closedBall c R) :=
     lem_Bf_is_analytic R R1 f <| h_f_analytic.mono (by gcongr)
-  have h_Bf_ne_zero : ∀ w ∈ closedBall (0 : ℂ) R1, B_f w ≠ 0 := by
+  have h_Bf_ne_zero : ∀ w ∈ closedBall c R1, B_f w ≠ 0 := by
     intro w hw
     refine Bf_never_zero R R1 hR1_pos hR1_lt_R f (fun z hz ↦ ?_) (fun z hz ↦ ?_) w hw
     · exact h_f_analytic z <| closedBall_subset_closedBall (by linarith) hz
     · refine order_ne_top h_f_analytic (by linarith) ?_ (closedBall_subset_closedBall (by linarith) hz)
-      exact ⟨0, (by simp; linarith), (by simp_all)⟩
-  -- Apply lem:log_of_analytic
+      exact ⟨c, (by simp; linarith), (by simp_all)⟩
   obtain ⟨J, hJ1, hJ2, hJ3, hJ4⟩ := log_of_analytic_open hR1_pos
     (h_Bf_analytic.mono (fun z hz ↦ (by simp_all; linarith)))
     (fun z hz ↦ h_Bf_ne_zero z (by simp_all; linarith))
-  have bs := closedBall_subset_ball (x := (0 : ℂ)) hr_lt_R1
+  have bs := closedBall_subset_ball (x := c) hr_lt_R1
   refine ⟨J, hJ1.mono bs, hJ2, fun z hz ↦ hJ3 z (bs hz), fun z hz ↦ (hJ4 z (bs hz)).symm⟩
 
 -- Lemma 43: final_ineq1
