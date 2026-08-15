@@ -229,19 +229,6 @@ lemma zetacnot0 (t : ℝ) : riemannZeta (3/2 + Complex.I * t) ≠ 0 := by
   simp
   norm_num
 
--- Lemma: fc_zeros (relation between zeros of f_c and zeros of f)
-lemma fc_zeros (r : ℝ) (c : ℂ) (f : ℂ → ℂ) (h_nonzero : f c ≠ 0) :
-    (zerosetKfR r (0 : ℂ) (fun z => f (z + c) / f c)) = (fun ρ => ρ - c) '' (zerosetKfR r c f) := by
-  ext ρ'; constructor
-  · intro hmem
-    use ρ' + c
-    simp_all [zerosetKfR]
-  · intro him
-    simp_all [zerosetKfR, Complex.dist_eq]
-    rcases him with ⟨x, hx1, rfl⟩
-    simp_all
-
--- Lemma: fc_m_order (orders of zeros are preserved under the shift)
 
 lemma analyticOrderAt_mul_const_eq (f : ℂ → ℂ) (a z0 : ℂ) (ha : a ≠ 0) :
     analyticOrderAt (fun z => f z * a) z0 = analyticOrderAt f z0 := by
@@ -265,26 +252,6 @@ lemma analyticOrderAt_mul_const_eq (f : ℂ → ℂ) (a z0 : ℂ) (ha : a ≠ 0)
     · left
       contrapose hf
       exact analyticAt_iff_analytic_fun_mul analyticAt_const ha|>.mpr hf
-
-lemma fc_m_order (c : ℂ) (f : ℂ → ℂ) (h_nonzero : f c ≠ 0)
-    {ρ' : ℂ} :
-    analyticOrderAt (fun z => f (z + c) / f c) ρ' = analyticOrderAt f (ρ' + c) := by
-  simp only [div_eq_mul_inv]
-  rw [analyticOrderAt_mul_const_eq _ _ _ <| inv_ne_zero h_nonzero]
-  by_cases hfA : AnalyticAt ℂ f (ρ' + c)
-  · rw [(by rfl : (fun z ↦ f (z + c)) = (f ∘ fun z ↦ z + c)),
-      hfA.analyticOrderAt_comp (g := (fun z ↦  z + c)) (by fun_prop)]
-    simp only [add_sub_add_right_eq_sub]
-    suffices analyticOrderAt (fun x ↦ x - ρ') ρ' = 1  by simp_all
-    apply AnalyticAt.analyticOrderAt_eq_natCast (by fun_prop)|>.mpr
-    exact ⟨(fun _ ↦ 1), analyticAt_const, (by simp), (by simp)⟩
-  · -- If f is not analytic at ρ' + c, then g0 is not analytic at ρ' either
-    have hg_not : ¬ AnalyticAt ℂ (fun z ↦ f (z + c)) ρ' := by
-      contrapose! hfA
-      convert hfA.comp_sub c
-      ring
-    -- In the non-analytic case, both sides reduce to 0 by definition
-    simp [analyticOrderAt, hfA, hg_not]
 
 lemma final_ineq2a
     (B : ℝ) (r1 r R R1 : ℝ) (hr1pos : 0 < r1) (hr1_lt_r : r1 < r) (hr_lt_R1 : r < R1)

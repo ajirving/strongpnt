@@ -996,250 +996,41 @@ lemma lem_sumK1abs (t : ℝ) (ht : |t| > 3) (z : ℂ)
   · linarith [lem_Rerhotodeltat t ht ρ (by simp_all),
       lem_abszrhoReRe z ρ]
 
-lemma helper_analyticOnNhd_shift_div (f : ℂ → ℂ) (c : ℂ)
-    (h : ∀ z ∈ Metric.closedBall c 1, AnalyticAt ℂ f z) :
-    AnalyticOnNhd ℂ (fun z => f (z + c) / f c) (Metric.closedBall (0 : ℂ) 1) := by
-  -- Unfold the definition of AnalyticOnNhd on a set: pointwise AnalyticAt on the set
-  intro z hz
-  -- From hz : z ∈ closedBall 0 1, we get ‖z‖ ≤ 1
-  have hz_norm : ‖z‖ ≤ 1 := by
-    simpa [Metric.mem_closedBall, dist_eq_norm] using hz
-  -- Hence z + c belongs to the translated ball: dist (z + c) c ≤ 1
-  have hz_addc_mem : z + c ∈ Metric.closedBall c 1 := by
-    -- Show dist (z + c) c ≤ 1 from ‖z‖ ≤ 1
-    have : dist (z + c) c ≤ 1 := by
-      simpa [dist_eq_norm, sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using hz_norm
-    simpa [Metric.mem_closedBall] using this
-  -- f is analytic at z + c by the hypothesis h
-  have h_f_at : AnalyticAt ℂ f (z + c) := h (z + c) hz_addc_mem
-  -- The translation z ↦ z + c is analytic at z
-  have h_addc : AnalyticAt ℂ (fun w => w + c) z := by
-    simpa using! (analyticAt_id.add analyticAt_const)
-  -- Therefore, the composition z ↦ f (z + c) is analytic at z
-  have h_comp : AnalyticAt ℂ (fun w => f (w + c)) z :=
-    (AnalyticAt.fun_comp h_f_at h_addc)
-  -- Multiplication by the constant (1 / f c) is analytic; hence division by f c is analytic
-  have h_mul_const : AnalyticAt ℂ (fun w => (1 / f c) * f (w + c)) z :=
-    (analyticAt_const.mul h_comp)
-  -- Rewrite to the desired form
-  simpa [div_eq_mul_inv, mul_comm] using h_mul_const
-
-
-lemma helper_bound_shifted (B R : ℝ)
-    (c : ℂ) (f : ℂ → ℂ) (hc : f c ≠ 0)
-    (h_bound : ∀ z ∈ Metric.closedBall c R, ‖f z‖ ≤ B) :
-    ∀ z ∈ Metric.closedBall (0 : ℂ) R,
-      ‖(fun w => f (w + c) / f c) z‖ ≤ B / ‖f c‖ :=
-by
-  intro z hz
-  -- From z ∈ closedBall 0 R, we get ‖z‖ ≤ R
-  have hz_norm : ‖z‖ ≤ R := by
-    have hz' : dist z (0 : ℂ) ≤ R := by simpa [Metric.mem_closedBall] using hz
-    simpa [Complex.dist_eq] using hz'
-  -- Hence z + c ∈ closedBall c R
-  have hz_ballc : z + c ∈ Metric.closedBall c R := by
-    simpa [Metric.mem_closedBall, Complex.dist_eq, add_sub_cancel] using hz_norm
-  -- Apply the bound on f over the translated ball
-  have hfb : ‖f (z + c)‖ ≤ B := h_bound (z + c) hz_ballc
-  -- Since f c ≠ 0, its norm is positive
-  have hpos : 0 < ‖f c‖ := (norm_pos_iff).2 hc
-  -- Divide the inequality by ‖f c‖
-  have hdiv : ‖f (z + c)‖ / ‖f c‖ ≤ B / ‖f c‖ := (div_le_div_iff_of_pos_right hpos).2 hfb
-  -- Rewrite the left-hand side using norm_div
-  have hnorm_eq : ‖(fun w => f (w + c) / f c) z‖ = ‖f (z + c)‖ / ‖f c‖ := by
-    change ‖f (z + c) / f c‖ = ‖f (z + c)‖ / ‖f c‖
-    simp
-  simpa [hnorm_eq] using hdiv
-
-lemma helper_g_zero_eq_one (f : ℂ → ℂ) (c : ℂ) (hc : f c ≠ 0) :
-  (fun z => f (z + c) / f c) 0 = 1 := by
-  simp [hc]
-
-lemma helper_apply_jensen_to_g
-  (B R R1 : ℝ) (hB : 1 < B)
-  (hR1_pos : 0 < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1)
-  (g : ℂ → ℂ)
-  (h_g_analytic : AnalyticOnNhd ℂ g (Metric.closedBall 0 1))
-  (hg0_one : g 0 = 1)
-  (hfin_g : (zerosetKfR R1 0 g).Finite)
-  (hg_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖g z‖ ≤ B) :
-  (∑ ρ ∈ hfin_g.toFinset, (analyticOrderNatAt g ρ : ℝ)) ≤ Real.log B / Real.log (R / R1) := by
-  convert lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R       g (h_g_analytic.mono (by gcongr)) hg0_one hfin_g  (by simpa)
-  field
-
-lemma helper_sum_f_equals_sum_g
-  (r : ℝ) (c : ℂ) (f : ℂ → ℂ) (hc : f c ≠ 0)
-  (hfin : (zerosetKfR r c f).Finite) :
-  (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt f ρ : ℝ))
-  =
-  (∑ ρ' ∈ ((hfin.image (fun ρ => ρ - c)).toFinset),
-      ((analyticOrderNatAt (fun z => f (z + c) / f c) ρ') : ℝ)) :=
-by
-  classical
-  -- Notation
-  let S : Finset ℂ := hfin.toFinset
-  let φ : ℂ → ℂ := fun ρ => ρ - c
-  let g' : ℂ → ℂ := fun z => f (z + c) / f c
-
-  -- Relate the RHS indexing Finset to the image of S under φ
-  have himg : (φ '' zerosetKfR r c f).Finite := hfin.image φ
-  have h_img_toFinset : ((hfin.image φ).toFinset) = S.image φ := by
-    simpa [S] using (Set.Finite.toFinset_image (s := (zerosetKfR r c f)) (f := φ)
-      (hs := hfin) (h := himg))
-
-  -- First, change the summand using equality of analytic orders at corresponding points
-  have h_orders_match :
-      (∑ ρ ∈ S, (analyticOrderNatAt f ρ : ℝ)) =
-      (∑ ρ ∈ S, ((analyticOrderNatAt g' (φ ρ)) : ℝ)) := by
-    apply Finset.sum_congr rfl
-    intro ρ hρS
-    -- ρ is in the zero set of f within the ball centered at c of radius r
-    have hρ_mem : ρ ∈ zerosetKfR r c f :=
-      (Set.Finite.mem_toFinset (hs := hfin)).1 hρS
-    have hρ_ball : ρ ∈ Metric.closedBall c r := hρ_mem.1
-    have hρ_fzero : f ρ = 0 := hρ_mem.2
-    -- Show that ρ' = ρ - c is in the zero set for g' centered at 0
-    have hρ'_ball : (φ ρ) ∈ Metric.closedBall (0 : ℂ) r := by
-      -- dist ρ c ≤ r
-      have hdist_le : dist ρ c ≤ r := by
-        simpa [Metric.mem_closedBall] using hρ_ball
-      -- translate the inequality to the origin
-      have : dist (φ ρ) 0 ≤ r := by
-        simpa [φ, dist_eq_norm] using (by simpa [dist_eq_norm] using hdist_le)
-      simpa [Metric.mem_closedBall] using this
-    have hρ'_gzero : g' (φ ρ) = 0 := by
-      simp [g', φ, hρ_fzero, sub_eq_add_neg, add_comm]
-    have hρ'_mem : (φ ρ) ∈ zerosetKfR r (0 : ℂ) g' := ⟨hρ'_ball, hρ'_gzero⟩
-    -- Apply fc_m_order to equate multiplicities
-    have h_m_eq := fc_m_order c f hc (ρ' := φ ρ)
-    -- (φ ρ) + c = ρ
-    have h_m_eq' : analyticOrderAt g' (φ ρ) = analyticOrderAt f ρ := by
-      simpa [g', φ, sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using h_m_eq
-    rw [analyticOrderNatAt, analyticOrderNatAt, h_m_eq']
-  -- Next, rewrite the sum over the image using Finset.sum_image
-  have h_inj : Function.Injective φ := by
-    intro x y hxy
-    -- add c to both sides to cancel the subtraction
-    have := congrArg (fun z => z + c) hxy
-    simpa [φ, sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using this
-
-  have h_sum_image :
-      (∑ ρ' ∈ S.image φ, ((analyticOrderNatAt g' ρ') : ℝ)) =
-      (∑ ρ ∈ S, (analyticOrderNatAt g' (φ ρ) : ℝ)) := by
-    refine Finset.sum_image ?h
-    intro x hx y hy hxy
-    -- need x = y from φ x = φ y
-    exact h_inj hxy
-
-  -- Put everything together
-  calc
-    (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt f ρ : ℝ))
-        = (∑ ρ ∈ S, (analyticOrderNatAt f ρ : ℝ)) := by rfl
-    _ = (∑ ρ ∈ S, (analyticOrderNatAt g' (φ ρ) : ℝ)) := h_orders_match
-    _ = (∑ ρ' ∈ S.image φ, ((analyticOrderNatAt g' ρ') : ℝ)) := h_sum_image.symm
-    _ = (∑ ρ' ∈ ((hfin.image (fun ρ => ρ - c)).toFinset),
-            ((analyticOrderNatAt (fun z => f (z + c) / f c) ρ') : ℝ)) := by
-          -- rewrite the index and the function names
-          simp [S, φ, g', h_img_toFinset]
-
-lemma helper_zero_set_shift_eq
-  (r : ℝ) (c : ℂ) (f : ℂ → ℂ) (hc : f c ≠ 0) :
-  zerosetKfR r (0 : ℂ) (fun z => f (z + c) / f c)
-  = (fun ρ => ρ - c) '' (zerosetKfR r c f) := by
-  simpa using fc_zeros r c f hc
-
-lemma helper_fin_zero_g_is_image
-  (r : ℝ) (c : ℂ) (f : ℂ → ℂ) (hc : f c ≠ 0)
-  (hfin : (zerosetKfR r c f).Finite) :
-  (zerosetKfR r (0 : ℂ) (fun z => f (z + c) / f c)).Finite :=
-by
-  classical
-  have hset : zerosetKfR r (0 : ℂ) (fun z => f (z + c) / f c)
-      = (fun ρ => ρ - c) '' (zerosetKfR r c f) :=
-    by simpa using fc_zeros r c f hc
-  have hfin_img : ((fun ρ => ρ - c) '' (zerosetKfR r c f)).Finite := hfin.image _
-  simpa [hset] using hfin_img
-
-lemma helper_AnalyticOnNhd_to_pointwise {S : Set ℂ} {f : ℂ → ℂ}
-  (h : AnalyticOnNhd ℂ f S) : ∀ z ∈ S, AnalyticAt ℂ f z := by
-  intro z hz
-  exact h z hz
-
 lemma no_zero_of_bound_one_and_center_one
   (R : ℝ) (hR_lt_1 : R < 1)
-  (g : ℂ → ℂ)
-  (h_g_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ g z)
-  (hg0_one : g 0 = 1)
-  (hg_le_one : ∀ z : ℂ, ‖z‖ ≤ R → ‖g z‖ ≤ 1) :
-  ∀ z ∈ Metric.closedBall (0 : ℂ) R, g z ≠ 0 := by
-  intro z hz
-  by_cases hRpos : 0 < R
+  (g : ℂ → ℂ) {c : ℂ}
+  (h_g_analytic : AnalyticOnNhd ℂ g (Metric.closedBall c 1))
+  (hg0_one : g c = 1)
+  (hg_le_one : ∀ z : ℂ, ‖z - c‖ ≤ R → ‖g z‖ ≤ 1)
+  (z : ℂ) (hz : z ∈ Metric.closedBall c R) : g z ≠ 0 := by
+  by_cases! hRpos : 0 < R
   · -- differentiability inside the open ball
-    have hdiff : DifferentiableOn ℂ g (Metric.ball (0 : ℂ) R) := by
-      intro x hx
-      have hxlt : ‖x‖ < R := by
-        simpa [Metric.mem_ball, Complex.dist_eq] using hx
-      have hxle1 : ‖x‖ ≤ 1 := le_trans (le_of_lt hxlt) (le_of_lt hR_lt_1)
-      have hx_in1 : x ∈ Metric.closedBall (0 : ℂ) 1 := by
-        simpa [Metric.mem_closedBall, Complex.dist_eq] using hxle1
-      exact ((h_g_analytic x hx_in1).differentiableAt).differentiableWithinAt
+    have hdiff : DifferentiableOn ℂ g (Metric.ball c R) := by
+      exact h_g_analytic.differentiableOn.mono <| Metric.ball_subset_closedBall.trans (by gcongr)
     -- continuity on the closed ball of radius R
-    have hcont : ContinuousOn g (Metric.closedBall (0 : ℂ) R) := by
-      intro x hx
-      have hxleR : ‖x‖ ≤ R := by
-        simpa [Metric.mem_closedBall, Complex.dist_eq] using hx
-      have hxle1 : ‖x‖ ≤ 1 := le_trans hxleR (le_of_lt hR_lt_1)
-      have hx_in1 : x ∈ Metric.closedBall (0 : ℂ) 1 := by
-        simpa [Metric.mem_closedBall, Complex.dist_eq] using hxle1
-      exact (h_g_analytic x hx_in1).continuousAt.continuousWithinAt
-    have hdcc : DiffContOnCl ℂ g (Metric.ball (0 : ℂ) R) :=
+    have hcont : ContinuousOn g (Metric.closedBall c R) := by
+      exact h_g_analytic.continuousOn.mono (by gcongr)
+    have hdcc : DiffContOnCl ℂ g (Metric.ball c R) :=
       DiffContOnCl.mk_ball hdiff hcont
     -- maximum of the modulus at 0 on the open ball of radius R
-    have hIsMax : IsMaxOn (fun z => ‖g z‖) (Metric.ball (0 : ℂ) R) 0 := by
+    have hIsMax : IsMaxOn (fun z => ‖g z‖) (Metric.ball c R) c := by
       intro y hy
-      have hynormlt : ‖y‖ < R := by
+      have hynormlt : ‖y - c‖ < R := by
         simpa [Metric.mem_ball, Complex.dist_eq] using hy
-      have hyle : ‖y‖ ≤ R := le_of_lt hynormlt
+      have hyle : ‖y - c‖ ≤ R := le_of_lt hynormlt
       have hgy : ‖g y‖ ≤ 1 := hg_le_one y hyle
       simpa [hg0_one] using hgy
     -- apply maximum modulus principle on the closed ball
     have hEqOn :=
-      Complex.eqOn_closedBall_of_isMaxOn_norm (z := (0 : ℂ)) (r := R) hdcc hIsMax
-    have hz_eq : g z = (fun _ => g 0) z := hEqOn hz
-    have hz_eq1 : g z = g 0 := by simpa using hz_eq
-    have gz_one : g z = 1 := by simpa [hg0_one] using hz_eq1
-    simp [gz_one]
+      Complex.eqOn_closedBall_of_isMaxOn_norm (z := c) (r := R) hdcc hIsMax
+    rw [hEqOn hz]
+    simp_all
   · -- If R ≤ 0, then any z in closedBall(0,R) must be 0, hence g z = 1 ≠ 0
-    have hRle : R ≤ 0 := le_of_not_gt hRpos
-    have hz_le : ‖z‖ ≤ R := by
-      simpa [Metric.mem_closedBall, Complex.dist_eq] using hz
-    have hz_norm_eq : ‖z‖ = 0 :=
-      le_antisymm (le_trans hz_le hRle) (norm_nonneg z)
-    have hz_zero : z = 0 := by
-      simpa [norm_eq_zero] using hz_norm_eq
-    simp [hz_zero, hg0_one]
-
-lemma helper_sum_over_equal_finite_sets_orders
-  {S T : Set ℂ} (g : ℂ → ℂ)
-  (hS : S.Finite) (hT : T.Finite) (hST : S = T) :
-  (∑ x ∈ hS.toFinset, (analyticOrderNatAt g x : ℝ))
-  = (∑ x ∈ hT.toFinset, (analyticOrderNatAt g x : ℝ)) := by
-  classical
-  have hF : hS.toFinset = hT.toFinset := by
-    ext x
-    simp [Set.Finite.mem_toFinset, hST]
-  simp [hF]
-
-lemma helper_bound_on_ball_to_norm_imp
-  {R : ℝ} {g : ℂ → ℂ} {M : ℝ}
-  (hg : ∀ z ∈ Metric.closedBall (0 : ℂ) R, ‖g z‖ ≤ M) :
-  ∀ z : ℂ, ‖z‖ ≤ R → ‖g z‖ ≤ M := by
-  intro z hz
-  have hz' : z ∈ Metric.closedBall (0 : ℂ) R := by
-    have : dist z (0 : ℂ) ≤ R := by
-      simpa [dist_eq_norm] using hz
-    simpa [Metric.mem_closedBall] using this
-  exact hg z hz'
+    have hz_norm_eq : ‖z - c‖ = 0 := by
+      simp [dist_eq_norm_sub] at hz
+      linarith [norm_nonneg (z - c)]
+    rw [norm_eq_zero] at hz_norm_eq
+    grind
 
 lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
   (hR1_pos : 0 < R1)
@@ -1254,138 +1045,84 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
       ∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt f ρ : ℝ) ≤ Real.log (B / ‖f c‖) / Real.log (R / R1) := by
   classical
   -- Define the shifted function g(z) = f(z+c)/f(c)
-  let g : ℂ → ℂ := fun z => f (z + c) / f c
+  let g : ℂ → ℂ := fun z => f z / f c
 
   -- g is analytic on the unit closed ball centered at 0
-  have h_g_analyticOn : AnalyticOnNhd ℂ g (Metric.closedBall (0 : ℂ) 1) :=
-    helper_analyticOnNhd_shift_div f c h_f_analytic
-  have h_g_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ g z :=
-    helper_AnalyticOnNhd_to_pointwise h_g_analyticOn
-
+  have h_g_analyticOn : AnalyticOnNhd ℂ g (Metric.closedBall c 1) :=
+    h_f_analytic.div_const
   -- g(0) = 1 and hence g(0) ≠ 0
-  have hg0_one : g 0 = 1 := helper_g_zero_eq_one f c h_f_nonzero_at_zero
-  have hg0_ne : g 0 ≠ 0 := by simp [hg0_one]
+  have hg0_one : g c = 1 := by simpa [g]
+  have hg0_ne : g c ≠ 0 := by simp [hg0_one]
 
   -- Finiteness of zeros of g in radius R1 and set equalities
-  have hfin_g : (zerosetKfR R1 0 g).Finite :=
-    helper_fin_zero_g_is_image R1 c f h_f_nonzero_at_zero hfin
+  have hfin_g : (zerosetKfR R1 c g).Finite := by
+    simp_all [zerosetKfR, g, dist_eq_norm_sub]
 
   -- Bound on g on the closed ball of radius R
-  have h_bound_shift : ∀ z ∈ Metric.closedBall (0 : ℂ) R, ‖g z‖ ≤ B / ‖f c‖ :=
-    helper_bound_shifted B R c f
-      h_f_nonzero_at_zero (fun z hz => hf_le_B z <| by simpa using hz)
-  have hg_le_B : ∀ z : ℂ, ‖z‖ ≤ R → ‖g z‖ ≤ B / ‖f c‖ :=
-    helper_bound_on_ball_to_norm_imp (R := R) (g := g) (M := B / ‖f c‖) h_bound_shift
+  have h_bound_shift : ∀ z ∈ Metric.closedBall c R, ‖g z‖ ≤ B / ‖f c‖ := by
+    intro w hw
+    simp only [Complex.norm_div, g]
+    gcongr
+    exact hf_le_B w hw
+  have hg_le_B : ∀ z : ℂ, ‖z - c‖ ≤ R → ‖g z‖ ≤ B / ‖f c‖ := by
+    simp_all [dist_eq_norm_sub]
 
   -- Show 1 ≤ B / ‖f c‖ to split into cases
   have hfc_le : ‖f c‖ ≤ B := by
-    have : c ∈ Metric.closedBall c R := by
-      have hRpos' : 0 ≤ R := le_of_lt (lt_trans hR1_pos hR1_lt_R)
-      have : dist c c ≤ R := by simpa [dist_self] using hRpos'
-      simpa [Metric.mem_closedBall] using this
-    exact hf_le_B c this
+    exact hf_le_B c (by simp; linarith)
   have hfc_pos : 0 < ‖f c‖ := (norm_pos_iff).2 h_f_nonzero_at_zero
   have hBdiv_ge_one : 1 ≤ B / ‖f c‖ := by
     have hdiv := (div_le_div_iff_of_pos_right hfc_pos).mpr hfc_le
     simpa [div_self (ne_of_gt hfc_pos)] using hdiv
 
-  -- Equality between sums over zeros of f and zeros of g (shifted)
-  have hsum_fg_eq :
-      (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt f ρ : ℝ))
-        = (∑ ρ' ∈ ((hfin.image (fun ρ => ρ - c)).toFinset),
-            ((analyticOrderNatAt g ρ') : ℝ)) :=
-    helper_sum_f_equals_sum_g (r := R1) (c := c)
-      (f := f) (hc := h_f_nonzero_at_zero) (hfin := hfin)
-
-  -- Equality of sets for g-zeros and the image of f-zeros
-  have hST_g_img : zerosetKfR R1 0 g
-      = (fun ρ => ρ - c) '' (zerosetKfR R1 c f) :=
-    helper_zero_set_shift_eq R1 c f h_f_nonzero_at_zero
-
   -- Now split into cases depending on whether B/‖f c‖ > 1 or = 1
   rcases lt_or_eq_of_le hBdiv_ge_one with hBdiv_gt_one | hBdiv_eq_one
   · -- Strict case: apply Jensen bound to g with B' = B / ‖f c‖
-    have hsum_g_bound :=
-      helper_apply_jensen_to_g (B := B / ‖f c‖) (R := R) (R1 := R1)
-        (hB := hBdiv_gt_one)
-        (hR1_pos := hR1_pos) (hR1_lt_R := hR1_lt_R) (hR_lt_1 := hR_lt_1)
-        (g := g) (h_g_analytic := h_g_analyticOn)
-        (hg0_one := hg0_one) (hfin_g := hfin_g) (hg_le_B := hg_le_B)
-    -- Replace the indexing finite set using equality of sets S = image set
-    have hsum_g_reindex :
-        (∑ ρ ∈ hfin_g.toFinset, (analyticOrderNatAt g ρ : ℝ))
-          = (∑ ρ ∈ (hfin.image (fun ρ => ρ - c)).toFinset, (analyticOrderNatAt g ρ : ℝ)) :=
-      helper_sum_over_equal_finite_sets_orders (g := g)
-        (S := zerosetKfR R1 0 g)
-        (T := (fun ρ => ρ - c) '' (zerosetKfR R1 c f))
-        (hS := hfin_g) (hT := hfin.image (fun ρ => ρ - c)) (hST := hST_g_img)
-    -- Combine bounds and equalities to obtain the desired inequality
-    have :
-        (∑ ρ ∈ (hfin.image (fun ρ => ρ - c)).toFinset, (analyticOrderNatAt g ρ : ℝ))
-          ≤ Real.log (B / ‖f c‖) / Real.log (R / R1) := by
-      simpa [hsum_g_reindex] using hsum_g_bound
-    -- Replace g-sum by f-sum using hsum_fg_eq
-    simpa [hsum_fg_eq] using this
+    convert lem_sum_m_rho_bound (B / ‖f c‖) R R1 hBdiv_gt_one hR1_pos hR1_lt_R g (h_g_analyticOn.mono (by gcongr)) hg0_one hfin_g hg_le_B using 1
+    · refine Finset.sum_congr (by simp_all [zerosetKfR, g]) fun ρ hρ ↦ ?_
+      simp only [analyticOrderNatAt, div_eq_mul_inv, Nat.cast_inj, g]
+      rw [analyticOrderAt_mul_const_eq _ _ _ (by simpa)]
+    · field
   · -- Equality case: B / ‖f c‖ = 1; show no zeros for g inside radius R, hence sum = 0
     have hBdiv_eq_one' : B / ‖f c‖ = 1 := by
       simpa [eq_comm] using hBdiv_eq_one
-    have hg_le_one : ∀ z : ℂ, ‖z‖ ≤ R → ‖g z‖ ≤ 1 := by
+    have hg_le_one : ∀ z : ℂ, ‖z - c‖ ≤ R → ‖g z‖ ≤ 1 := by
       intro z hz
       have := hg_le_B z hz
       simpa [hBdiv_eq_one'] using this
-    have g_nonzero_on_ball : ∀ z ∈ Metric.closedBall (0 : ℂ) R, g z ≠ 0 :=
-      no_zero_of_bound_one_and_center_one R hR_lt_1 g h_g_analytic hg0_one hg_le_one
+    have g_nonzero_on_ball : ∀ z ∈ Metric.closedBall c R, g z ≠ 0 :=
+      no_zero_of_bound_one_and_center_one R hR_lt_1 g h_g_analyticOn hg0_one hg_le_one
     -- zeroset within radius R1 is empty; hence the finite sum is zero
-    have hS_empty : zerosetKfR R1 0 g = (∅ : Set ℂ) := by
+    have hS_empty : zerosetKfR R1 c g = (∅ : Set ℂ) := by
       ext z; constructor
       · intro hz
         rcases hz with ⟨hzball, hzzero⟩
-        have hzR1 : ‖z‖ ≤ R1 := by simpa [Metric.mem_closedBall, dist_eq_norm] using hzball
-        have hzR : ‖z‖ ≤ R := le_trans hzR1 (le_of_lt hR1_lt_R)
-        have hzR' : z ∈ Metric.closedBall (0 : ℂ) R := by
+        have hzR1 : ‖z - c‖ ≤ R1 := by simpa [Metric.mem_closedBall, dist_eq_norm] using hzball
+        have hzR : ‖z - c‖ ≤ R := le_trans hzR1 (le_of_lt hR1_lt_R)
+        have hzR' : z ∈ Metric.closedBall c R := by
           simpa [Metric.mem_closedBall, dist_eq_norm] using hzR
         exact (g_nonzero_on_ball z hzR') hzzero
       · intro hzfalse
         cases hzfalse
+    apply le_of_eq
     have hsum_g_zero :
         (∑ ρ ∈ hfin_g.toFinset, (analyticOrderNatAt g ρ : ℝ)) = 0 := by
-      have h :=
-        helper_sum_over_equal_finite_sets_orders (g := g)
-          (S := zerosetKfR R1 0 g) (T := (∅ : Set ℂ))
-          (hS := hfin_g) (hT := Set.finite_empty) (hST := hS_empty)
-      simpa using h
-    -- Transport zero sum to the image-of-f sum via equality of finite sets S = image set
-    have hsum_reindex :=
-      helper_sum_over_equal_finite_sets_orders (g := g)
-        (S := zerosetKfR R1 0 g)
-        (T := (fun ρ => ρ - c) '' (zerosetKfR R1 c f))
-        (hS := hfin_g) (hT := hfin.image (fun ρ => ρ - c)) (hST := hST_g_img)
-    have hsum_img_eq :
-        (∑ ρ ∈ (hfin.image (fun ρ => ρ - c)).toFinset, (analyticOrderNatAt g ρ : ℝ))
-          = (∑ ρ ∈ hfin_g.toFinset, (analyticOrderNatAt g ρ : ℝ)) := by
-      simpa using hsum_reindex.symm
-    have hsum_img_zero :
-        (∑ ρ ∈ (hfin.image (fun ρ => ρ - c)).toFinset, (analyticOrderNatAt g ρ : ℝ)) = 0 := by
-      simp [hsum_img_eq, hsum_g_zero]
-    -- Hence the sum over f is zero via hsum_fg_eq
-    have hsum_f_zero :
-        (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt f ρ : ℝ)) = 0 := by
-      simpa [hsum_img_zero] using hsum_fg_eq
-    -- Right-hand side equals zero since log(1) = 0
+      convert Finset.sum_empty
+      simpa
+    trans 0
+    · convert hsum_g_zero using 1
+      refine Finset.sum_congr ?_ fun ρ hρ ↦ ?_
+      · simp [zerosetKfR, g, dist_eq_norm_sub, h_f_nonzero_at_zero]
+      · simp only [analyticOrderNatAt, div_eq_mul_inv, Nat.cast_inj, g]
+        rw [analyticOrderAt_mul_const_eq _ _ _ (by simpa)]
     have hRHS_zero : Real.log (B / ‖f c‖) / Real.log (R / R1) = 0 := by
       simp [hBdiv_eq_one']
-    -- Conclude the desired inequality
-    have :
-        (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt f ρ : ℝ))
-          ≤ Real.log (B / ‖f c‖) / Real.log (R / R1) := by
-      simp [hsum_f_zero, hRHS_zero]
-    exact this
+    rw [hRHS_zero]
 
 lemma lem_sum_m_rho_zeta :
     ∃ C_2 > 1, ∀ (t : ℝ) (_ : |t| > 3),
     ∀ (hfin : (zerosetKfR (5 / (6 : ℝ)) ((3/2 : ℂ) + Complex.I * t) riemannZeta).Finite),
       ∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ) ≤ C_2 * Real.log |t| := by
-  classical
   -- Constants from auxiliary bounds
   obtain ⟨b, hb_gt1, hb_bound⟩ := zeta32upper
   obtain ⟨a, ha_pos, ha_bound⟩ := zeta_low_332
