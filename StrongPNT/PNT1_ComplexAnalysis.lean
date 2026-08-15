@@ -144,34 +144,34 @@ open Filter Topology
 open scoped Topology
 
 theorem log_of_analytic_open
-    {r : ℝ} {B : ℂ → ℂ} (rpos : 0 < r)
-    (hB : AnalyticOnNhd ℂ B (Metric.ball (0 : ℂ) r))
-    (hB_ne_zero : ∀ z ∈ Metric.ball (0 : ℂ) r, B z ≠ 0) :
+    {r : ℝ} {B : ℂ → ℂ} {c : ℂ} (rpos : 0 < r)
+    (hB : AnalyticOnNhd ℂ B (Metric.ball c r))
+    (hB_ne_zero : ∀ z ∈ Metric.ball c r, B z ≠ 0) :
     ∃ J_B : ℂ → ℂ,
-      AnalyticOnNhd ℂ J_B (Metric.ball (0 : ℂ) r) ∧
-      J_B 0 = 0 ∧
-      (∀ z ∈ Metric.ball (0 : ℂ) r, deriv J_B z = deriv B z / B z) ∧
-      (∀ z ∈ Metric.ball (0 : ℂ) r,
-        Real.log (norm (B z)) - Real.log (norm (B 0)) = Complex.re (J_B z)) := by
+      AnalyticOnNhd ℂ J_B (Metric.ball c r) ∧
+      J_B c = 0 ∧
+      (∀ z ∈ Metric.ball c r, deriv J_B z = deriv B z / B z) ∧
+      (∀ z ∈ Metric.ball c r,
+        Real.log ‖B z‖ - Real.log ‖B c‖ = Complex.re (J_B z)) := by
   obtain ⟨J, hJ⟩ := hB.deriv.div hB hB_ne_zero|>.differentiableOn.isExactOn_ball
-  refine ⟨fun z ↦ J z - J 0, ?_, (by simp), ?_, ?_⟩
+  refine ⟨fun z ↦ J z - J c, ?_, (by simp), ?_, ?_⟩
   · apply AnalyticOnNhd.sub _ analyticOnNhd_const
     exact DifferentiableOn.analyticOnNhd (fun z hz ↦ DifferentiableAt.differentiableWithinAt (hJ z hz).differentiableAt) (Metric.isOpen_ball)
   · intro z hz
     rw [deriv_sub_const, (hJ z hz).deriv]
   · intro z hz
-    suffices B z = B 0 * Complex.exp (J z - J 0) by
+    suffices B z = B c * Complex.exp (J z - J c) by
       rw [this, norm_mul, Real.log_mul, Complex.norm_exp, Real.log_exp]
       · simp
-      · exact norm_ne_zero_iff.mpr (hB_ne_zero 0 (by simpa))
+      · exact norm_ne_zero_iff.mpr (hB_ne_zero c (by simpa))
       · exact norm_ne_zero_iff.mpr <| Complex.exp_ne_zero _
     let f := (fun z ↦ (J z).exp / B z)
-    suffices f z = f 0 by
+    suffices f z = f c by
       unfold f at this
       rw [Complex.exp_sub]
-      field_simp [hB_ne_zero z hz, hB_ne_zero 0 (by simpa)] at this ⊢
+      field_simp [hB_ne_zero z hz, hB_ne_zero c (by simpa)] at this ⊢
       rw [← this]
-    refine IsOpen.is_const_of_deriv_eq_zero (s := Metric.ball 0 r) Metric.isOpen_ball Metric.isPreconnected_ball ?_ ?_ hz (by simpa)
+    refine IsOpen.is_const_of_deriv_eq_zero (s := Metric.ball c r) Metric.isOpen_ball Metric.isPreconnected_ball ?_ ?_ hz (by simpa)
     · unfold f
       refine fun z hz ↦ DifferentiableAt.differentiableWithinAt ?_
       have :=hJ z hz|>.differentiableAt
