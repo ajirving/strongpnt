@@ -346,7 +346,6 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) {c : ℂ} (hB : 1 < B)
     grind
 
 variable {R R1 r B : ℝ} {f : ℂ → ℂ} {c : ℂ}
-variable (h_finite_zeros : (zerosetKfR R1 0 f).Finite)
 
 lemma lem_num_prod_never_zero_all
     (R R1 : ℝ)
@@ -708,11 +707,11 @@ lemma final_ineq1
     (B : ℝ) (hB : 1 < B) (r1 r R R1 : ℝ) (hr1pos : 0 < r1) (hr1_lt_r : r1 < r) (hr_lt_R1 : r < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
-    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall 0 R))
-    (h_f_zero : f 0 = 1)
-    (h_finite_zeros : (zerosetKfR R1 0 f).Finite)
-    (h_f_bounded : ∀ z ∈ closedBall (0 : ℂ) R, ‖f z‖ ≤ B)
-    (z : ℂ) (hz : z ∈ closedBall (0 : ℂ) r1 \ zerosetKfR R1 0 f) :
+    (h_f_analytic : AnalyticOnNhd ℂ f (closedBall c R))
+    (h_f_zero : f c = 1)
+    (h_finite_zeros : (zerosetKfR R1 c f).Finite)
+    (h_f_bounded : ∀ z ∈ closedBall c R, ‖f z‖ ≤ B)
+    (z : ℂ) (hz : z ∈ closedBall c r1 \ zerosetKfR R1 c f) :
     ‖(deriv f z / f z) - ∑ ρ ∈ h_finite_zeros.toFinset,
                  analyticOrderNatAt f ρ / (z - ρ)‖ ≤
     (16 * r^2 / ((r - r1)^3) +
@@ -720,16 +719,15 @@ lemma final_ineq1
   have hr_pos : 0 < r := by linarith [hr1pos, hr1_lt_r]
   have hR1_pos : 0 < R1 := by linarith [hr_pos, hr_lt_R1]
   obtain ⟨Lf, h_Lf⟩ := Lf_exists hr_lt_R1 hR1_lt_R hR1_pos (h_f_analytic.mono (by gcongr)) h_f_zero
-  have hz_in_r : z ∈ closedBall (0 : ℂ) r \ zerosetKfR R1 0 f := by
-    simp_all [zerosetKfR]
+  have hz_in_r : z ∈ closedBall c r \ zerosetKfR R1 c f := by
+    simp_all [zerosetKfR, dist_eq_norm_sub]
     linarith
   grw [target_inequality_setup h_finite_zeros hr_lt_R1 hR1_lt_R hR1_pos (h_f_analytic.mono (by gcongr)) h_f_zero Lf h_Lf z hz_in_r]
-  have hz_in_R1 : z ∈ closedBall (0 : ℂ) R1 \ zerosetKfR R1 0 f := by
+  have hz_in_R1 : z ∈ closedBall c R1 \ zerosetKfR R1 c f := by
     simp_all [zerosetKfR]
     linarith
   grw [final_sum_bound hR1_pos hR1_lt_R hB (h_f_analytic.mono (by gcongr)) h_f_zero h_finite_zeros h_f_bounded z hz_in_R1]
-  have hz_le_r1 : ‖z‖ ≤ r1 := by simpa [Metric.mem_closedBall, dist_eq_norm] using hz.1
-  have hz_abs : ‖z‖ ≤ r1 := hz_le_r1
+  have hz_le_r1 : ‖z - c‖ ≤ r1 := by simpa [Metric.mem_closedBall, dist_eq_norm] using hz.1
   grw [apply_BC_to_Lf B r1 r R R1 hB hr1pos hr1_lt_r hr_lt_R1 hR1_pos hR1_lt_R f
     (h_f_analytic.mono (by gcongr)) h_f_zero h_finite_zeros
     (h_f_bound := fun w hw => h_f_bounded w (Metric.mem_closedBall.mpr (by simpa [dist_eq_norm] using hw)))
