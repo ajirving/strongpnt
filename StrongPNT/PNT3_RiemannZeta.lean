@@ -232,24 +232,14 @@ lemma zetacnot0 (t : ℝ) : riemannZeta (3/2 + Complex.I * t) ≠ 0 := by
 
 lemma analyticOrderAt_mul_const_eq (f : ℂ → ℂ) (a z0 : ℂ) (ha : a ≠ 0) :
     analyticOrderAt (fun z => f z * a) z0 = analyticOrderAt f z0 := by
-  -- Rewrite right-multiplication by a as left-multiplication
-  have hcomm : (fun z => f z * a) = (fun z => a * f z) := by
-    funext z; simp [mul_comm]
-  have hrew : analyticOrderAt (fun z => f z * a) z0 =
-      analyticOrderAt (fun z => a * f z) z0 := by
-    simp [hcomm]
   by_cases hf : AnalyticAt ℂ f z0
   · -- Analytic case: use additivity of analytic order under multiplication
-    have hadd : analyticOrderAt (fun z => a * f z) z0
-        = analyticOrderAt (fun _ : ℂ => a) z0 + analyticOrderAt f z0 := by
-      exact analyticOrderAt_mul analyticAt_const hf
-    -- order of a nonzero constant is zero
-    have hconst_zero : analyticOrderAt (fun _ : ℂ => a) z0 = 0 := by
-      exact AnalyticAt.analyticOrderAt_eq_zero analyticAt_const|>.mpr ha
-    rw [hrew, hadd, hconst_zero, zero_add]
-  · rw [hrew, analyticOrderAt_eq_zero.mpr, analyticOrderAt_eq_zero.mpr]
+    convert! analyticOrderAt_mul hf analyticAt_const using 1
+    rw [analyticAt_const.analyticOrderAt_eq_zero.mpr ha, add_zero]
+  · rw [analyticOrderAt_eq_zero.mpr, analyticOrderAt_eq_zero.mpr]
     · simp [hf]
     · left
+      simp_rw [mul_comm]
       contrapose hf
       exact analyticAt_iff_analytic_fun_mul analyticAt_const ha|>.mpr hf
 
@@ -258,12 +248,11 @@ lemma final_ineq2a
     (hR1_lt_R : R1 < R)
     (c : ℂ) (f : ℂ → ℂ) (h_analytic : AnalyticOnNhd ℂ f (closedBall c R)) (h_nonzero : f c ≠ 0)
     (h_bound : ∀ z ∈ closedBall c R, ‖f z‖ < B)
-    (hfin : (zerosetKfR R1 c (fun z => f z / f c)).Finite) :
-    ∀ z ∈ closedBall c r1 \ zerosetKfR R1 c (fun z => f z / f c),
+    (hfin : (zerosetKfR R1 c (fun z => f z / f c)).Finite)
+    (z : ℂ) (hz : z ∈ closedBall c r1 \ zerosetKfR R1 c (fun z => f z / f c)) :
     ‖(deriv (fun z => f z / f c) z / (f z / f c)) - ∑ ρ ∈ hfin.toFinset,
       ((analyticOrderNatAt (fun w => f w / f c) ρ) : ℂ) / (z - ρ)‖ ≤ (16 * r^2 / ((r - r1)^3) +
     1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log (B / ‖f c‖) := by
-  intro z hz
   refine final_ineq1 (B / ‖f c‖) ?_ r1 r R R1 hr1pos hr1_lt_r hr_lt_R1 hR1_lt_R _ ?_ (by simpa) ?_ ?_ z hz
   · rw [one_lt_div <| norm_pos_iff.mpr h_nonzero]
     exact h_bound _ (by simp; linarith)
@@ -299,10 +288,9 @@ lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
   have hz0mem : z ∈ closedBall c r1 \ zerosetKfR R1 c (fun u => riemannZeta u / riemannZeta c) := by
     simp_all [zerosetKfR]
   -- Apply the shifted inequality (final_ineq2) to g at z0 = z - c
-  have hineq0 :=
+  convert
     (final_ineq2a B r1 r R R1 hr1_pos hr1_lt_r hr_lt_R1 hR1_lt_R c riemannZeta
-      hζ_analytic hζ_c_ne h_bound hfin_shift) z hz0mem
-  convert hineq0 using 3
+      hζ_analytic hζ_c_ne h_bound hfin_shift) z hz0mem using 3
   · simp [logDerivZeta]
     field
   refine Finset.sum_congr (by simp_all [zerosetKfR]) fun ρ hρ ↦ ?_
