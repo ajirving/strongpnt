@@ -1076,48 +1076,11 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
     simpa [div_self (ne_of_gt hfc_pos)] using hdiv
 
   -- Now split into cases depending on whether B/‖f c‖ > 1 or = 1
-  rcases lt_or_eq_of_le hBdiv_ge_one with hBdiv_gt_one | hBdiv_eq_one
-  · -- Strict case: apply Jensen bound to g with B' = B / ‖f c‖
-    convert lem_sum_m_rho_bound (B / ‖f c‖) R R1 hBdiv_gt_one hR1_pos hR1_lt_R g (h_g_analyticOn.mono (by gcongr)) hg0_one hfin_g hg_le_B using 1
-    · refine Finset.sum_congr (by simp_all [zerosetKfR, g]) fun ρ hρ ↦ ?_
-      simp only [analyticOrderNatAt, div_eq_mul_inv, Nat.cast_inj, g]
-      rw [analyticOrderAt_mul_const_eq _ _ _ (by simpa)]
-    · field
-  · -- Equality case: B / ‖f c‖ = 1; show no zeros for g inside radius R, hence sum = 0
-    have hBdiv_eq_one' : B / ‖f c‖ = 1 := by
-      simpa [eq_comm] using hBdiv_eq_one
-    have hg_le_one : ∀ z : ℂ, ‖z - c‖ ≤ R → ‖g z‖ ≤ 1 := by
-      intro z hz
-      have := hg_le_B z hz
-      simpa [hBdiv_eq_one'] using this
-    have g_nonzero_on_ball : ∀ z ∈ Metric.closedBall c R, g z ≠ 0 :=
-      no_zero_of_bound_one_and_center_one R hR_lt_1 g h_g_analyticOn hg0_one hg_le_one
-    -- zeroset within radius R1 is empty; hence the finite sum is zero
-    have hS_empty : zerosetKfR R1 c g = (∅ : Set ℂ) := by
-      ext z; constructor
-      · intro hz
-        rcases hz with ⟨hzball, hzzero⟩
-        have hzR1 : ‖z - c‖ ≤ R1 := by simpa [Metric.mem_closedBall, dist_eq_norm] using hzball
-        have hzR : ‖z - c‖ ≤ R := le_trans hzR1 (le_of_lt hR1_lt_R)
-        have hzR' : z ∈ Metric.closedBall c R := by
-          simpa [Metric.mem_closedBall, dist_eq_norm] using hzR
-        exact (g_nonzero_on_ball z hzR') hzzero
-      · intro hzfalse
-        cases hzfalse
-    apply le_of_eq
-    have hsum_g_zero :
-        (∑ ρ ∈ hfin_g.toFinset, (analyticOrderNatAt g ρ : ℝ)) = 0 := by
-      convert Finset.sum_empty
-      simpa
-    trans 0
-    · convert hsum_g_zero using 1
-      refine Finset.sum_congr ?_ fun ρ hρ ↦ ?_
-      · simp [zerosetKfR, g, dist_eq_norm_sub, h_f_nonzero_at_zero]
-      · simp only [analyticOrderNatAt, div_eq_mul_inv, Nat.cast_inj, g]
-        rw [analyticOrderAt_mul_const_eq _ _ _ (by simpa)]
-    have hRHS_zero : Real.log (B / ‖f c‖) / Real.log (R / R1) = 0 := by
-      simp [hBdiv_eq_one']
-    rw [hRHS_zero]
+  convert lem_sum_m_rho_bound (B / ‖f c‖) R R1 hBdiv_ge_one hR1_pos hR1_lt_R g (h_g_analyticOn.mono (by gcongr)) hg0_one hfin_g hg_le_B using 1
+  · refine Finset.sum_congr (by simp_all [zerosetKfR, g]) fun ρ hρ ↦ ?_
+    simp only [analyticOrderNatAt, div_eq_mul_inv, Nat.cast_inj, g]
+    rw [analyticOrderAt_mul_const_eq _ _ _ (by simpa)]
+  · field
 
 lemma lem_sum_m_rho_zeta :
     ∃ C_2 > 1, ∀ (t : ℝ) (_ : |t| > 3),

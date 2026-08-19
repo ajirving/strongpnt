@@ -311,7 +311,7 @@ lemma lem_Bf_bounded_in_disk_from_f (B R R1 : ℝ) {c : ℂ}
       ‖Bf R R1 c f z‖ ≤ B := by
   exact lem_Bf_bounded_in_disk_from_boundary B R R1 hR1_pos hR1_lt_R f h_f_analytic (lem_Bf_bounded_on_boundary B R R1 hR1_pos hR1_lt_R f h_finite_zeros hf_le_B) z hz
 
-lemma lem_sum_m_rho_bound (B R R1 : ℝ) {c : ℂ} (hB : 1 < B)
+lemma lem_sum_m_rho_bound (B R R1 : ℝ) {c : ℂ} (hB : 1 ≤ B)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
     (f : ℂ → ℂ)
@@ -321,7 +321,7 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) {c : ℂ} (hB : 1 < B)
     (hf_le_B : ∀ z : ℂ, ‖z- c‖ ≤ R → ‖f z‖ ≤ B) :
     (∑ ρ ∈ h_finite_zeros.toFinset, (analyticOrderNatAt f ρ : ℝ)) ≤ (1/Real.log (R/R1)) * Real.log B := by
   rw [← abs_of_nonneg (by linarith : 0 ≤ R)] at h_f_analytic
-  convert  AnalyticOnNhd.sum_divisor_le (by grind : 0 < |R1|) (by grind) hB.le h_f_analytic (by grind) _ using 1
+  convert  AnalyticOnNhd.sum_divisor_le (by grind : 0 < |R1|) (by grind) hB h_f_analytic (by grind) _ using 1
   · rw [finsum_eq_finsetSum_of_support_subset (s := h_finite_zeros.toFinset)]
     · push_cast
       refine Finset.sum_congr rfl (fun z hz ↦ ?_)
@@ -676,7 +676,7 @@ lemma final_sum_bound {R R1 B : ℝ} {f : ℂ → ℂ}
   have h_f_bounded_alt : ∀ z : ℂ, ‖z - c‖ ≤ R → ‖f z‖ ≤ B := by
     intro w hw
     exact h_f_bounded w (Metric.mem_closedBall.mpr (by simpa [dist_eq_norm] using hw))
-  grw [lem_sum_m_rho_bound B R R1 hB hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros (by simpa)]
+  grw [lem_sum_m_rho_bound B R R1 hB.le hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros (by simpa)]
   · field_simp
     rfl
   · refine div_nonneg (by norm_num) ?_
