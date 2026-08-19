@@ -996,42 +996,6 @@ lemma lem_sumK1abs (t : ℝ) (ht : |t| > 3) (z : ℂ)
   · linarith [lem_Rerhotodeltat t ht ρ (by simp_all),
       lem_abszrhoReRe z ρ]
 
-lemma no_zero_of_bound_one_and_center_one
-  (R : ℝ) (hR_lt_1 : R < 1)
-  (g : ℂ → ℂ) {c : ℂ}
-  (h_g_analytic : AnalyticOnNhd ℂ g (Metric.closedBall c 1))
-  (hg0_one : g c = 1)
-  (hg_le_one : ∀ z : ℂ, ‖z - c‖ ≤ R → ‖g z‖ ≤ 1)
-  (z : ℂ) (hz : z ∈ Metric.closedBall c R) : g z ≠ 0 := by
-  by_cases! hRpos : 0 < R
-  · -- differentiability inside the open ball
-    have hdiff : DifferentiableOn ℂ g (Metric.ball c R) := by
-      exact h_g_analytic.differentiableOn.mono <| Metric.ball_subset_closedBall.trans (by gcongr)
-    -- continuity on the closed ball of radius R
-    have hcont : ContinuousOn g (Metric.closedBall c R) := by
-      exact h_g_analytic.continuousOn.mono (by gcongr)
-    have hdcc : DiffContOnCl ℂ g (Metric.ball c R) :=
-      DiffContOnCl.mk_ball hdiff hcont
-    -- maximum of the modulus at 0 on the open ball of radius R
-    have hIsMax : IsMaxOn (fun z => ‖g z‖) (Metric.ball c R) c := by
-      intro y hy
-      have hynormlt : ‖y - c‖ < R := by
-        simpa [Metric.mem_ball, Complex.dist_eq] using hy
-      have hyle : ‖y - c‖ ≤ R := le_of_lt hynormlt
-      have hgy : ‖g y‖ ≤ 1 := hg_le_one y hyle
-      simpa [hg0_one] using hgy
-    -- apply maximum modulus principle on the closed ball
-    have hEqOn :=
-      Complex.eqOn_closedBall_of_isMaxOn_norm (z := c) (r := R) hdcc hIsMax
-    rw [hEqOn hz]
-    simp_all
-  · -- If R ≤ 0, then any z in closedBall(0,R) must be 0, hence g z = 1 ≠ 0
-    have hz_norm_eq : ‖z - c‖ = 0 := by
-      simp [dist_eq_norm_sub] at hz
-      linarith [norm_nonneg (z - c)]
-    rw [norm_eq_zero] at hz_norm_eq
-    grind
-
 lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
   (hR1_pos : 0 < R1)
   (hR1_lt_R : R1 < R)
