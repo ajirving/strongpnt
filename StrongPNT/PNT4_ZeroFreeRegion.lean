@@ -996,42 +996,6 @@ lemma lem_sumK1abs (t : ℝ) (ht : |t| > 3) (z : ℂ)
   · linarith [lem_Rerhotodeltat t ht ρ (by simp_all),
       lem_abszrhoReRe z ρ]
 
-lemma no_zero_of_bound_one_and_center_one
-  (R : ℝ) (hR_lt_1 : R < 1)
-  (g : ℂ → ℂ) {c : ℂ}
-  (h_g_analytic : AnalyticOnNhd ℂ g (Metric.closedBall c 1))
-  (hg0_one : g c = 1)
-  (hg_le_one : ∀ z : ℂ, ‖z - c‖ ≤ R → ‖g z‖ ≤ 1)
-  (z : ℂ) (hz : z ∈ Metric.closedBall c R) : g z ≠ 0 := by
-  by_cases! hRpos : 0 < R
-  · -- differentiability inside the open ball
-    have hdiff : DifferentiableOn ℂ g (Metric.ball c R) := by
-      exact h_g_analytic.differentiableOn.mono <| Metric.ball_subset_closedBall.trans (by gcongr)
-    -- continuity on the closed ball of radius R
-    have hcont : ContinuousOn g (Metric.closedBall c R) := by
-      exact h_g_analytic.continuousOn.mono (by gcongr)
-    have hdcc : DiffContOnCl ℂ g (Metric.ball c R) :=
-      DiffContOnCl.mk_ball hdiff hcont
-    -- maximum of the modulus at 0 on the open ball of radius R
-    have hIsMax : IsMaxOn (fun z => ‖g z‖) (Metric.ball c R) c := by
-      intro y hy
-      have hynormlt : ‖y - c‖ < R := by
-        simpa [Metric.mem_ball, Complex.dist_eq] using hy
-      have hyle : ‖y - c‖ ≤ R := le_of_lt hynormlt
-      have hgy : ‖g y‖ ≤ 1 := hg_le_one y hyle
-      simpa [hg0_one] using hgy
-    -- apply maximum modulus principle on the closed ball
-    have hEqOn :=
-      Complex.eqOn_closedBall_of_isMaxOn_norm (z := c) (r := R) hdcc hIsMax
-    rw [hEqOn hz]
-    simp_all
-  · -- If R ≤ 0, then any z in closedBall(0,R) must be 0, hence g z = 1 ≠ 0
-    have hz_norm_eq : ‖z - c‖ = 0 := by
-      simp [dist_eq_norm_sub] at hz
-      linarith [norm_nonneg (z - c)]
-    rw [norm_eq_zero] at hz_norm_eq
-    grind
-
 lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
   (hR1_pos : 0 < R1)
   (hR1_lt_R : R1 < R)
@@ -1043,81 +1007,26 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
   (hf_le_B : ∀ z ∈ Metric.closedBall c R, ‖f z‖ ≤ B)
   (hfin : (zerosetKfR R1 c f).Finite) :
       ∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt f ρ : ℝ) ≤ Real.log (B / ‖f c‖) / Real.log (R / R1) := by
-  classical
-  -- Define the shifted function g(z) = f(z+c)/f(c)
   let g : ℂ → ℂ := fun z => f z / f c
-
-  -- g is analytic on the unit closed ball centered at 0
   have h_g_analyticOn : AnalyticOnNhd ℂ g (Metric.closedBall c 1) :=
     h_f_analytic.div_const
   -- g(0) = 1 and hence g(0) ≠ 0
   have hg0_one : g c = 1 := by simpa [g]
   have hg0_ne : g c ≠ 0 := by simp [hg0_one]
-
-  -- Finiteness of zeros of g in radius R1 and set equalities
   have hfin_g : (zerosetKfR R1 c g).Finite := by
     simp_all [zerosetKfR, g, dist_eq_norm_sub]
-
-  -- Bound on g on the closed ball of radius R
-  have h_bound_shift : ∀ z ∈ Metric.closedBall c R, ‖g z‖ ≤ B / ‖f c‖ := by
+  have hg_le_B : ∀ z : ℂ, ‖z - c‖ ≤ R → ‖g z‖ ≤ B / ‖f c‖ := by
     intro w hw
     simp only [Complex.norm_div, g]
     gcongr
-    exact hf_le_B w hw
-  have hg_le_B : ∀ z : ℂ, ‖z - c‖ ≤ R → ‖g z‖ ≤ B / ‖f c‖ := by
-    simp_all [dist_eq_norm_sub]
-
-  -- Show 1 ≤ B / ‖f c‖ to split into cases
-  have hfc_le : ‖f c‖ ≤ B := by
-    exact hf_le_B c (by simp; linarith)
-  have hfc_pos : 0 < ‖f c‖ := (norm_pos_iff).2 h_f_nonzero_at_zero
+    exact hf_le_B w (by simp_all [dist_eq_norm_sub])
   have hBdiv_ge_one : 1 ≤ B / ‖f c‖ := by
-    have hdiv := (div_le_div_iff_of_pos_right hfc_pos).mpr hfc_le
-    simpa [div_self (ne_of_gt hfc_pos)] using hdiv
-
-  -- Now split into cases depending on whether B/‖f c‖ > 1 or = 1
-  rcases lt_or_eq_of_le hBdiv_ge_one with hBdiv_gt_one | hBdiv_eq_one
-  · -- Strict case: apply Jensen bound to g with B' = B / ‖f c‖
-    convert lem_sum_m_rho_bound (B / ‖f c‖) R R1 hBdiv_gt_one hR1_pos hR1_lt_R g (h_g_analyticOn.mono (by gcongr)) hg0_one hfin_g hg_le_B using 1
-    · refine Finset.sum_congr (by simp_all [zerosetKfR, g]) fun ρ hρ ↦ ?_
-      simp only [analyticOrderNatAt, div_eq_mul_inv, Nat.cast_inj, g]
-      rw [analyticOrderAt_mul_const_eq _ _ _ (by simpa)]
-    · field
-  · -- Equality case: B / ‖f c‖ = 1; show no zeros for g inside radius R, hence sum = 0
-    have hBdiv_eq_one' : B / ‖f c‖ = 1 := by
-      simpa [eq_comm] using hBdiv_eq_one
-    have hg_le_one : ∀ z : ℂ, ‖z - c‖ ≤ R → ‖g z‖ ≤ 1 := by
-      intro z hz
-      have := hg_le_B z hz
-      simpa [hBdiv_eq_one'] using this
-    have g_nonzero_on_ball : ∀ z ∈ Metric.closedBall c R, g z ≠ 0 :=
-      no_zero_of_bound_one_and_center_one R hR_lt_1 g h_g_analyticOn hg0_one hg_le_one
-    -- zeroset within radius R1 is empty; hence the finite sum is zero
-    have hS_empty : zerosetKfR R1 c g = (∅ : Set ℂ) := by
-      ext z; constructor
-      · intro hz
-        rcases hz with ⟨hzball, hzzero⟩
-        have hzR1 : ‖z - c‖ ≤ R1 := by simpa [Metric.mem_closedBall, dist_eq_norm] using hzball
-        have hzR : ‖z - c‖ ≤ R := le_trans hzR1 (le_of_lt hR1_lt_R)
-        have hzR' : z ∈ Metric.closedBall c R := by
-          simpa [Metric.mem_closedBall, dist_eq_norm] using hzR
-        exact (g_nonzero_on_ball z hzR') hzzero
-      · intro hzfalse
-        cases hzfalse
-    apply le_of_eq
-    have hsum_g_zero :
-        (∑ ρ ∈ hfin_g.toFinset, (analyticOrderNatAt g ρ : ℝ)) = 0 := by
-      convert Finset.sum_empty
-      simpa
-    trans 0
-    · convert hsum_g_zero using 1
-      refine Finset.sum_congr ?_ fun ρ hρ ↦ ?_
-      · simp [zerosetKfR, g, dist_eq_norm_sub, h_f_nonzero_at_zero]
-      · simp only [analyticOrderNatAt, div_eq_mul_inv, Nat.cast_inj, g]
-        rw [analyticOrderAt_mul_const_eq _ _ _ (by simpa)]
-    have hRHS_zero : Real.log (B / ‖f c‖) / Real.log (R / R1) = 0 := by
-      simp [hBdiv_eq_one']
-    rw [hRHS_zero]
+    exact one_le_div (by simpa)|>.mpr <| hf_le_B c (by simp; linarith)
+  convert lem_sum_m_rho_bound (B / ‖f c‖) R R1 hBdiv_ge_one hR1_pos hR1_lt_R g (h_g_analyticOn.mono (by gcongr)) hg0_one hfin_g hg_le_B using 1
+  · refine Finset.sum_congr (by simp_all [zerosetKfR, g]) fun ρ hρ ↦ ?_
+    simp only [analyticOrderNatAt, div_eq_mul_inv, Nat.cast_inj, g]
+    rw [analyticOrderAt_mul_const_eq _ _ _ (by simpa)]
+  · field
 
 lemma lem_sum_m_rho_zeta :
     ∃ C_2 > 1, ∀ (t : ℝ) (_ : |t| > 3),
@@ -1167,22 +1076,7 @@ lemma lem_sum_m_rho_zeta :
     exact le_of_lt (h_upper_on_ball1 z hz1)
   -- Show B = b * |t| > 1
   have hb_pos : 0 < b := lt_trans (by norm_num) hb_gt1
-  have htabove1 : (1 : ℝ) ≤ |t| := le_of_lt ht1
-  have hb_le_B : b ≤ b * |t| := by
-    have := mul_le_mul_of_nonneg_left htabove1 (le_of_lt hb_pos)
-    simpa [one_mul] using this
-  have hBpos : 1 < b * |t| := lt_of_lt_of_le hb_gt1 hb_le_B
-  -- Apply the Jensen-type bound centered at c, with R1=5/6, R=8/9
-  have h_sum_bound :=
-    lem_sum_m_rho_bound_c (B := b * |t|) (R := R) (R1 := R1)
-      (hR1_pos := hR1_pos)
-      (hR1_lt_R := hR1_lt_R)
-      (hR_lt_1 := hR_lt_1)
-      (f := riemannZeta) (c := c)
-      (h_f_analytic := h_f_analytic)
-      (h_f_nonzero_at_zero := h_nonzero)
-      (hf_le_B := hf_le_B)
-      (hfin := hfin)
+  grw [lem_sum_m_rho_bound_c (b * |t|) _ _ hR1_pos hR1_lt_R hR_lt_1 _ c h_f_analytic h_nonzero hf_le_B]
   -- Positivity of logRatio
   have hlogRatio_pos : 0 < logRatio := by
     have : 1 < R / R1 := by dsimp [R, R1]; norm_num
@@ -1253,18 +1147,9 @@ lemma lem_sum_m_rho_zeta :
         ≤ ((1 + |u|) / logRatio) * Real.log |t| := by
     have := div_le_div_of_nonneg_right hadd_le (le_of_lt hlogRatio_pos)
     simpa [div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using this
-  have hfinal :
-      (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ))
-        ≤ ((1 + |u|) / logRatio) * Real.log |t| := by
-    have := le_trans h_sum_bound hRHS1
-    exact le_trans this hRHS2
-  -- Compare with C2 * log |t|
-  have hC2_ge : ((1 + |u|) / logRatio) ≤ C2 := by
-    have := le_max_right (2 : ℝ) ((1 + |u|) / logRatio)
-    simp [C2]
-  have hlogt_nonneg : 0 ≤ Real.log |t| := le_trans (by norm_num) hlogt_ge_one
-  have hscale := mul_le_mul_of_nonneg_right hC2_ge hlogt_nonneg
-  exact le_trans hfinal hscale
+  grw [hRHS1, hRHS2]
+  gcongr
+  simp [C2]
 
 lemma lem_sumKdeltatlogt :
   ∃ C_3 > 1, ∀ (t : ℝ) (_ : |t| > 3),
@@ -1560,7 +1445,6 @@ lemma lem_term_real_nonneg (n : ℕ) (σ : ℝ) : ∃ r ≥ (0:ℝ), ((Arithmeti
 
 lemma lem_norm_logDeriv_le_tsum (s : ℂ) (hs : 1 < s.re) :
   ‖deriv riemannZeta s / riemannZeta s‖ ≤ ∑' n : ℕ, ‖((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ) / ((n : ℂ) ^ s)‖ := by
-  classical
   -- Define f(n) = Λ(n) as complex-valued coefficients
   let f : ℕ → ℂ := fun n => ((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ)
   -- Summability of the L-series terms on Re s > 1
@@ -1628,7 +1512,6 @@ lemma lem_tsum_norm_vonMangoldt_depends_on_Re_cast (s : ℂ) (σ : ℝ)
 lemma helper_norm_neg_logDeriv_eq_tsum_norm (σ : ℝ) (hσ : 1 < σ) :
   ‖- deriv riemannZeta (σ : ℂ) / riemannZeta (σ : ℂ)‖ =
     (∑' n : ℕ, ‖(ArithmeticFunction.vonMangoldt n : ℂ) / ((n : ℂ) ^ (σ : ℂ))‖) := by
-  classical
   -- Set s = σ as a complex number
   let s : ℂ := (σ : ℂ)
   -- Define the coefficient function f(n) = Λ(n) as a complex-valued function
@@ -2008,16 +1891,11 @@ lemma LogDerivZetaBndUnif2 :
     ∃ (A : ℝ) (_ : A ∈ Ioc 0 (1 / 2)) (C : ℝ) (_ : 0 < C), ∀ (σ : ℝ) (t : ℝ) (_ : 3 < |t|)
     (_ : σ ∈ Ici (1 - A / Real.log |t| ^ 1)), ‖(deriv riemannZeta) (σ + t * Complex.I) / riemannZeta (σ + t * Complex.I)‖ ≤
       C * Real.log |t| ^ 2 := by
-  classical
   obtain ⟨c, hc, hc2, K, hK, hfinal⟩ := thm_final_result
   -- Choose constants
   let A : ℝ := min (1/2 : ℝ) (c / 2)
   have hApos : 0 < A := by
-    have h1 : 0 < (1/2 : ℝ) := by norm_num
-    have h2 : 0 < c / 2 := by
-      have : 0 < (2 : ℝ) := by norm_num
-      exact div_pos hc this
-    exact (lt_min_iff).2 ⟨h1, h2⟩
+    exact lt_min (by norm_num) (by linarith)
   have hAle : A ≤ (1/2 : ℝ) := min_le_left _ _
   have hA_in : A ∈ Ioc 0 (1/2) := ⟨hApos, hAle⟩
   let C : ℝ := K
