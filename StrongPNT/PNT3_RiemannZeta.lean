@@ -244,59 +244,29 @@ lemma analyticOrderAt_mul_const_eq (f : ℂ → ℂ) (a z0 : ℂ) (ha : a ≠ 0)
       exact analyticAt_iff_analytic_fun_mul analyticAt_const ha|>.mpr hf
 
 lemma final_ineq2a
-    (B : ℝ) (r1 r R R1 : ℝ) (hr1pos : 0 < r1) (hr1_lt_r : r1 < r) (hr_lt_R1 : r < R1)
+    (B : ℝ) (r1 R R1 : ℝ) (hr1pos : 0 < r1) (hr1_lt_R1 : r1 < R1)
     (hR1_lt_R : R1 < R)
     (c : ℂ) (f : ℂ → ℂ) (h_analytic : AnalyticOnNhd ℂ f (closedBall c R)) (h_nonzero : f c ≠ 0)
     (h_bound : ∀ z ∈ closedBall c R, ‖f z‖ < B)
-    (hfin : (zerosetKfR R1 c (fun z => f z / f c)).Finite)
-    (z : ℂ) (hz : z ∈ closedBall c r1 \ zerosetKfR R1 c (fun z => f z / f c)) :
-    ‖(deriv (fun z => f z / f c) z / (f z / f c)) - ∑ ρ ∈ hfin.toFinset,
-      ((analyticOrderNatAt (fun w => f w / f c) ρ) : ℂ) / (z - ρ)‖ ≤ (8 * r / ((r - r1)^2) +
+    (hfin : (zerosetKfR R1 c f).Finite)
+    (z : ℂ) (hz : z ∈ closedBall c r1 \ zerosetKfR R1 c f) :
+    ‖(deriv f z / f z) - ∑ ρ ∈ hfin.toFinset,
+      ((analyticOrderNatAt f ρ) : ℂ) / (z - ρ)‖ ≤ (8 * R1 / ((R1 - r1)^2) +
     1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log (B / ‖f c‖) := by
-  refine final_ineq1 (B / ‖f c‖) ?_ r1 r R R1 hr1pos hr1_lt_r hr_lt_R1 hR1_lt_R _ ?_ (by simpa) ?_ ?_ z hz
+  convert final_ineq1 (c := c) (B / ‖f c‖) ?_ r1 R R1 hr1pos (by linarith) hR1_lt_R (fun z ↦ f z / f c) ?_ (by simpa) ?_ ?_ z ?_ using 3
+  · simp
+    field
+  · refine Finset.sum_congr (by simp_all [zerosetKfR]) fun ρ rρ ↦ ?_
+    simp [analyticOrderNatAt, div_eq_mul_inv, analyticOrderAt_mul_const_eq _ _ _ (inv_ne_zero h_nonzero)]
   · rw [one_lt_div <| norm_pos_iff.mpr h_nonzero]
     exact h_bound _ (by simp; linarith)
   · exact h_analytic.div_const
+  · simp_all [zerosetKfR]
   · intro w hw
     rw [norm_div]
     gcongr
     exact h_bound w hw|>.le
-
-lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
-    (r1 r R1 R : ℝ)
-    (hr1_pos : 0 < r1) (hr1_lt_r : r1 < r)
-    (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1) :
-    let c := (3/2 : ℂ) + Complex.I * t
-    ∀ B > 1, (∀ z ∈ closedBall c R, ‖riemannZeta z‖ < B) →
-    ∀ (hfin : (zerosetKfR R1 c riemannZeta).Finite),
-    ∀ z ∈ closedBall c r1 \ zerosetKfR R1 c riemannZeta,
-    ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
-      ((analyticOrderNatAt riemannZeta ρ) : ℂ) / (z - ρ)‖ ≤ (8 * r / ((r - r1)^2) +
-    1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log (B / ‖riemannZeta c‖) := by
-  intro c B hB h_bound hfin z hzmem
-  -- From |t| > 3, deduce |t| > 1
-  have ht1 : |t| > 1 := lt_trans (by norm_num : (1 : ℝ) < 2) (by simpa using ht)
-  -- ζ is analytic on a neighborhood of the closed ball and nonzero at c
-  have hζ_analytic : AnalyticOnNhd ℂ riemannZeta (closedBall c R) := by
-    simp only [c]
-    exact (zetaanalOnD1c t ht1).mono (by gcongr)
-  have hζ_c_ne : riemannZeta c ≠ 0 := by simpa [c] using zetacnot0 t
-  -- Finite zero set for the shifted/normalized function g(u) = ζ(u+c)/ζ(c)
-  have hfin_shift : (zerosetKfR R1 c (fun u => riemannZeta u / riemannZeta c)).Finite := by
-    simp_all [zerosetKfR]
-  -- Move the domain point to shifted coordinates z0 = z - c
-  have hz0mem : z ∈ closedBall c r1 \ zerosetKfR R1 c (fun u => riemannZeta u / riemannZeta c) := by
-    simp_all [zerosetKfR]
-  -- Apply the shifted inequality (final_ineq2) to g at z0 = z - c
-  convert
-    (final_ineq2a B r1 r R R1 hr1_pos hr1_lt_r hr_lt_R1 hR1_lt_R c riemannZeta
-      hζ_analytic hζ_c_ne h_bound hfin_shift) z hz0mem using 3
-  · simp [logDerivZeta]
-    field
-  refine Finset.sum_congr (by simp_all [zerosetKfR]) fun ρ hρ ↦ ?_
-  congr 2
-  simp only [analyticOrderNatAt, div_eq_mul_inv]
-  rw [analyticOrderAt_mul_const_eq _ _ _ (by simpa)]
+  · simp_all [zerosetKfR]
 
 lemma zeta32lower : ∃ a > 0, ∀ t : ℝ, ‖riemannZeta (3/2 + Complex.I * t)‖ ≥ a := by
   rcases zeta_low_332 with ⟨a, ha_pos, hbound⟩
@@ -375,15 +345,15 @@ lemma zeta32upper : ∃ b > 1, ∀ t : ℝ, |t| > 2 →
 lemma Zeta1_Zeta_Expand :
     ∃ A > 1, ∃ b > 1,
     ∀ (t : ℝ) (_ : |t| > 2)
-    (r1 r R1 R : ℝ)
-    (_ : 0 < r1) (_ : r1 < r)
-    (_ : 0 < r) (_ : r < R1) (_ : 0 < R1) (_ : R1 < R) (_ : R < 1),
+    (r1 R1 R : ℝ)
+    (_ : 0 < r1) (_ : r1 < R1)
+    (_ : 0 < R1) (_ : R1 < R) (_ : R < 1),
     let c := (3/2 : ℂ) + Complex.I * t;
     ∀ (hfin : (zerosetKfR R1 c riemannZeta).Finite),
     ∀ z ∈ closedBall c r1 \ zerosetKfR R1 c riemannZeta,
     ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
       ((analyticOrderNatAt riemannZeta ρ) : ℂ) / (z - ρ)‖ ≤
-      (8 * r / ((r - r1)^2) +
+      (8 * R1 / ((R1 - r1)^2) +
     1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * (Real.log |t| + Real.log b + A) := by
   -- Apply the three lemmas mentioned in the informal proof
   obtain ⟨b, hbgt1, hb⟩ := zeta32upper
@@ -391,11 +361,7 @@ lemma Zeta1_Zeta_Expand :
 
   -- Provide the constants A, b as required
   refine ⟨A, hAgt1, b, hbgt1, ?_⟩
-  intro t ht r1 r R1 R hr1_pos hr1_lt_r hr_pos hr_lt_R1 hR1_pos hR1_lt_R hR_lt_1 c hfin z hz
-
-  -- Apply log_Deriv_Expansion_Zeta
-  have hexp_lemma := log_Deriv_Expansion_Zeta t ht r1 r R1 R hr1_pos hr1_lt_r hr_lt_R1 hR1_lt_R hR_lt_1
-
+  intro t ht r1 R1 R hr1_pos hr1_lt_R1 hR1_pos hR1_lt_R hR_lt_1 c hfin z hz
   -- Set B = b * |t| as mentioned in informal proof
   have htpos : (0 : ℝ) < |t| := by linarith [ht]
   have hBgt1 : b * |t| > 1 := by
@@ -413,12 +379,9 @@ lemma Zeta1_Zeta_Expand :
     have ht2 : |t| > 2 := by linarith [ht]
     specialize hb t ht2
     exact hb s hs1
-
-  -- Apply log_Deriv_Expansion_Zeta with B = b * |t|
-  have hexp := hexp_lemma (b * |t|) hBgt1 hbound_ball hfin z hz
-
   -- Use properties of ζ at c and bounds from zeta32lower_log
   have hζne : riemannZeta (3/2 + Complex.I * t) ≠ 0 := zetacnot0 t
+  grw [logDerivZeta, final_ineq2a (b * |t|) r1 R R1 hr1_pos hr1_lt_R1 hR1_lt_R c riemannZeta ((zetaanalOnD1c t (by linarith)).mono (by gcongr)) hζne hbound_ball hfin z hz]
   have hζpos : (0 : ℝ) < ‖riemannZeta (3/2 + Complex.I * t)‖ := norm_pos_iff.mpr hζne
 
   have hBpos : (0 : ℝ) < b * |t| := mul_pos (by linarith [hbgt1]) htpos
@@ -440,54 +403,33 @@ lemma Zeta1_Zeta_Expand :
       rw [← eq_neg]
       exact hA_bound
     linarith
-
-  -- Need to show the coefficient is nonnegative
-  have hcoeff_nonneg : (0 : ℝ) ≤ 8 * r / ((r - r1)^2) + 1 / ((R^2 / R1 - R1) * Real.log (R / R1)) := by
-    apply add_nonneg
-    · apply div_nonneg
-      · apply mul_nonneg
-        · norm_num
-        · linarith
-      · apply le_of_lt
-        apply pow_pos
-        linarith [hr1_lt_r]
-    · apply div_nonneg
-      · norm_num
-      · apply le_of_lt
-        apply mul_pos
-        · -- Show R^2 / R1 - R1 > 0
-          have h_gt : R > R1 := hR1_lt_R
-          have h1_pos : (1 : ℝ) < R/R1 := by
-            rw [one_lt_div]
-            · exact h_gt
-            · exact hR1_pos
-          have h_sq_div : R^2/R1 = R * (R/R1) := by
-            field [ne_of_gt hR1_pos]
-          rw [h_sq_div]
-          have h_r_pos : (0 : ℝ) < R := by linarith [hR1_pos, h_gt]
-          have : R * (R/R1) > R * 1 := by
-            apply mul_lt_mul_of_pos_left h1_pos h_r_pos
-          simp at this
-          linarith [this]
-        · apply Real.log_pos
+  gcongr
+  apply add_nonneg
+  · positivity
+  · apply div_nonneg (by norm_num)
+    · apply le_of_lt
+      apply mul_pos
+      · -- Show R^2 / R1 - R1 > 0
+        have h_gt : R > R1 := hR1_lt_R
+        have h1_pos : (1 : ℝ) < R/R1 := by
           rw [one_lt_div]
-          · exact hR1_lt_R
+          · exact h_gt
           · exact hR1_pos
-
-  -- Final calculation combining all bounds
-  calc ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
-      ((analyticOrderNatAt riemannZeta ρ) : ℂ) / (z - ρ)‖
-      ≤ (8 * r / ((r - r1)^2) +
-          1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log (b * |t| / ‖riemannZeta (3/2 + Complex.I * t)‖) := hexp
-    _ ≤ (8 * r / ((r - r1)^2) +
-          1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * (Real.log |t| + Real.log b + A) := by
-      exact mul_le_mul_of_nonneg_left hlog_bound hcoeff_nonneg
+        have h_sq_div : R^2/R1 = R * (R/R1) := by
+          field [ne_of_gt hR1_pos]
+        rw [h_sq_div]
+        have h_r_pos : (0 : ℝ) < R := by linarith [hR1_pos, h_gt]
+        have : R * (R/R1) > R * 1 := by
+          apply mul_lt_mul_of_pos_left h1_pos h_r_pos
+        simp at this
+        linarith [this]
+      · apply Real.log_pos
+        rwa [one_lt_div hR1_pos]
 
 -- Lemma 21: Zeta1_Zeta_Expansion (final)
-
 lemma Zeta1_Zeta_Expansion
-    (r1 r : ℝ)
-    (hr1_pos : 0 < r1) (hr1_lt_r : r1 < r) (hr_lt_R1 : r < 5 / (6 : ℝ)) :
+    (r1 : ℝ)
+    (hr1_pos : 0 < r1) (hr1_lt_R1 : r1 < 5 / 6) :
     ∃ C > 1,
     ∀ (t : ℝ) (_ : |t| > 2),
     let c := (3/2 : ℂ) + Complex.I * t;
@@ -495,7 +437,7 @@ lemma Zeta1_Zeta_Expansion
     ∀ z ∈ closedBall c r1 \ zerosetKfR (5 / (6 : ℝ)) c riemannZeta,
     ‖logDerivZeta z - ∑ ρ ∈ hfin.toFinset,
       (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ)‖ ≤
-      C * (1 / (r - r1)^2 + 1) * Real.log |t| := by
+      C * (1 / (5/6 - r1)^2 + 1) * Real.log |t| := by
   -- Introduce the universal constants from Zeta1_Zeta_Expand
   obtain ⟨A, hAgt1, b, hbgt1, hmain⟩ := Zeta1_Zeta_Expand
   -- Fix numeric radii
@@ -504,25 +446,13 @@ lemma Zeta1_Zeta_Expansion
   have hR1_pos : 0 < R1 := by norm_num [R1]
   have hR1_lt_R : R1 < R := by norm_num [R1, R]
   have hR_lt_1  : R < 1 := by norm_num [R]
-  have hr_pos : 0 < r := lt_trans hr1_pos hr1_lt_r
   -- Define some shorthand constants
-  let d : ℝ := (r - r1) ^ 2
-  have hd_pos : 0 < d := by
-    have : 0 < r - r1 := sub_pos.mpr hr1_lt_r
-    simpa [d] using pow_pos this _
+  let d : ℝ := (R1 - r1) ^ 2
+  have hd_pos : 0 < d := by positivity
   let A0 : ℝ := 1 / ((R^2 / R1 - R1) * Real.log (R / R1))
-  have hA0_pos : 0 < A0 := by
-    have hx1 : 0 < R^2 / R1 - R1 := by
-      --  (8/9)^2 / (5/6) - (5/6) = 31/270 > 0
-      norm_num [R, R1]
-    have hx2 : 0 < Real.log (R / R1) := by
-      -- R/R1 = 16/15 > 1
-      have : (1 : ℝ) < R / R1 := by norm_num [R, R1]
-      exact Real.log_pos this
-    have hxden : 0 < (R^2 / R1 - R1) * Real.log (R / R1) := mul_pos hx1 hx2
-    simpa [A0] using (one_div_pos.mpr hxden)
+  have hA0_pos : 0 < A0 := by positivity
   -- Coefficient K in Zeta1_Zeta_Expand specialized to our R1,R
-  let K : ℝ := 8 * r / d + A0
+  let K : ℝ := 8 * R1 / d + A0
   -- S := log b + A (positive)
   let S : ℝ := Real.log b + A
   have hS_pos : 0 < S := by
@@ -530,19 +460,19 @@ lemma Zeta1_Zeta_Expansion
     have hApos : 0 < A := lt_trans (by norm_num) hAgt1
     exact add_pos hbpos hApos
   -- Choose a constant C large enough so K ≤ C * (1/d + 1) and (L + S) ≤ (1 + S/log 3) * L
-  let Kcoeff : ℝ := max (8 * r) A0
+  let Kcoeff : ℝ := max (8 * R1) A0
   have hK_le : K ≤ Kcoeff * (1 / d + 1) := by
     have hx_nonneg : 0 ≤ 1 / d := by
       exact le_of_lt (one_div_pos.mpr hd_pos)
-    have hα_le : 8 * r / d ≤ Kcoeff * (1 / d) := by
-        have hα : 8 * r ≤ Kcoeff := le_max_left _ _
-        have : (8 * r) * (1 / d) ≤ Kcoeff * (1 / d) :=
+    have hα_le : 8 * R1 / d ≤ Kcoeff * (1 / d) := by
+        have hα : 8 * R1 ≤ Kcoeff := le_max_left _ _
+        have : (8 * R1) * (1 / d) ≤ Kcoeff * (1 / d) :=
           mul_le_mul_of_nonneg_right hα hx_nonneg
         simpa [div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using this
     have hβ_le : A0 ≤ Kcoeff * 1 := by
       have hβ : A0 ≤ Kcoeff := le_max_right _ _
       simpa using hβ
-    have : 8 * r / d + A0 ≤ Kcoeff * (1 / d) + Kcoeff * 1 :=
+    have : 8 * R1 / d + A0 ≤ Kcoeff * (1 / d) + Kcoeff * 1 :=
       add_le_add hα_le hβ_le
     simpa [K, mul_add, mul_one, add_comm, add_left_comm, add_assoc] using this
   -- Build the final constant C (independent of t)
@@ -551,18 +481,14 @@ lemma Zeta1_Zeta_Expansion
     have : (1 : ℝ) < 2 := by norm_num
     exact lt_of_lt_of_le this (le_max_right _ _)
   refine ⟨C, hC_gt1, ?_⟩
-  -- Now fix t, apply the expansion lemma and chain bounds
-  intro t ht
+  peel hmain with t ht hmain
   -- Unfold the let-binding c in the goal
   simp only
   intro hfin z hz
   -- Apply Zeta1_Zeta_Expand specialized to R1,R
-  have ht2 : |t| > 2 := by linarith [ht]
-  have hineq0 :=
-    hmain t ht2 r1 r R1 R hr1_pos hr1_lt_r (lt_trans hr1_pos hr1_lt_r) hr_lt_R1 hR1_pos hR1_lt_R hR_lt_1
-  have hineq1 := hineq0 hfin z hz
+  have hineq0 := hmain r1 R1 R hr1_pos hr1_lt_R1 hR1_pos hR1_lt_R hR_lt_1 hfin z hz
   -- Rewrite RHS with our K and S
-  have hK_eq : (8 * r / (r - r1)^2 + 1 / ((R^2 / R1 - R1) * Real.log (R / R1))) = K := by
+  have hK_eq : (8 * R1 / (R1 - r1)^2 + 1 / ((R^2 / R1 - R1) * Real.log (R / R1))) = K := by
     simp [K, A0, d, R1, R]
   have hLS_eq : Real.log |t| + Real.log b + A = Real.log |t| + S := by
     simp [S, add_comm, add_assoc]
@@ -570,7 +496,7 @@ lemma Zeta1_Zeta_Expansion
         (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ)‖
         ≤ K * (Real.log |t| + S) := by
     rw [← hK_eq, ← hLS_eq]
-    exact hineq1
+    exact hineq0
   -- Bound (Real.log |t| + S) by (1 + S/log 3) * Real.log |t|
   have hlog2pos : 0 < Real.log (2 : ℝ) := by
     exact Real.log_pos (by norm_num)
@@ -602,7 +528,7 @@ lemma Zeta1_Zeta_Expansion
         (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ)‖
         ≤ K * ((1 + S / Real.log 2) * Real.log |t|) :=
     le_trans hineq2 (mul_le_mul_of_nonneg_left hsum_bound (by
-      have hterm1 : 0 ≤ 8 * r / d :=
+      have hterm1 : 0 ≤ 8 * R1 / d :=
         div_nonneg (mul_nonneg (by norm_num) (by linarith)) (le_of_lt hd_pos)
       have : 0 ≤ K := add_nonneg hterm1 (le_of_lt hA0_pos)
       exact this))
@@ -633,7 +559,4 @@ lemma Zeta1_Zeta_Expansion
     have hstep := mul_le_mul_of_nonneg_left hC_ge hnonneg_term
     -- rewrite both sides to match target
     simpa [mul_comm, mul_left_comm, mul_assoc] using hstep
-  -- Substitute d = (r - r1)^3 to get the final form
-  have hfinal_le := le_trans hfinal this
-  simp only [d] at hfinal_le
-  exact hfinal_le
+  linarith
