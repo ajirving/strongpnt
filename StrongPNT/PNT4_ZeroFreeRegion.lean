@@ -92,7 +92,7 @@ lemma lem_explicit1deltat :
   let r1 : ℝ := (1/2 : ℝ)
   let r  : ℝ := (2/3 : ℝ)
   rcases Zeta1_Zeta_Expansion r1 r (by norm_num) (by norm_num) (by norm_num) with ⟨c, hc1, hc2⟩
-  refine ⟨c * (1 / (r - r1) ^ 2 + 1), ?_, ?_⟩
+  refine ⟨c * (1 / (5/6 - r1) ^ 2 + 1), ?_, ?_⟩
   · apply one_lt_mul hc1.le
     simp
     norm_num
@@ -852,9 +852,9 @@ lemma lem_Zeta_Expansion_ZFR :
     (by norm_num : (0 : ℝ) < 2/3)
     (by norm_num : (2/3 : ℝ) < 3/4)
     (by norm_num : (3/4 : ℝ) < 5/6)
-  let C_1 := C * (1 / ((3/4 : ℝ) - 2/3)^2 + 1)
+  let C_1 := C * (1 / ((5/6 : ℝ) - 2/3)^2 + 1)
   have hC_1_gt_1 : C_1 > 1 := by
-    have h_coeff : (1 : ℝ) / ((3/4 : ℝ) - 2/3)^2 + 1 > 1 := by
+    have h_coeff : (1 : ℝ) / ((5/6 : ℝ) - 2/3)^2 + 1 > 1 := by
       have h_pos : ((3/4 : ℝ) - 2/3)^3 > 0 := by norm_num
       have h_div_pos : (1 : ℝ) / ((3/4 : ℝ) - 2/3)^3 > 0 := div_pos one_pos h_pos
       linarith
