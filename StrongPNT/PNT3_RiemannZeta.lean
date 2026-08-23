@@ -506,20 +506,9 @@ lemma Zeta1_Zeta_Expansion
   have hR_lt_1  : R < 1 := by norm_num [R]
   -- Define some shorthand constants
   let d : ℝ := (R1 - r1) ^ 2
-  have hd_pos : 0 < d := by
-    have : 0 < R1 - r1 := by simp [R1]; linarith
-    simpa [d] using pow_pos this _
+  have hd_pos : 0 < d := by positivity
   let A0 : ℝ := 1 / ((R^2 / R1 - R1) * Real.log (R / R1))
-  have hA0_pos : 0 < A0 := by
-    have hx1 : 0 < R^2 / R1 - R1 := by
-      --  (8/9)^2 / (5/6) - (5/6) = 31/270 > 0
-      norm_num [R, R1]
-    have hx2 : 0 < Real.log (R / R1) := by
-      -- R/R1 = 16/15 > 1
-      have : (1 : ℝ) < R / R1 := by norm_num [R, R1]
-      exact Real.log_pos this
-    have hxden : 0 < (R^2 / R1 - R1) * Real.log (R / R1) := mul_pos hx1 hx2
-    simpa [A0] using (one_div_pos.mpr hxden)
+  have hA0_pos : 0 < A0 := by positivity
   -- Coefficient K in Zeta1_Zeta_Expand specialized to our R1,R
   let K : ℝ := 8 * R1 / d + A0
   -- S := log b + A (positive)

@@ -849,12 +849,7 @@ lemma lem_Zeta_Expansion_ZFR :
   obtain ⟨C, hC_gt_one, hC_expansion⟩ := Zeta1_Zeta_Expansion (2/3) (by norm_num) (by norm_num)
   let C_1 := C * (1 / ((5/6 : ℝ) - 2/3)^2 + 1)
   have hC_1_gt_1 : C_1 > 1 := by
-    have h_coeff : (1 : ℝ) / ((5/6 : ℝ) - 2/3)^2 + 1 > 1 := by
-      have h_pos : ((3/4 : ℝ) - 2/3)^3 > 0 := by norm_num
-      have h_div_pos : (1 : ℝ) / ((3/4 : ℝ) - 2/3)^3 > 0 := div_pos one_pos h_pos
-      linarith
-    have h_ge_1 : (1 : ℝ) ≤ C := le_of_lt hC_gt_one
-    exact one_lt_mul_of_le_of_lt h_ge_1 h_coeff
+    exact one_lt_mul_of_le_of_lt (by linarith) (by norm_num)
   refine ⟨C_1, hC_1_gt_1, ?_⟩
   intro t ht hfin z hz
   have ht2 : |t| > 2 := by linarith
