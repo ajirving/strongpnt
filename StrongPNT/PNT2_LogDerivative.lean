@@ -345,7 +345,7 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) {c : ℂ} (hB : 1 ≤ B)
     simp_all only [mem_sphere_iff_norm]
     grind
 
-variable {R R1 r B : ℝ} {f : ℂ → ℂ} {c : ℂ}
+variable {R R1 B : ℝ} {f : ℂ → ℂ} {c : ℂ}
 
 lemma lem_num_prod_never_zero_all
     (R R1 : ℝ)
@@ -380,11 +380,11 @@ lemma Bf_never_zero
   · simp [Bf, h_finite_zeros]
   simp only [Bf, h_finite_zeros, ↓reduceDIte]
   exact mul_ne_zero (lem_Cf_never_zero hf ne_top z hz) (lem_num_prod_never_zero_all R R1 hR1_pos hR1_lt_R f h_finite_zeros z hz)
-
-def isLf (Lf : ℂ → ℂ) (f : ℂ → ℂ) (r R R1 : ℝ) (c : ℂ) : Prop :=
-    AnalyticOnNhd ℂ Lf (ball c r) ∧ Lf c = 0 ∧
-    (∀ z ∈ ball c r, deriv Lf z = logDeriv (Bf R R1 c f) z) ∧
-    ∀ z ∈ ball c r, (Lf z).re = Real.log ‖Bf R R1 c f z‖ - Real.log ‖Bf R R1 c f c‖
+  
+def isLf (Lf : ℂ → ℂ) (f : ℂ → ℂ) (R R1 : ℝ) (c : ℂ) : Prop :=
+    AnalyticOnNhd ℂ Lf (ball c R1) ∧ Lf c = 0 ∧
+    (∀ z ∈ ball c R1, deriv Lf z = logDeriv (Bf R R1 c f) z) ∧
+    ∀ z ∈ ball c R1, (Lf z).re = Real.log ‖Bf R R1 c f z‖ - Real.log ‖Bf R R1 c f c‖
 
 lemma re_Lf_le_log_B
     (B R R1 : ℝ)
@@ -396,7 +396,7 @@ lemma re_Lf_le_log_B
     (h_finite_zeros : (zerosetKfR R1 c f).Finite)
     (h_f_bound : ∀ z, ‖z - c‖ ≤ R → ‖f z‖ ≤ B)
     (Lf : ℂ → ℂ)
-    (hLf : isLf Lf f R1 R R1 c)
+    (hLf : isLf Lf f R R1 c)
     (z : ℂ) (hz : ‖z - c‖ < R1) :
       Complex.re (Lf z) ≤ Real.log B := by
   rw [hLf.2.2.2 _ (by simp_all [dist_eq_norm_sub])]
@@ -426,7 +426,7 @@ lemma apply_BC_to_Lf
     (h_finite_zeros : (zerosetKfR R1 c f).Finite)
     (h_f_bound : ∀ z, ‖z - c‖ ≤ R → ‖f z‖ ≤ B)
     (Lf : ℂ → ℂ)
-    (hLf : isLf Lf f R1 R R1 c)
+    (hLf : isLf Lf f R R1 c)
     (z : ℂ) (hz : ‖z - c‖ ≤ r1) :
       ‖deriv Lf z‖ ≤
       (8 * Real.log B * R1) / (R1 - r1)^2 := by
@@ -545,7 +545,7 @@ lemma Lf_deriv_step3 (h_finite_zeros : (zerosetKfR R1 c f).Finite) (hR1_lt_R : R
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall c R1))
     (h_f_zero : f c = 1)
     (Lf : ℂ → ℂ)
-    (h_Lf : isLf Lf f R1 R R1 c)
+    (h_Lf : isLf Lf f R R1 c)
     (z : ℂ) (hz : z ∈ ball c R1 \ zerosetKfR R1 c f) :
     deriv Lf z =
     deriv f z / f z + ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ * (1 / (z - c - R^2 / (conj (ρ - c))) - 1 / (z - ρ)) := by
@@ -587,7 +587,7 @@ lemma rearrange_Lf_deriv (h_finite_zeros : (zerosetKfR R1 c f).Finite) (hR1_lt_R
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall c R1))
     (h_f_zero : f c = 1)
     (Lf : ℂ → ℂ)
-    (h_Lf : isLf Lf f R1 R R1 c)
+    (h_Lf : isLf Lf f R R1 c)
     (z : ℂ) (hz : z ∈ ball c R1 \ zerosetKfR R1 c f) :
     deriv f z / f z - ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - ρ) =
     deriv Lf z -
@@ -602,7 +602,7 @@ lemma target_inequality_setup (h_finite_zeros : (zerosetKfR R1 c f).Finite) (hR1
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall c R1))
     (h_f_zero : f c = 1)
     (Lf : ℂ → ℂ)
-    (h_Lf : isLf Lf f R1 R R1 c)
+    (h_Lf : isLf Lf f R R1 c)
     (z : ℂ) (hz : z ∈ ball c R1 \ zerosetKfR R1 c f) :
   ‖deriv f z / f z - ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ / (z - ρ)‖ ≤
   ‖deriv Lf z‖ +
@@ -683,7 +683,7 @@ lemma final_sum_bound {R R1 B : ℝ} {f : ℂ → ℂ}
 lemma Lf_exists (hR1_lt_R : R1 < R) (hR1_pos : 0 < R1)
     (h_f_analytic : AnalyticOnNhd ℂ f (closedBall c R))
     (h_f_zero : f c = 1) :
-    ∃ Lf : ℂ → ℂ, isLf Lf f R1 R R1 c := by
+    ∃ Lf : ℂ → ℂ, isLf Lf f R R1 c := by
   let B_f := Bf R R1 c f
   have h_Bf_analytic : AnalyticOnNhd ℂ B_f (closedBall c R) :=
     lem_Bf_is_analytic R R1 f <| h_f_analytic.mono (by gcongr)
