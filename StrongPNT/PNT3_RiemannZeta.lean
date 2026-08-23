@@ -253,7 +253,7 @@ lemma final_ineq2a
     ‖(deriv (fun z => f z / f c) z / (f z / f c)) - ∑ ρ ∈ hfin.toFinset,
       ((analyticOrderNatAt (fun w => f w / f c) ρ) : ℂ) / (z - ρ)‖ ≤ (8 * r / ((r - r1)^2) +
     1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log (B / ‖f c‖) := by
-  refine final_ineq1 (B / ‖f c‖) ?_ r1 r R R1 hr1pos hr1_lt_r hr_lt_R1 hR1_lt_R _ ?_ (by simpa) ?_ ?_ z hz
+  refine final_ineq1 (B / ‖f c‖) ?_ r1 r R R1 hr1pos hr1_lt_r hr_lt_R1.le hR1_lt_R _ ?_ (by simpa) ?_ ?_ z hz
   · rw [one_lt_div <| norm_pos_iff.mpr h_nonzero]
     exact h_bound _ (by simp; linarith)
   · exact h_analytic.div_const
