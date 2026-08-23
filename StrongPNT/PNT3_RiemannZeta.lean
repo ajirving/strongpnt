@@ -248,19 +248,25 @@ lemma final_ineq2a
     (hR1_lt_R : R1 < R)
     (c : ℂ) (f : ℂ → ℂ) (h_analytic : AnalyticOnNhd ℂ f (closedBall c R)) (h_nonzero : f c ≠ 0)
     (h_bound : ∀ z ∈ closedBall c R, ‖f z‖ < B)
-    (hfin : (zerosetKfR R1 c (fun z => f z / f c)).Finite)
-    (z : ℂ) (hz : z ∈ closedBall c r1 \ zerosetKfR R1 c (fun z => f z / f c)) :
-    ‖(deriv (fun z => f z / f c) z / (f z / f c)) - ∑ ρ ∈ hfin.toFinset,
-      ((analyticOrderNatAt (fun w => f w / f c) ρ) : ℂ) / (z - ρ)‖ ≤ (8 * R1 / ((R1 - r1)^2) +
+    (hfin : (zerosetKfR R1 c f).Finite)
+    (z : ℂ) (hz : z ∈ closedBall c r1 \ zerosetKfR R1 c f) :
+    ‖(deriv f z / f z) - ∑ ρ ∈ hfin.toFinset,
+      ((analyticOrderNatAt f ρ) : ℂ) / (z - ρ)‖ ≤ (8 * R1 / ((R1 - r1)^2) +
     1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log (B / ‖f c‖) := by
-  refine final_ineq1 (B / ‖f c‖) ?_ r1 R R1 hr1pos (by linarith) hR1_lt_R _ ?_ (by simpa) ?_ ?_ z hz
+  convert final_ineq1 (c := c) (B / ‖f c‖) ?_ r1 R R1 hr1pos (by linarith) hR1_lt_R (fun z ↦ f z / f c) ?_ (by simpa) ?_ ?_ z ?_ using 3
+  · simp
+    field
+  · refine Finset.sum_congr (by simp_all [zerosetKfR]) fun ρ rρ ↦ ?_
+    simp [analyticOrderNatAt, div_eq_mul_inv, analyticOrderAt_mul_const_eq _ _ _ (inv_ne_zero h_nonzero)]
   · rw [one_lt_div <| norm_pos_iff.mpr h_nonzero]
     exact h_bound _ (by simp; linarith)
   · exact h_analytic.div_const
+  · simp_all [zerosetKfR]
   · intro w hw
     rw [norm_div]
     gcongr
     exact h_bound w hw|>.le
+  · simp_all [zerosetKfR]
 
 lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
     (r1 R1 R : ℝ)
@@ -281,22 +287,9 @@ lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
     simp only [c]
     exact (zetaanalOnD1c t ht1).mono (by gcongr)
   have hζ_c_ne : riemannZeta c ≠ 0 := by simpa [c] using zetacnot0 t
-  -- Finite zero set for the shifted/normalized function g(u) = ζ(u+c)/ζ(c)
-  have hfin_shift : (zerosetKfR R1 c (fun u => riemannZeta u / riemannZeta c)).Finite := by
-    simp_all [zerosetKfR]
-  -- Move the domain point to shifted coordinates z0 = z - c
-  have hz0mem : z ∈ closedBall c r1 \ zerosetKfR R1 c (fun u => riemannZeta u / riemannZeta c) := by
-    simp_all [zerosetKfR]
   -- Apply the shifted inequality (final_ineq2) to g at z0 = z - c
-  convert
-    (final_ineq2a B r1 R R1 hr1_pos hr1_lt_R1 hR1_lt_R c riemannZeta
-      hζ_analytic hζ_c_ne h_bound hfin_shift) z hz0mem using 3
-  · simp [logDerivZeta]
-    field
-  refine Finset.sum_congr (by simp_all [zerosetKfR]) fun ρ hρ ↦ ?_
-  congr 2
-  simp only [analyticOrderNatAt, div_eq_mul_inv]
-  rw [analyticOrderAt_mul_const_eq _ _ _ (by simpa)]
+  exact final_ineq2a B r1 R R1 hr1_pos hr1_lt_R1 hR1_lt_R c riemannZeta hζ_analytic hζ_c_ne h_bound hfin z hzmem
+
 
 lemma zeta32lower : ∃ a > 0, ∀ t : ℝ, ‖riemannZeta (3/2 + Complex.I * t)‖ ≥ a := by
   rcases zeta_low_332 with ⟨a, ha_pos, hbound⟩
