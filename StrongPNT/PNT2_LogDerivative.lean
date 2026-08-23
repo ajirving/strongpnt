@@ -431,7 +431,7 @@ lemma apply_BC_to_Lf
     (hLf : isLf Lf f r R R1 c)
     (z : ℂ) (hz : ‖z - c‖ ≤ r1) :
       ‖deriv Lf z‖ ≤
-      (16 * Real.log B * r^2) / (r - r1)^3 := by
+      (8 * Real.log B * r) / (r - r1)^2 := by
   refine borel_caratheodory_II (Real.log_pos hB) hr1_pos hr1_lt_r (hLf.1.analyticOn.mono ball_subset_closedBall) hLf.2.1 ?_ (by simp_all [dist_eq_norm_sub])
   exact fun w hw ↦ re_Lf_le_log_B B r R R1 hr_lt_R1 hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros (by simpa) Lf hLf w (by simp_all [dist_eq_norm_sub]; linarith)
 
@@ -714,7 +714,7 @@ lemma final_ineq1
     (z : ℂ) (hz : z ∈ closedBall c r1 \ zerosetKfR R1 c f) :
     ‖(deriv f z / f z) - ∑ ρ ∈ h_finite_zeros.toFinset,
                  analyticOrderNatAt f ρ / (z - ρ)‖ ≤
-    (16 * r^2 / ((r - r1)^3) +
+    (8 * r / ((r - r1)^2) +
     1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log B := by
   have hr_pos : 0 < r := by linarith [hr1pos, hr1_lt_r]
   have hR1_pos : 0 < R1 := by linarith [hr_pos, hr_lt_R1]
@@ -732,5 +732,4 @@ lemma final_ineq1
     (h_f_analytic.mono (by gcongr)) h_f_zero h_finite_zeros
     (h_f_bound := fun w hw => h_f_bounded w (Metric.mem_closedBall.mpr (by simpa [dist_eq_norm] using hw)))
     Lf h_Lf z (by simpa)]
-  field_simp
-  rfl
+  exact le_of_eq (by field)

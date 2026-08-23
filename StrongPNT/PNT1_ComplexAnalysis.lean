@@ -4,6 +4,7 @@ import Mathlib.Analysis.CStarAlgebra.Classes
 import Mathlib.Analysis.Complex.AbsMax
 import Mathlib.Analysis.Complex.BorelCaratheodory
 import Mathlib.Analysis.Complex.HasPrimitives
+import Mathlib.Analysis.Complex.Liouville
 import Mathlib.Analysis.Complex.RemovableSingularity
 import Mathlib.Analysis.Normed.Module.Connected
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
@@ -60,16 +61,6 @@ lemma lem_postriglogn (n : ℕ) (_hn : n ≥ 1) (t : ℝ) : 0 ≤ 3 + 4 * Real.c
   rw [mul_assoc]
   exact lem_postrig (t * Real.log (n : ℝ))
 
-lemma cauchy_formula_deriv {f : ℂ → ℂ} {R_analytic r_z r_int : ℝ} {c : ℂ}
-    (hfdiff : DifferentiableOn ℂ f (Metric.ball c R_analytic))
-    (h_r_z_lt_r_int : r_z < r_int)
-    (h_r_int_lt_R_analytic : r_int < R_analytic)
-    {z : ℂ} (hz : z ∈ Metric.closedBall c r_z) :
-deriv f z = (1 / (2 * Real.pi * Complex.I)) • ∮ w in C(c, r_int), (w - z)⁻¹ ^ 2 • f w := by
-  rw [← Complex.two_pi_I_inv_smul_circleIntegral_sub_sq_inv_smul_of_differentiable Metric.isOpen_ball
-    (Metric.closedBall_subset_ball h_r_int_lt_R_analytic) hfdiff
-    (Metric.closedBall_subset_ball h_r_z_lt_r_int hz)]
-  simp
 
 open Metric in
 theorem borelCaratheodory_centre {f : ℂ → ℂ} {M R : ℝ} {z c : ℂ} (hM : 0 < M) (hf : DifferentiableOn ℂ f (ball c R))
@@ -82,36 +73,6 @@ theorem borelCaratheodory_centre {f : ℂ → ℂ} {M R : ℝ} {z c : ℂ} (hM :
     convert! hf (z + c) (by simp_all)
     simp
 
-lemma lem_f_prime_bound {f : ℂ → ℂ} {M R_analytic r_z r_int : ℝ} {c : ℂ}
-    (hM_pos : 0 < M)
-    (h_r_z_pos : 0 < r_z)
-    (h_r_z_lt_r_int : r_z < r_int)
-    (h_r_int_lt_R_analytic : r_int < R_analytic)
-    (analytic : AnalyticOn ℂ f (Metric.ball c R_analytic))
-    (hf0 : f c = 0)
-    (hRe_f_le_M : ∀ w ∈ Metric.ball c R_analytic, (f w).re ≤ M)
-    {z : ℂ} (hz : z ∈ Metric.closedBall c r_z) :
-    ‖deriv f z‖ ≤ (2 * r_int ^ 2 * M) / ((R_analytic - r_int) * (r_int - r_z) ^ 2) := by
-  rw [cauchy_formula_deriv analytic.differentiableOn h_r_z_lt_r_int h_r_int_lt_R_analytic hz, one_div]
-  grw [circleIntegral.norm_two_pi_i_inv_smul_integral_le_of_norm_le_const (by linarith) (C := 2 * M * r_int / ((R_analytic - r_int) * (r_int - r_z) ^ 2))]
-  · exact le_of_eq (by ring)
-  · intro z' hz'
-    rw [smul_eq_mul, norm_mul]
-    grw [borelCaratheodory_centre hM_pos analytic.differentiableOn
-      hRe_f_le_M (by linarith) (by simp_all [dist_eq_norm_sub]) hf0]
-    suffices ‖(z' - z)⁻¹ ^ 2‖ ≤ 1 / (r_int - r_z) ^ 2 by
-      simp only [mem_sphere_iff_norm] at hz'
-      grw [this]
-      · rw [hz']; exact le_of_eq (by field)
-      · refine mul_nonneg (mul_nonneg ?_ ?_) (inv_nonneg.mpr ?_) <;> linarith
-    rw [norm_pow, norm_inv, one_div, inv_pow]
-    gcongr
-    · simp only [mem_sphere_iff_norm, dist_eq_norm_sub, Metric.mem_closedBall] at hz' hz
-      rw [← hz']
-      have := norm_sub_norm_le (z' -c) (z - c)
-      simp at this
-      linarith
-
 theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ} {c : ℂ}
     (hM_pos : 0 < M)
     (hr_pos : 0 < r)
@@ -120,16 +81,28 @@ theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ} {c : ℂ}
     (hf0 : f c = 0)
     (hRe_f_le_M : ∀ w ∈ Metric.ball c R, (f w).re ≤ M)
     {z : ℂ} (hz : z ∈ Metric.closedBall c r) :
-    ‖deriv f z‖ ≤ (16 * M * R ^ 2) / ((R - r) ^ 3) := by
-  grw [lem_f_prime_bound (r_int := (r + R) / 2) hM_pos hr_pos (by linarith)
-    (by linarith) analytic hf0 hRe_f_le_M hz]
-  calc
-  _ = (4 * (R + r) ^ 2 * M) / ((R - r) ^ 3) := by field
-  _ ≤ _ := by
-    gcongr 1
-    grw [(by linarith : R + r ≤ 2 * R)]
-    · exact le_of_eq (by ring)
-    · linarith
+    ‖deriv f z‖ ≤ (8 * M * R) / ((R - r) ^ 2) := by
+  grw [Complex.norm_deriv_le_of_forall_mem_sphere_norm_le (by linarith : 0 < (R - r) / 2) (C := 4 * M * R / (R - r))]
+  · exact le_of_eq (by field)
+  · apply analytic.differentiableOn.diffContOnCl_ball
+    intro z' hz'
+    simp_all
+    linarith [dist_triangle z' z c]
+  · intro z' hz'
+    grw [borelCaratheodory_centre hM_pos analytic.differentiableOn hRe_f_le_M (by linarith) _ hf0]
+    · simp_all only [Metric.mem_ball, Metric.mem_closedBall, Metric.mem_sphere, ← dist_eq_norm_sub]
+      have := dist_triangle z' z c
+      rw [hz'] at this
+      grw [hz, (by ring : (R - r) / 2 + r = (R + r) / 2)] at this
+      grw [this, this, (by linarith : (R + r) / 2 ≤ R), (by ring : R - (R + r) /2 = (R - r) / 2)]
+      · apply le_of_eq
+        field
+      · linarith
+      · exact mul_nonneg (by positivity) (by linarith)
+      · linarith
+      · linarith
+    · simp_all only [Metric.mem_ball, Metric.mem_closedBall, Metric.mem_sphere]
+      linarith [dist_triangle z' z c]
 
 #print axioms borel_caratheodory_II
 
