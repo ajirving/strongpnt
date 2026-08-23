@@ -90,8 +90,7 @@ lemma lem_explicit1deltat :
           ≤ C * Real.log (|t| + 2) := by
   -- Fixed radii and parameters
   let r1 : ℝ := (1/2 : ℝ)
-  let r  : ℝ := (2/3 : ℝ)
-  rcases Zeta1_Zeta_Expansion r1 r (by norm_num) (by norm_num) (by norm_num) with ⟨c, hc1, hc2⟩
+  rcases Zeta1_Zeta_Expansion r1 (by norm_num) (by norm_num) with ⟨c, hc1, hc2⟩
   refine ⟨c * (1 / (5/6 - r1) ^ 2 + 1), ?_, ?_⟩
   · apply one_lt_mul hc1.le
     simp
@@ -847,11 +846,7 @@ lemma lem_Zeta_Expansion_ZFR :
         ‖(deriv riemannZeta z / riemannZeta z) -
           (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℂ) / (z - ρ))‖
         ≤ C_1 * Real.log |t| := by
-  obtain ⟨C, hC_gt_one, hC_expansion⟩ :=
-    Zeta1_Zeta_Expansion (2/3) (3/4)
-    (by norm_num : (0 : ℝ) < 2/3)
-    (by norm_num : (2/3 : ℝ) < 3/4)
-    (by norm_num : (3/4 : ℝ) < 5/6)
+  obtain ⟨C, hC_gt_one, hC_expansion⟩ := Zeta1_Zeta_Expansion (2/3) (by norm_num) (by norm_num)
   let C_1 := C * (1 / ((5/6 : ℝ) - 2/3)^2 + 1)
   have hC_1_gt_1 : C_1 > 1 := by
     have h_coeff : (1 : ℝ) / ((5/6 : ℝ) - 2/3)^2 + 1 > 1 := by

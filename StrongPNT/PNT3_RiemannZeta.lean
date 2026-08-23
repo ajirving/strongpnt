@@ -244,7 +244,7 @@ lemma analyticOrderAt_mul_const_eq (f : ℂ → ℂ) (a z0 : ℂ) (ha : a ≠ 0)
       exact analyticAt_iff_analytic_fun_mul analyticAt_const ha|>.mpr hf
 
 lemma final_ineq2a
-    (B : ℝ) (r1 r R R1 : ℝ) (hr1pos : 0 < r1) (hr1_lt_r : r1 < r) (hr_lt_R1 : r < R1)
+    (B : ℝ) (r1 R R1 : ℝ) (hr1pos : 0 < r1) (hr1_lt_R1 : r1 < R1)
     (hR1_lt_R : R1 < R)
     (c : ℂ) (f : ℂ → ℂ) (h_analytic : AnalyticOnNhd ℂ f (closedBall c R)) (h_nonzero : f c ≠ 0)
     (h_bound : ∀ z ∈ closedBall c R, ‖f z‖ < B)
@@ -263,9 +263,9 @@ lemma final_ineq2a
     exact h_bound w hw|>.le
 
 lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
-    (r1 r R1 R : ℝ)
-    (hr1_pos : 0 < r1) (hr1_lt_r : r1 < r)
-    (hr_lt_R1 : r < R1) (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1) :
+    (r1 R1 R : ℝ)
+    (hr1_pos : 0 < r1) (hr1_lt_R1 : r1 < R1)
+    (hR1_lt_R : R1 < R) (hR_lt_1 : R < 1) :
     let c := (3/2 : ℂ) + Complex.I * t
     ∀ B > 1, (∀ z ∈ closedBall c R, ‖riemannZeta z‖ < B) →
     ∀ (hfin : (zerosetKfR R1 c riemannZeta).Finite),
@@ -289,7 +289,7 @@ lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
     simp_all [zerosetKfR]
   -- Apply the shifted inequality (final_ineq2) to g at z0 = z - c
   convert
-    (final_ineq2a B r1 r R R1 hr1_pos hr1_lt_r hr_lt_R1 hR1_lt_R c riemannZeta
+    (final_ineq2a B r1 R R1 hr1_pos hr1_lt_R1 hR1_lt_R c riemannZeta
       hζ_analytic hζ_c_ne h_bound hfin_shift) z hz0mem using 3
   · simp [logDerivZeta]
     field
@@ -375,9 +375,9 @@ lemma zeta32upper : ∃ b > 1, ∀ t : ℝ, |t| > 2 →
 lemma Zeta1_Zeta_Expand :
     ∃ A > 1, ∃ b > 1,
     ∀ (t : ℝ) (_ : |t| > 2)
-    (r1 r R1 R : ℝ)
-    (_ : 0 < r1) (_ : r1 < r)
-    (_ : 0 < r) (_ : r < R1) (_ : 0 < R1) (_ : R1 < R) (_ : R < 1),
+    (r1 R1 R : ℝ)
+    (_ : 0 < r1) (_ : r1 < R1)
+    (_ : 0 < R1) (_ : R1 < R) (_ : R < 1),
     let c := (3/2 : ℂ) + Complex.I * t;
     ∀ (hfin : (zerosetKfR R1 c riemannZeta).Finite),
     ∀ z ∈ closedBall c r1 \ zerosetKfR R1 c riemannZeta,
@@ -391,10 +391,10 @@ lemma Zeta1_Zeta_Expand :
 
   -- Provide the constants A, b as required
   refine ⟨A, hAgt1, b, hbgt1, ?_⟩
-  intro t ht r1 r R1 R hr1_pos hr1_lt_r hr_pos hr_lt_R1 hR1_pos hR1_lt_R hR_lt_1 c hfin z hz
+  intro t ht r1 R1 R hr1_pos hr1_lt_R1 hR1_pos hR1_lt_R hR_lt_1 c hfin z hz
 
   -- Apply log_Deriv_Expansion_Zeta
-  have hexp_lemma := log_Deriv_Expansion_Zeta t ht r1 r R1 R hr1_pos hr1_lt_r hr_lt_R1 hR1_lt_R hR_lt_1
+  have hexp_lemma := log_Deriv_Expansion_Zeta t ht r1 R1 R hr1_pos hr1_lt_R1 hR1_lt_R hR_lt_1
 
   -- Set B = b * |t| as mentioned in informal proof
   have htpos : (0 : ℝ) < |t| := by linarith [ht]
@@ -450,7 +450,7 @@ lemma Zeta1_Zeta_Expand :
         · linarith
       · apply le_of_lt
         apply pow_pos
-        linarith [hr1_lt_r]
+        linarith
     · apply div_nonneg
       · norm_num
       · apply le_of_lt
@@ -486,8 +486,8 @@ lemma Zeta1_Zeta_Expand :
 -- Lemma 21: Zeta1_Zeta_Expansion (final)
 
 lemma Zeta1_Zeta_Expansion
-    (r1 r : ℝ)
-    (hr1_pos : 0 < r1) (hr1_lt_r : r1 < r) (hr_lt_R1 : r < 5 / (6 : ℝ)) :
+    (r1 : ℝ)
+    (hr1_pos : 0 < r1) (hr1_lt_R1 : r1 < 5 / 6) :
     ∃ C > 1,
     ∀ (t : ℝ) (_ : |t| > 2),
     let c := (3/2 : ℂ) + Complex.I * t;
@@ -504,7 +504,6 @@ lemma Zeta1_Zeta_Expansion
   have hR1_pos : 0 < R1 := by norm_num [R1]
   have hR1_lt_R : R1 < R := by norm_num [R1, R]
   have hR_lt_1  : R < 1 := by norm_num [R]
-  have hr_pos : 0 < r := lt_trans hr1_pos hr1_lt_r
   -- Define some shorthand constants
   let d : ℝ := (R1 - r1) ^ 2
   have hd_pos : 0 < d := by
@@ -559,7 +558,7 @@ lemma Zeta1_Zeta_Expansion
   -- Apply Zeta1_Zeta_Expand specialized to R1,R
   have ht2 : |t| > 2 := by linarith [ht]
   have hineq0 :=
-    hmain t ht2 r1 r R1 R hr1_pos hr1_lt_r (lt_trans hr1_pos hr1_lt_r) hr_lt_R1 hR1_pos hR1_lt_R hR_lt_1
+    hmain t ht2 r1 R1 R hr1_pos hr1_lt_R1 hR1_pos hR1_lt_R hR_lt_1
   have hineq1 := hineq0 hfin z hz
   -- Rewrite RHS with our K and S
   have hK_eq : (8 * R1 / (R1 - r1)^2 + 1 / ((R^2 / R1 - R1) * Real.log (R / R1))) = K := by
