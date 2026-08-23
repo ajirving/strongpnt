@@ -13,10 +13,7 @@ import Mathlib.Order.CompletePartialOrder
 import Mathlib.RingTheory.SimpleRing.Principal
 import Mathlib.Topology.Algebra.Module.ModuleTopology
 
-
-lemma lem_coseveny (n : ℕ) (_hn : n ≥ 1) (y : ℝ) : Real.cos (-y * Real.log (n : ℝ)) = Real.cos (y * Real.log (n : ℝ)) := by
-  rw [neg_mul, Real.cos_neg]
-
+open Complex Metric
 
 lemma lem_niyelog (n : ℕ) (hn : n ≥ 1) (y : ℝ) : (n : ℂ) ^ (-y * Complex.I) = Complex.exp (-y * Complex.I * Real.log (n : ℝ)) := by
   -- First show that (n : ℂ) ≠ 0
@@ -46,15 +43,10 @@ lemma lem_eacosalog2 (n : ℕ) (hn : n ≥ 1) (y : ℝ) : ((n : ℂ) ^ (-y * Com
   exact lem_eacosalog n hn y
 
 lemma lem_eacosalog3 (n : ℕ) (hn : n ≥ 1) (y : ℝ) : ((n : ℂ) ^ (-y * Complex.I)).re = Real.cos (y * Real.log (n : ℝ)) := by
-  rw [lem_eacosalog2 n hn y]
-  exact lem_coseveny n hn y
-
-lemma lem_cos2cos341 (θ : ℝ) : 2 * (1 + Real.cos θ) ^ 2 = 3 + 4 * Real.cos θ + Real.cos (2 * θ) := by
-  rw [Real.cos_two_mul]
-  ring
+  rw [lem_eacosalog2 n hn y, neg_mul, Real.cos_neg]
 
 lemma lem_postrig (θ : ℝ) : 0 ≤ 3 + 4 * Real.cos θ + Real.cos (2 * θ) := by
-  rw [← lem_cos2cos341]
+  rw [Real.cos_two_mul, (by ring : 3 + 4 * Real.cos θ + (2 * Real.cos θ ^ 2 - 1) = 2 * (1 + Real.cos θ) ^ 2)]
   positivity
 
 lemma lem_postriglogn (n : ℕ) (_hn : n ≥ 1) (t : ℝ) : 0 ≤ 3 + 4 * Real.cos (t * Real.log (n : ℝ)) + Real.cos (2 * t * Real.log (n : ℝ)) := by
@@ -62,7 +54,6 @@ lemma lem_postriglogn (n : ℕ) (_hn : n ≥ 1) (t : ℝ) : 0 ≤ 3 + 4 * Real.c
   exact lem_postrig (t * Real.log (n : ℝ))
 
 
-open Metric in
 theorem borelCaratheodory_centre {f : ℂ → ℂ} {M R : ℝ} {z c : ℂ} (hM : 0 < M) (hf : DifferentiableOn ℂ f (ball c R))
     (hf₁ : Set.MapsTo f (ball c R) {z | z.re ≤ M}) (hR : 0 < R) (hz : z ∈ ball c R)
     (hf₂ : f c = 0) : ‖f z‖ ≤ 2 * M * ‖z - c‖ / (R - ‖z - c‖) := by
@@ -77,31 +68,27 @@ theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ} {c : ℂ}
     (hM_pos : 0 < M)
     (hr_pos : 0 < r)
     (hr_lt_R : r < R)
-    (analytic : AnalyticOn ℂ f (Metric.ball c R))
+    (hf : DifferentiableOn ℂ f (ball c R))
     (hf0 : f c = 0)
-    (hRe_f_le_M : ∀ w ∈ Metric.ball c R, (f w).re ≤ M)
-    {z : ℂ} (hz : z ∈ Metric.closedBall c r) :
+    (hRe_f_le_M : Set.MapsTo f (ball c R) {z | z.re ≤ M})
+    {z : ℂ} (hz : z ∈ closedBall c r) :
     ‖deriv f z‖ ≤ (8 * M * R) / ((R - r) ^ 2) := by
-  grw [Complex.norm_deriv_le_of_forall_mem_sphere_norm_le (by linarith : 0 < (R - r) / 2) (C := 4 * M * R / (R - r))]
+  grw [norm_deriv_le_of_forall_mem_sphere_norm_le (by linarith : 0 < (R - r) / 2) (C := 4 * M * R / (R - r))]
   · exact le_of_eq (by field)
-  · apply analytic.differentiableOn.diffContOnCl_ball
-    intro z' hz'
+  · refine hf.diffContOnCl_ball fun z' hz' ↦ ?_
     simp_all
     linarith [dist_triangle z' z c]
   · intro z' hz'
-    grw [borelCaratheodory_centre hM_pos analytic.differentiableOn hRe_f_le_M (by linarith) _ hf0]
-    · simp_all only [Metric.mem_ball, Metric.mem_closedBall, Metric.mem_sphere, ← dist_eq_norm_sub]
-      have := dist_triangle z' z c
-      rw [hz'] at this
-      grw [hz, (by ring : (R - r) / 2 + r = (R + r) / 2)] at this
-      grw [this, this, (by linarith : (R + r) / 2 ≤ R), (by ring : R - (R + r) /2 = (R - r) / 2)]
-      · apply le_of_eq
-        field
+    grw [borelCaratheodory_centre hM_pos hf hRe_f_le_M (by linarith) _ hf0]
+    · simp_all only [mem_closedBall, mem_sphere, ← dist_eq_norm_sub]
+      have : dist z' c ≤ (R + r) / 2 := by linarith [dist_triangle z' z c]
+      grw [this, this, (by linarith : (R + r) / 2 ≤ R)]
+      · exact le_of_eq (by field)
       · linarith
       · exact mul_nonneg (by positivity) (by linarith)
       · linarith
       · linarith
-    · simp_all only [Metric.mem_ball, Metric.mem_closedBall, Metric.mem_sphere]
+    · simp_all only [mem_ball, mem_closedBall, mem_sphere]
       linarith [dist_triangle z' z c]
 
 #print axioms borel_caratheodory_II

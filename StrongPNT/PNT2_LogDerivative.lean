@@ -432,7 +432,7 @@ lemma apply_BC_to_Lf
     (z : ℂ) (hz : ‖z - c‖ ≤ r1) :
       ‖deriv Lf z‖ ≤
       (8 * Real.log B * r) / (r - r1)^2 := by
-  refine borel_caratheodory_II (Real.log_pos hB) hr1_pos hr1_lt_r (hLf.1.analyticOn.mono ball_subset_closedBall) hLf.2.1 ?_ (by simp_all [dist_eq_norm_sub])
+  refine borel_caratheodory_II (Real.log_pos hB) hr1_pos hr1_lt_r (hLf.1.analyticOn.mono ball_subset_closedBall).differentiableOn hLf.2.1 ?_ (by simp_all [dist_eq_norm_sub])
   exact fun w hw ↦ re_Lf_le_log_B B r R R1 hr_lt_R1 hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros (by simpa) Lf hLf w (by simp_all [dist_eq_norm_sub]; linarith)
 
 -- Lemma 6: Lf_deriv_is_logBf_deriv
