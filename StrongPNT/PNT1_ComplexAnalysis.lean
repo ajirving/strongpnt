@@ -12,6 +12,7 @@ import Mathlib.GroupTheory.MonoidLocalization.Basic
 import Mathlib.Order.CompletePartialOrder
 import Mathlib.RingTheory.SimpleRing.Principal
 import Mathlib.Topology.Algebra.Module.ModuleTopology
+import StrongPNT.bc_new
 
 open Complex Metric
 
@@ -73,23 +74,15 @@ theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ} {c : ℂ}
     (hRe_f_le_M : Set.MapsTo f (ball c R) {z | z.re ≤ M})
     {z : ℂ} (hz : z ∈ closedBall c r) :
     ‖deriv f z‖ ≤ (8 * M * R) / ((R - r) ^ 2) := by
-  grw [norm_deriv_le_of_forall_mem_sphere_norm_le (by linarith : 0 < (R - r) / 2) (C := 4 * M * R / (R - r))]
-  · exact le_of_eq (by field)
-  · refine hf.diffContOnCl_ball fun z' hz' ↦ ?_
-    simp_all
-    linarith [dist_triangle z' z c]
-  · intro z' hz'
-    grw [borelCaratheodory_centre hM_pos hf hRe_f_le_M (by linarith) _ hf0]
-    · simp_all only [mem_closedBall, mem_sphere, ← dist_eq_norm_sub]
-      have : dist z' c ≤ (R + r) / 2 := by linarith [dist_triangle z' z c]
-      grw [this, this, (by linarith : (R + r) / 2 ≤ R)]
-      · exact le_of_eq (by field)
-      · linarith
-      · exact mul_nonneg (by positivity) (by linarith)
-      · linarith
-      · linarith
-    · simp_all only [mem_ball, mem_closedBall, mem_sphere]
-      linarith [dist_triangle z' z c]
+  -- apply the sharp Borel-Carathéodory bound on the intermediate disc of radius `(R + r) / 2`
+  have hsub : closedBall c ((R + r) / 2) ⊆ ball c R := closedBall_subset_ball (by linarith)
+  refine (norm_deriv_le_of_re_le (by linarith) (hf.diffContOnCl_ball hsub)
+    (fun w hw ↦ hRe_f_le_M (hsub (sphere_subset_closedBall hw))) (by linarith)
+    (mem_closedBall_iff_norm.mp hz)).trans ?_
+  rw [hf0]
+  simp only [Complex.zero_re, sub_zero]
+  rw [div_le_div_iff₀ (by nlinarith) (by nlinarith)]
+  nlinarith [mul_nonneg hM_pos.le (sq_nonneg (R - r))]
 
 #print axioms borel_caratheodory_II
 
