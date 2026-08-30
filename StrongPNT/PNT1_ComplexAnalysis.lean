@@ -55,16 +55,6 @@ lemma lem_postriglogn (n : ℕ) (_hn : n ≥ 1) (t : ℝ) : 0 ≤ 3 + 4 * Real.c
   exact lem_postrig (t * Real.log (n : ℝ))
 
 
-theorem borelCaratheodory_centre {f : ℂ → ℂ} {M R : ℝ} {z c : ℂ} (hM : 0 < M) (hf : DifferentiableOn ℂ f (ball c R))
-    (hf₁ : Set.MapsTo f (ball c R) {z | z.re ≤ M}) (hR : 0 < R) (hz : z ∈ ball c R)
-    (hf₂ : f c = 0) : ‖f z‖ ≤ 2 * M * ‖z - c‖ / (R - ‖z - c‖) := by
-  convert Complex.borelCaratheodory_zero (f := (fun z ↦ f (z + c))) (z := z - c) hM (fun z hz ↦ ?_)
-    (fun z hz ↦ (hf₁ (by simp_all)))   hR (by simp_all [dist_eq_norm_sub]) (by simp_all)
-  · simp
-  · rw [differentiableWithinAt_comp_add_right]
-    convert! hf (z + c) (by simp_all)
-    simp
-
 theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ} {c : ℂ}
     (hM_pos : 0 < M)
     (hr_pos : 0 < r)
