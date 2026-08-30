@@ -6,7 +6,9 @@ open Metric Real Complex
 
 open scoped Nat
 
-theorem norm_iteratedDeriv_le_of_re_le {R : ℝ} {f : ℂ → ℂ} {c : ℂ} {n : ℕ} {M : ℝ} (hR : 0 < R)
+variable {r R M : ℝ} {c z : ℂ} {f : ℂ → ℂ}
+
+theorem norm_iteratedDeriv_le_of_re_le {n : ℕ} (hR : 0 < R)
     (hf : DiffContOnCl ℂ f (ball c R)) (hf0 : f c = 0)
     (hM : ∀ z ∈ sphere c R, (f z).re ≤ M) (hn : 1 ≤ n) :
     ‖iteratedDeriv n f c‖ ≤ 2 * n ! * M / R ^ n := by
@@ -16,7 +18,7 @@ theorem norm_iteratedDeriv_le_of_re_le {R : ℝ} {f : ℂ → ℂ} {c : ℂ} {n 
     hR.ne (by simpa [h] using mem_sphere_iff_norm.mp hz)
   have hconj : ∀ z ∈ sphere c R, (starRingEnd ℂ) (z - c) = (R : ℂ) ^ 2 / (z - c) := by
     intro z hz
-    rw [eq_div_iff (hzne z hz), mul_comm, Complex.mul_conj, Complex.normSq_eq_norm_sq,
+    rw [eq_div_iff (hzne z hz), mul_comm, mul_conj, normSq_eq_norm_sq,
       mem_sphere_iff_norm.mp hz]
     norm_cast
   -- Step 1 : for holomorphic `w` the average of `conj w / (z - c) ^ n` vanishes.  Indeed the mean
@@ -35,7 +37,7 @@ theorem norm_iteratedDeriv_le_of_re_le {R : ℝ} {f : ℂ → ℂ} {c : ℂ} {n 
     have hint : CircleIntegrable (fun z => w z * (z - c) ^ n) c R :=
       ContinuousOn.circleIntegrable hR.le ((hwc.mono sphere_subset_closedBall).mul (by fun_prop))
     have h2 : circleAverage (fun z => (starRingEnd ℂ) (w z * (z - c) ^ n)) c R = 0 := by
-      have h := (Complex.conjCLE : ℂ ≃L[ℝ] ℂ).toContinuousLinearMap.circleAverage_comp_comm hint
+      have h := (conjCLE : ℂ ≃L[ℝ] ℂ).toContinuousLinearMap.circleAverage_comp_comm hint
       simp only [Function.comp_def, h1, map_zero] at h
       exact h
     have h3 : circleAverage
@@ -46,7 +48,7 @@ theorem norm_iteratedDeriv_le_of_re_le {R : ℝ} {f : ℂ → ℂ} {c : ℂ} {n 
       simp only [smul_eq_mul, map_mul, map_pow, hconj z hz, div_pow]
       ring
     rw [circleAverage_fun_smul, smul_eq_zero] at h3
-    exact h3.resolve_left (pow_ne_zero _ (pow_ne_zero _ (Complex.ofReal_ne_zero.mpr hR.ne')))
+    exact h3.resolve_left (pow_ne_zero _ (pow_ne_zero _ (ofReal_ne_zero.mpr hR.ne')))
   -- integrability of `g / (z - c) ^ n` on the circle
   have hcirc : ∀ g : ℂ → ℂ, ContinuousOn g (sphere c R) →
       CircleIntegrable (fun z => g z / (z - c) ^ n) c R := fun g hg =>
@@ -54,11 +56,11 @@ theorem norm_iteratedDeriv_le_of_re_le {R : ℝ} {f : ℂ → ℂ} {c : ℂ} {n 
       (hg.div (by fun_prop) fun z hz => pow_ne_zero _ (hzne z hz))
   have hI1 : CircleIntegrable (fun z => f z / (z - c) ^ n) c R := hcirc f hfs
   have hI2 : CircleIntegrable (fun z => (starRingEnd ℂ) (f z) / (z - c) ^ n) c R :=
-    hcirc _ (Complex.continuous_conj.comp_continuousOn hfs)
+    hcirc _ (continuous_conj.comp_continuousOn hfs)
   have hI12 : CircleIntegrable
       (fun z => f z / (z - c) ^ n + (starRingEnd ℂ) (f z) / (z - c) ^ n) c R := hI1.add hI2
   have hreI : CircleIntegrable (fun z => (f z).re) c R :=
-    ContinuousOn.circleIntegrable hR.le (Complex.continuous_re.comp_continuousOn hfs)
+    ContinuousOn.circleIntegrable hR.le (continuous_re.comp_continuousOn hfs)
   -- Step 2 : Cauchy's integral formula for derivatives, as a circle average
   have E3 : circleAverage (fun z => f z / (z - c) ^ n) c R = iteratedDeriv n f c / n ! := by
     rw [circleAverage_eq_circleIntegral hR.ne',
@@ -69,7 +71,7 @@ theorem norm_iteratedDeriv_le_of_re_le {R : ℝ} {f : ℂ → ℂ} {c : ℂ} {n 
         simp only [smul_eq_mul, pow_succ, mul_inv, div_eq_mul_inv]
         ring,
       hf.circleIntegral_one_div_sub_center_pow_smul hR n, smul_smul, smul_eq_mul]
-    field_simp [Complex.two_pi_I_ne_zero, Nat.cast_ne_zero.mpr n.factorial_ne_zero]
+    field
   -- the average of the constant term vanishes too, by `key` applied to `w = 1`
   have E2 : circleAverage (fun z => (2 * M : ℂ) / (z - c) ^ n) c R = 0 := by
     have h := key (fun _ => 1) diffContOnCl_const
@@ -87,7 +89,7 @@ theorem norm_iteratedDeriv_le_of_re_le {R : ℝ} {f : ℂ → ℂ} {c : ℂ} {n 
           funext z
           rw [← add_div, ← sub_div]
           congr 1
-          rw [Complex.add_conj]
+          rw [add_conj]
           push_cast
           ring,
       circleAverage_fun_sub hI12 (hcirc _ continuousOn_const),
@@ -97,7 +99,7 @@ theorem norm_iteratedDeriv_le_of_re_le {R : ℝ} {f : ℂ → ℂ} {c : ℂ} {n 
   have hre : circleAverage (fun z => (f z).re) c R = 0 := by
     have hmv : circleAverage f c R = f c :=
       (show DiffContOnCl ℂ f (ball c |R|) by rwa [hRabs]).circleAverage
-    simpa [Function.comp_def, hmv, hf0] using Complex.reCLM.circleAverage_comp_comm
+    simpa [Function.comp_def, hmv, hf0] using reCLM.circleAverage_comp_comm
       (c := c) (R := R) (ContinuousOn.circleIntegrable hR.le hfs)
   -- Step 5 : the norm of the average is at most the average of the norm, which the mean value
   -- property evaluates
@@ -114,7 +116,7 @@ theorem norm_iteratedDeriv_le_of_re_le {R : ℝ} {f : ℂ → ℂ} {c : ℂ} {n 
     _ = (n ! : ℝ) * (2 * M / R ^ n) := by
         rw [circleAverage_congr_sphere (f₂ := fun z => (2 / R ^ n) • (M - (f z).re)) fun z hz => by
               rw [hRabs] at hz
-              simp only [hG, norm_div, Complex.norm_real, Real.norm_eq_abs, norm_pow,
+              simp only [hG, norm_div, norm_real, Real.norm_eq_abs, norm_pow,
                 mem_sphere_iff_norm.mp hz, smul_eq_mul,
                 abs_of_nonpos (by linarith [hM z hz] : 2 * ((f z).re - M) ≤ 0)]
               ring,
@@ -125,13 +127,13 @@ theorem norm_iteratedDeriv_le_of_re_le {R : ℝ} {f : ℂ → ℂ} {c : ℂ} {n 
 
 /-- **Maximum principle for the real part**: if `Re f ≤ M` on the circle `sphere c R`, then
 `Re f ≤ M` on the whole closed disc `closedBall c R`. -/
-theorem re_le_of_re_le_of_mem_closedBall {R : ℝ} {f : ℂ → ℂ} {c z : ℂ} {M : ℝ} (hR : 0 < R)
+theorem re_le_of_re_le_of_mem_closedBall (hR : 0 < R)
     (hf : DiffContOnCl ℂ f (ball c R)) (hM : ∀ w ∈ sphere c R, (f w).re ≤ M)
     (hz : z ∈ closedBall c R) : (f z).re ≤ M := by
   -- apply the maximum modulus principle to `exp ∘ f`, whose modulus is `exp (Re f)`
   refine Real.exp_le_exp.mp ?_
   rw [← Complex.norm_exp]
-  refine Complex.norm_le_of_forall_mem_frontier_norm_le isBounded_ball
+  refine norm_le_of_forall_mem_frontier_norm_le isBounded_ball
     ⟨hf.differentiableOn.cexp, hf.continuousOn.cexp⟩ (fun w hw => ?_)
     (by rwa [closure_ball c hR.ne'])
   rw [frontier_ball c hR.ne'] at hw
@@ -140,7 +142,7 @@ theorem re_le_of_re_le_of_mem_closedBall {R : ℝ} {f : ℂ → ℂ} {c z : ℂ}
 /-- **Borel-Carathéodory theorem**: if `f` is holomorphic on the disc `ball c R`, continuous up to
 the boundary, vanishes at `c`, and satisfies `Re f ≤ M` on the boundary circle, then it is bounded
 by `2 * r * M / (R - r)` on the smaller disc of radius `r < R`. -/
-theorem norm_le_of_re_le {R r : ℝ} {f : ℂ → ℂ} {c z : ℂ} {M : ℝ} (hR : 0 < R)
+theorem norm_le_of_re_le (hR : 0 < R)
     (hf : DiffContOnCl ℂ f (ball c R)) (hf0 : f c = 0)
     (hM : ∀ w ∈ sphere c R, (f w).re ≤ M) (hr : r < R) (hz : ‖z - c‖ ≤ r) :
     ‖f z‖ ≤ 2 * r * M / (R - r) := by
@@ -152,7 +154,7 @@ theorem norm_le_of_re_le {R r : ℝ} {f : ℂ → ℂ} {c z : ℂ} {M : ℝ} (hR
   -- the Taylor series of `f` at `c`, whose constant term vanishes since `f c = 0`
   have hsum : HasSum
       (fun n : ℕ => (((n + 1)! : ℂ))⁻¹ • (z - c) ^ (n + 1) • iteratedDeriv (n + 1) f c) (f z) := by
-    simpa [hf0] using (hasSum_nat_add_iff' 1).mpr (Complex.hasSum_taylorSeries_on_ball
+    simpa [hf0] using (hasSum_nat_add_iff' 1).mpr (hasSum_taylorSeries_on_ball
       hf.differentiableOn (by rw [mem_ball, dist_eq_norm]; exact hsr))
   -- each Taylor coefficient is bounded by the estimate on the derivatives at the centre
   have hcoeff : ∀ n : ℕ, ‖(((n + 1)! : ℂ))⁻¹ • (z - c) ^ (n + 1) • iteratedDeriv (n + 1) f c‖
@@ -179,7 +181,7 @@ theorem norm_le_of_re_le {R r : ℝ} {f : ℂ → ℂ} {c z : ℂ} {M : ℝ} (hR
 
 /-- **Borel-Carathéodory theorem for the derivative**: under the hypotheses of `norm_le_of_re_le`,
 the derivative of `f` on the disc of radius `r < R` is bounded by `2 * R * M / (R - r) ^ 2`. -/
-theorem norm_deriv_le_of_re_le {R r : ℝ} {f : ℂ → ℂ} {c z : ℂ} {M : ℝ} (hR : 0 < R)
+theorem norm_deriv_le_of_re_le (hR : 0 < R)
     (hf : DiffContOnCl ℂ f (ball c R)) (hf0 : f c = 0)
     (hM : ∀ w ∈ sphere c R, (f w).re ≤ M) (hr : r < R) (hz : ‖z - c‖ ≤ r) :
     ‖deriv f z‖ ≤ 2 * R * M / (R - r) ^ 2 := by
