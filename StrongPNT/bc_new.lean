@@ -6,9 +6,19 @@ open Metric Real Complex
 
 open scoped Nat
 
-variable {r R M : ℝ} {c z : ℂ} {f : ℂ → ℂ}
+variable {r R M : ℝ} {c z : ℂ} {f : ℂ → ℂ} {n : ℕ}
 
-theorem norm_iteratedDeriv_le_of_re_le {n : ℕ} (hR : 0 < R)
+lemma deriv_eq_circleAverage (hf : DiffContOnCl ℂ f (ball c R)) (hR : 0 < R) :
+    circleAverage (fun z ↦ (1 / (z - c) ^ n) • f z) c R = iteratedDeriv n f c / n ! := by
+  rw [circleAverage_eq_circleIntegral hR.ne.symm, inv_smul_eq_iff₀ (by simp)]
+  convert hf.circleIntegral_one_div_sub_center_pow_smul hR n using 1
+  · congr
+    ext
+    simp [pow_succ]
+    field
+  · simp; field
+
+theorem norm_iteratedDeriv_le_of_re_le (hR : 0 < R)
     (hf : DiffContOnCl ℂ f (ball c R)) (hf0 : f c = 0)
     (hM : ∀ z ∈ sphere c R, (f z).re ≤ M) (hn : 1 ≤ n) :
     ‖iteratedDeriv n f c‖ ≤ 2 * n ! * M / R ^ n := by
@@ -63,14 +73,8 @@ theorem norm_iteratedDeriv_le_of_re_le {n : ℕ} (hR : 0 < R)
     ContinuousOn.circleIntegrable hR.le (continuous_re.comp_continuousOn hfs)
   -- Step 2 : Cauchy's integral formula for derivatives, as a circle average
   have E3 : circleAverage (fun z => f z / (z - c) ^ n) c R = iteratedDeriv n f c / n ! := by
-    rw [circleAverage_eq_circleIntegral hR.ne',
-      show (∮ z in C(c, R), (z - c)⁻¹ • (f z / (z - c) ^ n))
-          = ∮ z in C(c, R), (1 / (z - c) ^ (n + 1)) • f z from by
-        congr 1
-        funext z
-        simp only [smul_eq_mul, pow_succ, mul_inv, div_eq_mul_inv]
-        ring,
-      hf.circleIntegral_one_div_sub_center_pow_smul hR n, smul_smul, smul_eq_mul]
+    convert deriv_eq_circleAverage hf hR
+    simp
     field
   -- the average of the constant term vanishes too, by `key` applied to `w = 1`
   have E2 : circleAverage (fun z => (2 * M : ℂ) / (z - c) ^ n) c R = 0 := by
