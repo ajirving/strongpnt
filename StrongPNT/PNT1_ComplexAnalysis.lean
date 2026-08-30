@@ -76,11 +76,9 @@ theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ} {c : ℂ}
     ‖deriv f z‖ ≤ (8 * M * R) / ((R - r) ^ 2) := by
   -- apply the sharp Borel-Carathéodory bound on the intermediate disc of radius `(R + r) / 2`
   have hsub : closedBall c ((R + r) / 2) ⊆ ball c R := closedBall_subset_ball (by linarith)
-  refine (norm_deriv_le_of_re_le (by linarith) (hf.diffContOnCl_ball hsub)
+  refine (norm_deriv_le_of_re_le (by linarith) (hf.diffContOnCl_ball hsub) hf0
     (fun w hw ↦ hRe_f_le_M (hsub (sphere_subset_closedBall hw))) (by linarith)
     (mem_closedBall_iff_norm.mp hz)).trans ?_
-  rw [hf0]
-  simp only [Complex.zero_re, sub_zero]
   rw [div_le_div_iff₀ (by nlinarith) (by nlinarith)]
   nlinarith [mul_nonneg hM_pos.le (sq_nonneg (R - r))]
 
