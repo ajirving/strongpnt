@@ -147,7 +147,6 @@ theorem norm_le_of_re_le (hR : 0 < R)
     (hf : DiffContOnCl ℂ f (ball c R)) (hf0 : f c = 0)
     (hM : ∀ w ∈ sphere c R, (f w).re ≤ M) (hr : r < R) (hz : ‖z - c‖ ≤ r) :
     ‖f z‖ ≤ 2 * r * M / (R - r) := by
-  have hs0 : (0 : ℝ) ≤ ‖z - c‖ := norm_nonneg _
   have hsr : ‖z - c‖ < R := lt_of_le_of_lt hz hr
   have hne : R - ‖z - c‖ ≠ 0 := sub_ne_zero.mpr hsr.ne'
   have hA : 0 ≤ M := by
@@ -228,6 +227,6 @@ theorem norm_deriv_le_of_re_le (hR : 0 < R)
       ring] at h1
     simpa using h1
   -- conclude, and let the radius grow to `r`
-  refine (hsum.norm_le_of_bounded hgeo hcoeff).trans ?_
-  rw [div_le_div_iff₀ (pow_pos (by linarith) 2) (pow_pos (by linarith) 2)]
-  exact mul_le_mul_of_nonneg_left (by nlinarith) (by positivity)
+  grw [hsum.norm_le_of_bounded hgeo hcoeff]
+  gcongr
+
