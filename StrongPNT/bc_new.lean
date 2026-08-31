@@ -21,7 +21,7 @@ lemma deriv_eq_circleAverage (hf : DiffContOnCl ℂ f (ball c R)) (hR : 0 < R) :
 theorem norm_iteratedDeriv_le_of_re_le (hR : 0 < R)
     (hf : DiffContOnCl ℂ f (ball c R)) (hf0 : f c = 0)
     (hM : ∀ z ∈ sphere c R, (f z).re ≤ M) (hn : 1 ≤ n) :
-    ‖iteratedDeriv n f c‖ ≤ 2 * n ! * M / R ^ n := by
+    ‖iteratedDeriv n f c‖ / n ! ≤ 2 * M / R ^ n := by
   have hRabs : |R| = R := abs_of_pos hR
   have hfs : ContinuousOn f (sphere c R) := hf.continuousOn_ball.mono sphere_subset_closedBall
   have hzne : ∀ z ∈ sphere c R, z - c ≠ 0 := fun z hz h =>
@@ -107,17 +107,15 @@ theorem norm_iteratedDeriv_le_of_re_le (hR : 0 < R)
       (c := c) (R := R) (ContinuousOn.circleIntegrable hR.le hfs)
   -- Step 5 : the norm of the average is at most the average of the norm, which the mean value
   -- property evaluates
-  calc ‖iteratedDeriv n f c‖
-      = (n ! : ℝ) * ‖circleAverage G c R‖ := by
-        rw [hGsum, norm_div, Complex.norm_natCast, mul_div_cancel₀ _
-          (Nat.cast_ne_zero.mpr n.factorial_ne_zero : ((n ! : ℝ)) ≠ 0)]
-    _ ≤ (n ! : ℝ) * circleAverage (fun z => ‖G z‖) c R := by
-        refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+  calc _
+      = ‖circleAverage G c R‖ := by
+        rw [hGsum, norm_div, Complex.norm_natCast]
+    _ ≤ circleAverage (fun z => ‖G z‖) c R := by
         rw [circleAverage_def, circleAverage_def, norm_smul, smul_eq_mul, Real.norm_eq_abs,
           abs_of_pos (by positivity : (0 : ℝ) < (2 * π)⁻¹)]
         exact mul_le_mul_of_nonneg_left
           (intervalIntegral.norm_integral_le_integral_norm Real.two_pi_pos.le) (by positivity)
-    _ = (n ! : ℝ) * (2 * M / R ^ n) := by
+    _ = (2 * M / R ^ n) := by
         rw [circleAverage_congr_sphere (f₂ := fun z => (2 / R ^ n) • (M - (f z).re)) fun z hz => by
               rw [hRabs] at hz
               simp only [hG, norm_div, norm_real, Real.norm_eq_abs, norm_pow,
@@ -127,7 +125,6 @@ theorem norm_iteratedDeriv_le_of_re_le (hR : 0 < R)
           circleAverage_fun_smul, smul_eq_mul,
           circleAverage_fun_sub (circleIntegrable_const M c R) hreI, circleAverage_const, hre]
         ring
-    _ = 2 * n ! * M / R ^ n := by ring
 
 /-- **Maximum principle for the real part**: if `Re f ≤ M` on the circle `sphere c R`, then
 `Re f ≤ M` on the whole closed disc `closedBall c R`. -/
@@ -167,13 +164,13 @@ theorem norm_le_of_re_le (hR : 0 < R)
     have hd := norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (Nat.le_add_left 1 n)
     have hfac : (0 : ℝ) < ((n + 1)! : ℝ) := by positivity
     rw [norm_smul, norm_smul, norm_inv, Complex.norm_natCast, norm_pow]
-    calc (((n + 1)! : ℝ))⁻¹ * (‖z - c‖ ^ (n + 1) * ‖iteratedDeriv (n + 1) f c‖)
-        ≤ (((n + 1)! : ℝ))⁻¹ * (‖z - c‖ ^ (n + 1) * (2 * ((n + 1)! : ℝ) * M / R ^ (n + 1))) := by
-          gcongr
-      _ = 2 * M * (‖z - c‖ / R) * (‖z - c‖ / R) ^ n := by
-          rw [div_pow, pow_succ]
-          field_simp
-          ring
+    calc _
+        = ‖z - c‖ ^ (n + 1) * (‖iteratedDeriv (n + 1) f c‖ / (n + 1) !) := by field
+        _ ≤ _ := by
+          grw [hd]
+          apply le_of_eq
+          rw [pow_succ, pow_succ, div_pow]
+          field
   -- compare with a geometric series, then let the radius grow to `r`
   refine (hsum.norm_le_of_bounded ((hasSum_geometric_of_lt_one (by positivity)
     ((div_lt_one hR).mpr hsr)).mul_left (2 * M * (‖z - c‖ / R))) hcoeff).trans ?_
@@ -208,13 +205,14 @@ theorem norm_deriv_le_of_re_le (hR : 0 < R)
     have hfacsucc : (((n + 1)! : ℝ)) = ((n : ℝ) + 1) * (n ! : ℝ) := by
       rw [Nat.factorial_succ]; push_cast; ring
     rw [norm_smul, norm_smul, norm_inv, Complex.norm_natCast, norm_pow, div_pow]
-    calc ((n ! : ℝ))⁻¹ * (‖z - c‖ ^ n * ‖iteratedDeriv (n + 1) f c‖)
-        ≤ ((n ! : ℝ))⁻¹ * (‖z - c‖ ^ n
-            * (2 * ((n + 1)! : ℝ) * M / R ^ (n + 1))) := by gcongr
-      _ = 2 * M / R * (((n : ℝ) + 1) * (‖z - c‖ ^ n / R ^ n)) := by
+    calc _
+        = ‖z - c‖ ^ n * (n + 1) * (‖iteratedDeriv (n + 1) f c‖ / (n + 1) !) := by
           rw [hfacsucc]
-          field_simp
-          ring
+          field
+        _ ≤ _ := by
+          grw [hd]
+          apply le_of_eq
+          field
   -- sum the majorant : a differentiated geometric series
   have hgeo : HasSum (fun n : ℕ => 2 * M / R * (((n : ℝ) + 1) * (‖z - c‖ / R) ^ n))
       (2 * R * M / (R - ‖z - c‖) ^ 2) := by
