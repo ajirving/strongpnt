@@ -126,20 +126,6 @@ theorem norm_iteratedDeriv_le_of_re_le (hR : 0 < R)
           circleAverage_fun_sub (circleIntegrable_const M c R) hreI, circleAverage_const, hre]
         ring
 
-/-- **Maximum principle for the real part**: if `Re f ≤ M` on the circle `sphere c R`, then
-`Re f ≤ M` on the whole closed disc `closedBall c R`. -/
-theorem re_le_of_re_le_of_mem_closedBall (hR : 0 < R)
-    (hf : DiffContOnCl ℂ f (ball c R)) (hM : ∀ w ∈ sphere c R, (f w).re ≤ M)
-    (hz : z ∈ closedBall c R) : (f z).re ≤ M := by
-  -- apply the maximum modulus principle to `exp ∘ f`, whose modulus is `exp (Re f)`
-  refine Real.exp_le_exp.mp ?_
-  rw [← Complex.norm_exp]
-  refine norm_le_of_forall_mem_frontier_norm_le isBounded_ball
-    ⟨hf.differentiableOn.cexp, hf.continuousOn.cexp⟩ (fun w hw => ?_)
-    (by rwa [closure_ball c hR.ne'])
-  rw [frontier_ball c hR.ne'] at hw
-  exact Complex.norm_exp (f w) ▸ Real.exp_le_exp.mpr (hM w hw)
-
 /-- **Borel-Carathéodory theorem**: if `f` is holomorphic on the disc `ball c R`, continuous up to
 the boundary, vanishes at `c`, and satisfies `Re f ≤ M` on the boundary circle, then it is bounded
 by `2 * r * M / (R - r)` on the smaller disc of radius `r < R`. -/
@@ -150,7 +136,11 @@ theorem norm_le_of_re_le (hR : 0 < R)
   have hsr : ‖z - c‖ < R := lt_of_le_of_lt hz hr
   have hne : R - ‖z - c‖ ≠ 0 := sub_ne_zero.mpr hsr.ne'
   have hA : 0 ≤ M := by
-    simpa [hf0] using re_le_of_re_le_of_mem_closedBall hR hf hM (mem_closedBall_self hR.le)
+    have := norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (by rfl : 1 ≤ 1)
+    by_contra! h
+    grw [h] at this
+    simp at this
+    linarith [norm_nonneg (deriv f c)]
   -- the Taylor series of `f` at `c`, whose constant term vanishes since `f c = 0`
   have hsum : HasSum
       (fun n : ℕ => (((n + 1)! : ℂ))⁻¹ • (z - c) ^ (n + 1) • iteratedDeriv (n + 1) f c) (f z) := by
@@ -188,7 +178,11 @@ theorem norm_deriv_le_of_re_le (hR : 0 < R)
   have hs0 : (0 : ℝ) ≤ ‖z - c‖ := norm_nonneg _
   have hsr : ‖z - c‖ < R := lt_of_le_of_lt hz hr
   have hA : 0 ≤ M := by
-    simpa [hf0] using re_le_of_re_le_of_mem_closedBall hR hf hM (mem_closedBall_self hR.le)
+    have := norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (by rfl : 1 ≤ 1)
+    by_contra! h
+    grw [h] at this
+    simp at this
+    linarith [norm_nonneg (deriv f c)]
   -- `deriv f` is again holomorphic on the disc, so it is the sum of its Taylor series at `c`
   have hsum : HasSum
       (fun n : ℕ => ((n ! : ℂ))⁻¹ • (z - c) ^ n • iteratedDeriv (n + 1) f c) (deriv f z) := by
