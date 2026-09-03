@@ -65,11 +65,10 @@ theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ} {c : ℂ}
     {z : ℂ} (hz : z ∈ closedBall c r) :
     ‖deriv f z‖ ≤ (8 * M * R) / ((R - r) ^ 2) := by
   -- apply the sharp Borel-Carathéodory bound directly on the disc of radius `R`
-  refine (norm_deriv_le_of_re_le (by linarith) hf hf0 (fun w hw ↦ hRe_f_le_M hw) hr_lt_R
-    (mem_closedBall_iff_norm.mp hz)).trans ?_
-  have hd : (0 : ℝ) < (R - r) ^ 2 := pow_pos (by linarith) 2
-  rw [div_le_div_iff₀ hd hd]
-  nlinarith [mul_nonneg (mul_nonneg hM_pos.le (by linarith : (0 : ℝ) ≤ R)) hd.le]
+  grw [norm_deriv_le_of_re_le (by linarith) hf hf0 (fun w hw ↦ hRe_f_le_M hw) hr_lt_R
+    (mem_closedBall_iff_norm.mp hz)]
+  rw [(by ring : 2 * R * M = 2 * M * R)]
+  gcongr <;> linarith
 
 #print axioms borel_caratheodory_II
 
