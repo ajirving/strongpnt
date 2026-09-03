@@ -64,13 +64,12 @@ theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ} {c : ℂ}
     (hRe_f_le_M : Set.MapsTo f (ball c R) {z | z.re ≤ M})
     {z : ℂ} (hz : z ∈ closedBall c r) :
     ‖deriv f z‖ ≤ (8 * M * R) / ((R - r) ^ 2) := by
-  -- apply the sharp Borel-Carathéodory bound on the intermediate disc of radius `(R + r) / 2`
-  have hsub : closedBall c ((R + r) / 2) ⊆ ball c R := closedBall_subset_ball (by linarith)
-  refine (norm_deriv_le_of_re_le (by linarith) (hf.diffContOnCl_ball hsub) hf0
-    (fun w hw ↦ hRe_f_le_M (hsub (sphere_subset_closedBall hw))) (by linarith)
+  -- apply the sharp Borel-Carathéodory bound directly on the disc of radius `R`
+  refine (norm_deriv_le_of_re_le (by linarith) hf hf0 (fun w hw ↦ hRe_f_le_M hw) hr_lt_R
     (mem_closedBall_iff_norm.mp hz)).trans ?_
-  rw [div_le_div_iff₀ (by nlinarith) (by nlinarith)]
-  nlinarith [mul_nonneg hM_pos.le (sq_nonneg (R - r))]
+  have hd : (0 : ℝ) < (R - r) ^ 2 := pow_pos (by linarith) 2
+  rw [div_le_div_iff₀ hd hd]
+  nlinarith [mul_nonneg (mul_nonneg hM_pos.le (by linarith : (0 : ℝ) ≤ R)) hd.le]
 
 #print axioms borel_caratheodory_II
 

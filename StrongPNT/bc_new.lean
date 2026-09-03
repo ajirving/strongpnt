@@ -2,7 +2,7 @@ import Mathlib.Analysis.Complex.AbsMax
 import Mathlib.Analysis.Complex.TaylorSeries
 import Mathlib.Analysis.Complex.MeanValue
 
-open Metric Real Complex
+open Metric Real Complex Filter Topology
 
 open scoped Nat
 
@@ -18,7 +18,7 @@ lemma deriv_eq_circleAverage (hf : DiffContOnCl ℂ f (ball c R)) (hR : 0 < R) :
     field
   · simp; field
 
-theorem norm_iteratedDeriv_le_of_re_le (hR : 0 < R)
+theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
     (hf : DiffContOnCl ℂ f (ball c R)) (hf0 : f c = 0)
     (hM : ∀ z ∈ sphere c R, (f z).re ≤ M) (hn : 1 ≤ n) :
     ‖iteratedDeriv n f c‖ / n ! ≤ 2 * M / R ^ n := by
@@ -126,26 +126,37 @@ theorem norm_iteratedDeriv_le_of_re_le (hR : 0 < R)
           circleAverage_fun_sub (circleIntegrable_const M c R) hreI, circleAverage_const, hre]
         ring
 
-/-- **Borel-Carathéodory theorem**: if `f` is holomorphic on the disc `ball c R`, continuous up to
-the boundary, vanishes at `c`, and satisfies `Re f ≤ M` on the boundary circle, then it is bounded
-by `2 * r * M / (R - r)` on the smaller disc of radius `r < R`. -/
+/-- The bound on the derivatives at the centre, assuming only that `f` is holomorphic on the open
+disc and that `Re f ≤ M` there : apply the previous estimate on the discs of radius `R' < R` and
+let `R'` tend to `R`. -/
+theorem norm_iteratedDeriv_le_of_re_le (hR : 0 < R)
+    (hf : DifferentiableOn ℂ f (ball c R)) (hf0 : f c = 0)
+    (hM : ∀ z ∈ ball c R, (f z).re ≤ M) (hn : 1 ≤ n) :
+    ‖iteratedDeriv n f c‖ / n ! ≤ 2 * M / R ^ n := by
+  refine ge_of_tendsto (f := fun R' : ℝ => 2 * M / R' ^ n) (x := 𝓝[<] R)
+    (((continuousAt_const.div (by fun_prop) (by positivity)).tendsto).mono_left
+      nhdsWithin_le_nhds) ?_
+  filter_upwards [self_mem_nhdsWithin, eventually_nhdsWithin_of_eventually_nhds
+    (eventually_gt_nhds hR)] with R' hR'R hR'0
+  have hsub : closedBall c R' ⊆ ball c R := closedBall_subset_ball hR'R
+  exact norm_iteratedDeriv_le_of_re_le_sphere hR'0 (hf.diffContOnCl_ball hsub) hf0
+    (fun z hz => hM z (hsub (sphere_subset_closedBall hz))) hn
+
+/-- **Borel-Carathéodory theorem**: if `f` is holomorphic on the disc `ball c R`, vanishes at `c`,
+and satisfies `Re f ≤ M` there, then it is bounded by `2 * r * M / (R - r)` on the smaller disc of
+radius `r < R`. -/
 theorem norm_le_of_re_le (hR : 0 < R)
-    (hf : DiffContOnCl ℂ f (ball c R)) (hf0 : f c = 0)
-    (hM : ∀ w ∈ sphere c R, (f w).re ≤ M) (hr : r < R) (hz : ‖z - c‖ ≤ r) :
+    (hf : DifferentiableOn ℂ f (ball c R)) (hf0 : f c = 0)
+    (hM : ∀ w ∈ ball c R, (f w).re ≤ M) (hr : r < R) (hz : ‖z - c‖ ≤ r) :
     ‖f z‖ ≤ 2 * r * M / (R - r) := by
   have hsr : ‖z - c‖ < R := lt_of_le_of_lt hz hr
   have hne : R - ‖z - c‖ ≠ 0 := sub_ne_zero.mpr hsr.ne'
-  have hA : 0 ≤ M := by
-    have := norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (by rfl : 1 ≤ 1)
-    by_contra! h
-    grw [h] at this
-    simp at this
-    linarith [norm_nonneg (deriv f c)]
+  have hA : 0 ≤ M := by simpa [hf0] using hM c (mem_ball_self hR)
   -- the Taylor series of `f` at `c`, whose constant term vanishes since `f c = 0`
   have hsum : HasSum
       (fun n : ℕ => (((n + 1)! : ℂ))⁻¹ • (z - c) ^ (n + 1) • iteratedDeriv (n + 1) f c) (f z) := by
     simpa [hf0] using (hasSum_nat_add_iff' 1).mpr (hasSum_taylorSeries_on_ball
-      hf.differentiableOn (by rw [mem_ball, dist_eq_norm]; exact hsr))
+      hf (by rw [mem_ball, dist_eq_norm]; exact hsr))
   -- each Taylor coefficient is bounded by the estimate on the derivatives at the centre
   have hcoeff : ∀ n : ℕ, ‖(((n + 1)! : ℂ))⁻¹ • (z - c) ^ (n + 1) • iteratedDeriv (n + 1) f c‖
       ≤ 2 * M * (‖z - c‖ / R) * (‖z - c‖ / R) ^ n := by
@@ -172,21 +183,16 @@ theorem norm_le_of_re_le (hR : 0 < R)
 /-- **Borel-Carathéodory theorem for the derivative**: under the hypotheses of `norm_le_of_re_le`,
 the derivative of `f` on the disc of radius `r < R` is bounded by `2 * R * M / (R - r) ^ 2`. -/
 theorem norm_deriv_le_of_re_le (hR : 0 < R)
-    (hf : DiffContOnCl ℂ f (ball c R)) (hf0 : f c = 0)
-    (hM : ∀ w ∈ sphere c R, (f w).re ≤ M) (hr : r < R) (hz : ‖z - c‖ ≤ r) :
+    (hf : DifferentiableOn ℂ f (ball c R)) (hf0 : f c = 0)
+    (hM : ∀ w ∈ ball c R, (f w).re ≤ M) (hr : r < R) (hz : ‖z - c‖ ≤ r) :
     ‖deriv f z‖ ≤ 2 * R * M / (R - r) ^ 2 := by
   have hs0 : (0 : ℝ) ≤ ‖z - c‖ := norm_nonneg _
   have hsr : ‖z - c‖ < R := lt_of_le_of_lt hz hr
-  have hA : 0 ≤ M := by
-    have := norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (by rfl : 1 ≤ 1)
-    by_contra! h
-    grw [h] at this
-    simp at this
-    linarith [norm_nonneg (deriv f c)]
+  have hA : 0 ≤ M := by simpa [hf0] using hM c (mem_ball_self hR)
   -- `deriv f` is again holomorphic on the disc, so it is the sum of its Taylor series at `c`
   have hsum : HasSum
       (fun n : ℕ => ((n ! : ℂ))⁻¹ • (z - c) ^ n • iteratedDeriv (n + 1) f c) (deriv f z) := by
-    have h := Complex.hasSum_taylorSeries_on_ball (hf.differentiableOn.deriv isOpen_ball)
+    have h := Complex.hasSum_taylorSeries_on_ball (hf.deriv isOpen_ball)
       (show z ∈ ball c R by rw [mem_ball, dist_eq_norm]; exact hsr)
     simpa only [← iteratedDeriv_succ'] using h
   -- each coefficient is bounded by the estimate on the derivatives at the centre
