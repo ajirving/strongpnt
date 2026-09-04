@@ -18,6 +18,13 @@ lemma deriv_eq_circleAverage (hf : DiffContOnCl ℂ f (ball c R)) (hR : 0 < R) :
     field
   · simp; field
 
+theorem norm_circleAverage_le_circleAverage_norm {E : Type*} {f : ℂ → E} [NormedAddCommGroup E] [NormedSpace ℝ E] :
+    ‖circleAverage f c R‖ ≤ circleAverage (fun z ↦ ‖f z‖) c R := by
+  simp only  [circleAverage_def, norm_smul, smul_eq_mul]
+  gcongr
+  · simp [abs_of_nonneg pi_nonneg]
+  exact intervalIntegral.norm_integral_le_integral_norm (by positivity)
+
 theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
     (hf : DiffContOnCl ℂ f (ball c R)) (hf0 : f c = 0)
     (hM : ∀ z ∈ sphere c R, (f z).re ≤ M) (hn : 1 ≤ n) :
@@ -111,10 +118,7 @@ theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
       = ‖circleAverage G c R‖ := by
         rw [hGsum, norm_div, Complex.norm_natCast]
     _ ≤ circleAverage (fun z => ‖G z‖) c R := by
-        rw [circleAverage_def, circleAverage_def, norm_smul, smul_eq_mul, Real.norm_eq_abs,
-          abs_of_pos (by positivity : (0 : ℝ) < (2 * π)⁻¹)]
-        exact mul_le_mul_of_nonneg_left
-          (intervalIntegral.norm_integral_le_integral_norm Real.two_pi_pos.le) (by positivity)
+      exact norm_circleAverage_le_circleAverage_norm
     _ = (2 * M / R ^ n) := by
         rw [circleAverage_congr_sphere (f₂ := fun z => (2 / R ^ n) • (M - (f z).re)) fun z hz => by
               rw [hRabs] at hz
