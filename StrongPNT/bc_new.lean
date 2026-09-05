@@ -4,7 +4,7 @@ import Mathlib.Analysis.Complex.MeanValue
 
 open Metric Real Complex Filter Topology
 
-open scoped Nat
+open scoped Nat ComplexConjugate
 
 variable {r R M : ℝ} {c z : ℂ} {f : ℂ → ℂ} {n : ℕ}
 
@@ -33,7 +33,7 @@ theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
   have hfs : ContinuousOn f (sphere c R) := hf.continuousOn_ball.mono sphere_subset_closedBall
   have hzne : ∀ z ∈ sphere c R, z - c ≠ 0 := fun z hz h =>
     hR.ne (by simpa [h] using mem_sphere_iff_norm.mp hz)
-  have hconj : ∀ z ∈ sphere c R, (starRingEnd ℂ) (z - c) = (R : ℂ) ^ 2 / (z - c) := by
+  have hconj : ∀ z ∈ sphere c R, conj (z - c) = (R : ℂ) ^ 2 / (z - c) := by
     intro z hz
     rw [eq_div_iff (hzne z hz), mul_comm, mul_conj, normSq_eq_norm_sq,
       mem_sphere_iff_norm.mp hz]
@@ -41,7 +41,7 @@ theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
   -- Step 1 : for holomorphic `w` the average of `conj w / (z - c) ^ n` vanishes.  Indeed the mean
   -- value property kills the average of `w * (z - c) ^ n`, and conjugating it turns `conj (z - c)`
   -- into `R ^ 2 / (z - c)` on the circle.
-  have key : circleAverage (fun z => (starRingEnd ℂ) (f z) / (z - c) ^ n) c R = 0 := by
+  have key : circleAverage (fun z => conj (f z) / (z - c) ^ n) c R = 0 := by
     have hwc : ContinuousOn f (closedBall c R) := hf.continuousOn_ball
     have hdc : DiffContOnCl ℂ (fun z => f z * (z - c) ^ n) (ball c |R|) := by
       rw [hRabs]
@@ -51,12 +51,12 @@ theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
       simp [zero_pow (by omega : n ≠ 0)]
     have hint : CircleIntegrable (fun z => f z * (z - c) ^ n) c R :=
       ContinuousOn.circleIntegrable hR.le ((hwc.mono sphere_subset_closedBall).mul (by fun_prop))
-    have h2 : circleAverage (fun z => (starRingEnd ℂ) (f z * (z - c) ^ n)) c R = 0 := by
+    have h2 : circleAverage (fun z => conj (f z * (z - c) ^ n)) c R = 0 := by
       have h := (conjCLE : ℂ ≃L[ℝ] ℂ).toContinuousLinearMap.circleAverage_comp_comm hint
       simp only [Function.comp_def, h1, map_zero] at h
       exact h
     have h3 : circleAverage
-          (fun z => ((R : ℂ) ^ 2) ^ n • ((starRingEnd ℂ) (f z) / (z - c) ^ n)) c R = 0 := by
+          (fun z => ((R : ℂ) ^ 2) ^ n • (conj (f z) / (z - c) ^ n)) c R = 0 := by
       rw [← h2]
       refine circleAverage_congr_sphere fun z hz => ?_
       rw [hRabs] at hz
@@ -70,10 +70,10 @@ theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
     ContinuousOn.circleIntegrable hR.le
       (hg.div (by fun_prop) fun z hz => pow_ne_zero _ (hzne z hz))
   have hI1 : CircleIntegrable (fun z => f z / (z - c) ^ n) c R := hcirc f hfs
-  have hI2 : CircleIntegrable (fun z => (starRingEnd ℂ) (f z) / (z - c) ^ n) c R :=
+  have hI2 : CircleIntegrable (fun z => conj (f z) / (z - c) ^ n) c R :=
     hcirc _ (continuous_conj.comp_continuousOn hfs)
   have hI12 : CircleIntegrable
-      (fun z => f z / (z - c) ^ n + (starRingEnd ℂ) (f z) / (z - c) ^ n) c R := hI1.add hI2
+      (fun z => f z / (z - c) ^ n + conj (f z) / (z - c) ^ n) c R := hI1.add hI2
   have hreI : CircleIntegrable (fun z => (f z).re) c R :=
     ContinuousOn.circleIntegrable hR.le (continuous_re.comp_continuousOn hfs)
   -- Step 2 : Cauchy's integral formula for derivatives, as a circle average
@@ -88,7 +88,7 @@ theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
   set G : ℂ → ℂ := fun z => ((2 * ((f z).re - M) : ℝ) : ℂ) / (z - c) ^ n with hG
   have hGsum : circleAverage G c R = iteratedDeriv n f c / n ! := by
     rw [hG, show (fun z : ℂ => ((2 * ((f z).re - M) : ℝ) : ℂ) / (z - c) ^ n)
-        = fun z => (f z / (z - c) ^ n + (starRingEnd ℂ) (f z) / (z - c) ^ n)
+        = fun z => (f z / (z - c) ^ n + conj (f z) / (z - c) ^ n)
             - (2 * M : ℂ) / (z - c) ^ n from by
           funext z
           rw [← add_div, ← sub_div]
