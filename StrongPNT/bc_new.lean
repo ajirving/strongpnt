@@ -147,37 +147,25 @@ radius `r < R`. -/
 theorem norm_le_of_re_le (hR : 0 < R)
     (hf : DifferentiableOn ℂ f (ball c R)) (hf0 : f c = 0)
     (hM : ∀ w ∈ ball c R, (f w).re ≤ M) (hr : r < R) (hz : ‖z - c‖ ≤ r) :
-    ‖f z‖ ≤ 2 * r * M / (R - r) := by
-  have hsr : ‖z - c‖ < R := lt_of_le_of_lt hz hr
-  have hne : R - ‖z - c‖ ≠ 0 := sub_ne_zero.mpr hsr.ne'
-  have hA : 0 ≤ M := by simpa [hf0] using hM c (mem_ball_self hR)
+    ‖f z‖ ≤ 2 * M * ‖z - c‖ / (R - ‖z - c‖) := by
+  have hsr : ‖z - c‖ < R := by linarith
   -- the Taylor series of `f` at `c`, whose constant term vanishes since `f c = 0`
   have hsum : HasSum
       (fun n : ℕ => (((n + 1)! : ℂ))⁻¹ • (z - c) ^ (n + 1) • iteratedDeriv (n + 1) f c) (f z) := by
     simpa [hf0] using (hasSum_nat_add_iff' 1).mpr (hasSum_taylorSeries_on_ball
       hf (by rw [mem_ball, dist_eq_norm]; exact hsr))
-  -- each Taylor coefficient is bounded by the estimate on the derivatives at the centre
-  have hcoeff : ∀ n : ℕ, ‖(((n + 1)! : ℂ))⁻¹ • (z - c) ^ (n + 1) • iteratedDeriv (n + 1) f c‖
-      ≤ 2 * M * (‖z - c‖ / R) * (‖z - c‖ / R) ^ n := by
-    intro n
-    have hd := norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (Nat.le_add_left 1 n)
-    simp only [smul_eq_mul]
+  convert hsum.norm_le_of_bounded ((hasSum_geometric_of_lt_one (by positivity)
+    ((div_lt_one hR).mpr hsr)).mul_left (2 * M * (‖z - c‖ / R))) fun n ↦ _
+  · field
+  · simp only [smul_eq_mul]
     rw [mul_comm, mul_assoc, norm_mul, norm_pow]
-    calc _
-        = ‖z - c‖ ^ (n + 1) * (‖iteratedDeriv (n + 1) f c / ((n + 1) !)‖) := by field_simp
-        _ ≤ _ := by
-          grw [hd]
-          apply le_of_eq
-          rw [pow_succ, pow_succ, div_pow]
-          field
-  -- compare with a geometric series, then let the radius grow to `r`
-  refine (hsum.norm_le_of_bounded ((hasSum_geometric_of_lt_one (by positivity)
-    ((div_lt_one hR).mpr hsr)).mul_left (2 * M * (‖z - c‖ / R))) hcoeff).trans ?_
-  rw [show 2 * M * (‖z - c‖ / R) * (1 - ‖z - c‖ / R)⁻¹ = 2 * M * ‖z - c‖ / (R - ‖z - c‖) from by
-      rw [eq_div_iff hne]
-      field_simp,
-    div_le_div_iff₀ (by linarith) (by linarith)]
-  nlinarith [mul_nonneg (mul_nonneg hA (sub_nonneg.mpr hz)) hR.le]
+    calc
+    _ = ‖iteratedDeriv (n + 1) f c / ((n + 1) !)‖ * ‖z - c‖ ^ (n + 1) := by field_simp
+    _ ≤ _ := by
+      grw [norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (Nat.le_add_left 1 n)]
+      apply le_of_eq
+      rw [pow_succ, pow_succ, div_pow]
+      field
 
 /-- **Borel-Carathéodory theorem for the derivative**: under the hypotheses of `norm_le_of_re_le`,
 the derivative of `f` on the disc of radius `r < R` is bounded by `2 * R * M / (R - r) ^ 2`. -/
@@ -194,24 +182,6 @@ theorem norm_deriv_le_of_re_le (hR : 0 < R)
     have h := Complex.hasSum_taylorSeries_on_ball (hf.deriv isOpen_ball)
       (show z ∈ ball c R by rw [mem_ball, dist_eq_norm]; exact hsr)
     simpa only [← iteratedDeriv_succ'] using h
-  -- each coefficient is bounded by the estimate on the derivatives at the centre
-  have hcoeff : ∀ n : ℕ, ‖((n ! : ℂ))⁻¹ • (z - c) ^ n • iteratedDeriv (n + 1) f c‖
-      ≤ 2 * M / R * (((n : ℝ) + 1) * (‖z - c‖ / R) ^ n) := by
-    intro n
-    have hd := norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (Nat.le_add_left 1 n)
-    have hfacsucc : (((n + 1)! : ℝ)) = ((n : ℝ) + 1) * (n ! : ℝ) := by
-      rw [Nat.factorial_succ]; push_cast; ring
-    rw [norm_smul, norm_smul, norm_inv, Complex.norm_natCast, norm_pow, div_pow]
-    calc _
-        = ‖z - c‖ ^ n * (n + 1) * (‖iteratedDeriv (n + 1) f c‖ / (n + 1) !) := by
-          rw [hfacsucc]
-          field
-        _ = ‖z - c‖ ^ n * (n + 1) * (‖iteratedDeriv (n + 1) f c / ((n + 1) !)‖) := by simp
-        _ ≤ _ := by
-          grw [hd]
-          apply le_of_eq
-          field
-  -- sum the majorant : a differentiated geometric series
   have hgeo : HasSum (fun n : ℕ => 2 * M / R * (((n : ℝ) + 1) * (‖z - c‖ / R) ^ n))
       (2 * R * M / (R - ‖z - c‖) ^ 2) := by
     have hne : R - ‖z - c‖ ≠ 0 := sub_ne_zero.mpr hsr.ne'
@@ -219,13 +189,20 @@ theorem norm_deriv_le_of_re_le (hR : 0 < R)
       (show ‖(‖z - c‖ / R : ℝ)‖ < 1 by
         rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
         exact (div_lt_one hR).mpr hsr)).mul_left (2 * M / R)
-    rw [show 2 * M / R * (1 / (1 - ‖z - c‖ / R) ^ (1 + 1)) = 2 * R * M / (R - ‖z - c‖) ^ 2 from by
-      rw [show (1 : ℝ) - ‖z - c‖ / R = (R - ‖z - c‖) / R by field_simp, div_pow, one_div_div,
-        div_mul_div_comm,
-        div_eq_div_iff (mul_ne_zero hR.ne' (pow_ne_zero _ hne)) (pow_ne_zero 2 hne)]
-      ring] at h1
-    simpa using h1
-  -- conclude, and let the radius grow to `r`
-  grw [hsum.norm_le_of_bounded hgeo hcoeff]
-  gcongr
-
+    convert! h1 using 1
+    · simp
+    · rw [show (1 : ℝ) - ‖z - c‖ / R = (R - ‖z - c‖) / R by field_simp, div_pow]
+      field
+  grw [hsum.norm_le_of_bounded hgeo fun n ↦ ?_]
+  · gcongr
+  · have hfacsucc : (((n + 1)! : ℝ)) = ((n : ℝ) + 1) * (n ! : ℝ) := by
+      rw [Nat.factorial_succ]; push_cast; ring
+    rw [norm_smul, norm_smul, norm_inv, Complex.norm_natCast, norm_pow, div_pow]
+    calc
+    _ = ‖z - c‖ ^ n * (n + 1) * (‖iteratedDeriv (n + 1) f c‖ / (n + 1) !) := by
+      rw [hfacsucc]
+      field
+    _ = ‖z - c‖ ^ n * (n + 1) * (‖iteratedDeriv (n + 1) f c / ((n + 1) !)‖) := by simp
+    _ ≤ _ := by
+      grw [norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (Nat.le_add_left 1 n)]
+      exact le_of_eq (by field)
