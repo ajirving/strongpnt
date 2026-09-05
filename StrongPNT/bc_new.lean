@@ -85,11 +85,9 @@ theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
     field
   -- the average of the constant term vanishes too, by `key` applied to `w = 1`
   have E2 : circleAverage (fun z => (2 * M : ℂ) / (z - c) ^ n) c R = 0 := by
-    have h := key (fun _ => 1) diffContOnCl_const
-    simp only [map_one] at h
-    rw [show (fun z : ℂ => (2 * M : ℂ) / (z - c) ^ n)
-        = fun z => (2 * M : ℂ) • ((1 : ℂ) / (z - c) ^ n) from
-      funext fun z => by simp [smul_eq_mul, div_eq_mul_inv], circleAverage_fun_smul, h, smul_zero]
+    convert deriv_eq_circleAverage (n := n) (f := (fun z => (2 * M : ℂ))) diffContOnCl_const hR
+    · simp; ring
+    · simp [iteratedDeriv_const, (by linarith : n ≠ 0)]
   -- Step 3 : since `f + conj f - 2 * M = 2 * (Re f - M)` and the last two averages vanish,
   -- the derivative is the average of a real-part expression
   set G : ℂ → ℂ := fun z => ((2 * ((f z).re - M) : ℝ) : ℂ) / (z - c) ^ n with hG
