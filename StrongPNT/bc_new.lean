@@ -51,7 +51,7 @@ private lemma circleAverage_conj_div_sub_pow_eq_zero (hR : 0 < R)
 
 theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
     (hf : DiffContOnCl ℂ f (ball c R)) (hf0 : f c = 0)
-    (hM : ∀ z ∈ sphere c R, (f z).re ≤ M) (hn : 1 ≤ n) :
+    (hM : ∀ z ∈ sphere c R, (f z).re ≤ M) (hn : n ≠ 0) :
     ‖iteratedDeriv n f c / (n !)‖ ≤ 2 * M / R ^ n := by
   have hRabs : |R| = R := abs_of_pos hR
   have hfs : ContinuousOn f (sphere c R) := hf.continuousOn_ball.mono sphere_subset_closedBall
@@ -74,7 +74,7 @@ theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
     exact circleAverage_eq_iteratedDeriv_div_factorial hf hR
   have E2 : circleAverage (fun z => (2 * M : ℂ) / (z - c) ^ n) c R = 0 := by
     convert circleAverage_eq_iteratedDeriv_div_factorial (n := n) (f := (fun z => (2 * M : ℂ))) diffContOnCl_const hR
-    · simp [iteratedDeriv_const, (by linarith : n ≠ 0)]
+    · simp [iteratedDeriv_const, hn]
   -- Step 3 : since `f + conj f - 2 * M = 2 * (Re f - M)` and the last two averages vanish,
   -- the derivative is the average of a real-part expression
   set G : ℂ → ℂ := fun z => ((2 * ((f z).re - M) : ℝ) : ℂ) / (z - c) ^ n with hG
@@ -89,7 +89,7 @@ theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
           push_cast
           ring,
       circleAverage_fun_sub hI12 (hcirc _ continuousOn_const),
-      circleAverage_fun_add hI1 hI2, circleAverage_conj_div_sub_pow_eq_zero hR hf (by lia), E2, E3]
+      circleAverage_fun_add hI1 hI2, circleAverage_conj_div_sub_pow_eq_zero hR hf hn, E2, E3]
     ring
   -- Step 4 : the mean value property for the real part, which vanishes since `f c = 0`
   have hre : circleAverage (fun z => (f z).re) c R = 0 := by
@@ -117,7 +117,7 @@ disc and that `Re f ≤ M` there : apply the previous estimate on the discs of r
 let `R'` tend to `R`. -/
 theorem norm_iteratedDeriv_le_of_re_le (hR : 0 < R)
     (hf : DifferentiableOn ℂ f (ball c R)) (hf0 : f c = 0)
-    (hM : ∀ z ∈ ball c R, (f z).re ≤ M) (hn : 1 ≤ n) :
+    (hM : ∀ z ∈ ball c R, (f z).re ≤ M) (hn : n ≠ 0) :
     ‖iteratedDeriv n f c / (n !)‖ ≤ 2 * M / R ^ n := by
   refine ge_of_tendsto (f := fun R' : ℝ => 2 * M / R' ^ n) (x := 𝓝[<] R)
     (((continuousAt_const.div (by fun_prop) (by positivity)).tendsto).mono_left
@@ -149,7 +149,7 @@ theorem norm_le_of_re_le (hR : 0 < R)
     calc
     _ = ‖iteratedDeriv (n + 1) f c / ((n + 1) !)‖ * ‖z - c‖ ^ (n + 1) := by field_simp
     _ ≤ _ := by
-      grw [norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (Nat.le_add_left 1 n)]
+      grw [norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (by lia)]
       apply le_of_eq
       rw [pow_succ, pow_succ, div_pow]
       field
@@ -191,5 +191,5 @@ theorem norm_deriv_le_of_re_le (hR : 0 < R)
       field
     _ = ‖z - c‖ ^ n * (n + 1) * (‖iteratedDeriv (n + 1) f c / ((n + 1) !)‖) := by simp
     _ ≤ _ := by
-      grw [norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (Nat.le_add_left 1 n)]
+      grw [norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (by lia)]
       exact le_of_eq (by field)
