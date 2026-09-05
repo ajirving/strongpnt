@@ -8,8 +8,8 @@ open scoped Nat
 
 variable {r R M : ℝ} {c z : ℂ} {f : ℂ → ℂ} {n : ℕ}
 
-lemma deriv_eq_circleAverage (hf : DiffContOnCl ℂ f (ball c R)) (hR : 0 < R) :
-    circleAverage (fun z ↦ (1 / (z - c) ^ n) • f z) c R = iteratedDeriv n f c / n ! := by
+private lemma circleAverage_eq_iteratedDeriv_div_factorial (hf : DiffContOnCl ℂ f (ball c R)) (hR : 0 < R) :
+    circleAverage (fun z ↦ f z / (z - c) ^ n) c R = iteratedDeriv n f c / n ! := by
   rw [circleAverage_eq_circleIntegral hR.ne.symm, inv_smul_eq_iff₀ (by simp)]
   convert hf.circleIntegral_one_div_sub_center_pow_smul hR n using 1
   · congr
@@ -41,24 +41,22 @@ theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
   -- Step 1 : for holomorphic `w` the average of `conj w / (z - c) ^ n` vanishes.  Indeed the mean
   -- value property kills the average of `w * (z - c) ^ n`, and conjugating it turns `conj (z - c)`
   -- into `R ^ 2 / (z - c)` on the circle.
-  have key : ∀ w : ℂ → ℂ, DiffContOnCl ℂ w (ball c R) →
-      circleAverage (fun z => (starRingEnd ℂ) (w z) / (z - c) ^ n) c R = 0 := by
-    intro w hw
-    have hwc : ContinuousOn w (closedBall c R) := hw.continuousOn_ball
-    have hdc : DiffContOnCl ℂ (fun z => w z * (z - c) ^ n) (ball c |R|) := by
+  have key : circleAverage (fun z => (starRingEnd ℂ) (f z) / (z - c) ^ n) c R = 0 := by
+    have hwc : ContinuousOn f (closedBall c R) := hf.continuousOn_ball
+    have hdc : DiffContOnCl ℂ (fun z => f z * (z - c) ^ n) (ball c |R|) := by
       rw [hRabs]
-      exact DiffContOnCl.mk_ball (hw.differentiableOn.mul (by fun_prop)) (hwc.mul (by fun_prop))
-    have h1 : circleAverage (fun z => w z * (z - c) ^ n) c R = 0 := by
+      exact DiffContOnCl.mk_ball (hf.differentiableOn.mul (by fun_prop)) (hwc.mul (by fun_prop))
+    have h1 : circleAverage (fun z => f z * (z - c) ^ n) c R = 0 := by
       rw [hdc.circleAverage]
       simp [zero_pow (by omega : n ≠ 0)]
-    have hint : CircleIntegrable (fun z => w z * (z - c) ^ n) c R :=
+    have hint : CircleIntegrable (fun z => f z * (z - c) ^ n) c R :=
       ContinuousOn.circleIntegrable hR.le ((hwc.mono sphere_subset_closedBall).mul (by fun_prop))
-    have h2 : circleAverage (fun z => (starRingEnd ℂ) (w z * (z - c) ^ n)) c R = 0 := by
+    have h2 : circleAverage (fun z => (starRingEnd ℂ) (f z * (z - c) ^ n)) c R = 0 := by
       have h := (conjCLE : ℂ ≃L[ℝ] ℂ).toContinuousLinearMap.circleAverage_comp_comm hint
       simp only [Function.comp_def, h1, map_zero] at h
       exact h
     have h3 : circleAverage
-          (fun z => ((R : ℂ) ^ 2) ^ n • ((starRingEnd ℂ) (w z) / (z - c) ^ n)) c R = 0 := by
+          (fun z => ((R : ℂ) ^ 2) ^ n • ((starRingEnd ℂ) (f z) / (z - c) ^ n)) c R = 0 := by
       rw [← h2]
       refine circleAverage_congr_sphere fun z hz => ?_
       rw [hRabs] at hz
@@ -80,13 +78,10 @@ theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
     ContinuousOn.circleIntegrable hR.le (continuous_re.comp_continuousOn hfs)
   -- Step 2 : Cauchy's integral formula for derivatives, as a circle average
   have E3 : circleAverage (fun z => f z / (z - c) ^ n) c R = iteratedDeriv n f c / n ! := by
-    convert deriv_eq_circleAverage hf hR
-    simp
-    field
+    exact circleAverage_eq_iteratedDeriv_div_factorial hf hR
   -- the average of the constant term vanishes too, by `key` applied to `w = 1`
   have E2 : circleAverage (fun z => (2 * M : ℂ) / (z - c) ^ n) c R = 0 := by
-    convert deriv_eq_circleAverage (n := n) (f := (fun z => (2 * M : ℂ))) diffContOnCl_const hR
-    · simp; ring
+    convert circleAverage_eq_iteratedDeriv_div_factorial (n := n) (f := (fun z => (2 * M : ℂ))) diffContOnCl_const hR
     · simp [iteratedDeriv_const, (by linarith : n ≠ 0)]
   -- Step 3 : since `f + conj f - 2 * M = 2 * (Re f - M)` and the last two averages vanish,
   -- the derivative is the average of a real-part expression
@@ -102,7 +97,7 @@ theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
           push_cast
           ring,
       circleAverage_fun_sub hI12 (hcirc _ continuousOn_const),
-      circleAverage_fun_add hI1 hI2, key f hf, E2, E3]
+      circleAverage_fun_add hI1 hI2, key, E2, E3]
     ring
   -- Step 4 : the mean value property for the real part, which vanishes since `f c = 0`
   have hre : circleAverage (fun z => (f z).re) c R = 0 := by
