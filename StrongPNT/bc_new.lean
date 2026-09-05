@@ -28,7 +28,7 @@ theorem norm_circleAverage_le_circleAverage_norm {E : Type*} {f : ℂ → E} [No
 theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
     (hf : DiffContOnCl ℂ f (ball c R)) (hf0 : f c = 0)
     (hM : ∀ z ∈ sphere c R, (f z).re ≤ M) (hn : 1 ≤ n) :
-    ‖iteratedDeriv n f c‖ / n ! ≤ 2 * M / R ^ n := by
+    ‖iteratedDeriv n f c / (n !)‖ ≤ 2 * M / R ^ n := by
   have hRabs : |R| = R := abs_of_pos hR
   have hfs : ContinuousOn f (sphere c R) := hf.continuousOn_ball.mono sphere_subset_closedBall
   have hzne : ∀ z ∈ sphere c R, z - c ≠ 0 := fun z hz h =>
@@ -114,21 +114,18 @@ theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
       (c := c) (R := R) (ContinuousOn.circleIntegrable hR.le hfs)
   -- Step 5 : the norm of the average is at most the average of the norm, which the mean value
   -- property evaluates
-  calc _
-      = ‖circleAverage G c R‖ := by
-        rw [hGsum, norm_div, Complex.norm_natCast]
-    _ ≤ circleAverage (fun z => ‖G z‖) c R := by
-      exact norm_circleAverage_le_circleAverage_norm
-    _ = (2 * M / R ^ n) := by
-        rw [circleAverage_congr_sphere (f₂ := fun z => (2 / R ^ n) • (M - (f z).re)) fun z hz => by
-              rw [hRabs] at hz
-              simp only [hG, norm_div, norm_real, Real.norm_eq_abs, norm_pow,
-                mem_sphere_iff_norm.mp hz, smul_eq_mul,
-                abs_of_nonpos (by linarith [hM z hz] : 2 * ((f z).re - M) ≤ 0)]
-              ring,
-          circleAverage_fun_smul, smul_eq_mul,
+  grw [← hGsum, norm_circleAverage_le_circleAverage_norm]
+  apply le_of_eq
+  simp only [hG, norm_div, norm_pow, norm_real, Real.norm_eq_abs]
+  trans circleAverage (fun z => (2 / R ^ n) • (M - (f z).re)) c R
+  · refine circleAverage_congr_sphere fun z hz ↦ ?_
+    rw [hRabs] at hz
+    rw [abs_of_nonpos (by linarith [hM z hz])]
+    simp [mem_sphere_iff_norm.mp hz, smul_eq_mul]
+    ring
+  · rw [circleAverage_fun_smul, smul_eq_mul,
           circleAverage_fun_sub (circleIntegrable_const M c R) hreI, circleAverage_const, hre]
-        ring
+    ring
 
 /-- The bound on the derivatives at the centre, assuming only that `f` is holomorphic on the open
 disc and that `Re f ≤ M` there : apply the previous estimate on the discs of radius `R' < R` and
@@ -136,7 +133,7 @@ let `R'` tend to `R`. -/
 theorem norm_iteratedDeriv_le_of_re_le (hR : 0 < R)
     (hf : DifferentiableOn ℂ f (ball c R)) (hf0 : f c = 0)
     (hM : ∀ z ∈ ball c R, (f z).re ≤ M) (hn : 1 ≤ n) :
-    ‖iteratedDeriv n f c‖ / n ! ≤ 2 * M / R ^ n := by
+    ‖iteratedDeriv n f c / (n !)‖ ≤ 2 * M / R ^ n := by
   refine ge_of_tendsto (f := fun R' : ℝ => 2 * M / R' ^ n) (x := 𝓝[<] R)
     (((continuousAt_const.div (by fun_prop) (by positivity)).tendsto).mono_left
       nhdsWithin_le_nhds) ?_
@@ -166,10 +163,10 @@ theorem norm_le_of_re_le (hR : 0 < R)
       ≤ 2 * M * (‖z - c‖ / R) * (‖z - c‖ / R) ^ n := by
     intro n
     have hd := norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (Nat.le_add_left 1 n)
-    have hfac : (0 : ℝ) < ((n + 1)! : ℝ) := by positivity
-    rw [norm_smul, norm_smul, norm_inv, Complex.norm_natCast, norm_pow]
+    simp only [smul_eq_mul]
+    rw [mul_comm, mul_assoc, norm_mul, norm_pow]
     calc _
-        = ‖z - c‖ ^ (n + 1) * (‖iteratedDeriv (n + 1) f c‖ / (n + 1) !) := by field
+        = ‖z - c‖ ^ (n + 1) * (‖iteratedDeriv (n + 1) f c / ((n + 1) !)‖) := by field_simp
         _ ≤ _ := by
           grw [hd]
           apply le_of_eq
@@ -204,7 +201,6 @@ theorem norm_deriv_le_of_re_le (hR : 0 < R)
       ≤ 2 * M / R * (((n : ℝ) + 1) * (‖z - c‖ / R) ^ n) := by
     intro n
     have hd := norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (Nat.le_add_left 1 n)
-    have hfac : (0 : ℝ) < (n ! : ℝ) := by positivity
     have hfacsucc : (((n + 1)! : ℝ)) = ((n : ℝ) + 1) * (n ! : ℝ) := by
       rw [Nat.factorial_succ]; push_cast; ring
     rw [norm_smul, norm_smul, norm_inv, Complex.norm_natCast, norm_pow, div_pow]
@@ -212,6 +208,7 @@ theorem norm_deriv_le_of_re_le (hR : 0 < R)
         = ‖z - c‖ ^ n * (n + 1) * (‖iteratedDeriv (n + 1) f c‖ / (n + 1) !) := by
           rw [hfacsucc]
           field
+        _ = ‖z - c‖ ^ n * (n + 1) * (‖iteratedDeriv (n + 1) f c / ((n + 1) !)‖) := by simp
         _ ≤ _ := by
           grw [hd]
           apply le_of_eq
