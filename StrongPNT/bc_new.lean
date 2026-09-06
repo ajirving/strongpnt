@@ -25,6 +25,10 @@ theorem norm_circleAverage_le_circleAverage_norm {E : Type*} {f : ℂ → E} [No
   · simp [abs_of_nonneg pi_nonneg]
   exact intervalIntegral.norm_integral_le_integral_norm (by positivity)
 
+lemma circleAverage_fun_conj (hf : CircleIntegrable f c R) :
+    circleAverage (fun z ↦ conj (f z)) c R = conj (circleAverage f c R) :=
+  conjCLE.toContinuousLinearMap.circleAverage_comp_comm hf
+
 private lemma circleAverage_conj_div_sub_pow_eq_zero (hR : 0 < R)
     (hf : DiffContOnCl ℂ f (ball c R)) (hn : n ≠ 0) :
     circleAverage (fun z ↦ conj (f z) / (z - c) ^ n) c R = 0 := by
@@ -40,8 +44,7 @@ private lemma circleAverage_conj_div_sub_pow_eq_zero (hR : 0 < R)
   _ = (1 / ((R : ℂ) ^ 2) ^ n) * circleAverage (fun z ↦ conj (f z * (z - c) ^ n)) c R := by
     rw [circleAverage_fun_smul, smul_eq_mul]
   _ = (1 / ((R : ℂ) ^ 2) ^ n) * conj (circleAverage (fun z ↦ f z * (z - c) ^ n) c R) := by
-    congr 1
-    refine conjCLE.toContinuousLinearMap.circleAverage_comp_comm ?_
+    rw [circleAverage_fun_conj]
     refine ContinuousOn.circleIntegrable hR.le ?_
     exact (hf.continuousOn_ball.mono sphere_subset_closedBall).mul (by fun_prop)
   _ = _ := by
@@ -63,6 +66,11 @@ private lemma iteratedDeriv_div_factorial_eq_circleAverage_re (M : ℝ) (hf : Di
   rw [circleAverage_fun_sub, circleAverage_fun_add, circleAverage_eq_iteratedDeriv_div_factorial hf hR, circleAverage_conj_div_sub_pow_eq_zero hR hf hn, circleAverage_const_div_sub_pow_eq_zero _ hR hn, sub_zero, add_zero]
   all_goals exact ContinuousOn.circleIntegrable hR.le (by fun_prop)
 
+lemma circleAverage_fun_re (hf : CircleIntegrable f c R) :
+    circleAverage (fun z ↦ (f z).re) c R = (circleAverage f c R).re :=
+  reCLM.circleAverage_comp_comm hf
+
+
 theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
     (hf : DiffContOnCl ℂ f (ball c R)) (hf0 : f c = 0)
     (hM : ∀ z ∈ sphere c R, (f z).re ≤ M) (hn : n ≠ 0) :
@@ -72,19 +80,17 @@ theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
   simp only [norm_div, norm_pow, norm_real, Real.norm_eq_abs]
   have hRabs : |R| = R := abs_of_pos hR
   have hfs : ContinuousOn f (sphere c R) := hf.continuousOn_ball.mono sphere_subset_closedBall
-  have hre : circleAverage (fun z => (f z).re) c R = 0 := by
-    have hmv : circleAverage f c R = f c :=
-      (show DiffContOnCl ℂ f (ball c |R|) by rwa [hRabs]).circleAverage
-    simpa [Function.comp_def, hmv, hf0] using reCLM.circleAverage_comp_comm
-      (hfs.circleIntegrable hR.le)
   trans circleAverage (fun z => (2 / R ^ n) • (M - (f z).re)) c R
   · refine circleAverage_congr_sphere fun z hz ↦ ?_
     rw [hRabs] at hz
     rw [abs_of_nonpos (by linarith [hM z hz])]
     simp [mem_sphere_iff_norm.mp hz, smul_eq_mul]
     ring
-  · rw [circleAverage_fun_smul, smul_eq_mul,
-          circleAverage_fun_sub (circleIntegrable_const M c R) (ContinuousOn.circleIntegrable hR.le (by fun_prop)), circleAverage_const, hre]
+  · rw [← hRabs] at hf
+    rw [circleAverage_fun_smul, smul_eq_mul,
+          circleAverage_fun_sub (circleIntegrable_const M c R) (ContinuousOn.circleIntegrable hR.le (by fun_prop)), circleAverage_const,
+      circleAverage_fun_re (hfs.circleIntegrable hR.le), 
+      hf.circleAverage, hf0, zero_re]
     ring
 
 /-- The bound on the derivatives at the centre, assuming only that `f` is holomorphic on the open
