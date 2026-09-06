@@ -429,7 +429,7 @@ lemma apply_BC_to_Lf
     (hLf : isLf Lf f R R1 c)
     (z : ℂ) (hz : ‖z - c‖ ≤ r1) :
       ‖deriv Lf z‖ ≤
-      (8 * Real.log B * R1) / (R1 - r1)^2 := by
+      (2 * Real.log B * R1) / (R1 - r1)^2 := by
   refine borel_caratheodory_II (Real.log_pos hB) hr1_pos hr1_lt_R1 hLf.1.differentiableOn hLf.2.1 ?_ (by simp_all [dist_eq_norm_sub])
   exact fun w hw ↦ re_Lf_le_log_B B R R1 hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros h_f_bound Lf hLf w (by simp_all [dist_eq_norm_sub])
 
@@ -710,7 +710,7 @@ lemma final_ineq1
     (z : ℂ) (hz : z ∈ closedBall c r1 \ zerosetKfR R1 c f) :
     ‖(deriv f z / f z) - ∑ ρ ∈ h_finite_zeros.toFinset,
                  analyticOrderNatAt f ρ / (z - ρ)‖ ≤
-    (8 * R1 / ((R1 - r1)^2) +
+    (2 * R1 / ((R1 - r1)^2) +
     1 / ((R^2 / R1 - R1) * Real.log (R / R1))) * Real.log B := by
   have hR1_pos : 0 < R1 := by linarith
   obtain ⟨Lf, h_Lf⟩ := Lf_exists hR1_lt_R hR1_pos h_f_analytic h_f_zero

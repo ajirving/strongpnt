@@ -63,14 +63,13 @@ theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ} {c : ℂ}
     (hf0 : f c = 0)
     (hRe_f_le_M : Set.MapsTo f (ball c R) {z | z.re ≤ M})
     {z : ℂ} (hz : z ∈ closedBall c r) :
-    ‖deriv f z‖ ≤ (8 * M * R) / ((R - r) ^ 2) := by
+    ‖deriv f z‖ ≤ (2 * M * R) / ((R - r) ^ 2) := by
   simp only [mem_closedBall, dist_eq_norm_sub] at hz
   have R_pos : 0 < R := by linarith
   -- apply the sharp Borel-Carathéodory bound directly on the disc of radius `R`
   grw [norm_deriv_le_of_re_le R_pos hf hf0 (fun w hw ↦ hRe_f_le_M hw)
     (by linarith), hz]
   · rw [(by ring : 2 * R * M = 2 * M * R)]
-    gcongr; norm_num
   · linarith
   · positivity
 #print axioms borel_caratheodory_II
