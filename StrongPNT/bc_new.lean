@@ -109,9 +109,6 @@ theorem norm_iteratedDeriv_le_of_re_le (hR : 0 < R)
   exact norm_iteratedDeriv_le_of_re_le_sphere hR'0 (hf.diffContOnCl_ball hsub) hf0
     (fun z hz => hM z (hsub (sphere_subset_closedBall hz))) hn
 
-/-- **Borel-Carathéodory theorem**: if `f` is holomorphic on the disc `ball c R`, vanishes at `c`,
-and satisfies `Re f ≤ M` there, then it is bounded by `2 * r * M / (R - r)` on the smaller disc of
-radius `r < R`. -/
 theorem norm_le_of_re_le (hR : 0 < R)
     (hf : DifferentiableOn ℂ f (ball c R)) (hf0 : f c = 0)
     (hM : ∀ w ∈ ball c R, (f w).re ≤ M) (hz : ‖z - c‖ < R) :
@@ -145,20 +142,18 @@ theorem norm_deriv_le_of_re_le (hR : 0 < R)
   -- `deriv f` is again holomorphic on the disc, so it is the sum of its Taylor series at `c`
   have hsum : HasSum
       (fun n : ℕ => ((n ! : ℂ))⁻¹ • (z - c) ^ n • iteratedDeriv (n + 1) f c) (deriv f z) := by
-    have h := Complex.hasSum_taylorSeries_on_ball (hf.deriv isOpen_ball)
-      (show z ∈ ball c R by rw [mem_ball, dist_eq_norm]; exact hz)
+    have h := Complex.hasSum_taylorSeries_on_ball (hf.deriv isOpen_ball) (z := z)
+      (by simpa [dist_eq_norm_sub])
     simpa only [← iteratedDeriv_succ'] using h
   have hgeo : HasSum (fun n : ℕ => 2 * M / R * (((n : ℝ) + 1) * (‖z - c‖ / R) ^ n))
       (2 * R * M / (R - ‖z - c‖) ^ 2) := by
-    have hne : R - ‖z - c‖ ≠ 0 := sub_ne_zero.mpr hz.ne'
-    have h1 := (hasSum_choose_mul_geometric_of_norm_lt_one 1
-      (show ‖(‖z - c‖ / R : ℝ)‖ < 1 by
-        rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
-        exact (div_lt_one hR).mpr hz)).mul_left (2 * M / R)
-    convert! h1 using 1
+    convert! (hasSum_choose_mul_geometric_of_norm_lt_one 1 (r := (‖z - c‖ / R))
+      ?_).mul_left (2 * M / R) using 1
     · simp
     · rw [show (1 : ℝ) - ‖z - c‖ / R = (R - ‖z - c‖) / R by field_simp, div_pow]
       field
+    · rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+      exact (div_lt_one hR).mpr hz
   grw [hsum.norm_le_of_bounded hgeo fun n ↦ ?_]
   have hfacsucc : (((n + 1)! : ℝ)) = ((n : ℝ) + 1) * (n ! : ℝ) := by
     rw [Nat.factorial_succ]; push_cast; ring
