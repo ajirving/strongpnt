@@ -98,8 +98,11 @@ disc and that `Re f ≤ M` there : apply the previous estimate on the discs of r
 let `R'` tend to `R`. -/
 theorem norm_iteratedDeriv_le_of_re_le (hR : 0 < R)
     (hf : DifferentiableOn ℂ f (ball c R)) (hf0 : f c = 0)
-    (hM : ∀ z ∈ ball c R, (f z).re ≤ M) (hn : n ≠ 0) :
+    (hM : ∀ z ∈ ball c R, (f z).re ≤ M) :
     ‖iteratedDeriv n f c / (n !)‖ ≤ 2 * M / R ^ n := by
+  by_cases! hn : n = 0
+  · specialize hM c (mem_ball_self hR)
+    simp_all
   refine ge_of_tendsto (f := fun R' : ℝ => 2 * M / R' ^ n) (x := 𝓝[<] R)
     (((continuousAt_const.div (by fun_prop) (by positivity)).tendsto).mono_left
       nhdsWithin_le_nhds) ?_
@@ -113,11 +116,10 @@ theorem norm_le_of_re_le (hR : 0 < R)
     (hf : DifferentiableOn ℂ f (ball c R)) (hf0 : f c = 0)
     (hM : ∀ w ∈ ball c R, (f w).re ≤ M) (hz : ‖z - c‖ < R) :
     ‖f z‖ ≤ 2 * M * ‖z - c‖ / (R - ‖z - c‖) := by
-  -- the Taylor series of `f` at `c`, whose constant term vanishes since `f c = 0`
   have hsum : HasSum
       (fun n : ℕ => (((n + 1)! : ℂ))⁻¹ • (z - c) ^ (n + 1) • iteratedDeriv (n + 1) f c) (f z) := by
     simpa [hf0] using (hasSum_nat_add_iff' 1).mpr (hasSum_taylorSeries_on_ball
-      hf (by rw [mem_ball, dist_eq_norm]; exact hz))
+      hf (by rwa [mem_ball, dist_eq_norm]))
   convert hsum.norm_le_of_bounded ((hasSum_geometric_of_lt_one (by positivity)
     ((div_lt_one hR).mpr hz)).mul_left (2 * M * (‖z - c‖ / R))) fun n ↦ _
   · field
@@ -126,7 +128,7 @@ theorem norm_le_of_re_le (hR : 0 < R)
     calc
     _ = ‖iteratedDeriv (n + 1) f c / ((n + 1) !)‖ * ‖z - c‖ ^ (n + 1) := by field_simp
     _ ≤ _ := by
-      grw [norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (by lia)]
+      grw [norm_iteratedDeriv_le_of_re_le hR hf hf0 hM]
       apply le_of_eq
       rw [pow_succ, pow_succ, div_pow]
       field
@@ -137,8 +139,6 @@ theorem norm_deriv_le_of_re_le (hR : 0 < R)
     (hf : DifferentiableOn ℂ f (ball c R)) (hf0 : f c = 0)
     (hM : ∀ w ∈ ball c R, (f w).re ≤ M) (hz : ‖z - c‖ < R) :
     ‖deriv f z‖ ≤ 2 * R * M / (R - ‖z - c‖) ^ 2 := by
-  have hs0 : (0 : ℝ) ≤ ‖z - c‖ := norm_nonneg _
-  have hA : 0 ≤ M := by simpa [hf0] using hM c (mem_ball_self hR)
   -- `deriv f` is again holomorphic on the disc, so it is the sum of its Taylor series at `c`
   have hsum : HasSum
       (fun n : ℕ => ((n ! : ℂ))⁻¹ • (z - c) ^ n • iteratedDeriv (n + 1) f c) (deriv f z) := by
@@ -164,5 +164,5 @@ theorem norm_deriv_le_of_re_le (hR : 0 < R)
     field
   _ = ‖z - c‖ ^ n * (n + 1) * (‖iteratedDeriv (n + 1) f c / ((n + 1) !)‖) := by simp
   _ ≤ _ := by
-    grw [norm_iteratedDeriv_le_of_re_le hR hf hf0 hM (by lia)]
+    grw [norm_iteratedDeriv_le_of_re_le hR hf hf0 hM]
     exact le_of_eq (by field)
