@@ -112,14 +112,23 @@ theorem norm_iteratedDeriv_le_of_re_le (hR : 0 < R)
   exact norm_iteratedDeriv_le_of_re_le_sphere hR'0 (hf.diffContOnCl_ball hsub) hf0
     (fun z hz => hM z (hsub (sphere_subset_closedBall hz))) hn
 
+lemma hasSum_taylorSeries_on_ball_of_eq_zero (hf : DifferentiableOn ℂ f (ball c R))
+    (hf0 : f c = 0) (hz : z ∈ ball c R) :
+    HasSum (fun n : ℕ ↦ ((n  + 1) ! : ℂ)⁻¹ • (z - c) ^ (n + 1) • iteratedDeriv (n + 1) f c) (f z) := by
+  simpa [hf0] using (hasSum_nat_add_iff' 1).mpr (hasSum_taylorSeries_on_ball
+    hf hz)
+
+lemma hasSum_taylorSeries_deriv_on_ball (hf : DifferentiableOn ℂ f (ball c R))
+    (hz : z ∈ ball c R) :
+    HasSum (fun n : ℕ => ((n ! : ℂ))⁻¹ • (z - c) ^ n • iteratedDeriv (n + 1) f c) (deriv f z) := by
+  simpa only [← iteratedDeriv_succ'] using Complex.hasSum_taylorSeries_on_ball (hf.deriv isOpen_ball) hz
+
 theorem norm_le_of_re_le (hR : 0 < R)
     (hf : DifferentiableOn ℂ f (ball c R)) (hf0 : f c = 0)
-    (hM : ∀ w ∈ ball c R, (f w).re ≤ M) (hz : ‖z - c‖ < R) :
+    (hM : ∀ w ∈ ball c R, (f w).re ≤ M) (hz : z ∈ ball c R) :
     ‖f z‖ ≤ 2 * M * ‖z - c‖ / (R - ‖z - c‖) := by
-  have hsum : HasSum
-      (fun n : ℕ => (((n + 1)! : ℂ))⁻¹ • (z - c) ^ (n + 1) • iteratedDeriv (n + 1) f c) (f z) := by
-    simpa [hf0] using (hasSum_nat_add_iff' 1).mpr (hasSum_taylorSeries_on_ball
-      hf (by rwa [mem_ball, dist_eq_norm]))
+  have hsum := hasSum_taylorSeries_on_ball_of_eq_zero hf hf0 hz
+  simp only [mem_ball, dist_eq_norm_sub] at hz
   convert hsum.norm_le_of_bounded ((hasSum_geometric_of_lt_one (by positivity)
     ((div_lt_one hR).mpr hz)).mul_left (2 * M * (‖z - c‖ / R))) fun n ↦ _
   · field
@@ -137,14 +146,8 @@ theorem norm_le_of_re_le (hR : 0 < R)
 the derivative of `f` on the disc of radius `r < R` is bounded by `2 * R * M / (R - r) ^ 2`. -/
 theorem norm_deriv_le_of_re_le (hR : 0 < R)
     (hf : DifferentiableOn ℂ f (ball c R)) (hf0 : f c = 0)
-    (hM : ∀ w ∈ ball c R, (f w).re ≤ M) (hz : ‖z - c‖ < R) :
+    (hM : ∀ w ∈ ball c R, (f w).re ≤ M) (hz : z ∈ ball c R) :
     ‖deriv f z‖ ≤ 2 * R * M / (R - ‖z - c‖) ^ 2 := by
-  -- `deriv f` is again holomorphic on the disc, so it is the sum of its Taylor series at `c`
-  have hsum : HasSum
-      (fun n : ℕ => ((n ! : ℂ))⁻¹ • (z - c) ^ n • iteratedDeriv (n + 1) f c) (deriv f z) := by
-    have h := Complex.hasSum_taylorSeries_on_ball (hf.deriv isOpen_ball) (z := z)
-      (by simpa [dist_eq_norm_sub])
-    simpa only [← iteratedDeriv_succ'] using h
   have hgeo : HasSum (fun n : ℕ => 2 * M / R * (((n : ℝ) + 1) * (‖z - c‖ / R) ^ n))
       (2 * R * M / (R - ‖z - c‖) ^ 2) := by
     convert! (hasSum_choose_mul_geometric_of_norm_lt_one 1 (r := (‖z - c‖ / R))
@@ -153,8 +156,9 @@ theorem norm_deriv_le_of_re_le (hR : 0 < R)
     · rw [show (1 : ℝ) - ‖z - c‖ / R = (R - ‖z - c‖) / R by field_simp, div_pow]
       field
     · rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
-      exact (div_lt_one hR).mpr hz
-  grw [hsum.norm_le_of_bounded hgeo fun n ↦ ?_]
+      simp only [mem_ball, dist_eq_norm_sub] at hz
+      bound
+  grw [(hasSum_taylorSeries_deriv_on_ball hf hz).norm_le_of_bounded hgeo fun n ↦ ?_]
   have hfacsucc : (((n + 1)! : ℝ)) = ((n : ℝ) + 1) * (n ! : ℝ) := by
     rw [Nat.factorial_succ]; push_cast; ring
   rw [norm_smul, norm_smul, norm_inv, Complex.norm_natCast, norm_pow, div_pow]
