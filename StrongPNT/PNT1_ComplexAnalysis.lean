@@ -12,6 +12,7 @@ import Mathlib.GroupTheory.MonoidLocalization.Basic
 import Mathlib.Order.CompletePartialOrder
 import Mathlib.RingTheory.SimpleRing.Principal
 import Mathlib.Topology.Algebra.Module.ModuleTopology
+import StrongPNT.bc_new
 
 open Complex Metric
 
@@ -54,16 +55,6 @@ lemma lem_postriglogn (n : ℕ) (_hn : n ≥ 1) (t : ℝ) : 0 ≤ 3 + 4 * Real.c
   exact lem_postrig (t * Real.log (n : ℝ))
 
 
-theorem borelCaratheodory_centre {f : ℂ → ℂ} {M R : ℝ} {z c : ℂ} (hM : 0 < M) (hf : DifferentiableOn ℂ f (ball c R))
-    (hf₁ : Set.MapsTo f (ball c R) {z | z.re ≤ M}) (hR : 0 < R) (hz : z ∈ ball c R)
-    (hf₂ : f c = 0) : ‖f z‖ ≤ 2 * M * ‖z - c‖ / (R - ‖z - c‖) := by
-  convert Complex.borelCaratheodory_zero (f := (fun z ↦ f (z + c))) (z := z - c) hM (fun z hz ↦ ?_)
-    (fun z hz ↦ (hf₁ (by simp_all)))   hR (by simp_all [dist_eq_norm_sub]) (by simp_all)
-  · simp
-  · rw [differentiableWithinAt_comp_add_right]
-    convert! hf (z + c) (by simp_all)
-    simp
-
 theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ} {c : ℂ}
     (hM_pos : 0 < M)
     (hr_pos : 0 < r)
@@ -72,25 +63,14 @@ theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ} {c : ℂ}
     (hf0 : f c = 0)
     (hRe_f_le_M : Set.MapsTo f (ball c R) {z | z.re ≤ M})
     {z : ℂ} (hz : z ∈ closedBall c r) :
-    ‖deriv f z‖ ≤ (8 * M * R) / ((R - r) ^ 2) := by
-  grw [norm_deriv_le_of_forall_mem_sphere_norm_le (by linarith : 0 < (R - r) / 2) (C := 4 * M * R / (R - r))]
-  · exact le_of_eq (by field)
-  · refine hf.diffContOnCl_ball fun z' hz' ↦ ?_
-    simp_all
-    linarith [dist_triangle z' z c]
-  · intro z' hz'
-    grw [borelCaratheodory_centre hM_pos hf hRe_f_le_M (by linarith) _ hf0]
-    · simp_all only [mem_closedBall, mem_sphere, ← dist_eq_norm_sub]
-      have : dist z' c ≤ (R + r) / 2 := by linarith [dist_triangle z' z c]
-      grw [this, this, (by linarith : (R + r) / 2 ≤ R)]
-      · exact le_of_eq (by field)
-      · linarith
-      · exact mul_nonneg (by positivity) (by linarith)
-      · linarith
-      · linarith
-    · simp_all only [mem_ball, mem_closedBall, mem_sphere]
-      linarith [dist_triangle z' z c]
-
+    ‖deriv f z‖ ≤ (2 * M * R) / ((R - r) ^ 2) := by
+  simp only [mem_closedBall, dist_eq_norm_sub] at hz
+  have R_pos : 0 < R := by linarith
+  grw [norm_deriv_le_of_re_le R_pos hf hf0 (fun w hw ↦ hRe_f_le_M hw)
+    (by simp_all [dist_eq_norm_sub]; linarith), hz]
+  · rw [(by ring : 2 * R * M = 2 * M * R)]
+  · linarith
+  · positivity
 #print axioms borel_caratheodory_II
 
 open Complex MeasureTheory intervalIntegral
