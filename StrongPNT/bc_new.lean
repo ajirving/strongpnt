@@ -83,7 +83,7 @@ theorem norm_iteratedDeriv_le_of_re_le_sphere (hR : 0 < R)
   trans circleAverage (fun z => (2 / R ^ n) • (M - (f z).re)) c R
   · refine circleAverage_congr_sphere fun z hz ↦ ?_
     rw [hRabs] at hz
-    rw [abs_of_nonpos (by linarith [hM z hz])]
+    rw [abs_of_nonpos (by grind)]
     simp [mem_sphere_iff_norm.mp hz, smul_eq_mul]
     ring
   · rw [← hRabs] at hf
@@ -138,9 +138,7 @@ theorem norm_le_of_re_le (hR : 0 < R)
     _ = ‖iteratedDeriv (n + 1) f c / ((n + 1) !)‖ * ‖z - c‖ ^ (n + 1) := by field_simp
     _ ≤ _ := by
       grw [norm_iteratedDeriv_le_of_re_le hR hf hf0 hM]
-      apply le_of_eq
-      rw [pow_succ, pow_succ, div_pow]
-      field
+      exact le_of_eq (by ring)
 
 /-- **Borel-Carathéodory theorem for the derivative**: under the hypotheses of `norm_le_of_re_le`,
 the derivative of `f` on the disc of radius `r < R` is bounded by `2 * R * M / (R - r) ^ 2`. -/
@@ -153,8 +151,7 @@ theorem norm_deriv_le_of_re_le (hR : 0 < R)
     convert! (hasSum_choose_mul_geometric_of_norm_lt_one 1 (r := (‖z - c‖ / R))
       ?_).mul_left (2 * M / R) using 1
     · simp
-    · rw [show (1 : ℝ) - ‖z - c‖ / R = (R - ‖z - c‖) / R by field_simp, div_pow]
-      field
+    · grind
     · rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
       simp only [mem_ball, dist_eq_norm_sub] at hz
       bound
