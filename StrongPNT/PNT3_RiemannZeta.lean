@@ -19,26 +19,11 @@ lemma abs_zeta_prod_prime (s : ℂ) (hs : 1 < s.re) :
   simp_rw [norm_inv] at this
   exact this
 
-theorem HasProd.inv₀ {α β : Type*} {f : α → β} {a : β} [CommGroupWithZero β] [TopologicalSpace β]
-    [ContinuousInv₀ β] (h : HasProd f a) (ha : a ≠ 0) :
-    HasProd (fun x ↦ (f x )⁻¹) a⁻¹ := by
-  unfold HasProd
-  convert Filter.Tendsto.inv₀ h ha
-  rw [Finset.prod_inv_distrib]
-
-theorem HasProd.div₀ {α : Type*} {f g : α → ℂ} {a b : ℂ}
-    (hf : HasProd f a) (hg : HasProd g b) (hb : b ≠ 0) :
-    HasProd (fun x ↦ f x / g x) (a / b) := by
-  simp only [div_eq_mul_inv]
-  exact hf.mul <| hg.inv₀ hb
-
-
-
 -- Theorem zeta_ratio_identity
 theorem zeta_ratio_identity (s : ℂ) (hs : 1 < s.re) : HasProd (fun (p : ℙ) ↦ (1 + ((p : ℕ) : ℂ) ^ (-s : ℂ))⁻¹) (riemannZeta (2 * s) / riemannZeta s ) := by
   have zeta2s := riemannZeta_eulerProduct_hasProd (show (2 * s).re > 1 by simp; linarith)
   have := zeta2s.div₀ (riemannZeta_eulerProduct_hasProd hs) (riemannZeta_ne_zero_of_one_lt_re hs)
-  convert this using 1
+  convert! this using 1
   symm
   ext p
   field_simp
