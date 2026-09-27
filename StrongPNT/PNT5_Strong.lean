@@ -63,7 +63,7 @@ lemma I2Bound {SmoothingF : ℝ → ℝ}
     let σ₁ := sigma1Of A T
     ‖I₂ SmoothingF ε T X σ₁‖ ≤ C * X / (ε * T) := by
   have ⟨C₁, C₁pos, Mbd⟩ := MellinOfSmooth1b ContDiffSmoothingF suppSmoothingF
-  have := (IBound_aux1 3 (by norm_num) 9)
+  have := IBound_aux1 3 (by norm_num) (by norm_num : 0 < (9 : ℝ))
   obtain ⟨C₃, ⟨C₃_gt, hC₃⟩⟩ := this
 
   let C' : ℝ := C₁ * C₂ * C₃ * rexp 1
@@ -141,7 +141,7 @@ lemma I2Bound {SmoothingF : ℝ → ℝ}
         (by rw[this] at hσ; unfold sigma1Of at hσ; simp only [mem_Ioc, abs_neg, log_abs, mem_Ici,
           tsub_le_iff_right] at hσ ⊢; replace hσ := hσ.1; linarith)
       _ ≤ C₂ * Real.log T ^ 9 := by simp
-      _ ≤ C₂ * (C₃ * T) := by gcongr; exact hC₃ T (by linarith)
+      _ ≤ C₂ * (C₃ * T) := by gcongr; convert! hC₃ T (by linarith); simp
 
   -- Then estimate the remaining factors.
   calc
@@ -255,7 +255,7 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
         ‖I₃ SmoothingF ε T X σ₁‖ ≤ C * X * X ^ (- A / (Real.log T)) / ε := by
 --  intro SmoothingF suppSmoothingF ContDiffSmoothingF
   obtain ⟨CM, CMpos, CMhyp⟩ := MellinOfSmooth1b ContDiffSmoothingF suppSmoothingF
-  obtain ⟨Cint, Cintpos, Cinthyp⟩ := log_pow_over_xsq_integral_bounded 9
+  obtain ⟨Cint, Cintpos, Cinthyp⟩ := log_pow_over_xsq_integral_bounded 9 (by norm_num)
   use Cint * CM * Cζ
   have : Cint * CM > 0 := mul_pos Cintpos CMpos
   have : Cint * CM * Cζ > 0 := mul_pos this Cζpos
@@ -765,7 +765,8 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
         simp
       rw [this]
       have : ∫ (t : ℝ) in Ioo 3 T, Real.log t ^ 9 / t ^ 2 < Cint := by
-        exact Cinthyp T Tgt3
+        convert Cinthyp T Tgt3
+        simp
       linarith
     rw [ mul_comm]
     rw [← mul_div_assoc, mul_one]
