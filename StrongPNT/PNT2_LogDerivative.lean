@@ -222,7 +222,7 @@ theorem lem_mod_Bf_at_0_ge_1 (R R1 : ℝ) {c : ℂ} (hR1_pos : 0 < R1)
   rw [lem_mod_Bf_at_0_as_ratio R R1 hR1_pos hR1_lt_R f (by simp_all) h_finite_zeros]
   rw [hf0_eq_one, norm_one, one_mul]
   refine Finset.one_le_prod fun ρ hρ ↦ one_le_pow₀ ?_
-  simp only [zerosetKfR, mem_closedBall, Finite.mem_toFinset, mem_setOf_eq, dist_eq_norm_sub'] at hρ
+  simp only [zerosetKfR, mem_closedBall, Finite.mem_toFinset, mem_ofPred_eq, dist_eq_norm_sub'] at hρ
   refine one_le_div ?_|>.mpr (hρ.1.trans hR1_lt_R.le)
   exact norm_pos_iff.mpr fun h ↦ (by grind)
 
@@ -334,7 +334,7 @@ lemma lem_sum_m_rho_bound (B R R1 : ℝ) {c : ℂ} (hB : 1 ≤ B)
     · intro z hz
       simp_all only [mem_support, MeromorphicOn.divisor_def, mem_closedBall, ne_eq,
         ite_eq_right_iff, WithTop.untop₀_eq_zero, and_imp, Classical.not_imp, not_or, zerosetKfR,
-        Finite.coe_toFinset, mem_setOf_eq]
+        Finite.coe_toFinset, mem_ofPred_eq]
       rw [abs_of_pos (by linarith)] at hz
       refine ⟨hz.2.1, apply_eq_zero_of_analyticOrderAt_ne_zero ?_⟩
       rw [(h_f_analytic _ (by simp; grind)).meromorphicOrderAt_eq] at hz
