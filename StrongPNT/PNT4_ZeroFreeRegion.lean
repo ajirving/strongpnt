@@ -1341,17 +1341,7 @@ lemma lem_logDerivZetalogt0 :
 lemma lem_term_real_nonneg (n : ℕ) (σ : ℝ) : ∃ r ≥ (0:ℝ), ((ArithmeticFunction.vonMangoldt n : ℂ) / ((n : ℂ) ^ (σ : ℂ))) = (r : ℂ) := by
   -- Define the real number r to be the real quotient
   let r : ℝ := (ArithmeticFunction.vonMangoldt n) / ((n : ℝ) ^ σ)
-  refine ⟨r, ?_, ?_⟩
-  · -- Show r ≥ 0 using nonnegativity of vonMangoldt and nonnegativity of the denominator
-    have hbase_nonneg : 0 ≤ (n : ℝ) := by exact_mod_cast (Nat.zero_le n)
-    have hden_nonneg : 0 ≤ (n : ℝ) ^ σ := by
-      simpa using (Real.rpow_nonneg hbase_nonneg σ)
-    -- r = vonMangoldt n * ((n:ℝ)^σ)⁻¹ ≥ 0
-    have hv_nonneg : 0 ≤ (ArithmeticFunction.vonMangoldt n) := by
-      simp
-    have : 0 ≤ (ArithmeticFunction.vonMangoldt n) * ((n : ℝ) ^ σ)⁻¹ :=
-      mul_nonneg hv_nonneg (inv_nonneg.mpr hden_nonneg)
-    simpa [r, div_eq_mul_inv] using this
+  refine ⟨r, (by positivity), ?_⟩
   · -- Show the complex quotient equals (r : ℂ)
     have hbase_nonneg : 0 ≤ (n : ℝ) := by exact_mod_cast (Nat.zero_le n)
     have hden_eq : (((n : ℝ) ^ σ : ℝ) : ℂ) = (n : ℂ) ^ (σ : ℂ) := by
@@ -1411,25 +1401,20 @@ lemma lem_tsum_norm_vonMangoldt_depends_on_Re_cast (s : ℂ) (σ : ℝ)
   have hσ_ne_zero : σ ≠ 0 := by
     have : 0 < σ := by simpa [hσ] using (lt_trans zero_lt_one hs)
     exact ne_of_gt this
-  -- Show equality of the summands for each n, then conclude by congrArg on tsum
-  have hterm : (fun n : ℕ => ‖(((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ)) / ((n : ℂ) ^ s)‖)
-      = (fun n : ℕ => ‖(((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ)) / ((n : ℂ) ^ (σ : ℂ))‖) := by
-    funext n
-    -- Denominator norms depend only on real part of exponent
-    have hden_s : ‖(n : ℂ) ^ s‖ = (n : ℝ) ^ s.re :=
-      Complex.norm_natCast_cpow_of_re_ne_zero n hre_ne_zero
-    have hden_σ : ‖(n : ℂ) ^ (σ : ℂ)‖ = (n : ℝ) ^ (σ : ℂ).re :=
-      Complex.norm_natCast_cpow_of_re_ne_zero n (by simpa [Complex.ofReal_re] using hσ_ne_zero)
-    calc
-      ‖(((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ)) / ((n : ℂ) ^ s)‖
-          = ‖(((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ))‖ / ‖(n : ℂ) ^ s‖ := by simp
-      _ = |ArithmeticFunction.vonMangoldt n| / ((n : ℝ) ^ s.re) := by
-            simp [hden_s, Complex.norm_real]
-      _ = |ArithmeticFunction.vonMangoldt n| / ((n : ℝ) ^ σ) := by simp [hσ]
-      _ = ‖(((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ))‖ / ‖(n : ℂ) ^ (σ : ℂ)‖ := by
-            simp [hden_σ, Complex.ofReal_re, Complex.norm_real]
-      _ = ‖(((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ)) / ((n : ℂ) ^ (σ : ℂ))‖ := by simp
-  simpa using congrArg (fun f : ℕ → ℝ => ∑' n, f n) hterm
+  refine tsum_congr (fun n ↦ ?_)
+  have hden_s : ‖(n : ℂ) ^ s‖ = (n : ℝ) ^ s.re :=
+    Complex.norm_natCast_cpow_of_re_ne_zero n hre_ne_zero
+  have hden_σ : ‖(n : ℂ) ^ (σ : ℂ)‖ = (n : ℝ) ^ (σ : ℂ).re :=
+    Complex.norm_natCast_cpow_of_re_ne_zero n (by simpa [Complex.ofReal_re] using hσ_ne_zero)
+  calc
+    ‖(((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ)) / ((n : ℂ) ^ s)‖
+        = ‖(((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ))‖ / ‖(n : ℂ) ^ s‖ := by simp
+    _ = |ArithmeticFunction.vonMangoldt n| / ((n : ℝ) ^ s.re) := by
+          simp [hden_s, Complex.norm_real]
+    _ = |ArithmeticFunction.vonMangoldt n| / ((n : ℝ) ^ σ) := by simp [hσ]
+    _ = ‖(((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ))‖ / ‖(n : ℂ) ^ (σ : ℂ)‖ := by
+          simp [hden_σ, Complex.ofReal_re, Complex.norm_real]
+    _ = ‖(((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ)) / ((n : ℂ) ^ (σ : ℂ))‖ := by simp
 
 lemma helper_norm_neg_logDeriv_eq_tsum_norm (σ : ℝ) (hσ : 1 < σ) :
   ‖- deriv riemannZeta (σ : ℂ) / riemannZeta (σ : ℂ)‖ =
