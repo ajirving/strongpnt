@@ -23,7 +23,7 @@ rev = "v4.33.1"
 [[require]]
 name = "PrimeNumberTheoremAnd"
 git  = "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd.git"
-rev = "v4.33.1"
+rev = "650d31264be65f4cd6e70c45d8b25d86d482a761"
 
 [[require]]
 name = "checkdecls"
