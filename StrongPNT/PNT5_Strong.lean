@@ -29,11 +29,6 @@ open MeasureTheory
 /-- Our preferred left vertical line. -/
 @[inline] noncomputable def sigma1Of (A T : ℝ) : ℝ := 1 - A / Real.log T
 
-def LogDerivZetaHasBound (A C : ℝ) : Prop := ∀ (σ : ℝ) (t : ℝ) (_ : 3 < |t|)
-    (_ : σ ∈ Ici (1 - A / Real.log |t|)), ‖ζ' (σ + t * I) / ζ (σ + t * I)‖ ≤
-    C * Real.log |t| ^ 9
-
-
 theorem log_pos (T : ℝ) (T_gt : 3 < T) : (Real.log T > 1) := by
     have elt3 : Real.exp 1 < 3 := by
       linarith[Real.exp_one_lt_d9]
@@ -56,7 +51,7 @@ lemma I2Bound {SmoothingF : ℝ → ℝ}
     (suppSmoothingF : Function.support SmoothingF ⊆ Icc (1 / 2) 2)
 --    (mass_one : ∫ x in Ioi 0, SmoothingF x / x = 1)
     (ContDiffSmoothingF : ContDiff ℝ 1 SmoothingF)
-    {A C₂ : ℝ} (has_bound : LogDerivZetaHasBound A C₂) (C₂pos : 0 < C₂) (A_in : A ∈ Ioc 0 (1 / 2)) :
+    {A C₂ : ℝ} (has_bound : LogDerivZetaHasBound 1 9 A C₂) (C₂pos : 0 < C₂) (A_in : A ∈ Ioc 0 (1 / 2)) :
     ∃ (C : ℝ) (_ : 0 < C),
     ∀(X : ℝ) (_ : 3 < X) {ε : ℝ} (_ : 0 < ε)
     (_ : ε < 1) {T : ℝ} (_ : 3 < T),
@@ -139,7 +134,7 @@ lemma I2Bound {SmoothingF : ℝ → ℝ}
       _ ≤ C₂ * Real.log |-T| ^ 9 := 
         has_bound σ (-T) (by simp only [abs_neg]; rwa [abs_of_pos Tpos]) 
         (by rw[this] at hσ; unfold sigma1Of at hσ; simp only [mem_Ioc, abs_neg, log_abs, mem_Ici,
-          tsub_le_iff_right] at hσ ⊢; replace hσ := hσ.1; linarith)
+          tsub_le_iff_right] at hσ ⊢; replace hσ := hσ.1; simp; linarith)
       _ ≤ C₂ * Real.log T ^ 9 := by simp
       _ ≤ C₂ * (C₃ * T) := by gcongr; convert! hC₃ T (by linarith); simp
 
@@ -244,7 +239,7 @@ Same with $I_7$.
 theorem I3Bound {SmoothingF : ℝ → ℝ}
     (suppSmoothingF : Function.support SmoothingF ⊆ Icc (1 / 2) 2)
     (ContDiffSmoothingF : ContDiff ℝ 1 SmoothingF)
-    {A Cζ : ℝ} (hCζ : LogDerivZetaHasBound A Cζ) (Cζpos : 0 < Cζ) (hA : A ∈ Ioc 0 (1 / 2)) :
+    {A Cζ : ℝ} (hCζ : LogDerivZetaHasBound 1 9 A Cζ) (Cζpos : 0 < Cζ) (hA : A ∈ Ioc 0 (1 / 2)) :
     ∃ (C : ℝ) (_ : 0 < C),
       ∀ (X : ℝ) (_ : 3 < X)
         {ε : ℝ} (_ : 0 < ε) (_ : ε < 1)
@@ -403,9 +398,10 @@ theorem I3Bound {SmoothingF : ℝ → ℝ}
   have logzetabnd : ∀ t : ℝ, 3 < |t| ∧ |t| < T → ‖ζ' (↑σ₁ + ↑t * I) / ζ (↑σ₁ + ↑t * I)‖ ≤ Cζ * Real.log (|t| : ℝ) ^ 9 := by
     intro t tbounds
     obtain ⟨tgt3, tltT⟩ := tbounds
-    apply hCζ
-    · exact tgt3
-    · apply boundthing
+    convert hCζ _ _ tgt3 _
+    · simp
+    · convert boundthing t _
+      · simp
       constructor
       · exact tgt3
       · exact tltT
@@ -1199,7 +1195,7 @@ Putting these together gives the result.
 %%-/
 
 
-lemma LogDerivZetaBoundedAndHolo : ∃ A C : ℝ, 0 < C ∧ A ∈ Ioc 0 (1 / 2) ∧ LogDerivZetaHasBound A C
+lemma LogDerivZetaBoundedAndHolo : ∃ A C : ℝ, 0 < C ∧ A ∈ Ioc 0 (1 / 2) ∧ LogDerivZetaHasBound 1 9 A C
     ∧ ∀ (T : ℝ) (_ : 3 ≤ T),
     HolomorphicOn (fun (s : ℂ) ↦ ζ' s / (ζ s))
     (( (Icc ((1 : ℝ) - A / Real.log T ^ 1) 2)  ×ℂ (Icc (-T) T) ) \ {1}) := by
@@ -1242,7 +1238,8 @@ lemma LogDerivZetaBoundedAndHolo : ∃ A C : ℝ, 0 < C ∧ A ∈ Ioc 0 (1 / 2) 
     -- Multiply both sides by C ≥ 0
     have : C * Real.log |t| ^ (2 : ℕ) ≤ C * Real.log |t| ^ (9 : ℕ) :=
       mul_le_mul_of_nonneg_left hpow (le_of_lt C_pos)
-    exact (le_trans hmain this)
+    convert! (le_trans hmain this)
+    simp
   · -- Holomorphic: restrict the ^1-rectangle using A := min A₁ A₂ ≤ A₂
     intro T hT
     -- Our rectangle is a subset since 1 - (min A₁ A₂)/log T ≥ 1 - A₂/log T
