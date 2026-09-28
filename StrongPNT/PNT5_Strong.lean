@@ -26,19 +26,6 @@ local notation "ψ" => ChebyshevPsi
 open ComplexConjugate
 open MeasureTheory
 
-/-- Our preferred left vertical line. -/
-@[inline] noncomputable def sigma1Of (A T : ℝ) : ℝ := 1 - A / Real.log T
-
-theorem log_pos (T : ℝ) (T_gt : 3 < T) : (Real.log T > 1) := by
-    have elt3 : Real.exp 1 < 3 := by
-      linarith[Real.exp_one_lt_d9]
-    have logTgt1 : Real.log T > 1 := by
-      refine (lt_log_iff_exp_lt ?_).mpr ?_
-      · linarith
-      · linarith
-    exact logTgt1
-
-
 lemma LogDerivZetaBoundedAndHolo : ∃ A C : ℝ, 0 < C ∧ A ∈ Ioc 0 (1 / 2) ∧ LogDerivZetaHasBound 1 9 A C
     ∧ ∀ (T : ℝ) (_ : 3 ≤ T),
     HolomorphicOn (fun (s : ℂ) ↦ ζ' s / (ζ s))
