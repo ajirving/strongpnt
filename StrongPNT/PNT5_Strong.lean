@@ -38,112 +38,6 @@ theorem log_pos (T : ℝ) (T_gt : 3 < T) : (Real.log T > 1) := by
       · linarith
     exact logTgt1
 
-/-%%
-\begin{lemma}[I2Bound]\label{I2Bound}\lean{I2Bound}\leanok
-We have that
-$$
-\left|I_{2}(\nu, \epsilon, X, T)\right| \ll \frac{X}{\epsilon T}
-.
-$$
-\end{lemma}
-%%-/
-lemma I2Bound {SmoothingF : ℝ → ℝ}
-    (suppSmoothingF : Function.support SmoothingF ⊆ Icc (1 / 2) 2)
---    (mass_one : ∫ x in Ioi 0, SmoothingF x / x = 1)
-    (ContDiffSmoothingF : ContDiff ℝ 1 SmoothingF)
-    {A C₂ : ℝ} (has_bound : LogDerivZetaHasBound 1 9 A C₂) (C₂pos : 0 < C₂) (A_in : A ∈ Ioc 0 (1 / 2)) :
-    ∃ (C : ℝ) (_ : 0 < C),
-    ∀(X : ℝ) (_ : 3 < X) {ε : ℝ} (_ : 0 < ε)
-    (_ : ε < 1) {T : ℝ} (_ : 3 < T),
-    let σ₁ := sigma1Of A T
-    ‖I₂ SmoothingF ε T X σ₁‖ ≤ C * X / (ε * T) := by
-  convert I2GenBound suppSmoothingF ContDiffSmoothingF (by norm_num) (by norm_num) has_bound C₂pos A_in
-  simp [I2BoundGenProp]
-  rfl
-
-/-%%
-\begin{proof}\uses{MellinOfSmooth1b, LogDerivZetaBndUniform, I2, I8}\leanok
-Unfold the definitions and apply the triangle inequality.
-$$
-\left|I_{2}(\nu, \epsilon, X, T, \sigma_1)\right| =
-\left|\frac{1}{2\pi i} \int_{\sigma_1}^{\sigma_0}
-\left(\frac{-\zeta'}\zeta(\sigma - T i) \right) \cdot
-\mathcal M(\widetilde 1_\epsilon)(\sigma - T i) \cdot
-X^{\sigma - T i}
- \ d\sigma
-\right|
-$$
-$$\leq
-\frac{1}{2\pi}
-\int_{\sigma_1}^{\sigma_0}
-C \cdot \log T ^ 9
-\frac{C'}{\epsilon|\sigma - T i|^2}
-X^{\sigma_0}
- \ d\sigma
- \leq
-C'' \cdot \frac{X\log T^9}{\epsilon T^2}
-,
-$$
-where we used Theorems \ref{MellinOfSmooth1b} and \ref{LogDerivZetaBndUniform}, and the fact that
-$X^\sigma \le X^{\sigma_0} = X\cdot X^{1/\log X}=e \cdot X$.
-Since $T>3$, we have $\log T^9 \leq C''' T$.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}[I3Bound]\label{I3Bound}\lean{I3Bound}\leanok
-We have that
-$$
-\left|I_{3}(\nu, \epsilon, X, T)\right| \ll \frac{X}{\epsilon}\, X^{-\frac{A}{(\log T)^9}}
-.
-$$
-Same with $I_7$.
-\end{lemma}
-%%-/
-
-theorem I3Bound {SmoothingF : ℝ → ℝ}
-    (suppSmoothingF : Function.support SmoothingF ⊆ Icc (1 / 2) 2)
-    (ContDiffSmoothingF : ContDiff ℝ 1 SmoothingF)
-    {A Cζ : ℝ} (hCζ : LogDerivZetaHasBound 1 9 A Cζ) (Cζpos : 0 < Cζ) (hA : A ∈ Ioc 0 (1 / 2)) :
-    ∃ (C : ℝ) (_ : 0 < C),
-      ∀ (X : ℝ) (_ : 3 < X)
-        {ε : ℝ} (_ : 0 < ε) (_ : ε < 1)
-        {T : ℝ} (_ : 3 < T),
-        --(SmoothingFnonneg : ∀ x > 0, 0 ≤ SmoothingF x)
-        --(mass_one : ∫ x in Ioi 0, SmoothingF x / x = 1),
-        let σ₁ : ℝ := 1 - A / (Real.log T)
-        ‖I₃ SmoothingF ε T X σ₁‖ ≤ C * X * X ^ (- A / (Real.log T)) / ε := by
-  convert I3GenBound suppSmoothingF ContDiffSmoothingF (by norm_num) (by norm_num) hCζ Cζpos hA
-  simp [I3BoundGenProp]
-
-/-%%
-\begin{lemma}[I4Bound]\label{I4Bound}\lean{I4Bound}\leanok
-We have that
-$$
-\left|I_{4}(\nu, \epsilon, X, \sigma_1, \sigma_2)\right| \ll \frac{X}{\epsilon}\,
- X^{-\frac{A}{(\log T)^9}}
-.
-$$
-Same with $I_6$.
-\end{lemma}
-%%-/
-
-lemma I4Bound {SmoothingF : ℝ → ℝ}
-    (suppSmoothingF : Function.support SmoothingF ⊆ Icc (1 / 2) 2)
-    --(SmoothingFnonneg : ∀ x > 0, 0 ≤ SmoothingF x)
-    --(mass_one : ∫ x in Ioi 0, SmoothingF x / x = 1)
-    (ContDiffSmoothingF : ContDiff ℝ 1 SmoothingF)
-    {σ₂ : ℝ} (h_logDeriv_holo : LogDerivZetaIsHoloSmall σ₂) (hσ₂ : σ₂ ∈ Ioo 0 1)
-    {A : ℝ} --{Cζ : ℝ} --(hCζ : LogDerivZetaHasBound A Cζ) (Cζpos : 0 < Cζ)
-    (hA : A ∈ Ioc 0 (1 / 2)) :
-    ∃ (C : ℝ) (_ : 0 ≤ C) (Tlb : ℝ) (_ : 3 < Tlb),
-    ∀ (X : ℝ) (_ : 3 < X)
-    {ε : ℝ} (_ : 0 < ε) (_ : ε < 1)
-    {T : ℝ} (_ : Tlb < T),
-    let σ₁ : ℝ := 1 - A / (Real.log T)
-    ‖I₄ SmoothingF ε X σ₁ σ₂‖ ≤ C * X * X ^ (- A / (Real.log T)) / ε := by
-  convert I4GenBound suppSmoothingF ContDiffSmoothingF h_logDeriv_holo hσ₂ (by norm_num : (1 : ℝ) > 0) hA
-  simp [I4BoundGenProp]
 
 lemma LogDerivZetaBoundedAndHolo : ∃ A C : ℝ, 0 < C ∧ A ∈ Ioc 0 (1 / 2) ∧ LogDerivZetaHasBound 1 9 A C
     ∧ ∀ (T : ℝ) (_ : 3 ≤ T),
@@ -267,12 +161,12 @@ theorem Strong_PNT : ∃ c > 0,
   clear holo2' σ₂'_lt_one
 
   obtain ⟨c₁, c₁pos, hc₁⟩ := I1Bound ν_supp ContDiff1ν ν_nonneg ν_massOne
-  obtain ⟨c₂, c₂pos, hc₂⟩ := I2Bound ν_supp ContDiff1ν zeta_bnd C_bnd_pos A_in_Ioc
-  obtain ⟨c₃, c₃pos, hc₃⟩ := I3Bound ν_supp ContDiff1ν zeta_bnd C_bnd_pos A_in_Ioc
+  obtain ⟨c₂, c₂pos, hc₂⟩ := I2GenBound ν_supp ContDiff1ν (by norm_num) (by norm_num) zeta_bnd C_bnd_pos A_in_Ioc
+  obtain ⟨c₃, c₃pos, hc₃⟩ := I3GenBound ν_supp ContDiff1ν (by norm_num) (by norm_num) zeta_bnd C_bnd_pos A_in_Ioc
   obtain ⟨c₅, c₅pos, hc₅⟩ := I5Bound ν_supp ContDiff1ν holo2  ⟨σ₂_pos, σ₂_lt_one⟩
-  obtain ⟨c₄, c₄pos, Tlb₄, Tlb₄bnd, hc₄⟩ := I4Bound ν_supp ContDiff1ν
-    holo2 ⟨σ₂_pos, σ₂_lt_one⟩ A_in_Ioc
-
+  obtain ⟨c₄, c₄pos, Tlb₄, Tlb₄bnd, hc₄⟩ := I4GenBound ν_supp ContDiff1ν
+    holo2 ⟨σ₂_pos, σ₂_lt_one⟩ (by norm_num : (1 : ℝ) > 0) A_in_Ioc
+  simp only [rpow_one] at hc₂ hc₃ hc₄
   let C' := c_close + C_main
   let C'' := 2 *(c₁ + c₂)
   let C''' := 2 * (c₃ + c₄)
@@ -753,11 +647,6 @@ theorem Strong_PNT : ∃ c > 0,
         rw [← norm_neg]
         congr
         ring
-      change ‖I₂ ν ε (Tx X) X σ₁‖ ≤ c₂ * X / (ε * (Tx X))
-      dsimp at hc₂
-      dsimp [σ₁]
-      unfold sigma1Of at hc₂
-      exact hc₂
     _         =  (c_close * ε * X * Real.log X + C_main * ε * X)
                   + (2 * (c₁ * X * Real.log X / (ε * T) + c₂ * X / (ε * T))
                   + 2 * (c₃ * X * X ^ (-A / Real.log T) / ε
