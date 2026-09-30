@@ -95,7 +95,7 @@ lemma lem_explicit1deltat :
   · apply one_lt_mul hc1.le
     simp
     norm_num
-  peel hc2 with t ht hc2
+  gconvert hc2 with t ht hc2
   intro δ hδ
   have := zerosetKfR_eq_ZetaZerosNearPoint t
   rw [mul_comm] at this
@@ -123,10 +123,10 @@ lemma lem_explicit1RealReal :
           ≤ C * Real.log (|t| + 2) := by
   rcases lem_explicit1deltat with ⟨C, hCpos, hE⟩
   refine ⟨C, hCpos, ?_⟩
-  peel hE with t ht δ hδ hE
+  gconvert hE with t ht δ hδ hE
   rw [← Complex.re_sum, ← Complex.sub_re]
   grw [Complex.abs_re_le_norm]
-  rwa [norm_sub_rev]
+  rw [norm_sub_rev]
 
 -- Updated lem_explicit2Real
 lemma lem_explicit2Real :
@@ -573,7 +573,7 @@ lemma Z0boundRe_const3 :
   -- Use Z0bound_const to get a bound on the norm, then unwind the real part of (1/δ : ℂ)
   rcases Z0bound_const with ⟨C, hCpos, hC⟩
   use C, hCpos
-  peel hC with δ hδ hC
+  gconvert hC using 2 with δ hδ hC
   grw [← hC, ← Complex.re_le_norm]
   simp
 
@@ -697,7 +697,7 @@ lemma lem341tsC2 :
   -- Obtain the constant and bound from lem341tsC
   rcases lem341tsC with ⟨C, hCpos, hT⟩
   refine ⟨C, hCpos, ?_⟩
-  peel hT with  s hs hTs hT
+  gconvert hT using 3 with  s hs hTs hT
   refine (div_le_comm₀ ?_ (mul_pos (by positivity) (Real.log_pos (by linarith)))).mp hT
   refine add_pos (by linarith) (one_div_pos.mpr ?_)
   exact mul_pos (by positivity) (Real.log_pos (by linarith))
@@ -716,8 +716,7 @@ lemma lem341tsC3 :
     1 - s.re ≥ 1 / (14 * C * Real.log (|s.im| + 2)) := by
   obtain ⟨C, hCpos, hT⟩ := lem341tsC2
   refine ⟨C, hCpos, ?_⟩
-  peel hT with  s hs hTle hT
-  -- Convert the inequality to the form required by fraction_diff_lower_bound
+  gconvert hT using 3 with  s hs hTle hT
   have h' : 4 / (7 * C * Real.log (|s.im| + 2)) ≤
       (1 - s.re) + 1 / (2 * C * Real.log (|s.im| + 2)) := by
     simpa [ge_iff_le, add_comm, add_left_comm, add_assoc] using hT
@@ -735,7 +734,7 @@ lemma zerofree :
   -- Obtain the inequality from lem341tsC3
   rcases lem341tsC3 with ⟨C0, hC0pos, hT⟩
   refine ⟨1 / (14 * C0), (by positivity), (by bound), ?__⟩
-  peel hT with s hs hsi hT
+  gconvert hT using 3 with s hs hsi hT
   suffices 1 / (14 * C0) / Real.log (|s.im| + 2) ≤ 1 - s.re by linarith
   convert hT.le using 1
   ring
@@ -967,7 +966,7 @@ lemma lem_Zeta_Triangle_ZFR :
         C_1 * Real.log |t| := by
   obtain ⟨C1, hC1, hbound⟩ := lem_Zeta_Expansion_ZFR
   refine ⟨C1, hC1, ?_⟩
-  peel hbound with  t ht hfin z hz hbound
+  gconvert hbound using 5 with  t ht hfin z hz hbound
   grw [norm_le_norm_sub_add _ (∑ ρ ∈ hfin.toFinset, ↑(analyticOrderNatAt riemannZeta ρ) / (z - ρ)), hbound]
   exact le_of_eq (by ring)
 
