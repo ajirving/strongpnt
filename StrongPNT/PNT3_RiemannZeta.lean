@@ -43,7 +43,7 @@ lemma zeta_ratio_at_3_2 :  HasProd (fun (p : ℙ) ↦ (1 + ((p : ℕ) : ℂ) ^ (
 lemma hasProd_le_of_nonneg {α : Type*} {f g : α → ℝ} {a b : ℝ}
     (hf : HasProd f a) (hg : HasProd g b) (h_nonneg : ∀ i, 0 ≤ f i) (h : ∀ i, f i ≤ g i)
     : a ≤ b :=
-  le_of_tendsto_of_tendsto' hf hg fun _ ↦ Finset.prod_le_prod (fun i _ ↦ h_nonneg i) (fun i _ ↦ h i )
+  le_of_tendsto_of_tendsto' hf hg fun _ ↦ Finset.prod_le_prod₀ (fun i _ ↦ h_nonneg i) (fun i _ ↦ h i )
 
 -- Theorem zeta_lower_bound
 
@@ -466,7 +466,7 @@ lemma Zeta1_Zeta_Expansion
     have : (1 : ℝ) < 2 := by norm_num
     exact lt_of_lt_of_le this (le_max_right _ _)
   refine ⟨C, hC_gt1, ?_⟩
-  peel hmain with t ht hmain
+  gconvert hmain with t ht hmain
   -- Unfold the let-binding c in the goal
   simp only
   intro hfin z hz

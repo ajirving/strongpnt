@@ -18,13 +18,6 @@ private lemma circleAverage_eq_iteratedDeriv_div_factorial (hf : DiffContOnCl �
     field
   · simp; field
 
-theorem norm_circleAverage_le_circleAverage_norm {E : Type*} {f : ℂ → E} [NormedAddCommGroup E] [NormedSpace ℝ E] :
-    ‖circleAverage f c R‖ ≤ circleAverage (fun z ↦ ‖f z‖) c R := by
-  simp only  [circleAverage_def, norm_smul, smul_eq_mul]
-  gcongr
-  · simp [abs_of_nonneg pi_nonneg]
-  exact intervalIntegral.norm_integral_le_integral_norm (by positivity)
-
 lemma circleAverage_fun_conj (hf : CircleIntegrable f c R) :
     circleAverage (fun z ↦ conj (f z)) c R = conj (circleAverage f c R) :=
   conjCLE.toContinuousLinearMap.circleAverage_comp_comm hf

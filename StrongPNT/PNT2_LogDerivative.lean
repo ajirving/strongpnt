@@ -221,7 +221,7 @@ theorem lem_mod_Bf_at_0_ge_1 (R R1 : ℝ) {c : ℂ} (hR1_pos : 0 < R1)
     ‖Bf R R1 c f c‖ ≥ 1 := by
   rw [lem_mod_Bf_at_0_as_ratio R R1 hR1_pos hR1_lt_R f (by simp_all) h_finite_zeros]
   rw [hf0_eq_one, norm_one, one_mul]
-  refine Finset.one_le_prod fun ρ hρ ↦ one_le_pow₀ ?_
+  refine Finset.one_le_prod₀ fun ρ hρ ↦ one_le_pow₀ ?_
   simp only [zerosetKfR, mem_closedBall, Finite.mem_toFinset, mem_ofPred_eq, dist_eq_norm_sub'] at hρ
   refine one_le_div ?_|>.mpr (hρ.1.trans hR1_lt_R.le)
   exact norm_pos_iff.mpr fun h ↦ (by grind)
@@ -530,7 +530,7 @@ lemma logDeriv_Bf_is_sum (h_finite_zeros : (zerosetKfR R1 c f).Finite) (hR1_lt_R
   rw [logDeriv_congr_of_eventuallyEq h_ev]
   have hf' := f_diff_nonzero_outside_Kf h_f_analytic z hz
   have hg' := blaschke_prod_diff_nonzero hR1_pos hR1_lt_R h_finite_zeros z hz
-  rw [logDeriv_mul _ hf'.1 hg'.1 hf'.2 hg'.2]
+  rw [logDeriv_fun_mul _ hf'.1 hg'.1 hf'.2 hg'.2]
 
 theorem in_r_minus_kf {R1 : ℝ} {f : ℂ → ℂ}
   (z : ℂ)
@@ -551,7 +551,7 @@ lemma Lf_deriv_step3 (h_finite_zeros : (zerosetKfR R1 c f).Finite) (hR1_lt_R : R
     deriv f z / f z + ∑ ρ ∈ h_finite_zeros.toFinset, analyticOrderNatAt f ρ * (1 / (z - c - R^2 / (conj (ρ - c))) - 1 / (z - ρ)) := by
   rw [h_Lf.2.2.1 z hz.1, logDeriv_Bf_is_sum h_finite_zeros hR1_lt_R hR1_pos h_f_analytic z (in_r_minus_kf _ hz), logDeriv_apply]
   have := fun ρ (hρ : ρ ∈ h_finite_zeros.toFinset) ↦ blaschke_pow_diff_nonzero (f := f) (c := c) hR1_pos hR1_lt_R ρ (by simp_all) z (by simp_all; linarith)
-  rw [logDeriv_prod (fun ρ hρ ↦ (this ρ hρ).1) (fun ρ hρ ↦ (this ρ hρ).2)]
+  rw [logDeriv_fun_prod (fun ρ hρ ↦ (this ρ hρ).1) (fun ρ hρ ↦ (this ρ hρ).2)]
   rw [Finset.sum_congr rfl fun ρ hρ ↦ ?_]
   have := blaschke_frac_diff_nonzero (c := c) (f := f) hR1_pos hR1_lt_R ρ (by simp_all) z (by simp_all; linarith)|>.2
   rw [logDeriv_fun_pow this]
@@ -559,7 +559,7 @@ lemma Lf_deriv_step3 (h_finite_zeros : (zerosetKfR R1 c f).Finite) (hR1_lt_R : R
   have hden := z_minus_rho_diff_nonzero ρ (by simp_all) z (in_r_minus_kf _ hz)
   have hnum := blaschke_num_diff_nonzero (c := c) (f := f) hR1_pos hR1_lt_R
       ρ (by simp_all) z (by simp_all [dist_eq_norm_sub]; linarith)
-  rw [logDeriv_div z hnum.1 hden.1 hnum.2 hden.2]
+  rw [logDeriv_fun_div z hnum.1 hden.1 hnum.2 hden.2]
   have hρ_ne_zero : ρ ≠ c := by
     intro h; simp_all [zerosetKfR]
   simp [logDeriv_apply, -map_sub]
