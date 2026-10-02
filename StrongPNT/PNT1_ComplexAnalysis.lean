@@ -3,10 +3,13 @@ import Mathlib.Analysis.Analytic.Order
 import Mathlib.Analysis.CStarAlgebra.Classes
 import Mathlib.Analysis.Complex.AbsMax
 import Mathlib.Analysis.Complex.BorelCaratheodory
+import Mathlib.Analysis.Complex.BranchLogRoot
 import Mathlib.Analysis.Complex.HasPrimitives
 import Mathlib.Analysis.Complex.Liouville
 import Mathlib.Analysis.Complex.RemovableSingularity
+import Mathlib.Analysis.Convex.Contractible
 import Mathlib.Analysis.Normed.Module.Connected
+import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.GroupTheory.MonoidLocalization.Basic
 import Mathlib.Order.CompletePartialOrder
@@ -80,6 +83,52 @@ open Filter Topology
 
 open scoped Topology
 
+/-! ### Holomorphic logarithms
+
+The following lemmas are intended for upstreaming to Mathlib. -/
+
+theorem Convex.isSimplyConnected {E : Type*} [AddCommGroup E] [Module ℝ E] [TopologicalSpace E]
+    [IsTopologicalAddGroup E] [ContinuousSMul ℝ E] {s : Set E} (hs : Convex ℝ s)
+    (hne : s.Nonempty) : IsSimplyConnected s :=
+  have := hs.contractibleSpace hne
+  SimplyConnectedSpace.ofContractible s
+
+/-- A continuous logarithm of an analytic function is analytic. -/
+theorem AnalyticAt.of_exp_comp {f g : ℂ → ℂ} {x : ℂ} (hg : AnalyticAt ℂ g x)
+    (hf : ContinuousAt f x) (hfg : ∀ᶠ y in 𝓝 x, exp (f y) = g y) : AnalyticAt ℂ f x := by
+  have hgx : g x ≠ 0 := hfg.self_of_nhds ▸ exp_ne_zero _
+  have hlog : AnalyticAt ℂ (fun y ↦ f x + Complex.log (g y / g x)) x := by
+    have h1 : AnalyticAt ℂ (fun y ↦ g y / g x) x := hg.div analyticAt_const hgx
+    exact analyticAt_const.add (h1.clog (by simp [hgx]))
+  refine hlog.congr ?_
+  have hcont : ContinuousAt (fun y ↦ (f y - f x).im) x := by fun_prop
+  have hlt : ∀ᶠ y in 𝓝 x, |(f y - f x).im| < Real.pi := by
+    simpa [Real.dist_eq] using hcont.eventually (Metric.ball_mem_nhds _ Real.pi_pos)
+  filter_upwards [hfg, hlt] with y hy hlt
+  rw [abs_lt] at hlt
+  rw [← hy, ← hfg.self_of_nhds, ← exp_sub, log_exp hlt.1 hlt.2.le]
+  ring
+
+/-- A nonvanishing analytic function on an open simply connected set has an analytic
+logarithm. -/
+theorem AnalyticOnNhd.exists_eqOn_exp_comp {U : Set ℂ} (hUc : IsSimplyConnected U)
+    (hUo : IsOpen U) {g : ℂ → ℂ} (hg : AnalyticOnNhd ℂ g U) (hg0 : ∀ z ∈ U, g z ≠ 0) :
+    ∃ f : ℂ → ℂ, AnalyticOnNhd ℂ f U ∧ Set.EqOn (exp ∘ f) g U := by
+  obtain ⟨f, hfc, hf⟩ := exists_continuousOn_eqOn_exp_comp hUc hUo hg.continuousOn
+    (by rintro ⟨z, hz, h0⟩; exact hg0 z hz h0)
+  refine ⟨f, fun z hz ↦ (hg z hz).of_exp_comp (hfc.continuousAt (hUo.mem_nhds hz)) ?_, hf⟩
+  filter_upwards [hUo.mem_nhds hz] with y hy using hf hy
+
+theorem deriv_eq_logDeriv_of_exp_comp {f g : ℂ → ℂ} {x : ℂ} (hf : DifferentiableAt ℂ f x)
+    (hfg : ∀ᶠ y in 𝓝 x, exp (f y) = g y) : deriv f x = deriv g x / g x := by
+  have h := ((hasDerivAt_exp (f x)).comp x hf.hasDerivAt).congr_of_eventuallyEq
+    (hfg.mono fun _ h ↦ h.symm)
+  rw [h.deriv, ← hfg.self_of_nhds]
+  field_simp [exp_ne_zero]
+
+theorem re_eq_log_norm_of_exp_eq {w z : ℂ} (h : exp w = z) : w.re = Real.log ‖z‖ := by
+  rw [← h, norm_exp, Real.log_exp]
+
 theorem log_of_analytic_open
     {r : ℝ} {B : ℂ → ℂ} {c : ℂ} (rpos : 0 < r)
     (hB : AnalyticOnNhd ℂ B (Metric.ball c r))
@@ -90,36 +139,11 @@ theorem log_of_analytic_open
       (∀ z ∈ Metric.ball c r, deriv J_B z = deriv B z / B z) ∧
       (∀ z ∈ Metric.ball c r,
         Real.log ‖B z‖ - Real.log ‖B c‖ = Complex.re (J_B z)) := by
-  obtain ⟨J, hJ⟩ := hB.deriv.div hB hB_ne_zero|>.differentiableOn.isExactOn_ball
-  refine ⟨fun z ↦ J z - J c, ?_, (by simp), ?_, ?_⟩
-  · apply AnalyticOnNhd.sub _ analyticOnNhd_const
-    exact DifferentiableOn.analyticOnNhd (fun z hz ↦ DifferentiableAt.differentiableWithinAt (hJ z hz).differentiableAt) (Metric.isOpen_ball)
-  · intro z hz
-    rw [deriv_sub_const, (hJ z hz).deriv]
-  · intro z hz
-    suffices B z = B c * Complex.exp (J z - J c) by
-      rw [this, norm_mul, Real.log_mul, Complex.norm_exp, Real.log_exp]
-      · simp
-      · exact norm_ne_zero_iff.mpr (hB_ne_zero c (by simpa))
-      · exact norm_ne_zero_iff.mpr <| Complex.exp_ne_zero _
-    let f := (fun z ↦ (J z).exp / B z)
-    suffices f z = f c by
-      unfold f at this
-      rw [Complex.exp_sub]
-      field_simp [hB_ne_zero z hz, hB_ne_zero c (by simpa)] at this ⊢
-      rw [← this]
-    refine IsOpen.is_const_of_deriv_eq_zero (s := Metric.ball c r) Metric.isOpen_ball Metric.isPreconnected_ball ?_ ?_ hz (by simpa)
-    · unfold f
-      refine fun z hz ↦ DifferentiableAt.differentiableWithinAt ?_
-      have :=hJ z hz|>.differentiableAt
-      have := hB.differentiableOn z hz|>.differentiableAt (IsOpen.mem_nhds Metric.isOpen_ball hz)
-      have := hB_ne_zero z hz
-      fun_prop (disch := assumption)
-    · intro z hz
-      have : HasDerivAt (fun z ↦ cexp (J z)) ((J z).exp * deriv J z) z := by
-        refine (Complex.hasDerivAt_exp (J z)).comp z (hJ z hz|>.differentiableAt|>.hasDerivAt)
-      unfold f
-      rw [deriv_fun_div this.differentiableAt
-        ((hB.differentiableOn z hz).differentiableAt (IsOpen.mem_nhds Metric.isOpen_ball hz)) (hB_ne_zero z hz), this.deriv, (hJ z hz).deriv]
-      simp only [Pi.zero_apply]
-      field [hB_ne_zero z hz]
+  obtain ⟨f, hfa, hf⟩ := hB.exists_eqOn_exp_comp
+    ((convex_ball c r).isSimplyConnected ⟨c, mem_ball_self rpos⟩) isOpen_ball hB_ne_zero
+  refine ⟨fun z ↦ f z - f c, hfa.sub analyticOnNhd_const, by simp, fun z hz ↦ ?_, fun z hz ↦ ?_⟩
+  · rw [deriv_sub_const]
+    exact deriv_eq_logDeriv_of_exp_comp (hfa z hz).differentiableAt <| by
+      filter_upwards [isOpen_ball.mem_nhds hz] with y hy using hf hy
+  · rw [sub_re, re_eq_log_norm_of_exp_eq (hf hz),
+      re_eq_log_norm_of_exp_eq (hf (mem_ball_self rpos))]
