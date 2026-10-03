@@ -89,18 +89,13 @@ The following lemmas are intended for upstreaming to Mathlib. -/
 
 theorem Convex.isSimplyConnected {E : Type*} [AddCommGroup E] [Module ℝ E] [TopologicalSpace E]
     [IsTopologicalAddGroup E] [ContinuousSMul ℝ E] {s : Set E} (hs : Convex ℝ s)
-    (hne : s.Nonempty) : IsSimplyConnected s :=
+    (hne : s.Nonempty) : IsSimplyConnected s := by
   have := hs.contractibleSpace hne
-  SimplyConnectedSpace.ofContractible s
+  exact SimplyConnectedSpace.ofContractible s
 
-/-- A continuous logarithm of an analytic function is analytic. -/
-theorem AnalyticAt.of_exp_comp {f g : ℂ → ℂ} {x : ℂ} (hg : AnalyticAt ℂ g x)
-    (hf : ContinuousAt f x) (hfg : ∀ᶠ y in 𝓝 x, exp (f y) = g y) : AnalyticAt ℂ f x := by
-  have hgx : g x ≠ 0 := hfg.self_of_nhds ▸ exp_ne_zero _
-  have hlog : AnalyticAt ℂ (fun y ↦ f x + Complex.log (g y / g x)) x := by
-    have h1 : AnalyticAt ℂ (fun y ↦ g y / g x) x := hg.div analyticAt_const hgx
-    exact analyticAt_const.add (h1.clog (by simp [hgx]))
-  refine hlog.congr ?_
+theorem eventually_eq_of_exp_comp {f g : ℂ → ℂ} {x : ℂ}
+    (hf : ContinuousAt f x) (hfg : ∀ᶠ y in 𝓝 x, exp (f y) = g y) :
+    f =ᶠ[𝓝 x] (fun y ↦ f x + log (g y / g x)) := by
   have hcont : ContinuousAt (fun y ↦ (f y - f x).im) x := by fun_prop
   have hlt : ∀ᶠ y in 𝓝 x, |(f y - f x).im| < Real.pi := by
     simpa [Real.dist_eq] using hcont.eventually (Metric.ball_mem_nhds _ Real.pi_pos)
@@ -108,6 +103,14 @@ theorem AnalyticAt.of_exp_comp {f g : ℂ → ℂ} {x : ℂ} (hg : AnalyticAt �
   rw [abs_lt] at hlt
   rw [← hy, ← hfg.self_of_nhds, ← exp_sub, log_exp hlt.1 hlt.2.le]
   ring
+
+/-- A continuous logarithm of an analytic function is analytic. -/
+theorem AnalyticAt.of_exp_comp {f g : ℂ → ℂ} {x : ℂ} (hg : AnalyticAt ℂ g x)
+    (hf : ContinuousAt f x) (hfg : ∀ᶠ y in 𝓝 x, exp (f y) = g y) : AnalyticAt ℂ f x := by
+  have hgx : g x ≠ 0 := hfg.self_of_nhds ▸ exp_ne_zero _
+  refine AnalyticAt.congr ?_ (eventually_eq_of_exp_comp hf hfg).symm
+  have : g x / g x ∈ slitPlane := by simp [hgx]
+  fun_prop
 
 /-- A nonvanishing analytic function on an open simply connected set has an analytic
 logarithm. -/
