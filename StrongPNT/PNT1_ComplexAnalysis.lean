@@ -103,10 +103,9 @@ theorem AnalyticAt.of_exp_comp {f : ℂ → ℂ} {x : ℂ} (hg : AnalyticAt ℂ 
 /-- A nonvanishing analytic function on an open simply connected set has an analytic
 logarithm. -/
 theorem AnalyticOnNhd.exists_eqOn_exp_comp {U : Set ℂ} (hUc : IsSimplyConnected U)
-    (hUo : IsOpen U) {g : ℂ → ℂ} (hg : AnalyticOnNhd ℂ g U) (hg0 : ∀ z ∈ U, g z ≠ 0) :
+    (hUo : IsOpen U) {g : ℂ → ℂ} (hg : AnalyticOnNhd ℂ g U) (hg0 : 0 ∉ g '' U) :
     ∃ f : ℂ → ℂ, AnalyticOnNhd ℂ f U ∧ Set.EqOn (exp ∘ f) g U := by
-  obtain ⟨f, hfc, hf⟩ := exists_continuousOn_eqOn_exp_comp hUc hUo hg.continuousOn
-    (by rintro ⟨z, hz, h0⟩; exact hg0 z hz h0)
+  obtain ⟨f, hfc, hf⟩ := exists_continuousOn_eqOn_exp_comp hUc hUo hg.continuousOn hg0
   refine ⟨f, fun z hz ↦ AnalyticAt.of_exp_comp ?_ (hfc.continuousAt (hUo.mem_nhds hz)), hf⟩
   refine (hg z hz).congr ?_
   filter_upwards [hUo.mem_nhds hz] with y hy using (hf hy).symm
@@ -116,10 +115,7 @@ theorem deriv_eq_logDeriv_of_exp_comp {f g : ℂ → ℂ} {x : ℂ} (hf : Differ
   have h := ((hasDerivAt_exp (f x)).comp x hf.hasDerivAt).congr_of_eventuallyEq
     (hfg.mono fun _ h ↦ h.symm)
   rw [h.deriv, ← hfg.self_of_nhds]
-  field_simp [exp_ne_zero]
-
-theorem re_eq_log_norm_of_exp_eq {w z : ℂ} (h : exp w = z) : w.re = Real.log ‖z‖ := by
-  rw [← h, norm_exp, Real.log_exp]
+  field
 
 theorem log_of_analytic_open
     {r : ℝ} {B : ℂ → ℂ} {c : ℂ} (rpos : 0 < r)
@@ -132,10 +128,10 @@ theorem log_of_analytic_open
       (∀ z ∈ Metric.ball c r,
         Real.log ‖B z‖ - Real.log ‖B c‖ = Complex.re (J_B z)) := by
   obtain ⟨f, hfa, hf⟩ := hB.exists_eqOn_exp_comp
-    ((convex_ball c r).isSimplyConnected ⟨c, mem_ball_self rpos⟩) isOpen_ball hB_ne_zero
+    ((convex_ball c r).isSimplyConnected ⟨c, mem_ball_self rpos⟩) isOpen_ball (by simpa)
   refine ⟨fun z ↦ f z - f c, hfa.sub analyticOnNhd_const, by simp, fun z hz ↦ ?_, fun z hz ↦ ?_⟩
   · rw [deriv_sub_const]
     exact deriv_eq_logDeriv_of_exp_comp (hfa z hz).differentiableAt <| by
       filter_upwards [isOpen_ball.mem_nhds hz] with y hy using hf hy
-  · rw [sub_re, re_eq_log_norm_of_exp_eq (hf hz),
-      re_eq_log_norm_of_exp_eq (hf (mem_ball_self rpos))]
+  · rw [sub_re, ← hf hz, ← hf (mem_ball_self rpos)]
+    simp [norm_exp]
