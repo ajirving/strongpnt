@@ -93,24 +93,12 @@ theorem Convex.isSimplyConnected {E : Type*} [AddCommGroup E] [Module ℝ E] [To
   have := hs.contractibleSpace hne
   exact SimplyConnectedSpace.ofContractible s
 
-theorem eventually_eq_of_exp_comp {f g : ℂ → ℂ} {x : ℂ}
-    (hf : ContinuousAt f x) (hfg : ∀ᶠ y in 𝓝 x, exp (f y) = g y) :
-    f =ᶠ[𝓝 x] (fun y ↦ f x + log (g y / g x)) := by
-  have hcont : ContinuousAt (fun y ↦ (f y - f x).im) x := by fun_prop
-  have hlt : ∀ᶠ y in 𝓝 x, |(f y - f x).im| < Real.pi := by
-    simpa [Real.dist_eq] using hcont.eventually (Metric.ball_mem_nhds _ Real.pi_pos)
-  filter_upwards [hfg, hlt] with y hy hlt
-  rw [abs_lt] at hlt
-  rw [← hy, ← hfg.self_of_nhds, ← exp_sub, log_exp hlt.1 hlt.2.le]
-  ring
-
-/-- A continuous logarithm of an analytic function is analytic. -/
-theorem AnalyticAt.of_exp_comp {f g : ℂ → ℂ} {x : ℂ} (hg : AnalyticAt ℂ g x)
-    (hf : ContinuousAt f x) (hfg : ∀ᶠ y in 𝓝 x, exp (f y) = g y) : AnalyticAt ℂ f x := by
-  have hgx : g x ≠ 0 := hfg.self_of_nhds ▸ exp_ne_zero _
-  refine AnalyticAt.congr ?_ (eventually_eq_of_exp_comp hf hfg).symm
-  have : g x / g x ∈ slitPlane := by simp [hgx]
-  fun_prop
+theorem AnalyticAt.of_exp_comp {f : ℂ → ℂ} {x : ℂ} (hg : AnalyticAt ℂ (exp ∘ f) x)
+    (hf : ContinuousAt f x) : AnalyticAt ℂ f x := by
+  have : AnalyticAt ℂ cexp (f x) := analyticAt_cexp
+  have hd : deriv cexp (f x) ≠ 0 := by simp
+  refine ((this.analyticAt_localInverse hd).comp_of_eq hg rfl).congr ?_
+  exact hf.eventually (this.hasStrictDerivAt.eventually_left_inverse hd)
 
 /-- A nonvanishing analytic function on an open simply connected set has an analytic
 logarithm. -/
@@ -119,8 +107,9 @@ theorem AnalyticOnNhd.exists_eqOn_exp_comp {U : Set ℂ} (hUc : IsSimplyConnecte
     ∃ f : ℂ → ℂ, AnalyticOnNhd ℂ f U ∧ Set.EqOn (exp ∘ f) g U := by
   obtain ⟨f, hfc, hf⟩ := exists_continuousOn_eqOn_exp_comp hUc hUo hg.continuousOn
     (by rintro ⟨z, hz, h0⟩; exact hg0 z hz h0)
-  refine ⟨f, fun z hz ↦ (hg z hz).of_exp_comp (hfc.continuousAt (hUo.mem_nhds hz)) ?_, hf⟩
-  filter_upwards [hUo.mem_nhds hz] with y hy using hf hy
+  refine ⟨f, fun z hz ↦ AnalyticAt.of_exp_comp ?_ (hfc.continuousAt (hUo.mem_nhds hz)), hf⟩
+  refine (hg z hz).congr ?_
+  filter_upwards [hUo.mem_nhds hz] with y hy using (hf hy).symm
 
 theorem deriv_eq_logDeriv_of_exp_comp {f g : ℂ → ℂ} {x : ℂ} (hf : DifferentiableAt ℂ f x)
     (hfg : ∀ᶠ y in 𝓝 x, exp (f y) = g y) : deriv f x = deriv g x / g x := by
