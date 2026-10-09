@@ -93,7 +93,7 @@ theorem Convex.isSimplyConnected {E : Type*} [AddCommGroup E] [Module ℝ E] [To
   have := hs.contractibleSpace hne
   exact SimplyConnectedSpace.ofContractible s
 
-theorem AnalyticAt.of_exp_comp {f : ℂ → ℂ} {x : ℂ} (hg : AnalyticAt ℂ (exp ∘ f) x)
+theorem AnalyticAt.of_exp_comp {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E] {f : E → ℂ} {x : E} (hg : AnalyticAt ℂ (exp ∘ f) x)
     (hf : ContinuousAt f x) : AnalyticAt ℂ f x := by
   have : AnalyticAt ℂ cexp (f x) := analyticAt_cexp
   have hd : deriv cexp (f x) ≠ 0 := by simp
