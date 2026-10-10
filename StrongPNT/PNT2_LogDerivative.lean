@@ -415,7 +415,6 @@ lemma re_Lf_le_log_B
 
 lemma apply_BC_to_Lf
     (B r1 R R1 : ℝ)
-    (hB : 1 < B)
     (hr1_pos : 0 < r1)
     (hr1_lt_R1 : r1 < R1)
     (hR1_pos : 0 < R1)
@@ -430,7 +429,7 @@ lemma apply_BC_to_Lf
     (z : ℂ) (hz : ‖z - c‖ ≤ r1) :
       ‖deriv Lf z‖ ≤
       (2 * Real.log B * R1) / (R1 - r1)^2 := by
-  refine borel_caratheodory_II (Real.log_pos hB) hr1_pos hr1_lt_R1 hLf.1.differentiableOn hLf.2.1 ?_ (by simp_all [dist_eq_norm_sub])
+  refine borel_caratheodory_II hr1_pos hr1_lt_R1 hLf.1.differentiableOn hLf.2.1 ?_ (by simp_all [dist_eq_norm_sub])
   exact fun w hw ↦ re_Lf_le_log_B B R R1 hR1_pos hR1_lt_R f h_f_analytic h_f_zero h_finite_zeros h_f_bound Lf hLf w (by simp_all [dist_eq_norm_sub])
 
 -- Lemma 6: Lf_deriv_is_logBf_deriv
@@ -723,7 +722,7 @@ lemma final_ineq1
     linarith
   grw [final_sum_bound hR1_pos hR1_lt_R hB h_f_analytic h_f_zero h_finite_zeros h_f_bounded z hz_in_R1]
   have hz_le_r1 : ‖z - c‖ ≤ r1 := by simpa [Metric.mem_closedBall, dist_eq_norm] using hz.1
-  grw [apply_BC_to_Lf B r1 R R1 hB hr1pos hr1_lt_R1 (by linarith) hR1_lt_R f
+  grw [apply_BC_to_Lf B r1 R R1 hr1pos hr1_lt_R1 (by linarith) hR1_lt_R f
     h_f_analytic h_f_zero h_finite_zeros
     (h_f_bound := fun w hw => h_f_bounded w (Metric.mem_closedBall.mpr (by simpa [dist_eq_norm] using hw)))
     Lf h_Lf z (by simpa)]
