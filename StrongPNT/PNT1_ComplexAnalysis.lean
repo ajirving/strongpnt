@@ -73,9 +73,7 @@ theorem borel_caratheodory_II {f : ℂ → ℂ} {R M r : ℝ} {c : ℂ}
     simp_all
   grw [norm_deriv_le_of_re_le R_pos hf hf0 (fun w hw ↦ hRe_f_le_M hw)
     (by simp_all [dist_eq_norm_sub]; linarith), hz]
-  · rw [(by ring : 2 * R * M = 2 * M * R)]
-  · linarith
-  · positivity
+  rw [(by ring : 2 * R * M = 2 * M * R)]
 #print axioms borel_caratheodory_II
 
 open Complex MeasureTheory intervalIntegral

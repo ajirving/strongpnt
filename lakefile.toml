@@ -2,6 +2,7 @@
 name           = "StrongPNT"
 version        = "0.1.0"
 defaultTargets = ["StrongPNT"]
+allowNonModules = true
 
 [leanOptions]
 pp.unicode.fun         = true
