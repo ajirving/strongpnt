@@ -215,19 +215,6 @@ lemma zetacnot0 (t : ℝ) : riemannZeta (3/2 + Complex.I * t) ≠ 0 := by
   norm_num
 
 
-lemma analyticOrderAt_mul_const_eq (f : ℂ → ℂ) (a z0 : ℂ) (ha : a ≠ 0) :
-    analyticOrderAt (fun z => f z * a) z0 = analyticOrderAt f z0 := by
-  by_cases hf : AnalyticAt ℂ f z0
-  · -- Analytic case: use additivity of analytic order under multiplication
-    convert! analyticOrderAt_mul hf analyticAt_const using 1
-    rw [analyticAt_const.analyticOrderAt_eq_zero.mpr ha, add_zero]
-  · rw [analyticOrderAt_eq_zero.mpr, analyticOrderAt_eq_zero.mpr]
-    · simp [hf]
-    · left
-      simp_rw [mul_comm]
-      contrapose hf
-      exact analyticAt_iff_analytic_fun_mul analyticAt_const ha|>.mpr hf
-
 lemma final_ineq2a
     (B : ℝ) (r1 R R1 : ℝ) (hr1pos : 0 < r1) (hr1_lt_R1 : r1 < R1)
     (hR1_lt_R : R1 < R)
@@ -242,7 +229,12 @@ lemma final_ineq2a
   · simp
     field
   · refine Finset.sum_congr (by simp_all [zerosetKfR]) fun ρ rρ ↦ ?_
-    simp [analyticOrderNatAt, div_eq_mul_inv, analyticOrderAt_mul_const_eq _ _ _ (inv_ne_zero h_nonzero)]
+    simp only [div_eq_mul_inv, mul_eq_mul_right_iff, Nat.cast_inj, inv_eq_zero]
+    left
+    rw [analyticOrderNatAt_fun_mul_const _ (by simpa)]
+    apply h_analytic
+    simp_all [zerosetKfR]
+    linarith
   · rw [one_lt_div <| norm_pos_iff.mpr h_nonzero]
     exact h_bound _ (by simp; linarith)
   · exact h_analytic.div_const
