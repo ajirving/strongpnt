@@ -191,8 +191,8 @@ lemma D1cinTt_pre (t : ℝ) (ht : |t| > 1) :
     ∀ s ∈ closedBall (3/2 + Complex.I * t : ℂ) 1, s ≠ 1 := by
   intro s hs h
   simp only [h, mem_closedBall, Complex.dist_eq] at hs
-  have := le_trans (Complex.abs_im_le_norm (1 - (3 / 2 + Complex.I * ↑t))) hs
-  simp at this
+  have h2 : |(1 - (3 / 2 + Complex.I * ↑t)).im| ≤ 1 := (Complex.abs_im_le_norm _).trans hs
+  simp at h2
   linarith
 
 -- Lemma 10: D1cinTt

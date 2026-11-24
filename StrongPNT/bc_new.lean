@@ -97,7 +97,7 @@ theorem norm_iteratedDeriv_le_of_re_le (hR : 0 < R)
   · specialize hM c (mem_ball_self hR)
     simp_all
   refine ge_of_tendsto (f := fun R' : ℝ => 2 * M / R' ^ n) (x := 𝓝[<] R)
-    (((continuousAt_const.div (by fun_prop) (by positivity)).tendsto).mono_left
+    (((ContinuousAt.tendsto (by fun_prop (disch := positivity)))).mono_left
       nhdsWithin_le_nhds) ?_
   filter_upwards [self_mem_nhdsWithin, eventually_nhdsWithin_of_eventually_nhds
     (eventually_gt_nhds hR)] with R' hR'R hR'0
