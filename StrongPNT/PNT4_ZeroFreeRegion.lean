@@ -1,7 +1,11 @@
-import StrongPNT.PNT3_RiemannZeta
-import StrongPNT.Z0
-import Mathlib.Analysis.Meromorphic.Divisor
-import Mathlib.NumberTheory.LSeries.ZetaZeros
+module
+
+public import StrongPNT.PNT3_RiemannZeta
+public import StrongPNT.Z0
+public import Mathlib.Analysis.Meromorphic.Divisor
+public import Mathlib.NumberTheory.LSeries.ZetaZeros
+
+public section
 
 def ZetaZerosNearPoint (t : ℝ) : Set ℂ := { ρ : ℂ | ρ ∈ riemannZetaZeros ∧ ‖ρ - ((3/2 : ℂ) + t * Complex.I)‖ ≤ (5/6 : ℝ) }
 
@@ -1013,8 +1017,11 @@ lemma lem_sum_m_rho_bound_c (B R R1 : ℝ)
     exact one_le_div (by simpa)|>.mpr <| hf_le_B c (by simp; linarith)
   convert lem_sum_m_rho_bound (B / ‖f c‖) R R1 hBdiv_ge_one hR1_pos hR1_lt_R g (h_g_analyticOn.mono (by gcongr)) hg0_one hfin_g hg_le_B using 1
   · refine Finset.sum_congr (by simp_all [zerosetKfR, g]) fun ρ hρ ↦ ?_
-    simp only [analyticOrderNatAt, div_eq_mul_inv, Nat.cast_inj, g]
-    rw [analyticOrderAt_mul_const_eq _ _ _ (by simpa)]
+    simp only [div_eq_mul_inv, Nat.cast_inj, g]
+    rw [analyticOrderNatAt_fun_mul_const _ (by simpa)]
+    apply h_f_analytic
+    simp_all [zerosetKfR]
+    linarith
   · field
 
 lemma lem_sum_m_rho_zeta :

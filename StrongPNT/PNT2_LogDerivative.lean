@@ -1,10 +1,14 @@
-import Mathlib.Algebra.Lie.OfAssociative
-import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
-import Mathlib.Analysis.Complex.JensenFormula
-import Mathlib.Analysis.Normed.Module.Connected
-import Mathlib.Analysis.Complex.ExponentialBounds
-import StrongPNT.PNT1_ComplexAnalysis
-import Mathlib.Tactic.Cases
+module
+
+public import Mathlib.Algebra.Lie.OfAssociative
+public import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
+public import Mathlib.Analysis.Complex.JensenFormula
+public import Mathlib.Analysis.Normed.Module.Connected
+public import Mathlib.Analysis.Complex.ExponentialBounds
+public import StrongPNT.PNT1_ComplexAnalysis
+public import Mathlib.Tactic.Cases
+
+@[expose] public section
 
 def zerosetKfR (R : ℝ) (c : ℂ) (f : ℂ → ℂ) : Set ℂ :=
   {ρ : ℂ | ρ ∈ Metric.closedBall (c : ℂ) R ∧ f ρ = 0}

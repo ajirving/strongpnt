@@ -1,5 +1,9 @@
-import PrimeNumberTheoremAnd.ZetaBounds
-import StrongPNT.PNT3_RiemannZeta
+module
+
+public import PrimeNumberTheoremAnd.ZetaBounds
+public import StrongPNT.PNT3_RiemannZeta
+
+public section
 open Complex Topology Filter Interval Set Asymptotics
 
 local notation (name := riemannzeta1) "ζ" => riemannZeta
