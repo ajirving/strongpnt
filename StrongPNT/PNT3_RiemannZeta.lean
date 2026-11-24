@@ -1,12 +1,17 @@
-import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Analysis.SpecialFunctions.Log.Summable
-import Mathlib.NumberTheory.AbelSummation
-import Mathlib.NumberTheory.EulerProduct.DirichletLSeries
-import Mathlib.Topology.Metrizable.Basic
-import Mathlib.Topology.Compactness.Lindelof
-import StrongPNT.PNT2_LogDerivative
-import PrimeNumberTheoremAnd.ZetaBounds
+module
 
+public import Mathlib.Algebra.Order.Ring.Star
+public import Mathlib.Analysis.SpecialFunctions.Log.Summable
+public import Mathlib.NumberTheory.AbelSummation
+public import Mathlib.NumberTheory.EulerProduct.DirichletLSeries
+public import Mathlib.Topology.Metrizable.Basic
+public import Mathlib.Topology.Compactness.Lindelof
+public import Mathlib.Topology.Algebra.InfiniteSum.Field
+public import StrongPNT.PNT2_LogDerivative
+public import PrimeNumberTheoremAnd.ZetaBounds
+
+@[expose]
+public section
 
 open scoped BigOperators Topology
 abbrev ℙ := Nat.Primes

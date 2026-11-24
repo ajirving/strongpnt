@@ -1,5 +1,11 @@
-import PrimeNumberTheoremAnd.MediumPNT
+
+module
+
+public import PrimeNumberTheoremAnd.MediumPNT
+
 import StrongPNT.ZetaZeroFree
+
+public section
 
 set_option lang.lemmaCmd true
 

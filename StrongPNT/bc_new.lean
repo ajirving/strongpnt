@@ -1,6 +1,10 @@
-import Mathlib.Analysis.Complex.AbsMax
-import Mathlib.Analysis.Complex.TaylorSeries
-import Mathlib.Analysis.Complex.MeanValue
+module
+
+public import Mathlib.Analysis.Complex.AbsMax
+public import Mathlib.Analysis.Complex.TaylorSeries
+public import Mathlib.Analysis.Complex.MeanValue
+
+public section
 
 open Metric Real Complex Filter Topology
 

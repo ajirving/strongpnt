@@ -1,4 +1,8 @@
-import StrongPNT.PNT4_ZeroFreeRegion
+module
+
+public import StrongPNT.PNT4_ZeroFreeRegion
+
+public section
 
 set_option lang.lemmaCmd true
 open Complex Topology Filter Interval Set Asymptotics

@@ -1,7 +1,11 @@
-import StrongPNT.PNT3_RiemannZeta
-import StrongPNT.Z0
-import Mathlib.Analysis.Meromorphic.Divisor
-import Mathlib.NumberTheory.LSeries.ZetaZeros
+module
+
+public import StrongPNT.PNT3_RiemannZeta
+public import StrongPNT.Z0
+public import Mathlib.Analysis.Meromorphic.Divisor
+public import Mathlib.NumberTheory.LSeries.ZetaZeros
+
+public section
 
 def ZetaZerosNearPoint (t : ℝ) : Set ℂ := { ρ : ℂ | ρ ∈ riemannZetaZeros ∧ ‖ρ - ((3/2 : ℂ) + t * Complex.I)‖ ≤ (5/6 : ℝ) }
 
